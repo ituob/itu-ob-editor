@@ -14,19 +14,14 @@ interface AppState {
   publications: Publication[],
   issues: OBIssue[],
   lang: LangConfig,
-  operations: string[],
 }
 export class App extends React.Component<AppProps, AppState> {
-
-  ops: { [opname: string]: string } = { initRepo: "Loading OB data repository…" };
-
   constructor(props: any) {
     super(props);
 
     this.state = {
       publications: [],
       issues: [],
-      operations: [],
       lang: {
         default: this.props.defaultLang,
         selected: Object.assign({}, this.props.defaultLang),
@@ -47,7 +42,6 @@ export class App extends React.Component<AppProps, AppState> {
             selected={this.state.lang.selected}
             onSelect={(lang) => this.handleLanguageSelection(lang)}
           />
-          {this.state.operations.length > 0 ? <p>{this.state.operations[0]}</p> : ''}
         </header>
 
         <main>
@@ -74,14 +68,6 @@ export class App extends React.Component<AppProps, AppState> {
         </main>
       </React.Fragment>
     );
-  }
-
-  addOperation(op: string) {
-    this.setState({ operations: [...this.state.operations, this.ops.initRepo] });
-  }
-
-  popOperation(op: string) {
-    this.setState({ operations: this.state.operations.filter(op => op !== this.ops.initRepo) });
   }
 
   async componentDidMount() {
