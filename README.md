@@ -1,5 +1,9 @@
 # ITU OB editor
 
+## Get the app
+
+Download (unsigned) binaries from [Releases](https://github.com/ituob/itu-ob-editor/releases/).
+
 ## Setting up
 
 You’ll need Node & Yarn.
