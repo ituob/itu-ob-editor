@@ -47,6 +47,8 @@ export class Workspace {
       }
     }
 
+    // Blindly hope that data structure loaded from YAML
+    // is valid for given type.
     return (objData as T);
   }
 
