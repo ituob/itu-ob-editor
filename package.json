@@ -1,7 +1,7 @@
 {
-  "name": "electron-webpack-quick-start",
-  "version": "0.0.0",
-  "license": "MIT",
+  "name": "ITU OB editor",
+  "version": "0.0.1",
+  "license": "All Rights Reserved",
   "scripts": {
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",
