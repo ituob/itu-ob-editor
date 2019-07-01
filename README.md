@@ -2,7 +2,7 @@
 
 ## Setting up
 
-You’ll need Node & NPM.
+You’ll need Node & Yarn.
 
 ```bash
 # Install dependencies
