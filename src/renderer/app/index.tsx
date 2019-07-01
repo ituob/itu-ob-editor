@@ -57,7 +57,7 @@ export class App extends React.Component<AppProps, AppState> {
           </section>
           <section>
             <h2>OB issues</h2>
-            {this.state.publications.length > 0
+            {this.state.issues.length > 0
               ? <React.Fragment>
                   {this.state.issues.map((issue: OBIssue) =>
                     <OBIssueCard key={issue.id} issue={issue} />
