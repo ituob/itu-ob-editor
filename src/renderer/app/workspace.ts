@@ -10,6 +10,66 @@ const OB_ISSUE_ROOT = 'issues';
 const YAML_EXT = '.yaml';
 
 
+interface IndexableObject { id: string | number, [key: string]: any }
+
+interface Index<T extends IndexableObject> { [id: string]: T }
+
+interface ArraySorter { (a: [string, unknown], b: [string, unknown]): number }
+
+interface ObjectManagementOpts { order: ArraySorter | undefined }
+
+export class QuerySet<T extends IndexableObject> {
+  index: Index<T>;
+  order: ArraySorter;
+  items: [string, T][];
+  _ordered: boolean;
+
+  constructor(
+      index: Index<T>,
+      order: ArraySorter = sortAlphabeticallyAscending,
+      items: [string, T][] | undefined = undefined,
+      ordered = false) {
+    this.index = index;
+    this.items = items === undefined ? Object.entries(index) : items;
+    this.order = order;
+    this._ordered = ordered;
+  }
+  get(id: string): T {
+    return this.index[id];
+  }
+  add(obj: T): void {
+    this.index[obj.id] = obj;
+  }
+  orderBy(comparison: ArraySorter) {
+    return new QuerySet(this.index, this.order, [...this.items].sort(comparison), true);
+  }
+  filter(func: (item: [string, T]) => boolean) {
+    console.debug("Filtered:", this.items.filter(func));
+    return new QuerySet(this.index, this.order, this.items.filter(func), this._ordered);
+  }
+  all() {
+    return this._ordered
+      ? this.items.map(item => item[1])
+      : this.orderBy(this.order).items.map(item => item[1]);
+  }
+}
+
+export class ItemManager<T extends IndexableObject> {
+  index: Index<T>;
+  items: QuerySet<T>;
+
+  constructor(index: Index<T>, opts: ObjectManagementOpts = { order: undefined }) {
+    this.index = index;
+    this.items = new QuerySet<T>(index, opts.order);
+  }
+}
+
+export interface WorkspaceState {
+  publications: Index<Publication>,
+  issues: Index<OBIssue>,
+}
+
+
 export class Workspace {
   fs: any;
   workDir: string;
@@ -19,9 +79,41 @@ export class Workspace {
     this.workDir = workDir;
   }
 
+  static async init() {
+    return initWorkspace();
+  }
+
   async loadYAML(filePath: string): Promise<any> {
     const data: string = await this.fs.readFile(filePath, { encoding: 'utf8' });
     return yaml.load(data);
+  }
+
+  async storeYAML(filePath: string, data: any): Promise<any> {
+    // Merge new data into old data; this way if some YAML properties
+    // are not supported we will not lose them after the update.
+    let fileExists: boolean;
+    let oldData: any;
+    try {
+      fileExists = (await this.fs.stat(filePath)).type == 'file';
+    } catch (e) {
+      fileExists = false;
+    }
+    if (fileExists) {
+      oldData = await this.loadYAML(filePath);
+    } else {
+      oldData = {};
+    }
+    const newData: any = Object.assign({}, oldData, data);
+
+    const newContents: string = yaml.dump(newData);
+
+    // if (fileExists) {
+    //   const oldContents: string = await this.fs.readFile(filePath, { encoding: 'utf8' });
+    //   console.debug(`Replacing contents of ${filePath}`, oldContents, newContents);
+    // }
+
+    await this.fs.writeFile(filePath, newContents, { encoding: 'utf8' });
+    return data;
   }
 
   // Loads object data from given directory, reading YAML files.
@@ -52,30 +144,48 @@ export class Workspace {
     return (objData as T);
   }
 
-  async getIssues(): Promise<OBIssue[]> {
-    const dirs = await this.fs.readdir(path.join(this.workDir, OB_ISSUE_ROOT));
-    const items: OBIssue[] = [];
+  async storeObject(obj: OBIssue): Promise<OBIssue> {
+    const objDir = path.join(OB_ISSUE_ROOT, `${obj.id}`);
+    const meta = {
+      id: obj.id,
+      publication_date: obj.publication_date,
+      cutoff_date: obj.cutoff_date,
+    };
+    await this.storeYAML(path.join(this.workDir, objDir, 'meta.yaml'), meta);
+    await this.storeYAML(path.join(this.workDir, objDir, 'general.yaml'), obj.general);
+    await this.storeYAML(path.join(this.workDir, objDir, 'amendments.yaml'), obj.amendments);
+    await this.storeYAML(path.join(this.workDir, objDir, 'annexes.yaml'), obj.annexes);
+    return obj;
+  }
 
-    for (let dir of dirs) {
-      const item = await this.loadObject<OBIssue>(path.join(OB_ISSUE_ROOT, dir));
-      items.push(item);
+  async loadState(): Promise<WorkspaceState> {
+    return {
+      publications: await this.loadIndex<Publication>(PUBLICATIONS_ROOT),
+      issues: await this.loadIndex<OBIssue>(OB_ISSUE_ROOT),
+    }
+  }
+
+  async storeState(state: WorkspaceState): Promise<boolean> {
+    return this.storeIndex(state.issues);
+  }
+
+  async loadIndex<O extends IndexableObject>(rootPath: string): Promise<Index<O>> {
+    const dirs = await this.fs.readdir(path.join(this.workDir, rootPath));
+    const items: Index<O> = {};
+
+    for (const dir of dirs) {
+      const item = await this.loadObject<O>(path.join(rootPath, dir));
+      items[item.id] = item;
     }
     return items;
   }
 
-  async getPublications(): Promise<Publication[]> {
-    const dirs = await this.fs.readdir(path.join(this.workDir, PUBLICATIONS_ROOT));
-    const items: Publication[] = [];
-
-    for (let dir of dirs) {
-      const item = await this.loadObject<Publication>(path.join(PUBLICATIONS_ROOT, dir));
-      items.push(item);
+  async storeIndex(idx: Index<OBIssue>): Promise<boolean> {
+    const items: OBIssue[] = Object.values(idx);
+    for (const obj of items) {
+      await this.storeObject(obj);
     }
-    return items;
-  }
-
-  static async init() {
-    return initWorkspace();
+    return true;
   }
 }
 
@@ -101,4 +211,16 @@ async function initWorkspace(): Promise<Workspace> {
   });
 
   return new Workspace(pfs, workDir);
+}
+
+
+
+export const sortAlphabeticallyAscending: ArraySorter = function (a, b) {
+  return a[0].localeCompare(b[0]);
+}
+export const sortIntegerDescending: ArraySorter = function (a: [string, unknown], b: [string, unknown]): number {
+  return parseInt(b[0], 10) - parseInt(a[0], 10);
+}
+export const sortIntegerAscending: ArraySorter = function (a: [string, unknown], b: [string, unknown]): number {
+  return parseInt(a[0], 10) - parseInt(b[0], 10);
 }

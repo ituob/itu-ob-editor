@@ -9,13 +9,15 @@ export interface Translatable { [lang: string]: string; }
 interface TranslatableComponentProps { what: Translatable, lang: LangConfig }
 export class Trans extends React.Component<TranslatableComponentProps, {}> {
   render() {
-    const translatable = this.props.what
-    const lang = this.props.lang
-    return <span>{
-      translatable[lang.selected.id] ||
-      translatable[lang.default.id] ||
-      translatable
-    }</span>;
+    const translatable = this.props.what;
+    const lang = this.props.lang;
+
+    const translated = translatable[lang.selected.id];
+    if (!translated) {
+      // Register missing translation
+    }
+
+    return <span>{translated || translatable[lang.default.id] || translatable}</span>;
   }
 }
 
