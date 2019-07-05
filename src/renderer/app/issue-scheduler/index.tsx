@@ -170,7 +170,7 @@ class NewIssueScheduleButton extends React.Component<NewIssueScheduleButtonProps
                 canClearSelection={true}
                 value={this.state.cutoffDate}
                 minDate={this.props.minDate}
-                maxDate={this.state.pubDate}
+                maxDate={this.state.pubDate || undefined}
                 onChange={this.updateCutoffDate.bind(this)} />
             </Card>
 
