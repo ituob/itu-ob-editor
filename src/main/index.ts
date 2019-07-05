@@ -42,6 +42,7 @@ function _openIssueScheduler() {
     'ITU OB issues',
     'c=issueScheduler', {
       width: 400,
+      minWidth: 380,
       frame: process.platform === 'darwin' ? true : false,
       titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
     });
