@@ -1,35 +1,63 @@
-import { app } from 'electron'
+import { app, ipcMain, BrowserWindow } from 'electron'
 import { createWindow } from './window'
 
-// global reference to mainWindow (necessary to prevent window from being garbage collected)
-let mainWindow: any
 
-function createMainWindow() {
-  const window = createWindow('ITU OB Editor', 'main');
+app.on('ready', () => {
+  _openIssueScheduler();
+})
 
-  window.on('closed', () => {
-    mainWindow = null
-  })
+ipcMain.on('edit-issue', (event: any, issueId: string) => {
+  _openIssueEditor(issueId);
+});
 
-  return window;
-}
-
-// quit application when all windows are closed
+// Quit application when all windows are closed
 app.on('window-all-closed', () => {
-  // on macOS it is common for applications to stay open until the user explicitly quits
+  // On macOS it is common for applications to stay open until the user explicitly quits
   if (process.platform !== 'darwin') {
     app.quit()
   }
 })
 
 app.on('activate', () => {
-  // on macOS it is common to re-create a window even after all windows have been closed
-  if (mainWindow === null) {
-    mainWindow = createMainWindow()
+  // On macOS it is common to re-create a window even after all windows have been closed
+  if (windows.length < 1) {
+    _openIssueScheduler();
   }
 })
 
-// create main BrowserWindow when electron is ready
-app.on('ready', () => {
-  mainWindow = createMainWindow();
-})
+
+function _openIssueEditor(issueId: string) {
+  _createWindow('issueEditor', `Edit ITU OB issue ${issueId}`, `c=issueEditor&issueId=${issueId}`);
+}
+
+function _openIssueScheduler() {
+  _createWindow('issueScheduler', 'ITU OB issues', 'c=issueScheduler');
+}
+
+
+function _createWindow(id: string, title: string, component: string): BrowserWindow {
+  const window = createWindow(title, component);
+
+  windows.push(window);
+
+  window.on('closed', () => {
+    var deletedWindows: number[] = [];
+    for (const [idx, win] of windows.entries()) {
+      // When accessing the id attribute of a closed window,
+      // it’ll throw. We’ll mark its index for deletion then.
+      try {
+        win.id;
+      } catch (e) {
+        deletedWindows.push(idx - deletedWindows.length);
+      }
+    }
+    for (const idx of deletedWindows) {
+      windows.splice(idx, 1);
+    }
+  });
+
+  return window;
+}
+
+// Keeps track of windows and ensures (?) they do not get garbage collected
+var windows: BrowserWindow[] = [];

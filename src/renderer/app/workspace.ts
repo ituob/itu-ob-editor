@@ -1,5 +1,6 @@
 import * as path from 'path';
-import LightningFS from '@isomorphic-git/lightning-fs';
+import * as fs from 'fs-extra';
+import { remote } from 'electron';
 import * as git from 'isomorphic-git';
 import * as yaml from 'js-yaml';
 import { Publication, OBIssue } from './publications';
@@ -44,7 +45,6 @@ export class QuerySet<T extends IndexableObject> {
     return new QuerySet(this.index, this.order, [...this.items].sort(comparison), true);
   }
   filter(func: (item: [string, T]) => boolean) {
-    console.debug("Filtered:", this.items.filter(func));
     return new QuerySet(this.index, this.order, this.items.filter(func), this._ordered);
   }
   all() {
@@ -73,6 +73,7 @@ export interface WorkspaceState {
 export class Workspace {
   fs: any;
   workDir: string;
+  storageInitialized = false;
   state: WorkspaceState = {
     publications: {},
     issues: {},
@@ -81,12 +82,6 @@ export class Workspace {
   constructor(fs: any, workDir: string) {
     this.fs = fs;
     this.workDir = workDir;
-  }
-
-  static async init(): Promise<Workspace> {
-    const w: Workspace = await initWorkspace();
-    w.state = await w.loadState();
-    return w;
   }
 
   async loadYAML(filePath: string): Promise<any> {
@@ -100,7 +95,7 @@ export class Workspace {
     let fileExists: boolean;
     let oldData: any;
     try {
-      fileExists = (await this.fs.stat(filePath)).type == 'file';
+      fileExists = (await this.fs.stat(filePath)).isFile() === true;
     } catch (e) {
       fileExists = false;
     }
@@ -131,7 +126,7 @@ export class Workspace {
     let objData: {[propName: string]: any};
 
     const metaFile = path.join(this.workDir, objDir, 'meta.yaml');
-    if ((await this.fs.stat(metaFile)).type == 'file') {
+    if ((await this.fs.stat(metaFile)).isFile()) {
       objData = await this.loadYAML(metaFile);
     } else {
       objData = {};
@@ -156,17 +151,7 @@ export class Workspace {
     const objDir = path.join(OB_ISSUE_ROOT, `${obj.id}`);
     const objPath = path.join(this.workDir, objDir);
 
-    let pathExists: boolean;
-
-    try {
-      await this.fs.stat(objPath)
-      pathExists = true;
-    } catch (e) {
-      pathExists = false;
-    }
-    if (!pathExists) {
-      await this.fs.mkdir(objPath);
-    }
+    await this.fs.ensureDir(objPath);
 
     const meta = {
       id: obj.id,
@@ -212,27 +197,30 @@ export class Workspace {
 }
 
 
-async function initWorkspace(): Promise<Workspace> {
-  const workDir = '/itu-ob-data';
-  const fs: any = new LightningFS('fs', { wipe: true });
+export async function initWorkspace(): Promise<Workspace> {
+  const userDataPath = remote.app.getPath('userData');
+  const workDir = path.join(userDataPath, 'itu-ob-data');
 
   git.plugins.set('fs', fs);
 
-  const pfs: any = (fs.promises as any);
+  try {
+    await fs.stat(path.join(workDir, '.git'));
+  } catch (e) {
+    await fs.remove(workDir);
+    await fs.ensureDir(workDir);
+    await git.clone({
+      dir: workDir,
+      corsProxy: 'https://cors.isomorphic-git.org',
+      url: 'https://github.com/ituob/itu-ob-data',
+      ref: 'master',
+      singleBranch: true,
+      depth: 10
+    });
+  }
 
-  await pfs.mkdir(workDir);
-  await pfs.readdir(workDir);
-
-  await git.clone({
-    dir: workDir,
-    corsProxy: 'https://cors.isomorphic-git.org',
-    url: 'https://github.com/ituob/itu-ob-data',
-    ref: 'master',
-    singleBranch: true,
-    depth: 10
-  });
-
-  return new Workspace(pfs, workDir);
+  const ws = new Workspace(fs, workDir);
+  ws.state = await ws.loadState();
+  return ws;
 }
 
 
