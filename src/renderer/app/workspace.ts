@@ -17,8 +17,6 @@ interface Index<T extends IndexableObject> { [id: string]: T }
 
 interface ArraySorter { (a: [string, unknown], b: [string, unknown]): number }
 
-interface ObjectManagementOpts { order: ArraySorter | undefined }
-
 export class QuerySet<T extends IndexableObject> {
   index: Index<T>;
   order: ArraySorter;
@@ -54,15 +52,6 @@ export class QuerySet<T extends IndexableObject> {
   }
 }
 
-export class ItemManager<T extends IndexableObject> {
-  index: Index<T>;
-  items: QuerySet<T>;
-
-  constructor(index: Index<T>, opts: ObjectManagementOpts = { order: undefined }) {
-    this.index = index;
-    this.items = new QuerySet<T>(index, opts.order);
-  }
-}
 
 export interface WorkspaceState {
   publications: Index<Publication>,
