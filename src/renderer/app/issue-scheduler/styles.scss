@@ -1,13 +1,13 @@
 .datePickerContainer {
   display: flex;
   flex-flow: column nowrap;
-  align-items: center;
 
   > * {
     flex: 1;
   }
 }
-.issueScheduler {
+
+body {
   $draggableRegionHeight: 3em;
 
   &:before {
@@ -30,15 +30,39 @@
 
 .issueScheduleCard {
   border-radius: 0 !important;
+  position: relative;
+
   &:hover {
     z-index: 1;
   }
 }
 
-.issueSkeleton {
+.pastIssueCard {
+  opacity: 0.5;
+}
+
+.newIssueScheduleButton {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 2;
+
+  button {
+    width: 100%;
+  }
+}
+
+.scheduleInfo {
+  display: flex;
+  flex-flow: row wrap;
+
+  > * {
+    flex: 1;
+    white-space: nowrap;
+
+    &:first-child {
+      margin-right: 1em;
+    }
+  }
 }

@@ -1,33 +1,24 @@
 import { ipcRenderer, remote } from 'electron';
+import moment from 'moment';
 import * as React from 'react';
-import { Position, Classes, H3, H5, Card, Button, Drawer } from '@blueprintjs/core';
+import { Callout, Position, Classes, H3, H5, Button, Card, Drawer } from '@blueprintjs/core';
 import { DatePicker } from '@blueprintjs/datetime';
 import { useTimeTravel, TimeTravel } from '../useTimeTravel';
 import { OBIssue } from '../publications';
+import { DateStamp } from '../dates';
 import { Workspace, WorkspaceState, QuerySet, sortIntegerAscending, sortIntegerDescending } from '../workspace';
 import * as styles from './styles.scss';
 
-
-interface OBIssueSkeleton {
-  id: number,
-}
 
 interface IssueSchedule {
   publication_date: Date,
   cutoff_date: Date,
 }
 
-/* Determine whether we were given an issue skeleton/template to schedule,
-   or a proper issue to reschedule. */
-function isScheduledIssue(obj: OBIssue | OBIssueSkeleton): obj is OBIssue {
-  return (obj as OBIssue).publication_date !== undefined && (obj as OBIssue).cutoff_date !== undefined;
-}
-
 
 function reducer(state: WorkspaceState, action: any) {
   switch (action.type) {
     case 'SCHEDULE_ISSUE':
-      console.debug(state.issues);
       if (state.issues[action.id]) {
         break;
       }
@@ -61,175 +52,175 @@ export function IssueScheduler(props: IssueSchedulerProps) {
 
   const existingIssues = [...previousIssues, ...futureIssues];
 
-  // If there are too few issues, append issue skeleton to schedule the next one
-  const displayedIssues: Array<{ id: number } | OBIssue> = existingIssues.length >= 20
-    ? existingIssues
-    : [...existingIssues, {
-      id: existingIssues.slice(-1)[0].id + 1,
-    }];
+  let newIssueTemplate: OBIssue;
+  let minDate: Date;
+
+  if (existingIssues.length > 0) {
+    const latestIssue = existingIssues.slice(-1)[0];
+    minDate = moment(latestIssue.publication_date).toDate();
+    newIssueTemplate = {
+      id: latestIssue.id + 1,
+      publication_date: moment(latestIssue.publication_date).add(2, 'weeks').toDate(),
+      cutoff_date: moment(latestIssue.cutoff_date).add(2, 'weeks').toDate(),
+      general: { messages: [] },
+      amendments: { messages: [] },
+      annexes: {},
+    };
+
+  } else {
+    minDate = moment().toDate();
+    newIssueTemplate = {
+      id: 1,
+      publication_date: moment().add(4, 'weeks').toDate(),
+      cutoff_date: moment().add(2, 'weeks').toDate(),
+      general: { messages: [] },
+      amendments: { messages: [] },
+      annexes: {},
+    };
+  }
 
   return (
     <div className={styles.issueScheduler} style={{background: remote.systemPreferences.getColor('control-background')}}>
-      {displayedIssues.length > 0
-        ? displayedIssues.map((issue) =>
+      {existingIssues.length > 0
+        ? existingIssues.map((issue) =>
             <IssueScheduleCard
               key={issue.id}
               issue={issue}
-              onSchedule={(schedule: IssueSchedule) => {
-                tt.dispatch({
-                  'type': 'SCHEDULE_ISSUE',
-                  id: issue.id,
-                  publication_date: schedule.publication_date,
-                  cutoff_date: schedule.cutoff_date,
-                });
-              }}
               onEditClick={() => ipcRenderer.send('edit-issue', `${issue.id}`)}
             />
           )
         : <p>No OB issues in the database.</p>}
+      {existingIssues.length < 20
+        ? <NewIssueScheduleButton
+            issue={newIssueTemplate}
+            minDate={minDate}
+            onSchedule={(schedule: IssueSchedule) => {
+              tt.dispatch({
+                'type': 'SCHEDULE_ISSUE',
+                id: newIssueTemplate.id,
+                publication_date: schedule.publication_date,
+                cutoff_date: schedule.cutoff_date,
+              });
+            }}
+          />
+        : ''}
     </div>
   );
-
 }
 
 
-interface IssueScheduleCardProps {
-  issue: OBIssueSkeleton | OBIssue,
+interface NewIssueScheduleButtonProps {
+  minDate: Date,
+  issue: OBIssue,
   onSchedule: (schedule: IssueSchedule) => void,
-  onEditClick: () => void,
 }
-
-interface IssueScheduleCardState {
+interface NewIssueScheduleButtonState {
   pubDate: Date | undefined,
   cutoffDate: Date | undefined,
   scheduling: boolean,
 }
-
-class IssueScheduleCard extends React.Component<IssueScheduleCardProps, IssueScheduleCardState> {
-  constructor(props: IssueScheduleCardProps) {
+class NewIssueScheduleButton extends React.Component<NewIssueScheduleButtonProps, NewIssueScheduleButtonState> {
+  constructor(props: NewIssueScheduleButtonProps) {
     super(props);
-
-    let pubDate: Date | undefined;
-    let cutoffDate: Date | undefined;
-
-    if (isScheduledIssue(this.props.issue)) {
-      pubDate = this.props.issue.publication_date;
-      cutoffDate = this.props.issue.cutoff_date;
-    }
-
+    let pubDate = props.issue.publication_date;
+    let cutoffDate = undefined;
     this.state = { pubDate, cutoffDate, scheduling: false };
+  }
+
+  componentWillReceiveProps(props: NewIssueScheduleButtonProps) {
+    let pubDate = props.issue.publication_date;
+    let cutoffDate = undefined;
+    this.setState({ pubDate, cutoffDate });
   }
 
   render() {
     return (
-      <Card
-        interactive={(this.state.pubDate && this.state.cutoffDate) ? true : false}
-        onClick={() => {return (this.state.pubDate && this.state.cutoffDate) ? this.props.onEditClick() : undefined }}
-        className={`${styles.issueScheduleCard} ${!this.state.pubDate ? `${styles.issueSkeleton}` : ''}`}>
-        {this.state.pubDate && this.state.cutoffDate && !this.state.scheduling
-          ? <React.Fragment>
-              <H3>
-                No. {this.props.issue.id}
-              </H3>
-              <p>
-                Publication: <DateStamp date={this.state.pubDate} />
-                &emsp;
-                Cutoff: <DateStamp date={this.state.cutoffDate} />
-              </p>
-            </React.Fragment>
-          : <React.Fragment>
-              <H3>
-                No. {this.props.issue.id}
-              </H3>
+      <div className={styles.newIssueScheduleButton}>
+        <Button
+            intent="success"
+            className={Classes.LARGE}
+            onClick={this.startScheduling.bind(this)}>Schedule {this.props.issue.id}</Button>
 
-              <Button onClick={this.startScheduling.bind(this)}>Schedule</Button>
+        <Drawer
+            size={'calc(100% - 3rem)'}
+            position={Position.BOTTOM}
+            title={`Schedule issue ${this.props.issue.id}`}
+            isOpen={this.state.scheduling}
+            onClose={this.finishScheduling.bind(this)}>
+          <div className={`${styles.datePickerContainer} ${Classes.DRAWER_BODY}`}>
 
-              <Drawer
-                  size={Drawer.SIZE_LARGE}
-                  position={Position.BOTTOM}
-                  title={`Schedule issue ${this.props.issue.id}`}
-                  isOpen={this.state.scheduling}
-                  onClose={this.finishScheduling.bind(this)}>
-                <div className={`${styles.datePickerContainer} ${Classes.DRAWER_BODY}`}>
+            <Callout intent="primary">
+              <p>If both dates are selected, closing this will save new issue schedule.</p>
+              <p>Click on selected day to deselect date.</p>
+            </Callout>
 
-                  <Card className={styles.pickerCard}>
-                    <H5>Publication date</H5>
-                    <DatePicker
-                      canClearSelection={false}
-                      value={this.state.pubDate}
-                      onChange={this.updatePublicationDate.bind(this)} />
-                  </Card>
+            <Card className={styles.pickerCard}>
+              <H5>Publication date</H5>
+              <DatePicker
+                canClearSelection={true}
+                value={this.state.pubDate}
+                minDate={this.props.minDate}
+                maxDate={moment().add(1, 'years').toDate()}
+                onChange={this.updatePublicationDate.bind(this)} />
+            </Card>
 
-                  <Card className={styles.pickerCard}>
-                    <H5>Cutoff date</H5>
-                    <DatePicker
-                      canClearSelection={false}
-                      value={this.state.cutoffDate}
-                      onChange={this.updateCutoffDate.bind(this)} />
-                  </Card>
+            <Card className={styles.pickerCard}>
+              <H5>Cutoff date</H5>
+              <DatePicker
+                canClearSelection={true}
+                value={this.state.cutoffDate}
+                minDate={this.props.minDate}
+                maxDate={this.state.pubDate}
+                onChange={this.updateCutoffDate.bind(this)} />
+            </Card>
 
-                </div>
-              </Drawer>
-            </React.Fragment>
-          }
-      </Card>
-    );
+          </div>
+        </Drawer>
+      </div>
+    )
   }
-
   startScheduling() {
     this.setState({ scheduling: true });
   }
-
   finishScheduling() {
     if (this.state.pubDate && this.state.cutoffDate) {
       const schedule: IssueSchedule = {
-        publication_date: this.state.pubDate,
-        cutoff_date: this.state.cutoffDate,
+        publication_date: moment(this.state.pubDate).toDate(),
+        cutoff_date: moment(this.state.cutoffDate).toDate(),
       };
       this.props.onSchedule(schedule);
     }
     this.setState({ scheduling: false });
   }
-
   updatePublicationDate(date: Date) {
     this.setState({ pubDate: date });
   }
-
   updateCutoffDate(date: Date) {
     this.setState({ cutoffDate: date });
   }
 }
 
 
-interface DateStampProps { date: Date }
 
-function DateStamp(props: DateStampProps) {
-  return (
-    <React.Fragment>
-      <span className={'day'}>{props.date.getDate()}</span
-        ><span className={'separator'}>.</span
-        ><span className={'month'}>{monthAsRoman(props.date.getMonth())}</span
-        ><span className={'separator'}>.</span
-        ><span className={'year'}>{props.date.getFullYear()}</span>
-    </React.Fragment>
-  );
+interface IssueScheduleCardProps {
+  issue: OBIssue,
+  onEditClick: () => void,
 }
+class IssueScheduleCard extends React.Component<IssueScheduleCardProps, {}> {
+  render() {
+    const isPast = moment(this.props.issue.publication_date).isBefore(moment());
+    return (
+      <Card
+          interactive={true}
+          onClick={this.props.onEditClick}
+          className={`${styles.issueScheduleCard} ${isPast ? styles.pastIssueCard : ''}`}>
+        <H3>{this.props.issue.id}</H3>
 
-
-function monthAsRoman(num: number): string {
-  const romanMonths: { [num: number]: string } = {
-    1: 'I',
-    2: 'II',
-    3: 'III',
-    4: 'IV',
-    5: 'V',
-    6: 'VI',
-    7: 'VII',
-    8: 'VIII',
-    9: 'IX',
-    10: 'X',
-    11: 'XI',
-    12: 'XII',
+        <p className={styles.scheduleInfo}>
+          <span>Publication: <DateStamp date={this.props.issue.publication_date} /></span>
+          <span>Cutoff: <DateStamp date={this.props.issue.cutoff_date} /></span>
+        </p>
+      </Card>
+    );
   }
-  return romanMonths[num];
 }
