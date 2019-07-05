@@ -73,14 +73,20 @@ export interface WorkspaceState {
 export class Workspace {
   fs: any;
   workDir: string;
+  state: WorkspaceState = {
+    publications: {},
+    issues: {},
+  };
 
   constructor(fs: any, workDir: string) {
     this.fs = fs;
     this.workDir = workDir;
   }
 
-  static async init() {
-    return initWorkspace();
+  static async init(): Promise<Workspace> {
+    const w: Workspace = await initWorkspace();
+    w.state = await w.loadState();
+    return w;
   }
 
   async loadYAML(filePath: string): Promise<any> {
@@ -106,6 +112,8 @@ export class Workspace {
     const newData: any = Object.assign({}, oldData, data);
 
     const newContents: string = yaml.dump(newData);
+
+    console.debug(`Writing to ${filePath}, file exists: ${fileExists}`);
 
     // if (fileExists) {
     //   const oldContents: string = await this.fs.readFile(filePath, { encoding: 'utf8' });
@@ -146,15 +154,29 @@ export class Workspace {
 
   async storeObject(obj: OBIssue): Promise<OBIssue> {
     const objDir = path.join(OB_ISSUE_ROOT, `${obj.id}`);
+    const objPath = path.join(this.workDir, objDir);
+
+    let pathExists: boolean;
+
+    try {
+      await this.fs.stat(objPath)
+      pathExists = true;
+    } catch (e) {
+      pathExists = false;
+    }
+    if (!pathExists) {
+      await this.fs.mkdir(objPath);
+    }
+
     const meta = {
       id: obj.id,
       publication_date: obj.publication_date,
       cutoff_date: obj.cutoff_date,
     };
-    await this.storeYAML(path.join(this.workDir, objDir, 'meta.yaml'), meta);
-    await this.storeYAML(path.join(this.workDir, objDir, 'general.yaml'), obj.general);
-    await this.storeYAML(path.join(this.workDir, objDir, 'amendments.yaml'), obj.amendments);
-    await this.storeYAML(path.join(this.workDir, objDir, 'annexes.yaml'), obj.annexes);
+    await this.storeYAML(path.join(objPath, 'meta.yaml'), meta);
+    await this.storeYAML(path.join(objPath, 'general.yaml'), obj.general);
+    await this.storeYAML(path.join(objPath, 'amendments.yaml'), obj.amendments);
+    await this.storeYAML(path.join(objPath, 'annexes.yaml'), obj.annexes);
     return obj;
   }
 

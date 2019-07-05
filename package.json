@@ -1,6 +1,6 @@
 {
   "name": "itu-ob-editor",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "All Rights Reserved",
   "scripts": {
     "dev": "electron-webpack dev",
@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@blueprintjs/core": "^3.16.2",
+    "@blueprintjs/datetime": "^3.11.0",
     "@isomorphic-git/lightning-fs": "^3.3.0",
     "@types/react": "^16.8.22",
     "@types/react-dom": "^16.8.4",
