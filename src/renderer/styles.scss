@@ -3,6 +3,7 @@
 @keyframes spin {
   100% { transform: rotate(360deg); }
 }
+
 .bodyLoading {
   &:after {
     background: whiteSmoke;
@@ -17,4 +18,8 @@
     background-size: contain;
     animation: spin 4s linear infinite;
   }
+}
+
+body, html, #app {
+  height: 100%;
 }

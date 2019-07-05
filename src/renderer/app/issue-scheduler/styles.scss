@@ -1,13 +1,44 @@
-.issueScheduler {
-  max-width: 30em;
-  margin: 0 auto;
-}
 .datePickerContainer {
   display: flex;
-  flex-flow: row nowrap;
-  justify-content: stretch;
+  flex-flow: column nowrap;
+  align-items: center;
 
   > * {
     flex: 1;
   }
+}
+.issueScheduler {
+  $draggableRegionHeight: 3em;
+
+  &:before {
+    content: " ";
+    display: block;
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: $draggableRegionHeight;
+    -webkit-app-region: drag;
+  }
+
+  padding-top: $draggableRegionHeight !important;
+  display: flex;
+  flex-flow: column nowrap;
+  padding-bottom: 7.5em;
+}
+
+.issueScheduleCard {
+  border-radius: 0 !important;
+  &:hover {
+    z-index: 1;
+  }
+}
+
+.issueSkeleton {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
 }

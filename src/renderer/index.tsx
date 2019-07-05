@@ -1,10 +1,11 @@
 import * as ReactDOM from 'react-dom';
 import * as React from 'react';
-import '!style-loader!css-loader!@blueprintjs/core/lib/css/blueprint.css';
-import '!style-loader!css-loader!@blueprintjs/datetime/lib/css/blueprint-datetime.css';
 import { IssueScheduler } from './app/issue-scheduler';
 import { IssueEditor } from './app/issue-editor';
 import { initWorkspace } from './app/workspace';
+import '!style-loader!css-loader!@blueprintjs/datetime/lib/css/blueprint-datetime.css';
+import '!style-loader!css-loader!@blueprintjs/core/lib/css/blueprint.css';
+import '!style-loader!css-loader!./normalize.css';
 
 
 async function initWindow() {
@@ -24,6 +25,5 @@ async function initWindow() {
         issueId={searchParams.get('issueId') || ''} />,
       document.getElementById('app'));
   }
-
 }
 initWindow();

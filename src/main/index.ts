@@ -27,16 +27,29 @@ app.on('activate', () => {
 
 
 function _openIssueEditor(issueId: string) {
-  _createWindow('issueEditor', `Edit ITU OB issue ${issueId}`, `c=issueEditor&issueId=${issueId}`);
+  _createWindow(
+    'issueEditor',
+    `Edit ITU OB issue ${issueId}`,
+    `c=issueEditor&issueId=${issueId}`, {
+      width: 800,
+      height: 600,
+    });
 }
 
 function _openIssueScheduler() {
-  _createWindow('issueScheduler', 'ITU OB issues', 'c=issueScheduler');
+  _createWindow(
+    'issueScheduler',
+    'ITU OB issues',
+    'c=issueScheduler', {
+      width: 400,
+      frame: process.platform === 'darwin' ? true : false,
+      titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
+    });
 }
 
 
-function _createWindow(id: string, title: string, component: string): BrowserWindow {
-  const window = createWindow(title, component);
+function _createWindow(id: string, title: string, params: string, winParams: any): BrowserWindow {
+  const window = createWindow(title, params, winParams);
 
   windows.push(window);
 

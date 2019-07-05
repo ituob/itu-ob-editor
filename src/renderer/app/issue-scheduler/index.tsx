@@ -1,6 +1,6 @@
-import { ipcRenderer } from 'electron';
+import { ipcRenderer, remote } from 'electron';
 import * as React from 'react';
-import { Position, Classes, H5, Card, Button, Drawer } from '@blueprintjs/core';
+import { Position, Classes, H3, H5, Card, Button, Drawer } from '@blueprintjs/core';
 import { DatePicker } from '@blueprintjs/datetime';
 import { useTimeTravel, TimeTravel } from '../useTimeTravel';
 import { OBIssue } from '../publications';
@@ -69,7 +69,7 @@ export function IssueScheduler(props: IssueSchedulerProps) {
     }];
 
   return (
-    <div className={styles.issueScheduler}>
+    <div className={styles.issueScheduler} style={{background: remote.systemPreferences.getColor('control-background')}}>
       {displayedIssues.length > 0
         ? displayedIssues.map((issue) =>
             <IssueScheduleCard
@@ -122,22 +122,30 @@ class IssueScheduleCard extends React.Component<IssueScheduleCardProps, IssueSch
 
   render() {
     return (
-      <Card role="article">
-        <H5>
-          No. {this.props.issue.id}
-        </H5>
+      <Card
+        interactive={(this.state.pubDate && this.state.cutoffDate) ? true : false}
+        onClick={() => {return (this.state.pubDate && this.state.cutoffDate) ? this.props.onEditClick() : undefined }}
+        className={`${styles.issueScheduleCard} ${!this.state.pubDate ? `${styles.issueSkeleton}` : ''}`}>
         {this.state.pubDate && this.state.cutoffDate && !this.state.scheduling
-          ? <span>
-              <span>Publication: <DateStamp date={this.state.pubDate} /></span>
-              &ensp;
-              <span>Cutoff: <DateStamp date={this.state.cutoffDate} /></span>
-              &nbsp;
-              <a onClick={this.props.onEditClick}>Edit</a>
-            </span>
+          ? <React.Fragment>
+              <H3>
+                No. {this.props.issue.id}
+              </H3>
+              <p>
+                Publication: <DateStamp date={this.state.pubDate} />
+                &emsp;
+                Cutoff: <DateStamp date={this.state.cutoffDate} />
+              </p>
+            </React.Fragment>
           : <React.Fragment>
+              <H3>
+                No. {this.props.issue.id}
+              </H3>
+
               <Button onClick={this.startScheduling.bind(this)}>Schedule</Button>
 
               <Drawer
+                  size={Drawer.SIZE_LARGE}
                   position={Position.BOTTOM}
                   title={`Schedule issue ${this.props.issue.id}`}
                   isOpen={this.state.scheduling}

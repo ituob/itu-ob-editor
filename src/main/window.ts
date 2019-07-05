@@ -4,11 +4,12 @@ import { BrowserWindow } from 'electron';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
-export function createWindow(title: string, params: string) {
+export function createWindow(title: string, params: string, winParams: any) {
 
   const window = new BrowserWindow({
     webPreferences: {nodeIntegration: true},
     title: title,
+    ...winParams
   });
 
   if (isDevelopment) {
