@@ -8,6 +8,11 @@
     "dist": "yarn compile && electron-builder -mwl",
     "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
   },
+  "electronWebpack": {
+    "renderer": {
+      "webpackConfig": "renderer.webpack.js"
+    }
+  },
   "dependencies": {
     "@blueprintjs/core": "^3.16.2",
     "@blueprintjs/datetime": "^3.11.0",
