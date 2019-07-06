@@ -90,6 +90,7 @@ export function IssueEditor(props: IssueEditorProps) {
             onSelect={() => selectMessage(msg)}
             onDelete={() => tt.dispatch({
               type: 'REMOVE_GENERAL_MESSAGE',
+              id: issue.id,
               messageIndex: idx,
             })}
           />
@@ -111,6 +112,7 @@ export function IssueEditor(props: IssueEditorProps) {
               availableTypes={availableNewMessageTypes}
               onCreate={(type) => tt.dispatch({
                 type: 'ADD_GENERAL_MESSAGE',
+                id: issue.id,
                 message: createMessage(type),
               })}
             />
