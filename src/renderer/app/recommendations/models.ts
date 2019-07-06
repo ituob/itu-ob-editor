@@ -11,7 +11,7 @@ export interface Recommendation {
 }
 
 export interface ITURecommendation {
-  code: ITURecCode,
+  id: ITURecCode,
   version: ITURecVersion,
   title: Translatable,
 }

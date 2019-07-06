@@ -16,8 +16,25 @@ function reducer(state: Workspace, action: any) {
       }
       state.issues[action.id].general.messages.push(action.message);
       break;
+
+    case 'EDIT_GENERAL_MESSAGE':
+      if (!state.issues[action.id]) {
+        break;
+      }
+      state.issues[action.id].general.messages[action.messageIdx] = {
+        ...state.issues[action.id].general.messages[action.messageIdx],
+        ...action.messageData,
+      };
+      break;
+
     case 'REMOVE_GENERAL_MESSAGE':
       state.issues[action.id].general.messages.splice(action.index, 1);
+      break;
+
+    case 'ADD_RECOMMENDATION':
+      break;
+
+    case 'ADD_LIST':
       break;
   }
 }
@@ -41,8 +58,17 @@ export function IssueEditor(props: IssueEditorProps) {
       </Navbar>
       <div>
         <h2 className={styles.issueSectionHeader}>General</h2>
-        {issue.general.messages.map((msg: Message) => (
-          <MessageView msg={msg} workspaceState={tt.state} />
+        {[...issue.general.messages.entries()].map(([idx, msg]: [number, Message]) => (
+          <MessageView
+            msg={msg}
+            workspace={tt.state}
+            onChange={(updatedMessage) => tt.dispatch({
+              type: 'EDIT_GENERAL_MESSAGE',
+              id: issue.id,
+              messageIdx: idx,
+              messageData: updatedMessage,
+            })}
+          />
         ))}
       </div>
     </React.Fragment>

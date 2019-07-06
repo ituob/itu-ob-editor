@@ -5,16 +5,19 @@ import * as git from 'isomorphic-git';
 import * as yaml from 'js-yaml';
 import { Publication } from 'renderer/app/lists/models';
 import { OBIssue } from 'renderer/app/issues/models';
+import { ITURecommendation } from 'renderer/app/recommendations/models';
 import { Index, IndexableObject } from './query';
 
 
 const PUBLICATIONS_ROOT = 'lists';
+const REC_ROOT = 'recommendations';
 const OB_ISSUE_ROOT = 'issues';
 const YAML_EXT = '.yaml';
 
 
 export interface Workspace {
   publications: Index<Publication>,
+  recommendations: Index<ITURecommendation>,
   issues: Index<OBIssue>,
 }
 
@@ -22,6 +25,7 @@ export interface Workspace {
 export class Storage {
   workspace: Workspace = {
     publications: {},
+    recommendations: {},
     issues: {},
   };
 
@@ -33,6 +37,7 @@ export class Storage {
   public async loadWorkspace(): Promise<Workspace> {
     return {
       publications: await this.loadIndex<Publication>(PUBLICATIONS_ROOT),
+      recommendations: await this.loadIndex<ITURecommendation>(REC_ROOT),
       issues: await this.loadIndex<OBIssue>(OB_ISSUE_ROOT),
     }
   }

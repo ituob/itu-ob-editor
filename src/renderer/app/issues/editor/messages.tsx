@@ -8,9 +8,11 @@ import * as styles from './styles.scss';
 interface MessageViewProps {
   msg: any,
   workspace: Workspace,
+  onChange: (updatedMessage: any) => void,
 }
 export function MessageView(props: MessageViewProps) {
-  const tpl = getMessageTemplate(props.msg.type, props.msg);
+  const tpl = getMessageTemplate(props.msg);
+  const MessageBody = tpl.getBodyView;
 
   if (tpl) {
     return (
@@ -20,7 +22,7 @@ export function MessageView(props: MessageViewProps) {
             <H5>{tpl.title}</H5>
           </header>
           <div className={styles.messageBody}>
-            {tpl.getBodyView(props.workspace)}
+            <MessageBody workspace={props.workspace} onChange={props.onChange} />
           </div>
         </article>
       </Card>
