@@ -20,6 +20,8 @@ export type MessageType = Message["type"]
 
 type ExcludeTypeKey<K> = K extends "type" ? never : K;
 
+export type ExcludeTypeField<M> = { [K in ExcludeTypeKey<keyof M>]: M[K] }
+
 export type ExtractMessageProperties<M, T> = M extends { type: T }
-  ? ExcludeTypeKey<M>
+  ? ExcludeTypeField<M>
   : never;
