@@ -1,0 +1,21 @@
+.issueSectionHeader {
+  background: grey;
+  color: white;
+  padding: .5em 20px;
+  margin: 0;
+  font-size: 120%;
+}
+
+.message {
+  display: flex;
+  flex-flow: row nowrap;
+
+  .messageHeader {
+    flex: 0;
+    width: 40%;
+    margin-right: 2em;
+  }
+
+  .messageBody {
+  }
+}

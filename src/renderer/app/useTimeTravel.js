@@ -4,8 +4,8 @@ import produce from 'immer';
 const UNDO = Symbol('UNDO');
 const REDO = Symbol('REDO');
 
-// TODO: Decouple from workspace
-export function useTimeTravel(workspace, reducer, initialState) {
+// TODO: Decouple from storage!
+export function useTimeTravel(storage, reducer, initialState) {
   const timeline = {
     past: [],
     present: initialState,
@@ -23,7 +23,7 @@ export function useTimeTravel(workspace, reducer, initialState) {
       newTimelineState = _addNewPresent(tl, newState);
     }
     if (action.type !== 'FETCH_DATA') {
-      workspace.storeState(newTimelineState.present);
+      storage.storeWorkspace(newTimelineState.present);
     }
     return newTimelineState;
   };

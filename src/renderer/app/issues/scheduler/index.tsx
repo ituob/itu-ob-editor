@@ -3,20 +3,15 @@ import moment from 'moment';
 import * as React from 'react';
 import { Callout, Position, Classes, H3, H5, Button, Card, Drawer } from '@blueprintjs/core';
 import { DatePicker } from '@blueprintjs/datetime';
-import { useTimeTravel, TimeTravel } from '../useTimeTravel';
-import { OBIssue } from '../publications';
-import { DateStamp } from '../dates';
-import { Workspace, WorkspaceState, QuerySet, sortIntegerAscending, sortIntegerDescending } from '../workspace';
+import { useTimeTravel, TimeTravel } from 'renderer/app/useTimeTravel';
+import { DateStamp } from 'renderer/app/dates';
+import { Storage, Workspace } from 'renderer/app/storage';
+import { QuerySet, sortIntegerAscending, sortIntegerDescending  } from 'renderer/app/storage/query';
+import { OBIssue } from '../models';
 import * as styles from './styles.scss';
 
 
-interface IssueSchedule {
-  publication_date: Date,
-  cutoff_date: Date,
-}
-
-
-function reducer(state: WorkspaceState, action: any) {
+function reducer(state: Workspace, action: any) {
   switch (action.type) {
     case 'SCHEDULE_ISSUE':
       if (state.issues[action.id]) {
@@ -35,10 +30,16 @@ function reducer(state: WorkspaceState, action: any) {
 }
 
 
-interface IssueSchedulerProps { workspace: Workspace }
+interface IssueSchedule {
+  publication_date: Date,
+  cutoff_date: Date,
+}
+
+
+interface IssueSchedulerProps { storage: Storage }
 
 export function IssueScheduler(props: IssueSchedulerProps) {
-  const tt: TimeTravel = useTimeTravel(props.workspace, reducer, props.workspace.state);
+  const tt: TimeTravel = useTimeTravel(props.storage, reducer, props.storage.workspace);
 
   const issues = new QuerySet<OBIssue>(tt.state.issues, sortIntegerAscending);
 

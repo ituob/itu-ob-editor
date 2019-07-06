@@ -1,8 +1,7 @@
 import * as ReactDOM from 'react-dom';
 import * as React from 'react';
-import { IssueScheduler } from './app/issue-scheduler';
-import { IssueEditor } from './app/issue-editor';
-import { initWorkspace } from './app/workspace';
+import { IssueScheduler, IssueEditor } from './app';
+import { initStorage } from './app/storage';
 import '!style-loader!css-loader!@blueprintjs/datetime/lib/css/blueprint-datetime.css';
 import '!style-loader!css-loader!@blueprintjs/core/lib/css/blueprint.css';
 import '!style-loader!css-loader!./normalize.css';
@@ -10,18 +9,18 @@ import '!style-loader!css-loader!./normalize.css';
 
 async function initWindow() {
   const searchParams = new URLSearchParams(window.location.search);
-  const workspace = await initWorkspace();
+  const storage = await initStorage();
 
   if (searchParams.get('c') === 'issueScheduler') { 
     ReactDOM.render(
       <IssueScheduler
-        workspace={workspace} />,
+        storage={storage} />,
       document.getElementById('app'));
 
   } else if (searchParams.get('c') === 'issueEditor') {
     ReactDOM.render(
       <IssueEditor
-        workspace={workspace}
+        storage={storage}
         issueId={searchParams.get('issueId') || ''} />,
       document.getElementById('app'));
   }
