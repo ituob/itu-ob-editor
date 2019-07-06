@@ -22,8 +22,6 @@ Core implementation is under `src/renderer`.
 
 * `styles.scss`: Styles relevant before the app is loaded.
 * `app/`: Application & its components.
-* `app/workspace`: Listing/loading/saving entities.
-  Interacts with Git repository and YAML files in the working copy.
 
 ## Generic Electron Webpack docs
 
