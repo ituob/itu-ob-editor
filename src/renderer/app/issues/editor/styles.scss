@@ -1,9 +1,12 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
 .issueSectionHeader {
   background: grey;
   color: white;
   padding: .5em 20px;
   margin: 0;
-  font-size: 120%;
+  font-size: 80%;
+  text-transform: uppercase;
 }
 
 .message {
@@ -17,4 +20,33 @@
 
   .messageBody {
   }
+}
+
+.twoPaneEditor {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: stretch;
+  height: 100vh;
+
+  > * {
+    overflow-y: auto;
+  }
+}
+.messageListPane {
+  border-right: 1px solid silver;
+}
+.selectedMessagePane {
+  flex: 1;
+}
+.messageListItem {
+  border-radius: 0 !important;
+  padding: 10px 20px !important;
+
+  &:hover {
+    position: relative;
+    z-index: 2;
+  }
+}
+.selectedMessageListItem {
+  background: $gray5 !important;
 }

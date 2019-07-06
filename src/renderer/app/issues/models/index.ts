@@ -19,4 +19,9 @@ export interface OBIssue {
 }
 
 export { Message }
-export { MessageType, ApprovedRecommendationsMessage, RunningAnnexesMessage } from './messages';
+export {
+  MessageType,
+  ExcludeTypeField,
+  ApprovedRecommendationsMessage,
+  RunningAnnexesMessage,
+} from './messages';

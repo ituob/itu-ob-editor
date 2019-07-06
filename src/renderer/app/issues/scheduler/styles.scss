@@ -30,9 +30,9 @@
 
 .issueScheduleCard {
   border-radius: 0 !important;
-  position: relative;
 
   &:hover {
+    position: relative;
     z-index: 1;
   }
 }
@@ -50,6 +50,8 @@
 
   button {
     width: 100%;
+    border-radius: 0;
+    box-shadow: none !important;
   }
 }
 
