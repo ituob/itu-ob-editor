@@ -709,6 +709,14 @@
     classnames "^2.2"
     tslib "^1.9.0"
 
+"@blueprintjs/icons@^3.9.1":
+  version "3.9.1"
+  resolved "https://registry.yarnpkg.com/@blueprintjs/icons/-/icons-3.9.1.tgz#064d43314313f0feb4b1dd7e0904ddc17c8652d1"
+  integrity sha512-2EU9Xot0lkztDp8xVnBi5/71jgG1Rmsfz0LycBX/T16H0qGO7i+XEbZbpJjSvmr/UzhTpxQ/Yh5XGBc2U2zG4w==
+  dependencies:
+    classnames "^2.2"
+    tslib "^1.9.0"
+
 "@isomorphic-git/lightning-fs@^3.3.0":
   version "3.3.0"
   resolved "https://registry.yarnpkg.com/@isomorphic-git/lightning-fs/-/lightning-fs-3.3.0.tgz#496d919a594f9dfc41a9c5a73e62e90a4872bc7b"
