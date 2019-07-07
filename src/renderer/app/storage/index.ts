@@ -51,7 +51,7 @@ export class Storage {
     const items: Index<O> = {};
 
     for (const dir of dirs) {
-      const item = await this.loadObject<O>(path.join(rootPath, dir));
+      const item = (await this.loadObject(path.join(rootPath, dir))) as O;
       items[item.id] = item;
     }
     return items;
@@ -68,7 +68,7 @@ export class Storage {
   // Loads object data from given directory, reading YAML files.
   // meta.yaml is treated specially, populating top-level object payload.
   // Other YAML files populate corresponding object properties.
-  private async loadObject<T>(objDir: string): Promise<T> {
+  private async loadObject(objDir: string): Promise<any> {
     let objData: {[propName: string]: any};
 
     const metaFile = path.join(this.workDir, objDir, 'meta.yaml');
@@ -90,7 +90,7 @@ export class Storage {
 
     // Blindly hope that data structure loaded from YAML
     // is valid for given type.
-    return (objData as T);
+    return objData;
   }
 
   private async storeObject(obj: OBIssue): Promise<OBIssue> {

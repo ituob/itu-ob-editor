@@ -5,17 +5,24 @@ export interface MessageBlock {
   messages: Message[],
 }
 
-interface AnnexBlock {
-  [pubId: string]: string,
+export interface AnnexesBlock {
+  [pubId: string]: { position_on: Date },
+}
+
+export interface ScheduledIssue {
+  id: number,
+  publication_date: Date,
+  cutoff_date: Date,
 }
 
 export interface OBIssue {
+  // Stored data
   id: number,
   publication_date: Date,
   cutoff_date: Date,
   general: MessageBlock,
   amendments: MessageBlock,
-  annexes: AnnexBlock,
+  annexes: AnnexesBlock,
 }
 
 export { Message }
@@ -24,4 +31,6 @@ export {
   ExcludeTypeField,
   ApprovedRecommendationsMessage,
   RunningAnnexesMessage,
+  AmendmentMessage,
+  AmendmentTarget,
 } from './messages';

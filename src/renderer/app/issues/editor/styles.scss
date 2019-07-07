@@ -5,7 +5,7 @@
   color: white;
 
   padding: 0 20px;
-  height: $pt-navbar-height * 0.5;
+  height: $pt-navbar-height;
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
@@ -39,7 +39,8 @@
   }
 }
 .messageListPane {
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   background: $pt-app-background-color;
   width: 20em;
   position: relative;
@@ -108,4 +109,8 @@
 }
 .selectedMessageListItem {
   background: $light-gray2 !important;
+}
+
+.newMessageMenu {
+  max-width: 18em;
 }

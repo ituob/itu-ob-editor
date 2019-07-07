@@ -2,9 +2,9 @@ import { PublicationID } from 'renderer/app/lists/models';
 import { ITURecVersion } from 'renderer/app/recommendations/models';
 
 
-interface AmendmentTarget {
+export interface AmendmentTarget {
   publication: PublicationID,
-  position_on: string,
+  position_on: string | undefined,
 }
 
 export interface ApprovedRecommendationsMessage {

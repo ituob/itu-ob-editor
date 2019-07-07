@@ -2,12 +2,18 @@ import * as React from 'react';
 import { useState } from 'react';
 import { Navbar, NavbarGroup, Position, UL, InputGroup, Button, Drawer, Card, H5 } from '@blueprintjs/core';
 import { Workspace } from 'renderer/app/storage';
+import { DateStamp } from 'renderer/app/dates';
+
 import {
+  OBIssue,
   Message,
   MessageType,
+  AmendmentMessage,
   ApprovedRecommendationsMessage,
   RunningAnnexesMessage,
 } from '../models';
+
+import { RunningAnnex, getRunningAnnexesForIssue } from '../running-annexes';
 
 
 // TODO: Turn those functions into one generic function
@@ -79,17 +85,17 @@ export function getMessageTypeTitle(type: MessageType): string {
 }
 
 
-// Not type-savvy enough to use this without lots of boilerplate code.
-// export interface MessageEditorProps<T extends Message> {
-//   workspace: Workspace,
-//   message: T,
-//   onChange: (updatedMessage: ExcludeTypeField<T>) => void,
-// }
-// interface MessageEditor<T extends Message> {
-//   (props: MessageEditorProps<T>): any
-// }
+export function getMessageSubtitle(msg: Message): string | undefined {
+  if (msg.type === 'amendment') {
+    return `to ${((msg as AmendmentMessage).target || {}).publication}`;
+  }
+  return undefined;
+}
+
+
 export interface MessageEditorProps {
   workspace: Workspace,
+  issue: OBIssue,
   message: Message,
   onChange: (updatedMessage: any) => void,
 }
@@ -149,17 +155,34 @@ const ApprovedRecommendationsEditor: MessageEditor = function (props) {
 
 const RunningAnnexesEditor: MessageEditor = function (props) {
   const extraPublicationIDs = (props.message as RunningAnnexesMessage).extra_links;
+  const runningAnnexes = getRunningAnnexesForIssue(
+    props.issue,
+    props.workspace.issues,
+    props.workspace.publications);
 
   return (
-    <UL>
-      {extraPublicationIDs.map((pubId) => (
-        <li key={pubId}>{pubId}</li>
-      ))}
-    </UL>
+    <React.Fragment>
+      <UL key={'lists-annexed'}>
+        {runningAnnexes.map((annex: RunningAnnex) => (
+          <li key={annex.publication.id}>
+            <strong>{annex.annexedTo.id}:</strong>
+            &emsp;
+            {annex.publication.title.en}
+            &emsp;
+            (position on <DateStamp date={annex.positionOn} />)
+          </li>
+        ))}
+      </UL>
+      <UL key={'lists-external'}>
+        {extraPublicationIDs.map((pubId) => (
+          <li key={pubId}>{pubId}</li>
+        ))}
+      </UL>
+    </React.Fragment>
   );
 };
 
-export function getMessageEditor(msg: Message) {
+export function getMessageEditor(msg: Message): MessageEditor {
   if (isApprovedRecommendations(msg)) {
     return ApprovedRecommendationsEditor;
   } else if (isRunningAnnexes(msg)) {
