@@ -79,7 +79,7 @@ export function IssueEditor(props: IssueEditorProps) {
     }
   }
 
-  function newMessage(idx: number) {
+  function newMessagePrompt(idx: number) {
     return (
       <NewMessagePrompt
         availableTypes={availableNewMessageTypes}
@@ -104,7 +104,7 @@ export function IssueEditor(props: IssueEditorProps) {
       <div className={styles.messageListPane}>
         <h2 className={styles.issueSectionHeader}>General</h2>
 
-        {newMessage(0)}
+        {newMessagePrompt(0)}
 
         {[...issue.general.messages.entries()].map(([idx, msg]: [number, Message]) => (
           <React.Fragment>
@@ -121,7 +121,7 @@ export function IssueEditor(props: IssueEditorProps) {
                 selectMessage(undefined);
               }}
             />
-            {newMessage(idx + 1)}
+            {newMessagePrompt(idx + 1)}
           </React.Fragment>
         ))}
       </div>
