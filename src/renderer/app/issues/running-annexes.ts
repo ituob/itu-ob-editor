@@ -10,6 +10,8 @@ export interface RunningAnnex {
 }
 
 
+// Runs through past issues (relative to given issue) and builds a list
+// of annexed publications.
 export function getRunningAnnexesForIssue(
     issue: OBIssue,
     issueIndex: Index<OBIssue>,
