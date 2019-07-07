@@ -1,13 +1,12 @@
-import * as React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Text, Card, Button, Popover, Menu } from '@blueprintjs/core';
 import { Storage } from 'renderer/app/storage';
 import { useTimeTravel, TimeTravel } from 'renderer/app/useTimeTravel';
 import { Index, QuerySet } from 'renderer/app/storage/query';
 import { Message, AmendmentMessage, MessageType, OBIssue } from 'renderer/app/issues/models';
 import { Publication } from 'renderer/app/lists/models';
-import { getMessageEditor, getMessageTypeTitle, getMessageSubtitle } from './message-templates';
 import { RunningAnnex, getRunningAnnexesForIssue } from '../running-annexes';
+import { getMessageEditor, getMessageTypeTitle, getMessageSubtitle } from './message-templates';
 import { reducer } from './reducer';
 import * as styles from './styles.scss';
 
@@ -25,6 +24,7 @@ export function IssueEditor(props: IssueEditorProps) {
     msg: Message | undefined,
     section: "amendments" | "general" | undefined,
   } = { msg: undefined, section: undefined };
+
   if (issue.general.messages.length > 0) {
     initialMessage = { msg: issue.general.messages[0], section: "general" };
   } else if (issue.amendments.messages.length > 0) {
@@ -193,6 +193,8 @@ function MessageEditor(props: any) {
   if (props.message) {
     const MessageEditor = getMessageEditor(props.message);
     return MessageEditor(props);
+  } else {
+    throw new Error("MessageEditor received no message");
   }
   return null;
 }
