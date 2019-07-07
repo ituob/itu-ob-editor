@@ -189,6 +189,8 @@ interface NewMessagePromptProps {
 export function NewMessagePrompt(props: NewMessagePromptProps) {
   const messageTypeMenu = (
     <Menu>
+      <Menu.Divider title="Add new issue" />
+
       {props.availableTypes.map(type => (
         <Menu.Item
           key={type}
