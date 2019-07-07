@@ -24,6 +24,10 @@ export interface CustomMessage {
   type: "custom",
   contents: any,
 }
+export interface TelephoneServiceMessage {
+  type: "telephone_service",
+  contents: any,
+}
 export interface ServiceRestrictionsMessage {
   type: "service_restrictions",
   items: { country: string, ob: number, page: number }[],
@@ -35,6 +39,7 @@ export interface CallbackProceduresMessage {
 export type Message =
   ApprovedRecommendationsMessage |
   RunningAnnexesMessage |
+  TelephoneServiceMessage |
   ServiceRestrictionsMessage |
   CallbackProceduresMessage |
   AmendmentMessage |

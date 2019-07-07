@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { UL, InputGroup, Button, Drawer, Card, H5 } from '@blueprintjs/core';
+import { Navbar, NavbarGroup, Position, UL, InputGroup, Button, Drawer, Card, H5 } from '@blueprintjs/core';
 import { Workspace } from 'renderer/app/storage';
 import {
   Message,
@@ -21,15 +21,35 @@ function isRunningAnnexes(msg: Message): msg is RunningAnnexesMessage {
 
 // TODO: Turn message types into classes and below into constructors
 export function createMessage(type: MessageType): Message {
+  var msg = { type: type };
+
   if (type === 'approved_recommendations') {
     return {
-      type: 'approved_recommendations',
+      ...msg,
       items: {},
     } as Message;
   } else if (type === 'running_annexes') {
     return {
-      type: 'running_annexes',
+      ...msg,
       extra_links: [],
+    } as Message;
+  } else if (type === 'telephone_service') {
+    return {
+      ...msg,
+      contents: {},
+    } as Message;
+  } else if (type === 'service_restrictions') {
+    return {
+      ...msg,
+      items: [],
+    } as Message;
+  } else if (type === 'callback_procedures') {
+    return {
+      ...msg,
+    } as Message;
+  } else if (type === 'amendment') {
+    return {
+      ...msg,
     } as Message;
   } else {
     throw new Error("Unknown message type requested");
@@ -37,22 +57,23 @@ export function createMessage(type: MessageType): Message {
 }
 
 
-interface MessageHeaderData {
-  title: string,
-}
-export function getMessageHeader(msg: Message): MessageHeaderData {
-  if (isApprovedRecommendations(msg)) {
-    return {
-      title: "Approved Recommendations",
-    };
-  } else if (isRunningAnnexes(msg)) {
-    return {
-      title: "Lists Annexed",
-    };
+export function getMessageTypeTitle(type: MessageType): string {
+  if (type === 'approved_recommendations') {
+    return  "Approved Recommendations";
+  } else if (type === 'running_annexes') {
+    return "Lists Annexed";
+  } else if (type === 'telephone_service') {
+    return "Telephone Service";
+  } else if (type === 'callback_procedures') {
+    return "Call-back and Alternative Calling Procedures";
+  } else if (type === 'custom') {
+    return "Custom";
+  } else if (type === 'amendment') {
+    return  "Amendment";
+  } else if (type === 'service_restrictions') {
+    return "Service Restrictions";
   } else {
-    return {
-      title: msg.type,
-    };
+    return type;
     //throw new Error(`Unknown message type: ${msg.type}`);
   }
 }
@@ -90,19 +111,25 @@ const ApprovedRecommendationsEditor: MessageEditor = function (props) {
       props.onChange({ items: newRecs });
     }
     updateAddDialogStatus(false);
+    updateNewRecCode('');
+    updateNewRecVersion('');
   }
 
   return (
     <React.Fragment>
-      <div>
+      <Navbar>
+        <NavbarGroup>
+          <Button onClick={() => updateAddDialogStatus(true)}>Add new…</Button>
+        </NavbarGroup>
+      </Navbar>
+      <Card>
         {Object.entries(recommendations).map(([code, version]: [string, string]) => {
           const pub = props.workspace.recommendations[code];
           const title = pub ? pub.title.en : '';
           return <Card key={code}><H5>{code} ({version})</H5>{title}</Card>
         })}
-      </div>
-      <Button onClick={() => updateAddDialogStatus(true)}>Add new</Button>
-      <Drawer isOpen={addDialogStatus} onClose={onClose}>
+      </Card>
+      <Drawer usePortal={false} position={Position.TOP} isOpen={addDialogStatus} onClose={onClose}>
         <InputGroup
           value={newRecCode}
           placeholder="Code"

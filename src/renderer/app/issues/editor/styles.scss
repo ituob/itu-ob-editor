@@ -3,7 +3,13 @@
 .issueSectionHeader {
   background: grey;
   color: white;
-  padding: .5em 20px;
+
+  padding: 0 20px;
+  height: $pt-navbar-height * 0.5;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+
   margin: 0;
   font-size: 80%;
   text-transform: uppercase;
@@ -33,20 +39,73 @@
   }
 }
 .messageListPane {
-  border-right: 1px solid silver;
+  overflow: hidden;
+  background: $pt-app-background-color;
+  width: 20em;
+  position: relative;
 }
 .selectedMessagePane {
   flex: 1;
+  box-shadow: $pt-elevation-shadow-1;
+  position: relative;
+  z-index: 2;
 }
+
 .messageListItem {
+  $deleteButtonW: 4em;
+
   border-radius: 0 !important;
-  padding: 10px 20px !important;
+  flex: 1;
+
+  height: $pt-navbar-height;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+
+  position: relative;
+  padding: 0 20px !important;
+  padding-right: $deleteButtonW + .5em !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   &:hover {
-    position: relative;
-    z-index: 2;
+    cursor: pointer;
+  }
+  .messageListItemDelete {
+    width: $deleteButtonW;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 .5em !important;
+  }
+}
+.addMessageTriggerContainer {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%) scale(0.8);
+  z-index: 4;
+  transition: opacity .2s linear, transform .2s linear;
+
+  &:hover {
+    opacity: 1;
+    cursor: pointer;
+  }
+
+  .addMessageTriggerCard {
+    background: $pt-app-background-color !important;
+    border-radius: 0 !important;
+    transform: rotate(45deg);
+    padding: 0 .5em !important;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: center;
   }
 }
 .selectedMessageListItem {
-  background: $gray5 !important;
+  background: $light-gray2 !important;
 }

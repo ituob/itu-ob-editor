@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { UL, Card, Button } from '@blueprintjs/core';
+import { Text, Card, Button, Popover, Menu } from '@blueprintjs/core';
 import { Storage, Workspace } from 'renderer/app/storage';
 import { QuerySet } from 'renderer/app/storage/query';
 import { useTimeTravel, TimeTravel } from 'renderer/app/useTimeTravel';
 import { Message, MessageType, OBIssue } from 'renderer/app/issues/models';
 import {
   getMessageEditor,
-  getMessageHeader,
+  getMessageTypeTitle,
   createMessage,
 } from './message-templates';
 import * as styles from './styles.scss';
@@ -31,7 +31,7 @@ function reducer(state: Workspace, action: any) {
       if (!state.issues[action.id]) {
         break;
       }
-      state.issues[action.id].general.messages.push(action.message);
+      state.issues[action.id].general.messages.splice(action.newMessageIndex, 0, action.message);
       break;
 
     case 'EDIT_GENERAL_MESSAGE':
@@ -79,21 +79,50 @@ export function IssueEditor(props: IssueEditorProps) {
     }
   }
 
+  function newMessage(idx: number) {
+    return (
+      <NewMessagePrompt
+        availableTypes={availableNewMessageTypes}
+        onCreate={(type) => {
+          const newMessage = createMessage(type);
+          tt.dispatch({
+            type: 'ADD_GENERAL_MESSAGE',
+            id: issue.id,
+            message: newMessage,
+            newMessageIndex: idx,
+          });
+          setTimeout(() => {
+            selectMessage(newMessage);
+          }, 100);
+        }}
+      />
+    );
+  }
+
   return (
     <div className={styles.twoPaneEditor}>
       <div className={styles.messageListPane}>
         <h2 className={styles.issueSectionHeader}>General</h2>
+
+        {newMessage(0)}
+
         {[...issue.general.messages.entries()].map(([idx, msg]: [number, Message]) => (
-          <MessageItem
-            selected={msg == selectedMessage}
-            message={msg}
-            onSelect={() => selectMessage(msg)}
-            onDelete={() => tt.dispatch({
-              type: 'REMOVE_GENERAL_MESSAGE',
-              id: issue.id,
-              messageIndex: idx,
-            })}
-          />
+          <React.Fragment>
+            <MessageItem
+              selected={msg == selectedMessage}
+              message={msg}
+              onSelect={() => selectMessage(msg)}
+              onDelete={() => {
+                tt.dispatch({
+                  type: 'REMOVE_GENERAL_MESSAGE',
+                  id: issue.id,
+                  messageIndex: idx,
+                });
+                selectMessage(undefined);
+              }}
+            />
+            {newMessage(idx + 1)}
+          </React.Fragment>
         ))}
       </div>
       <div className={styles.selectedMessagePane}>
@@ -108,14 +137,7 @@ export function IssueEditor(props: IssueEditorProps) {
                 messageData: updatedMessage,
               })}
             />
-          : <NewMessagePrompt
-              availableTypes={availableNewMessageTypes}
-              onCreate={(type) => tt.dispatch({
-                type: 'ADD_GENERAL_MESSAGE',
-                id: issue.id,
-                message: createMessage(type),
-              })}
-            />
+          : null
         }
       </div>
     </div>
@@ -130,22 +152,29 @@ interface MessageItemProps {
   onDelete: () => void,
 }
 function MessageItem(props: MessageItemProps) {
-  const headerData = getMessageHeader(props.message);
   return (
     <Card
         className={`${styles.messageListItem} ${props.selected ? styles.selectedMessageListItem : ''}`}
-        onClick={props.onSelect}
-        interactive={true}>
-      {headerData.title}
-      &emsp;
+        onClick={props.onSelect}>
+      <Text ellipsize={true}>
+        {getMessageTypeTitle(props.message.type)}
+      </Text>
       <Button
-        minimal={true}
-        onClick={props.onDelete}
+        onClick={(evt: any) => {
+          props.onDelete();
+          evt.stopPropagation();
+          return false;
+        }}
         intent="danger"
-        small={true}>Delete</Button>
+        icon="cross"
+        className={styles.messageListItemDelete}
+        minimal={true}
+        small={true}
+      />
     </Card>
   )
 }
+
 
 function MessageEditor(props: any) {
   const MessageEditor = getMessageEditor(props.message);
@@ -158,11 +187,27 @@ interface NewMessagePromptProps {
   onCreate: (type: MessageType) => void,
 }
 export function NewMessagePrompt(props: NewMessagePromptProps) {
-  return (
-    <UL>
+  const messageTypeMenu = (
+    <Menu>
       {props.availableTypes.map(type => (
-        <li><a onClick={() => props.onCreate(type)}>{type}</a></li>
+        <Menu.Item
+          key={type}
+          shouldDismissPopover={true}
+          text={getMessageTypeTitle(type)}
+          onClick={() => props.onCreate(type)}
+        />
       ))}
-    </UL>
+    </Menu>
+  )
+  return (
+    <Popover
+        wrapperTagName={'div'}
+        targetTagName={'div'}
+        className={styles.addMessageTriggerContainer}
+        content={messageTypeMenu}>
+      <Card className={styles.addMessageTriggerCard}>
+        &nbsp;
+      </Card>
+    </Popover>
   )
 }
