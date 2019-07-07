@@ -124,7 +124,7 @@ export function IssueEditor(props: IssueEditorProps) {
 
       </div>
       <div className={styles.selectedMessagePane}>
-        {selectedMessage
+        {selectedMessage.msg
           ? <MessageEditor
               workspace={tt.state}
               message={selectedMessage.msg}
