@@ -1,3 +1,5 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
 .datePickerContainer {
   display: flex;
   flex-flow: column nowrap;
@@ -10,6 +12,14 @@
 .issueScheduler {
   $draggableRegionHeight: 3em;
 
+  background: $pt-app-background-color !important;
+  height: 100%;
+
+  padding-top: $draggableRegionHeight !important;
+  display: flex;
+  flex-flow: column nowrap;
+  padding-bottom: 7.5em;
+
   &:before {
     content: " ";
     display: block;
@@ -21,11 +31,6 @@
     height: $draggableRegionHeight;
     -webkit-app-region: drag;
   }
-
-  padding-top: $draggableRegionHeight !important;
-  display: flex;
-  flex-flow: column nowrap;
-  padding-bottom: 7.5em;
 }
 
 .issueScheduleCard {
