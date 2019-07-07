@@ -400,9 +400,7 @@ export function NewMessagePrompt(props: NewMessagePromptProps) {
         targetTagName={'div'}
         className={styles.addMessageTriggerContainer}
         content={props.menu}>
-      <Card className={styles.addMessageTriggerCard}>
-        &nbsp;
-      </Card>
+      <Button icon="plus" className={styles.addMessageTrigger} />
     </Popover>
   )
 }

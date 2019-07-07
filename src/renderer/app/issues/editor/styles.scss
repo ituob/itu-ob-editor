@@ -87,24 +87,27 @@
 .addMessageTriggerContainer {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%) translateY(-50%) scale(0.8);
+  transform: translateX(-50%) translateY(-50%);
   z-index: 4;
-  transition: opacity .2s linear, transform .2s linear;
 
   &:hover {
-    opacity: 1;
     cursor: pointer;
   }
 
-  .addMessageTriggerCard {
-    background: $pt-app-background-color !important;
-    border-radius: 0 !important;
-    transform: rotate(45deg);
-    padding: 0 .5em !important;
-    display: flex;
-    flex-flow: row nowrap;
-    align-items: center;
-    justify-content: center;
+  .addMessageTrigger {
+    border-radius: 100% !important;
+    background: white !important;
+
+    transform: scale(0.6);
+
+    &:hover {
+      transform: scale(0.8);
+    }
+  }
+
+  // Hack to preserve external class name
+  :global .bp3-active {
+    transform: scale(1) !important;
   }
 }
 .selectedMessageListItem {
