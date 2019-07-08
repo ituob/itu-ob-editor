@@ -133,7 +133,7 @@ export class Storage {
     }
     const newData: any = Object.assign({}, oldData, data);
 
-    const newContents: string = yaml.dump(newData);
+    const newContents: string = yaml.dump(newData, { noRefs: true });
 
     console.debug(`Writing to ${filePath}, file exists: ${fileExists}`);
 
