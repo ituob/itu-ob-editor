@@ -20,17 +20,19 @@ export function IssueEditor(props: IssueEditorProps) {
   const issues = new QuerySet<OBIssue>(tt.state.issues);
   const issue: OBIssue = issues.get(props.issueId);
 
-  let initialMessage: {
-    msg: Message | undefined,
-    section: "amendments" | "general" | undefined,
-  } = { msg: undefined, section: undefined };
+  let initialMessage: Message | undefined = undefined;
+  let initialSection: "amendments" | "general" | undefined = undefined;
 
   if (issue.general.messages.length > 0) {
-    initialMessage = { msg: issue.general.messages[0], section: "general" };
+    initialMessage = issue.general.messages[0];
+    initialSection = "general"
   } else if (issue.amendments.messages.length > 0) {
-    initialMessage = { msg: issue.amendments.messages[0], section: "amendments" };
+    initialMessage = issue.amendments.messages[0];
+    initialSection = "amendments"
   }
+
   const [ selectedMessage, selectMessage ] = useState(initialMessage);
+  const [ selectedSection, selectSection ] = useState(initialSection);
 
   function newGeneralMessagePrompt(idx: number) {
     return (
@@ -45,7 +47,8 @@ export function IssueEditor(props: IssueEditorProps) {
               newMessageIndex: idx,
             });
             setTimeout(() => {
-              selectMessage({ msg: msg, section: "general" });
+              selectMessage(msg);
+              selectSection("general");
             }, 100);
           }}
         />
@@ -68,7 +71,8 @@ export function IssueEditor(props: IssueEditorProps) {
               newMessageIndex: idx,
             });
             setTimeout(() => {
-              selectMessage({ msg: msg, section: "amendments" });
+              selectMessage(msg);
+              selectSection("amendments");
             }, 100);
           }}
         />
@@ -85,16 +89,17 @@ export function IssueEditor(props: IssueEditorProps) {
         {[...issue.general.messages.entries()].map(([idx, msg]: [number, Message]) => (
           <React.Fragment>
             <MessageItem
-              selected={msg == selectedMessage.msg}
+              selected={msg == selectedMessage && selectedSection === 'general'}
               message={msg}
-              onSelect={() => selectMessage({ msg: msg, section: "general" })}
+              onSelect={() => { selectMessage(msg); selectSection("general"); }}
               onDelete={() => {
                 tt.dispatch({
                   type: 'REMOVE_GENERAL_MESSAGE',
                   id: issue.id,
                   messageIndex: idx,
                 });
-                selectMessage({ msg: undefined, section: undefined });
+                selectMessage(undefined);
+                selectSection(undefined);
               }}
             />
             {newGeneralMessagePrompt(idx + 1)}
@@ -106,16 +111,17 @@ export function IssueEditor(props: IssueEditorProps) {
         {[...issue.amendments.messages.entries()].map(([idx, msg]: [number, Message]) => (
           <React.Fragment>
             <MessageItem
-              selected={msg == selectedMessage.msg}
+              selected={msg == selectedMessage && selectedSection === 'amendments'}
               message={msg}
-              onSelect={() => selectMessage({ msg: msg, section: "amendments" })}
+              onSelect={() => { selectMessage(msg); selectSection("amendments"); }}
               onDelete={() => {
                 tt.dispatch({
                   type: 'REMOVE_AMENDMENT_MESSAGE',
                   id: issue.id,
                   messageIndex: idx,
                 });
-                selectMessage({ msg: undefined, section: undefined });
+                selectMessage(undefined);
+                selectSection(undefined);
               }}
             />
             {newAmendmentMessagePrompt(idx + 1)}
@@ -124,27 +130,28 @@ export function IssueEditor(props: IssueEditorProps) {
 
       </div>
       <div className={styles.selectedMessagePane}>
-        {selectedMessage.msg
+        {selectedMessage
           ? <MessageEditor
               workspace={tt.state}
-              message={selectedMessage.msg}
+              message={selectedMessage}
               issue={issue}
               onChange={(updatedMessage: any) => {
-                if (selectedMessage.section === "general") {
+                if (selectedSection === "general") {
                   tt.dispatch({
                     type: 'EDIT_GENERAL_MESSAGE',
                     id: issue.id,
-                    messageIndex: issue.general.messages.indexOf(selectedMessage.msg as Message),
+                    messageIndex: issue.general.messages.indexOf(selectedMessage as Message),
                     messageData: updatedMessage,
                   });
-                } else if (selectedMessage.section === "amendments") {
+                } else if (selectedSection === "amendments") {
                   tt.dispatch({
                     type: 'EDIT_AMENDMENT_MESSAGE',
                     id: issue.id,
-                    messageIndex: issue.amendments.messages.indexOf(selectedMessage.msg as Message),
+                    messageIndex: issue.amendments.messages.indexOf(selectedMessage as Message),
                     messageData: updatedMessage,
                   });
                 }
+                selectMessage(updatedMessage);
               }}
             />
           : null
@@ -191,8 +198,15 @@ function MessageItem(props: MessageItemProps) {
 
 function MessageEditor(props: any) {
   if (props.message) {
-    const MessageEditor = getMessageEditor(props.message);
-    return MessageEditor(props);
+    const EditorCls = getMessageEditor(props.message);
+    return (
+      <EditorCls
+        workspace={props.workspace}
+        message={props.message}
+        issue={props.issue}
+        onChange={props.onChange}
+      />
+    );
   } else {
     throw new Error("MessageEditor received no message");
   }

@@ -1,19 +1,21 @@
-import * as React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Navbar, NavbarGroup, Position, UL, InputGroup, Button, Drawer, Card, H5 } from '@blueprintjs/core';
 import { Workspace } from 'renderer/app/storage';
 import { DateStamp } from 'renderer/app/dates';
 
 import {
   OBIssue,
+
   Message,
   MessageType,
+
   AmendmentMessage,
   ApprovedRecommendationsMessage,
   RunningAnnexesMessage,
 } from '../models';
 
 import { RunningAnnex, getRunningAnnexesForIssue } from '../running-annexes';
+import { FreeformContents } from './freeform-contents';
 
 
 // TODO: Turn those functions into one generic function
@@ -23,46 +25,24 @@ function isApprovedRecommendations(msg: Message): msg is ApprovedRecommendations
 function isRunningAnnexes(msg: Message): msg is RunningAnnexesMessage {
   return msg.type === 'running_annexes';
 }
-
-
-// TODO: Turn message types into classes and below into constructors
-export function createMessage(type: MessageType): Message {
-  var msg = { type: type };
-
-  if (type === 'approved_recommendations') {
-    return {
-      ...msg,
-      items: {},
-    } as Message;
-  } else if (type === 'running_annexes') {
-    return {
-      ...msg,
-      extra_links: [],
-    } as Message;
-  } else if (type === 'telephone_service') {
-    return {
-      ...msg,
-      contents: {},
-    } as Message;
-  } else if (type === 'service_restrictions') {
-    return {
-      ...msg,
-      items: [],
-    } as Message;
-  } else if (type === 'callback_procedures') {
-    return {
-      ...msg,
-    } as Message;
-  } else if (type === 'amendment') {
-    return {
-      ...msg,
-    } as Message;
+function isAmendment(msg: Message): msg is AmendmentMessage {
+  return msg.type === 'amendment';
+}
+export function getMessageEditor(msg: Message) {
+  if (isApprovedRecommendations(msg)) {
+    return ApprovedRecommendationsEditor;
+  } else if (isRunningAnnexes(msg)) {
+    return RunningAnnexesEditor;
+  } else if (isAmendment(msg)) {
+    return AmendmentEditor;
   } else {
-    throw new Error("Unknown message type requested");
+    return () => <p>Messages of type {msg.type} aren’t supported yet.</p>
+    //throw new Error("Unknown message type");
   }
 }
 
 
+// TODO: Refactor these; amendment title should be publication
 export function getMessageTypeTitle(type: MessageType): string {
   if (type === 'approved_recommendations') {
     return  "Approved Recommendations";
@@ -83,8 +63,6 @@ export function getMessageTypeTitle(type: MessageType): string {
     //throw new Error(`Unknown message type: ${msg.type}`);
   }
 }
-
-
 export function getMessageSubtitle(msg: Message): string | undefined {
   if (msg.type === 'amendment') {
     return `to ${((msg as AmendmentMessage).target || {}).publication}`;
@@ -99,11 +77,8 @@ export interface MessageEditorProps {
   message: Message,
   onChange: (updatedMessage: any) => void,
 }
-interface MessageEditor {
-  (props: MessageEditorProps): any
-}
 
-const ApprovedRecommendationsEditor: MessageEditor = function (props) {
+const ApprovedRecommendationsEditor: React.FC<MessageEditorProps> = function (props) {
   const [ addDialogStatus, updateAddDialogStatus ] = useState(false);
   const [ newRecCode, updateNewRecCode ] = useState('');
   const [ newRecVersion, updateNewRecVersion ] = useState('');
@@ -153,7 +128,7 @@ const ApprovedRecommendationsEditor: MessageEditor = function (props) {
   );
 };
 
-const RunningAnnexesEditor: MessageEditor = function (props) {
+const RunningAnnexesEditor: React.FC<MessageEditorProps> = function (props) {
   const extraPublicationIDs = (props.message as RunningAnnexesMessage).extra_links;
   const runningAnnexes = getRunningAnnexesForIssue(
     props.issue,
@@ -182,13 +157,28 @@ const RunningAnnexesEditor: MessageEditor = function (props) {
   );
 };
 
-export function getMessageEditor(msg: Message): MessageEditor {
-  if (isApprovedRecommendations(msg)) {
-    return ApprovedRecommendationsEditor;
-  } else if (isRunningAnnexes(msg)) {
-    return RunningAnnexesEditor;
-  } else {
-    return () => <p>Messages of type {msg.type} aren’t supported yet.</p>
-    //throw new Error("Unknown message type");
+
+class AmendmentEditor extends React.Component<MessageEditorProps, { doc: any }> {
+  render() {
+    var doc = Object.assign({}, (this.props.message as AmendmentMessage).contents);
+    console.debug('Rendering editor');
+    return (
+      <Card>
+        <FreeformContents
+          doc={doc}
+          onChange={(updatedDoc) => { doc = JSON.parse(JSON.stringify(updatedDoc, null, 2)); }}
+        />
+
+        <Button
+          onClick={() => {
+            console.debug("updated", doc);
+            console.debug("updated", Object.assign({}, (this.props.message as AmendmentMessage), { contents: doc }));
+            this.props.onChange(Object.assign({}, (this.props.message as AmendmentMessage), { contents: doc }));
+          }}
+          text="Save"
+          intent="primary"
+        />
+      </Card>
+    );
   }
 }
