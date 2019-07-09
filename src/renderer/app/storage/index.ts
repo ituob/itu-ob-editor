@@ -52,8 +52,10 @@ export class Storage {
 
     for (const dir of dirs) {
       if (dir != '.DS_Store') {
-        const item = (await this.loadObject(path.join(rootPath, dir))) as O;
-        items[item.id] = item;
+        const objData = await this.loadObject(path.join(rootPath, dir));
+        if (objData) {
+          items[objData.id] = objData as O;
+        }
       }
     }
     return items;
@@ -70,15 +72,20 @@ export class Storage {
   // Loads object data from given directory, reading YAML files.
   // meta.yaml is treated specially, populating top-level object payload.
   // Other YAML files populate corresponding object properties.
-  private async loadObject(objDir: string): Promise<any> {
+  private async loadObject(objDir: string): Promise<any | undefined> {
     let objData: {[propName: string]: any};
 
     const metaFile = path.join(this.workDir, objDir, 'meta.yaml');
-    if ((await this.fs.stat(metaFile)).isFile()) {
-      objData = await this.loadYAML(metaFile);
-    } else {
-      objData = {};
+    let metaFileIsFile: boolean;
+    try {
+      metaFileIsFile = (await this.fs.stat(metaFile)).isFile();
+    } catch (e) {
+      return undefined;
     }
+    if (!metaFileIsFile) {
+      return undefined;
+    }
+    objData = await this.loadYAML(metaFile);
 
     const dirContents = await this.fs.readdir(path.join(this.workDir, objDir));
     for (const item of dirContents) {
