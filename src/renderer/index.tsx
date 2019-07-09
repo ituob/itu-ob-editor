@@ -20,6 +20,10 @@ async function initWindow() {
 
   if (searchParams.get('c') === 'home') { 
     ipcRenderer.on('update-current-issue', () => {
+      // When a new issue is scheduled, it means home screen’s button
+      // “Edit current issue” might change its state from disabled to enabled.
+      // This reloads the page to re-render everything on home screen.
+      // TODO: Handle this within React component state.
       window.location.reload();
     });
     ReactDOM.render(
