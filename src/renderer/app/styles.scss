@@ -1,6 +1,21 @@
 body {
   font-family: sans-serif;
 }
-.header {
-  background: whiteSmoke;
+.homeMenuContainer {
+  $draggableRegionHeight: 3em;
+
+  height: 100%;
+  padding-top: $draggableRegionHeight !important;
+
+  &:before {
+    content: " ";
+    display: block;
+    position: fixed;
+    z-index: 3;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: $draggableRegionHeight;
+    -webkit-app-region: drag;
+  }
 }

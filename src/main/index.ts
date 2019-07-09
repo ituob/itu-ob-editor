@@ -3,11 +3,15 @@ import { createWindow } from './window'
 
 
 app.on('ready', () => {
-  _openIssueScheduler();
+  openHomeScreen();
 })
 
+ipcMain.on('schedule-issues', (event: any) => {
+  openIssueScheduler();
+});
+
 ipcMain.on('edit-issue', (event: any, issueId: string) => {
-  _openIssueEditor(issueId);
+  openIssueEditor(issueId);
 });
 
 // Quit application when all windows are closed
@@ -21,28 +25,42 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   // On macOS it is common to re-create a window even after all windows have been closed
   if (windows.length < 1) {
-    _openIssueScheduler();
+    openHomeScreen();
   }
 })
 
 
-function _openIssueEditor(issueId: string) {
+function openHomeScreen() {
   _createWindow(
-    'issueEditor',
-    `Edit ITU OB issue ${issueId}`,
-    `c=issueEditor&issueId=${issueId}`, {
-      width: 800,
-      height: 600,
+    'home',
+    "ITU OB editor",
+    `c=home`, {
+      width: 400,
+      height: 400,
+      frame: process.platform === 'darwin' ? true : false,
+      titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
     });
 }
 
-function _openIssueScheduler() {
+function openIssueScheduler() {
   _createWindow(
     'issueScheduler',
     'ITU OB issues',
     'c=issueScheduler', {
       width: 400,
       minWidth: 380,
+      frame: process.platform === 'darwin' ? true : false,
+      titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
+    });
+}
+
+function openIssueEditor(issueId: string) {
+  _createWindow(
+    'issueEditor',
+    `Edit ITU OB issue ${issueId}`,
+    `c=issueEditor&issueId=${issueId}`, {
+      width: 800,
+      height: 600,
       frame: process.platform === 'darwin' ? true : false,
       titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
     });

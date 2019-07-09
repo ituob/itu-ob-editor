@@ -5,7 +5,6 @@ import { BrowserWindow } from 'electron';
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
 export function createWindow(title: string, params: string, winParams: any) {
-
   const window = new BrowserWindow({
     webPreferences: {nodeIntegration: true},
     title: title,
@@ -15,7 +14,6 @@ export function createWindow(title: string, params: string, winParams: any) {
   if (isDevelopment) {
     window.webContents.openDevTools();
   }
-
   if (isDevelopment) {
     window.loadURL(`http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}?${params}`);
   }

@@ -1,6 +1,6 @@
 import * as ReactDOM from 'react-dom';
 import * as React from 'react';
-import { IssueScheduler, IssueEditor } from './app';
+import { HomeScreen, IssueScheduler, IssueEditor } from './app';
 import { initStorage } from './app/storage';
 import '!style-loader!css-loader!@blueprintjs/datetime/lib/css/blueprint-datetime.css';
 import '!style-loader!css-loader!@blueprintjs/core/lib/css/blueprint.css';
@@ -17,7 +17,13 @@ async function initWindow() {
 
   app.classList.add(styles.app);
 
-  if (searchParams.get('c') === 'issueScheduler') { 
+  if (searchParams.get('c') === 'home') { 
+    ReactDOM.render(
+      <HomeScreen
+        storage={storage} />,
+      app);
+
+  } else if (searchParams.get('c') === 'issueScheduler') { 
     ReactDOM.render(
       <IssueScheduler
         storage={storage} />,
