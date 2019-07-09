@@ -26,14 +26,18 @@
   }
 }
 .messageListPane {
+  $paneWidth: 20em;
+  $topDraggableRegionHeight: 3em;
+
   overflow-y: auto;
   overflow-x: hidden;
   background: $pt-app-background-color;
-  width: 20em;
+  width: $paneWidth;
   position: relative;
   padding-bottom: 3em;
 
-  $draggableRegionHeight: 3em;
+  cursor: default;
+  -webkit-app-region: drag;
 
   &:before {
     content: " ";
@@ -42,8 +46,8 @@
     z-index: 3;
     top: 0;
     left: 0;
-    right: 0;
-    height: $draggableRegionHeight;
+    width: $paneWidth;
+    height: $topDraggableRegionHeight;
     -webkit-app-region: drag;
   }
 }
@@ -56,6 +60,8 @@
 
 .messageListItem {
   $deleteButtonW: 4em;
+
+  -webkit-app-region: no-drag;
 
   border-radius: 0 !important;
   flex: 1;
