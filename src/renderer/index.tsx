@@ -1,3 +1,4 @@
+import { ipcRenderer } from 'electron';
 import * as ReactDOM from 'react-dom';
 import * as React from 'react';
 import { HomeScreen, IssueScheduler, IssueEditor } from './app';
@@ -18,6 +19,9 @@ async function initWindow() {
   app.classList.add(styles.app);
 
   if (searchParams.get('c') === 'home') { 
+    ipcRenderer.on('update-current-issue', () => {
+      window.location.reload();
+    });
     ReactDOM.render(
       <HomeScreen
         storage={storage} />,

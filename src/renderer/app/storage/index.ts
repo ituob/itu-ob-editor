@@ -51,8 +51,10 @@ export class Storage {
     const items: Index<O> = {};
 
     for (const dir of dirs) {
-      const item = (await this.loadObject(path.join(rootPath, dir))) as O;
-      items[item.id] = item;
+      if (dir != '.DS_Store') {
+        const item = (await this.loadObject(path.join(rootPath, dir))) as O;
+        items[item.id] = item;
+      }
     }
     return items;
   }

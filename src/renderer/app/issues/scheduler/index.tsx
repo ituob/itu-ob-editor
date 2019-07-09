@@ -25,6 +25,7 @@ function reducer(state: Workspace, action: any) {
         amendments: { messages: [] },
         annexes: {},
       };
+      ipcRenderer.send('scheduled-new-issue');
       break;
   }
 }

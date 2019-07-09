@@ -1,9 +1,9 @@
 import { ipcRenderer } from 'electron';
 import React from 'react';
 import { ButtonGroup, Button } from '@blueprintjs/core';
+import { QuerySet, sortIntegerAscending } from './storage/query';
 import { Storage } from './storage';
-export { IssueScheduler } from './issues/scheduler';
-export { IssueEditor } from './issues/editor';
+import { OBIssue } from './issues/models';
 import * as styles from './styles.scss';
 
 
@@ -11,6 +11,11 @@ interface HomeScreenProps {
   storage: Storage,
 }
 export const HomeScreen: React.FC<HomeScreenProps> = function ({ storage }) {
+  const issues = new QuerySet<OBIssue>(storage.workspace.issues);
+  const futureIssues = issues.filter(item => {
+    return item[1].publication_date.getTime() >= new Date().getTime();
+  }).orderBy(sortIntegerAscending).all();
+
   return (
     <div className={styles.homeMenuContainer}>
       <ButtonGroup
@@ -24,9 +29,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = function ({ storage }) {
         />
         <Button
           text="Edit current issue"
-          disabled={true}
+          disabled={futureIssues.length < 1}
           icon="edit"
-          onClick={() => ipcRenderer.send('schedule-issues')}
+          onClick={() => ipcRenderer.send('edit-issue', `${futureIssues[0].id}`)}
         />
         <Button
           text="Sync your changes"
@@ -38,3 +43,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = function ({ storage }) {
     </div>
   );
 };
+
+export { IssueScheduler } from './issues/scheduler';
+export { IssueEditor } from './issues/editor';

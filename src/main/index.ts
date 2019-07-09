@@ -2,12 +2,32 @@ import { app, ipcMain, BrowserWindow } from 'electron'
 import { createWindow } from './window'
 
 
+var schedulerWindow: BrowserWindow | null = null;
+var homeWindow: BrowserWindow | null = null;
+
+
 app.on('ready', () => {
-  openHomeScreen();
+  if (homeWindow === null) {
+    homeWindow = openHomeScreen();
+    homeWindow.on('close', () => {
+      homeWindow = null;
+    });
+  }
 })
 
 ipcMain.on('schedule-issues', (event: any) => {
-  openIssueScheduler();
+  if (schedulerWindow === null) {
+    schedulerWindow = openIssueScheduler();
+    schedulerWindow.on('close', () => {
+      schedulerWindow = null;
+    });
+  }
+});
+
+ipcMain.on('scheduled-new-issue', (event: any) => {
+  if (homeWindow !== null) {
+    homeWindow.webContents.send('update-current-issue');
+  }
 });
 
 ipcMain.on('edit-issue', (event: any, issueId: string) => {
@@ -31,7 +51,7 @@ app.on('activate', () => {
 
 
 function openHomeScreen() {
-  _createWindow(
+  return _createWindow(
     'home',
     "ITU OB editor",
     `c=home`, {
@@ -43,7 +63,7 @@ function openHomeScreen() {
 }
 
 function openIssueScheduler() {
-  _createWindow(
+  return _createWindow(
     'issueScheduler',
     'ITU OB issues',
     'c=issueScheduler', {
