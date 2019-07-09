@@ -1,27 +1,28 @@
-import { app, ipcMain, BrowserWindow } from 'electron'
-import { createWindow } from './window'
+import { app, Menu, ipcMain, BrowserWindow } from 'electron';
+import { createWindow } from './window';
+import { getMenu } from './menu';
 
+
+// Keeps track of windows and ensures (?) they do not get garbage collected
+var windows: BrowserWindow[] = [];
 
 var schedulerWindow: BrowserWindow | null = null;
 var homeWindow: BrowserWindow | null = null;
+var issueEditorsOpen: { [id: string]: BrowserWindow | null } = {};
+
+
+Menu.setApplicationMenu(getMenu({
+  openIssueScheduler,
+  openHomeScreen,
+}));
 
 
 app.on('ready', () => {
-  if (homeWindow === null) {
-    homeWindow = openHomeScreen();
-    homeWindow.on('close', () => {
-      homeWindow = null;
-    });
-  }
+  openHomeScreen();
 })
 
 ipcMain.on('schedule-issues', (event: any) => {
-  if (schedulerWindow === null) {
-    schedulerWindow = openIssueScheduler();
-    schedulerWindow.on('close', () => {
-      schedulerWindow = null;
-    });
-  }
+  openIssueScheduler();
 });
 
 ipcMain.on('scheduled-new-issue', (event: any) => {
@@ -51,39 +52,60 @@ app.on('activate', () => {
 
 
 function openHomeScreen() {
-  return _createWindow(
-    'home',
-    "ITU OB editor",
-    `c=home`, {
-      width: 400,
-      height: 400,
-      frame: process.platform === 'darwin' ? true : false,
-      titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
+  if (homeWindow === null) {
+    homeWindow = _createWindow(
+      'home',
+      "ITU OB editor",
+      `c=home`, {
+        width: 400,
+        height: 400,
+        frame: process.platform === 'darwin' ? true : false,
+        titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
+      });
+    homeWindow.on('close', () => {
+      homeWindow = null;
     });
+  } else {
+    homeWindow.focus();
+  }
 }
 
 function openIssueScheduler() {
-  return _createWindow(
-    'issueScheduler',
-    'ITU OB issues',
-    'c=issueScheduler', {
-      width: 400,
-      minWidth: 380,
-      frame: process.platform === 'darwin' ? true : false,
-      titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
+  if (schedulerWindow === null) {
+    schedulerWindow = _createWindow(
+      'issueScheduler',
+      'Issue Scheduler',
+      'c=issueScheduler', {
+        width: 400,
+        minWidth: 380,
+        frame: process.platform === 'darwin' ? true : false,
+        titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
+      });
+    schedulerWindow.on('close', () => {
+      schedulerWindow = null;
     });
+  } else {
+    schedulerWindow.focus();
+  }
 }
 
 function openIssueEditor(issueId: string) {
-  _createWindow(
-    'issueEditor',
-    `Edit ITU OB issue ${issueId}`,
-    `c=issueEditor&issueId=${issueId}`, {
-      width: 800,
-      height: 600,
-      frame: process.platform === 'darwin' ? true : false,
-      titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
+  if (!issueEditorsOpen[issueId]) {
+    issueEditorsOpen[issueId] = _createWindow(
+      'issueEditor',
+      `Issue ${issueId}`,
+      `c=issueEditor&issueId=${issueId}`, {
+        width: 800,
+        height: 600,
+        frame: process.platform === 'darwin' ? true : false,
+        titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
+      });
+    (issueEditorsOpen[issueId] as BrowserWindow).on('close', () => {
+      issueEditorsOpen[issueId] = null;
     });
+  } else {
+    (issueEditorsOpen[issueId] as BrowserWindow).focus();
+  }
 }
 
 
@@ -110,6 +132,3 @@ function _createWindow(id: string, title: string, params: string, winParams: any
 
   return window;
 }
-
-// Keeps track of windows and ensures (?) they do not get garbage collected
-var windows: BrowserWindow[] = [];
