@@ -1,4 +1,4 @@
-const { app, Menu } = require('electron');
+import { app, Menu, MenuItemConstructorOptions } from 'electron';
 
 
 interface MenuActions {
@@ -114,5 +114,5 @@ export function getMenu ({ openIssueScheduler, openHomeScreen }: MenuActions) {
     },
   ];
 
-  return Menu.buildFromTemplate(template);
+  return Menu.buildFromTemplate(template as MenuItemConstructorOptions[]);
 };
