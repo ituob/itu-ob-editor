@@ -6,7 +6,7 @@ import { OBIssue } from './models';
 export interface RunningAnnex {
   publication: Publication,
   annexedTo: OBIssue,
-  positionOn: Date,
+  positionOn: Date | null,
 }
 
 
@@ -28,10 +28,11 @@ export function getRunningAnnexesForIssue(
     for (const [annexedPublicationId, annexedPublicationPosition] of annexes) {
       const pub = publicationIndex[annexedPublicationId];
       if (pub) {
+        const position = annexedPublicationPosition;
         runningAnnexes.push({
           publication: pub as Publication,
           annexedTo: pastIssue,
-          positionOn: annexedPublicationPosition.position_on as Date,
+          positionOn: position ? (position.position_on as Date) : null,
         });
       }
     }
