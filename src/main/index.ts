@@ -10,6 +10,8 @@ var schedulerWindow: BrowserWindow | null = null;
 var homeWindow: BrowserWindow | null = null;
 var issueEditorsOpen: { [id: string]: BrowserWindow | null } = {};
 
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) { app.exit(0); }
 
 Menu.setApplicationMenu(getMenu({
   openIssueScheduler,
