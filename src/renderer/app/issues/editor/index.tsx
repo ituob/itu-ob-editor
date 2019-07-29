@@ -307,7 +307,7 @@ function NewAmendmentMessageMenu(props: NewAmendmentMessageMenuProps) {
 
   function createAmendmentMessage(
       forPublication: Publication,
-      atPosition: Date | undefined = undefined) {
+      atPosition: Date | null | undefined = undefined) {
     let positionString: string | undefined;
     if (atPosition) {
       positionString: `${atPosition.getFullYear()}-${atPosition.getMonth()}-${atPosition.getDate()}`

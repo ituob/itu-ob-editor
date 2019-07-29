@@ -144,7 +144,9 @@ const RunningAnnexesEditor: React.FC<MessageEditorProps> = function (props) {
             &emsp;
             {annex.publication.title.en}
             &emsp;
-            (position on <DateStamp date={annex.positionOn} />)
+            {annex.positionOn
+              ? <span>(position on <DateStamp date={annex.positionOn} />)</span>
+              : null}
           </li>
         ))}
       </UL>
