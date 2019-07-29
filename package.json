@@ -32,7 +32,8 @@
     "source-map-support": "^0.5.12"
   },
   "resolutions": {
-    "*/**/prosemirror-model": "git+ssh://git@github.com:strogonoff/prosemirror-model.git#ccdae4c0c9f8c26d8aa670186dae1eb0bca9bc1a"
+    "*/**/prosemirror-model": "git+ssh://git@github.com:strogonoff/prosemirror-model.git#ccdae4c0c9f8c26d8aa670186dae1eb0bca9bc1a",
+    "lodash": "4.17.13"
   },
   "devDependencies": {
     "@types/fs-extra": "^8.0.0",
