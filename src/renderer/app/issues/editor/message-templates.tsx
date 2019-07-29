@@ -28,7 +28,7 @@ function isRunningAnnexes(msg: Message): msg is RunningAnnexesMessage {
 function isAmendment(msg: Message): msg is AmendmentMessage {
   return msg.type === 'amendment';
 }
-export function getMessageEditor(msg: Message) {
+export function getMessageEditor(msg: Message): React.FC<MessageEditorProps> {
   if (isApprovedRecommendations(msg)) {
     return ApprovedRecommendationsEditor;
   } else if (isRunningAnnexes(msg)) {
@@ -160,27 +160,25 @@ const RunningAnnexesEditor: React.FC<MessageEditorProps> = function (props) {
 };
 
 
-class AmendmentEditor extends React.Component<MessageEditorProps, { doc: any }> {
-  render() {
-    var doc = Object.assign({}, (this.props.message as AmendmentMessage).contents);
-    console.debug('Rendering editor');
-    return (
-      <Card>
-        <FreeformContents
-          doc={doc}
-          onChange={(updatedDoc) => { doc = JSON.parse(JSON.stringify(updatedDoc, null, 2)); }}
-        />
+const AmendmentEditor: React.FC<MessageEditorProps> = function ({ message, onChange }) {
+  var doc = Object.assign({}, (message as AmendmentMessage).contents);
+  console.debug('Rendering editor');
+  return (
+    <Card>
+      <FreeformContents
+        doc={doc}
+        onChange={(updatedDoc) => { doc = JSON.parse(JSON.stringify(updatedDoc, null, 2)); }}
+      />
 
-        <Button
-          onClick={() => {
-            console.debug("updated", doc);
-            console.debug("updated", Object.assign({}, (this.props.message as AmendmentMessage), { contents: doc }));
-            this.props.onChange(Object.assign({}, (this.props.message as AmendmentMessage), { contents: doc }));
-          }}
-          text="Save"
-          intent="primary"
-        />
-      </Card>
-    );
-  }
+      <Button
+        onClick={() => {
+          console.debug("updated", doc);
+          console.debug("updated", Object.assign({}, (message as AmendmentMessage), { contents: doc }));
+          onChange(Object.assign({}, (message as AmendmentMessage), { contents: doc }));
+        }}
+        text="Save"
+        intent="primary"
+      />
+    </Card>
+  );
 }
