@@ -38,12 +38,27 @@ export class Storage {
     return {
       publications: await this.loadIndex<Publication>(PUBLICATIONS_ROOT),
       recommendations: await this.loadIndex<ITURecommendation>(REC_ROOT),
-      issues: await this.loadIndex<OBIssue>(OB_ISSUE_ROOT),
+      issues: await this.loadIssueIndex(),
     }
   }
 
   public async storeWorkspace(workspace: Workspace): Promise<boolean> {
     return this.storeIndex(workspace.issues);
+  }
+
+  private async loadIssueIndex(): Promise<Index<OBIssue>> {
+    const issues: Index<OBIssue> = await this.loadIndex<OBIssue>(OB_ISSUE_ROOT);
+
+    for (let [idx, issue] of Object.entries(issues)) {
+      if (!(issue.general || {}).messages) {
+        issue.general = { messages: [] };
+      }
+      if (!(issue.amendments || {}).messages) {
+        issue.amendments = { messages: [] };
+      }
+      issues[idx] = Object.assign({}, issue);
+    }
+    return issues;
   }
 
   private async loadIndex<O extends IndexableObject>(rootPath: string): Promise<Index<O>> {
