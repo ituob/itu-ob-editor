@@ -21,17 +21,17 @@ function reducer(issues: OBIssue[], action: any) {
       }
       break;
     case 'SCHEDULE_ISSUE':
-      if (issues[action.id]) {
+      if (issues.find(i => i.id === action.id) !== undefined) {
         break;
       }
-      issues[action.id] = {
+      issues.push({
         id: action.id as number,
         publication_date: action.publication_date as Date,
         cutoff_date: action.cutoff_date as Date,
         general: { messages: [] },
         amendments: { messages: [] },
         annexes: {},
-      };
+      });
       ipcRenderer.send('scheduled-new-issue');
       break;
   }
