@@ -49,7 +49,9 @@ export class Storage {
   }
 
   public async storeWorkspace(workspace: Workspace): Promise<boolean> {
-    return this.storeIndex(workspace.issues);
+    await this.storeIndex(workspace.issues);
+    this.workspace = await this.loadWorkspace();
+    return true;
   }
 
   private async loadIssueIndex(): Promise<Index<OBIssue>> {
