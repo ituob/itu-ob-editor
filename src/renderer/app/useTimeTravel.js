@@ -5,7 +5,7 @@ const UNDO = Symbol('UNDO');
 const REDO = Symbol('REDO');
 
 // TODO: Decouple from storage!
-export function useTimeTravel(storage, reducer, initialState) {
+export function useTimeTravel(storeData, reducer, initialState) {
   const timeline = {
     past: [],
     present: initialState,
@@ -23,7 +23,7 @@ export function useTimeTravel(storage, reducer, initialState) {
       newTimelineState = _addNewPresent(tl, newState);
     }
     if (action.type !== 'FETCH_DATA') {
-      storage.storeWorkspace(newTimelineState.present);
+      storeData(newTimelineState.present);
     }
     return newTimelineState;
   };

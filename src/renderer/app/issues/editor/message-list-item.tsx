@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, Card, Button } from '@blueprintjs/core';
-import { Message } from 'renderer/app/issues/models';
+import { Message } from 'main/issues/models';
 import { getMessageTypeTitle, getMessageSubtitle } from './message-templates';
 import * as styles from './styles.scss';
 

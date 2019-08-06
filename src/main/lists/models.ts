@@ -1,5 +1,5 @@
+import { Recommendation } from 'main/recommendations/models';
 import { Translatable } from 'renderer/app/localizer';
-import { Recommendation } from 'renderer/app/recommendations/models';
 
 
 export type PublicationID = string;

@@ -1,23 +1,30 @@
-import { ipcRenderer, remote } from 'electron';
 import moment from 'moment';
+import { ipcRenderer, remote } from 'electron';
 import * as React from 'react';
 import { Callout, Position, Classes, H3, H5, Button, Card, Drawer } from '@blueprintjs/core';
 import { DatePicker } from '@blueprintjs/datetime';
-import { useTimeTravel, TimeTravel } from 'renderer/app/useTimeTravel';
+
+import { OBIssue } from 'main/issues/models';
+
+import { useWorkspace, useWorkspaceRO } from 'renderer/app/storage/api';
 import { DateStamp } from 'renderer/app/dates';
-import { Storage, Workspace } from 'renderer/app/storage';
-import { QuerySet, sortIntegerAscending, sortIntegerDescending  } from 'renderer/app/storage/query';
-import { OBIssue } from '../models';
+
 import * as styles from './styles.scss';
 
 
-function reducer(state: Workspace, action: any) {
+function reducer(issues: OBIssue[], action: any) {
   switch (action.type) {
+    case 'FETCH_DATA':
+      issues.length = 0;
+      for (let issue of action.data) {
+        issues.push(issue);
+      }
+      break;
     case 'SCHEDULE_ISSUE':
-      if (state.issues[action.id]) {
+      if (issues[action.id]) {
         break;
       }
-      state.issues[action.id] = {
+      issues[action.id] = {
         id: action.id as number,
         publication_date: action.publication_date as Date,
         cutoff_date: action.cutoff_date as Date,
@@ -37,22 +44,15 @@ interface IssueSchedule {
 }
 
 
-interface IssueSchedulerProps { storage: Storage }
+interface IssueSchedulerProps {}
 
 export function IssueScheduler(props: IssueSchedulerProps) {
-  const tt: TimeTravel = useTimeTravel(props.storage, reducer, props.storage.workspace);
+  const previousIssues = useWorkspaceRO<OBIssue[]>('latest-published-issues', [])
+  const futureIssues = useWorkspace<OBIssue[]>('future-issues', reducer, []);
 
-  const issues = new QuerySet<OBIssue>(tt.state.issues, sortIntegerAscending);
+  const existingIssues = [...previousIssues, ...futureIssues.state];
 
-  const previousIssues = issues.filter((item) => {
-    return item[1].publication_date.getTime() < new Date().getTime();
-  }).orderBy(sortIntegerDescending).all().slice(0, 1);
-
-  const futureIssues = issues.filter((item) => {
-    return item[1].publication_date.getTime() >= new Date().getTime();
-  }).orderBy(sortIntegerAscending).all();
-
-  const existingIssues = [...previousIssues, ...futureIssues];
+  console.debug(existingIssues);
 
   let newIssueTemplate: OBIssue;
   let minDate: Date;
@@ -97,7 +97,7 @@ export function IssueScheduler(props: IssueSchedulerProps) {
             issue={newIssueTemplate}
             minDate={minDate}
             onSchedule={(schedule: IssueSchedule) => {
-              tt.dispatch({
+              futureIssues.dispatch({
                 'type': 'SCHEDULE_ISSUE',
                 id: newIssueTemplate.id,
                 publication_date: schedule.publication_date,

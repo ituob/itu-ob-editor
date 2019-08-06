@@ -1,48 +1,33 @@
-import { ipcRenderer } from 'electron';
 import * as ReactDOM from 'react-dom';
 import * as React from 'react';
-import { HomeScreen, IssueScheduler, IssueEditor } from './app';
-import { initStorage } from './app/storage';
+
+import { HomeScreen, IssueEditor, IssueScheduler } from './app';
+
 import '!style-loader!css-loader!@blueprintjs/datetime/lib/css/blueprint-datetime.css';
 import '!style-loader!css-loader!@blueprintjs/core/lib/css/blueprint.css';
 import '!style-loader!css-loader!./normalize.css';
 import * as styles from './styles.scss';
 
 
-async function initWindow() {
-  const searchParams = new URLSearchParams(window.location.search);
-  const storage = await initStorage();
+// Electron Webpack skeleton guarantees that #app exists in index.html
+const app = document.getElementById('app') as HTMLElement;
 
-  // Electron Webpack skeleton guarantees that #app exists in index.html
-  const app = document.getElementById('app') as HTMLElement;
+app.classList.add(styles.app);
 
-  app.classList.add(styles.app);
+const searchParams = new URLSearchParams(window.location.search);
 
-  if (searchParams.get('c') === 'home') { 
-    ipcRenderer.on('update-current-issue', () => {
-      // When a new issue is scheduled, it means home screen’s button
-      // “Edit current issue” might change its state from disabled to enabled.
-      // This reloads the page to re-render everything on home screen.
-      // TODO: Handle this within React component state.
-      window.location.reload();
-    });
-    ReactDOM.render(
-      <HomeScreen
-        storage={storage} />,
-      app);
+if (searchParams.get('c') === 'home') { 
+  ReactDOM.render(
+    <HomeScreen />,
+    app);
 
-  } else if (searchParams.get('c') === 'issueScheduler') { 
-    ReactDOM.render(
-      <IssueScheduler
-        storage={storage} />,
-      app);
+} else if (searchParams.get('c') === 'issueScheduler') { 
+  ReactDOM.render(
+    <IssueScheduler />,
+    app);
 
-  } else if (searchParams.get('c') === 'issueEditor') {
-    ReactDOM.render(
-      <IssueEditor
-        storage={storage}
-        issueId={searchParams.get('issueId') || ''} />,
-      app);
-  }
+} else if (searchParams.get('c') === 'issueEditor') {
+  ReactDOM.render(
+    <IssueEditor issueId={searchParams.get('issueId') || ''} />,
+    app);
 }
-initWindow();

@@ -1,11 +1,14 @@
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { remote } from 'electron';
 import * as git from 'isomorphic-git';
-import * as yaml from 'js-yaml';
-import { Publication } from 'renderer/app/lists/models';
-import { OBIssue } from 'renderer/app/issues/models';
-import { ITURecommendation } from 'renderer/app/recommendations/models';
+
+import { app } from 'electron';
+
+import { YAMLStorage } from 'main/storage/yaml';
+import { Publication } from 'main/lists/models';
+import { OBIssue } from 'main/issues/models';
+import { ITURecommendation } from 'main/recommendations/models';
+
 import { Index, IndexableObject } from './query';
 
 
@@ -23,6 +26,8 @@ export interface Workspace {
 
 
 export class Storage {
+  yaml: YAMLStorage;
+
   workspace: Workspace = {
     publications: {},
     recommendations: {},
@@ -32,6 +37,7 @@ export class Storage {
   constructor(private fs: any, private workDir: string) {
     this.fs = fs;
     this.workDir = workDir;
+    this.yaml = new YAMLStorage(fs);
   }
 
   public async loadWorkspace(): Promise<Workspace> {
@@ -100,14 +106,14 @@ export class Storage {
     if (!metaFileIsFile) {
       return undefined;
     }
-    objData = await this.loadYAML(metaFile);
+    objData = await this.yaml.load(metaFile);
 
     const dirContents = await this.fs.readdir(path.join(this.workDir, objDir));
     for (const item of dirContents) {
       if (path.extname(item) == YAML_EXT) {
         const basename = path.basename(item, YAML_EXT);
         if (basename != 'meta') {
-          objData[basename] = await this.loadYAML(path.join(this.workDir, objDir, item));
+          objData[basename] = await this.yaml.load(path.join(this.workDir, objDir, item));
         }
       }
     }
@@ -125,71 +131,52 @@ export class Storage {
 
     const meta = {
       id: obj.id,
-      publication_date: obj.publication_date,
-      cutoff_date: obj.cutoff_date,
+      publication_date: new Date(obj.publication_date),
+      cutoff_date: new Date(obj.cutoff_date),
     };
-    await this.storeYAML(path.join(objPath, 'meta.yaml'), meta);
-    await this.storeYAML(path.join(objPath, 'general.yaml'), obj.general);
-    await this.storeYAML(path.join(objPath, 'amendments.yaml'), obj.amendments);
-    await this.storeYAML(path.join(objPath, 'annexes.yaml'), obj.annexes);
+    await this.yaml.store(path.join(objPath, 'meta.yaml'), meta);
+    await this.yaml.store(path.join(objPath, 'general.yaml'), obj.general);
+    await this.yaml.store(path.join(objPath, 'amendments.yaml'), obj.amendments);
+    await this.yaml.store(path.join(objPath, 'annexes.yaml'), obj.annexes);
     return obj;
-  }
-
-  private async loadYAML(filePath: string): Promise<any> {
-    const data: string = await this.fs.readFile(filePath, { encoding: 'utf8' });
-    return yaml.load(data);
-  }
-
-  private async storeYAML(filePath: string, data: any): Promise<any> {
-    // Merge new data into old data; this way if some YAML properties
-    // are not supported we will not lose them after the update.
-    let fileExists: boolean;
-    let oldData: any;
-    try {
-      fileExists = (await this.fs.stat(filePath)).isFile() === true;
-    } catch (e) {
-      fileExists = false;
-    }
-    if (fileExists) {
-      oldData = await this.loadYAML(filePath);
-    } else {
-      oldData = {};
-    }
-    const newData: any = Object.assign({}, oldData, data);
-
-    const newContents: string = yaml.dump(newData, { noRefs: true });
-
-    console.debug(`Writing to ${filePath}, file exists: ${fileExists}`);
-
-    // if (fileExists) {
-    //   const oldContents: string = await this.fs.readFile(filePath, { encoding: 'utf8' });
-    //   console.debug(`Replacing contents of ${filePath}`, oldContents, newContents);
-    // }
-
-    await this.fs.writeFile(filePath, newContents, { encoding: 'utf8' });
-    return data;
   }
 }
 
 
 export async function initStorage(): Promise<Storage> {
-  const userDataPath = remote.app.getPath('userData');
+  const userDataPath = app.getPath('userData');
   const workDir = path.join(userDataPath, 'itu-ob-data');
+  const repoUrl = 'https://github.com/ituob/itu-ob-data';
+  const corsProxy = 'https://cors.isomorphic-git.org';
 
   git.plugins.set('fs', fs);
 
+  let gitInitialized: boolean;
+
   try {
-    await fs.stat(path.join(workDir, '.git'));
+    gitInitialized = (await fs.stat(path.join(workDir, '.git'))).isDirectory();
   } catch (e) {
+    gitInitialized = false;
+  }
+
+  if (gitInitialized === true) {
+    await git.pull({
+      dir: workDir,
+      ref: 'master',
+      singleBranch: true,
+      fastForwardOnly: true,
+    });
+
+  } else {
     await fs.remove(workDir);
     await fs.ensureDir(workDir);
     await git.clone({
       dir: workDir,
-      corsProxy: 'https://cors.isomorphic-git.org',
-      url: 'https://github.com/ituob/itu-ob-data',
+      url: repoUrl,
       ref: 'master',
       singleBranch: true,
-      depth: 10
+      depth: 10,
+      corsProxy: corsProxy,
     });
   }
 

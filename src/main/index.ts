@@ -1,6 +1,10 @@
 import { app, Menu, ipcMain, BrowserWindow } from 'electron';
 import { createWindow } from './window';
 import { getMenu } from './menu';
+import { initStorage, Workspace, Storage } from './storage';
+import { reviveJsonValue } from './storage/api';
+import { QuerySet, sortIntegerAscending, sortIntegerDescending } from './storage/query';
+import { OBIssue } from './issues/models';
 
 
 // Keeps track of windows and ensures (?) they do not get garbage collected
@@ -10,47 +14,107 @@ var schedulerWindow: BrowserWindow | null = null;
 var homeWindow: BrowserWindow | null = null;
 var issueEditorsOpen: { [id: string]: BrowserWindow | null } = {};
 
+
+// Ensure only one instance of the app can run at a time on given user’s machine
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) { app.exit(0); }
 
-Menu.setApplicationMenu(getMenu({
-  openIssueScheduler,
-  openHomeScreen,
-}));
+
+function makeReadableWSEndpoint<T>(name: string, dataGetter: (...args: string[]) => T): void {
+  ipcMain.on(`request-workspace-${name}`, (evt: any, ...args: string[]) => {
+    evt.reply(`workspace-${name}`, JSON.stringify(dataGetter(...args)));
+  });
+}
 
 
-app.on('ready', () => {
+function makeWritableWSEndpoint(name: string, dataSaver: (...args: string[]) => void): void {
+  ipcMain.on(`store-workspace-${name}`, (evt: any, ...args: string[]) => {
+    dataSaver(...args);
+  });
+}
+
+
+Promise.all([ initStorage(), app.whenReady() ]).then((...args) => {
+  const storage: Storage = args[0][0];
+
   openHomeScreen();
-})
 
-ipcMain.on('schedule-issues', (event: any) => {
-  openIssueScheduler();
+  makeReadableWSEndpoint<Workspace>('all', () => {
+    return storage.workspace;
+  });
+
+  makeReadableWSEndpoint<OBIssue[]>('latest-published-issues', () => {
+    const issues = new QuerySet<OBIssue>(storage.workspace.issues);
+    return issues.filter((item) => {
+      return new Date(item[1].publication_date).getTime() < new Date().getTime();
+    }).orderBy(sortIntegerDescending).all().slice(0, 1);
+  });
+
+  makeReadableWSEndpoint<OBIssue[]>('future-issues', () => {
+    const issues = new QuerySet<OBIssue>(storage.workspace.issues);
+    return issues.filter(item => {
+      return new Date(item[1].publication_date).getTime() >= new Date().getTime();
+    }).orderBy(sortIntegerAscending).all()
+  });
+
+  makeWritableWSEndpoint('future-issues', (rawData: string) => {
+    const issues = JSON.parse(rawData, JSON.parse(rawData, reviveJsonValue));
+    storage.workspace.issues = issues;
+    storage.storeWorkspace(storage.workspace);
+  });
+
+  makeReadableWSEndpoint<OBIssue>('issue', (issueId: string) => {
+    const issues = new QuerySet<OBIssue>(storage.workspace.issues);
+    const issue = issues.get(issueId);
+    if (!(issue.general || {}).messages) {
+      issue.general = { messages: [] };
+    }
+    if (!(issue.amendments || {}).messages) {
+      issue.amendments = { messages: [] };
+    }
+    return issue;
+  });
+
+  makeWritableWSEndpoint('issue', (issueId: string, rawData: string) => {
+    const issueData = JSON.parse(rawData, JSON.parse(rawData, reviveJsonValue));
+    storage.workspace.issues[issueId] = issueData;
+    storage.storeWorkspace(storage.workspace);
+  });
+
+  Menu.setApplicationMenu(getMenu({
+    openIssueScheduler,
+    openHomeScreen,
+  }));
+
+  ipcMain.on('schedule-issues', (event: any) => {
+    openIssueScheduler();
+  });
+
+  ipcMain.on('scheduled-new-issue', (event: any) => {
+    if (homeWindow !== null) {
+      homeWindow.webContents.send('update-current-issue');
+    }
+  });
+
+  ipcMain.on('edit-issue', (event: any, issueId: string) => {
+    openIssueEditor(issueId);
+  });
+
+  // Quit application when all windows are closed
+  app.on('window-all-closed', () => {
+    // On macOS it is common for applications to stay open until the user explicitly quits
+    if (process.platform !== 'darwin') {
+      app.quit()
+    }
+  });
+
+  app.on('activate', () => {
+    // On macOS it is common to re-create a window even after all windows have been closed
+    if (windows.length < 1) {
+      openHomeScreen();
+    }
+  });
 });
-
-ipcMain.on('scheduled-new-issue', (event: any) => {
-  if (homeWindow !== null) {
-    homeWindow.webContents.send('update-current-issue');
-  }
-});
-
-ipcMain.on('edit-issue', (event: any, issueId: string) => {
-  openIssueEditor(issueId);
-});
-
-// Quit application when all windows are closed
-app.on('window-all-closed', () => {
-  // On macOS it is common for applications to stay open until the user explicitly quits
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
-})
-
-app.on('activate', () => {
-  // On macOS it is common to re-create a window even after all windows have been closed
-  if (windows.length < 1) {
-    openHomeScreen();
-  }
-})
 
 
 function openHomeScreen() {

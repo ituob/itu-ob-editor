@@ -9,6 +9,9 @@
     "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
   },
   "electronWebpack": {
+    "main": {
+      "webpackConfig": "main.webpack.js"
+    },
     "renderer": {
       "webpackConfig": "renderer.webpack.js"
     }

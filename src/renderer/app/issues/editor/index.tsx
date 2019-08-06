@@ -1,35 +1,48 @@
 import React, { useState } from 'react';
 import { Button, Popover } from '@blueprintjs/core';
-import { Storage } from 'renderer/app/storage';
-import { useTimeTravel, TimeTravel } from 'renderer/app/useTimeTravel';
-import { QuerySet } from 'renderer/app/storage/query';
-import { Message, AmendmentMessage, OBIssue } from 'renderer/app/issues/models';
+import { Workspace } from 'main/storage';
+import { Message, AmendmentMessage, OBIssue } from 'main/issues/models';
+
+import { useWorkspace, useWorkspaceRO } from 'renderer/app/storage/api';
+import { reducer } from './reducer';
 import { getMessageEditor } from './message-templates';
 import { NewGeneralMessageMenu } from './new-general-message-menu';
 import { NewAmendmentMessageMenu } from './new-amendment-menu';
 import { MessageItem } from './message-list-item';
-import { reducer } from './reducer';
 import * as styles from './styles.scss';
 
 
 interface IssueEditorProps {
-  storage: Storage,
   issueId: string,
 }
 export function IssueEditor(props: IssueEditorProps) {
-  const tt: TimeTravel = useTimeTravel(props.storage, reducer, props.storage.workspace);
-  const issues = new QuerySet<OBIssue>(tt.state.issues);
-  const issue: OBIssue = issues.get(props.issueId);
+  const wsIssue = useWorkspace<OBIssue | {}>('issue', reducer, {}, props.issueId);
+  const maybeIssue = wsIssue.state;
 
-  let initialMessage: Message | undefined = undefined;
-  let initialSection: "amendments" | "general" | undefined = undefined;
+  const ws = useWorkspaceRO<Workspace>(
+    'all',
+    { issues: {}, publications: {}, recommendations: {} },
+    false);
+
+  var initialMessage: Message | undefined = undefined;
+  var initialSection: "amendments" | "general" | undefined = undefined;
+
+  if (Object.keys(maybeIssue).length < 1) {
+    // Silence React hooks :(
+    useState(initialMessage);
+    useState(initialSection);
+
+    return <p>Loading…</p>;
+  }
+
+  const issue = maybeIssue as OBIssue;
 
   if (issue.general.messages.length > 0) {
-    initialMessage = issue.general.messages[0];
-    initialSection = "general"
+    initialMessage = maybeIssue.general.messages[0];
+    initialSection = "general";
   } else if (issue.amendments.messages.length > 0) {
-    initialMessage = issue.amendments.messages[0];
-    initialSection = "amendments"
+    initialMessage = maybeIssue.amendments.messages[0];
+    initialSection = "amendments";
   }
 
   const [ selectedMessage, selectMessage ] = useState(initialMessage);
@@ -41,9 +54,8 @@ export function IssueEditor(props: IssueEditorProps) {
         <NewGeneralMessageMenu
           issue={issue}
           onCreate={(msg) => {
-            tt.dispatch({
+            wsIssue.dispatch({
               type: 'ADD_GENERAL_MESSAGE',
-              id: issue.id,
               message: msg,
               newMessageIndex: idx,
             });
@@ -62,12 +74,11 @@ export function IssueEditor(props: IssueEditorProps) {
       <NewMessagePrompt menu={
         <NewAmendmentMessageMenu
           issue={issue}
-          issueIndex={tt.state.issues}
-          publicationIndex={tt.state.publications}
+          issueIndex={ws.issues}
+          publicationIndex={ws.publications}
           onCreate={(msg: AmendmentMessage) => {
-            tt.dispatch({
+            wsIssue.dispatch({
               type: 'ADD_AMENDMENT_MESSAGE',
-              id: issue.id,
               message: msg as Message,
               newMessageIndex: idx,
             });
@@ -94,9 +105,8 @@ export function IssueEditor(props: IssueEditorProps) {
               message={msg}
               onSelect={() => { selectMessage(msg); selectSection("general"); }}
               onDelete={() => {
-                tt.dispatch({
+                wsIssue.dispatch({
                   type: 'REMOVE_GENERAL_MESSAGE',
-                  id: issue.id,
                   messageIndex: idx,
                 });
                 selectMessage(undefined);
@@ -116,9 +126,8 @@ export function IssueEditor(props: IssueEditorProps) {
               message={msg}
               onSelect={() => { selectMessage(msg); selectSection("amendments"); }}
               onDelete={() => {
-                tt.dispatch({
+                wsIssue.dispatch({
                   type: 'REMOVE_AMENDMENT_MESSAGE',
-                  id: issue.id,
                   messageIndex: idx,
                 });
                 selectMessage(undefined);
@@ -133,21 +142,19 @@ export function IssueEditor(props: IssueEditorProps) {
       <div className={styles.selectedMessagePane}>
         {selectedMessage
           ? <MessageEditor
-              workspace={tt.state}
+              workspace={ws}
               message={selectedMessage}
               issue={issue}
               onChange={(updatedMessage: any) => {
                 if (selectedSection === "general") {
-                  tt.dispatch({
+                  wsIssue.dispatch({
                     type: 'EDIT_GENERAL_MESSAGE',
-                    id: issue.id,
                     messageIndex: issue.general.messages.indexOf(selectedMessage as Message),
                     messageData: updatedMessage,
                   });
                 } else if (selectedSection === "amendments") {
-                  tt.dispatch({
+                  wsIssue.dispatch({
                     type: 'EDIT_AMENDMENT_MESSAGE',
-                    id: issue.id,
                     messageIndex: issue.amendments.messages.indexOf(selectedMessage as Message),
                     messageData: updatedMessage,
                   });

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Navbar, NavbarGroup, Position, UL, InputGroup, Button, Drawer, Card, H5 } from '@blueprintjs/core';
-import { Workspace } from 'renderer/app/storage';
-import { DateStamp } from 'renderer/app/dates';
+import { Workspace } from 'main/storage';
 
 import {
   OBIssue,
@@ -12,8 +11,9 @@ import {
   AmendmentMessage,
   ApprovedRecommendationsMessage,
   RunningAnnexesMessage,
-} from '../models';
+} from 'main/issues/models';
 
+import { DateStamp } from 'renderer/app/dates';
 import { RunningAnnex, getRunningAnnexesForIssue } from '../running-annexes';
 import { FreeformContents } from './freeform-contents';
 
@@ -162,12 +162,16 @@ const RunningAnnexesEditor: React.FC<MessageEditorProps> = function (props) {
 
 const AmendmentEditor: React.FC<MessageEditorProps> = function ({ message, onChange }) {
   var doc = Object.assign({}, (message as AmendmentMessage).contents);
-  console.debug('Rendering editor');
   return (
     <Card>
       <FreeformContents
         doc={doc}
-        onChange={(updatedDoc) => { doc = JSON.parse(JSON.stringify(updatedDoc, null, 2)); }}
+        onChange={(updatedDoc) => {
+          Object.keys(doc).forEach(function(key) {
+            delete doc[key];
+          });
+          Object.assign(doc, JSON.parse(JSON.stringify(updatedDoc, null, 2)));
+        }}
       />
 
       <Button

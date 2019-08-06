@@ -1,5 +1,5 @@
-import { PublicationID } from 'renderer/app/lists/models';
-import { ITURecVersion } from 'renderer/app/recommendations/models';
+import { PublicationID } from 'main/lists/models';
+import { ITURecVersion } from 'main/recommendations/models';
 
 
 export interface AmendmentTarget {

@@ -1,11 +1,12 @@
 /// <reference types="node" />
 
-import { Workspace, Storage } from './storage';
-
-export function useTimeTravel(storage: Storage, reducer: any, initialState: Workspace): any
+export function useTimeTravel(
+  storeData: (...args: string[]) => void,
+  reducer: any,
+  initialState: any): any
 
 export interface TimeTravel {
-  state: Workspace,
+  state: any,
   dispatch: any,
   timeline: any,
   doUndo: any,

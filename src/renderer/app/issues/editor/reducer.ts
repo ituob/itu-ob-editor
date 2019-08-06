@@ -1,50 +1,41 @@
-import { Workspace } from 'renderer/app/storage';
+import { OBIssue } from 'main/issues/models';
 
 
-export function reducer(state: Workspace, action: any) {
+export function reducer(issue: OBIssue, action: any) {
   switch (action.type) {
-    case 'ADD_GENERAL_MESSAGE':
-      if (state.issues[action.id]) {
-        state.issues[action.id].general.messages.splice(action.newMessageIndex, 0, action.message);
+    case 'FETCH_DATA':
+      if (action.data !== null) {
+        Object.assign(issue, action.data);
       }
+      break;
+    case 'ADD_GENERAL_MESSAGE':
+      issue.general.messages.splice(action.newMessageIndex, 0, action.message);
       break;
     case 'EDIT_GENERAL_MESSAGE':
-      if (state.issues[action.id]) {
-        state.issues[action.id].general.messages[action.messageIndex] = {
-          ...state.issues[action.id].general.messages[action.messageIndex],
-          ...action.messageData,
-        };
-      }
+      issue.general.messages[action.messageIndex] = {
+        ...issue.general.messages[action.messageIndex],
+        ...action.messageData,
+      };
       break;
     case 'REMOVE_GENERAL_MESSAGE':
-      if (state.issues[action.id]) {
-        state.issues[action.id].general.messages.splice(action.messageIndex, 1);
-      }
+      issue.general.messages.splice(action.messageIndex, 1);
       break;
     case 'REORDER_GENERAL_MESSAGE':
-      if (state.issues[action.id]) {
-        state.issues[action.id].general.messages.splice(action.oldIndex, 1);
-        state.issues[action.id].general.messages.splice(action.newIndex, 0, action.message);
-      }
+      issue.general.messages.splice(action.oldIndex, 1);
+      issue.general.messages.splice(action.newIndex, 0, action.message);
       break;
 
     case 'ADD_AMENDMENT_MESSAGE':
-      if (state.issues[action.id]) {
-        state.issues[action.id].amendments.messages.splice(action.newMessageIndex, 0, action.message);
-      }
+      issue.amendments.messages.splice(action.newMessageIndex, 0, action.message);
       break;
     case 'EDIT_AMENDMENT_MESSAGE':
-      if (state.issues[action.id]) {
-        state.issues[action.id].amendments.messages[action.messageIndex] = {
-          ...state.issues[action.id].amendments.messages[action.messageIndex],
-          ...action.messageData,
-        };
-      }
+      issue.amendments.messages[action.messageIndex] = {
+        ...issue.amendments.messages[action.messageIndex],
+        ...action.messageData,
+      };
       break;
     case 'REMOVE_AMENDMENT_MESSAGE':
-      if (state.issues[action.id]) {
-        state.issues[action.id].amendments.messages.splice(action.messageIndex, 1);
-      }
+      issue.amendments.messages.splice(action.messageIndex, 1);
       break;
 
     case 'ADD_RECOMMENDATION':
