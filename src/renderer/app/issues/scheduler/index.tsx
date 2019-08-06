@@ -52,8 +52,6 @@ export function IssueScheduler(props: IssueSchedulerProps) {
 
   const existingIssues = [...previousIssues, ...futureIssues.state];
 
-  console.debug(existingIssues);
-
   let newIssueTemplate: OBIssue;
   let minDate: Date;
 
