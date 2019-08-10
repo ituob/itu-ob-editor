@@ -27,7 +27,7 @@ export function getRunningAnnexesForIssue(
     const annexes = Object.entries(pastIssue.annexes || {});
     for (const [annexedPublicationId, annexedPublicationPosition] of annexes) {
       const pub = publicationIndex[annexedPublicationId];
-      if (pub) {
+      if (pub && runningAnnexes.find(ann => ann.publication.id == pub.id) === undefined) {
         const position = annexedPublicationPosition;
         runningAnnexes.push({
           publication: pub as Publication,
