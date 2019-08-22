@@ -1,3 +1,4 @@
+import { IndexableObject } from 'main/storage/query';
 import { Translatable } from 'renderer/app/localizer';
 
 
@@ -10,7 +11,7 @@ export interface Recommendation {
   version: ITURecVersion,
 }
 
-export interface ITURecommendation {
+export interface ITURecommendation extends IndexableObject {
   id: ITURecCode,
   version: ITURecVersion,
   title: Translatable,
