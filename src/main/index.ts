@@ -59,6 +59,7 @@ Promise.all([ initStorage(), app.whenReady() ]).then((...args) => {
 
   makeWritableWSEndpoint('future-issues', (rawData: string) => {
     const issues = JSON.parse(rawData, JSON.parse(rawData, reviveJsonValue));
+
     storage.workspace.issues = issues;
     storage.storeWorkspace(storage.workspace);
   });
@@ -66,6 +67,7 @@ Promise.all([ initStorage(), app.whenReady() ]).then((...args) => {
   makeReadableWSEndpoint<OBIssue>('issue', (issueId: string) => {
     const issues = new QuerySet<OBIssue>(storage.workspace.issues);
     const issue = issues.get(issueId);
+
     if (!(issue.general || {}).messages) {
       issue.general = { messages: [] };
     }
