@@ -18,6 +18,113 @@ const OB_ISSUE_ROOT = 'issues';
 const YAML_EXT = '.yaml';
 
 
+abstract class StoreManager<O extends IndexableObject> {
+  private _index: Index<O> | undefined = undefined;
+
+  constructor(public rootDir: string) {}
+
+  public async storeIndex(storage: Storage, newIdx: Index<O> | undefined): Promise<boolean> {
+    const idx: Index<O> = newIdx || await this.getIndex(storage);
+    const items: O[] = Object.values(idx);
+
+    for (const obj of items) {
+      await this.store(obj, storage);
+    }
+    return true;
+  };
+
+  public async getIndex(storage: Storage): Promise<Index<O>> {
+    if (this._index === undefined) {
+      this._index = await this._loadIndex(storage);
+    }
+    return this._index;
+  };
+
+  private async _loadIndex(storage: Storage): Promise<Index<O>> {
+    const rootPath = this.rootDir;
+    const dirs = await storage.fs.readdir(path.join(storage.workDir, rootPath));
+    const idx: Index<O> = {};
+
+    for (const dir of dirs) {
+      if (dir != '.DS_Store') {
+        const objData = await storage.loadObject(path.join(rootPath, dir));
+        if (objData) {
+          const obj: O = this.postLoad(objData);
+          idx[obj.id] = obj;
+        }
+      }
+    }
+    return idx;
+  }
+
+  // Stores object in DB
+  public abstract async store(obj: O, storage: Storage): Promise<boolean>;
+
+  // Converts object data into valid object, if needed
+  // (in cases when partial data is stored or migration took place previously)
+  public postLoad(obj: any): O {
+    return obj as O;
+  };
+}
+
+class IssueManager extends StoreManager<OBIssue> {
+  constructor() {
+    super(OB_ISSUE_ROOT);
+  }
+
+  public async store(obj: OBIssue, storage: Storage): Promise<boolean> {
+    const objDir = path.join(this.rootDir, `${obj.id}`);
+    const objPath = path.join(storage.workDir, objDir);
+
+    await storage.fs.ensureDir(objPath);
+
+    const meta = {
+      id: obj.id,
+      publication_date: new Date(obj.publication_date),
+      cutoff_date: new Date(obj.cutoff_date),
+    };
+    await storage.yaml.store(path.join(objPath, 'meta.yaml'), meta);
+    await storage.yaml.store(path.join(objPath, 'general.yaml'), obj.general);
+    await storage.yaml.store(path.join(objPath, 'amendments.yaml'), obj.amendments);
+    await storage.yaml.store(path.join(objPath, 'annexes.yaml'), obj.annexes);
+
+    return true;
+  }
+
+  public postLoad(obj: any): OBIssue {
+    if (!(obj.general || {}).messages) {
+      obj.general = { messages: [] };
+    }
+    if (!(obj.amendments || {}).messages) {
+      obj.amendments = { messages: [] };
+    }
+    return obj;
+  }
+}
+
+
+class PublicationManager extends StoreManager<Publication> {
+  constructor() {
+    super(PUBLICATIONS_ROOT);
+  }
+
+  public async store(obj: Publication, storage: Storage): Promise<boolean> {
+    return false;
+  }
+}
+
+
+class RecommendationManager extends StoreManager<ITURecommendation> {
+  constructor() {
+    super(REC_ROOT);
+  }
+
+  public async store(obj: ITURecommendation, storage: Storage): Promise<boolean> {
+    return false;
+  }
+}
+
+
 export interface Workspace {
   publications: Index<Publication>,
   recommendations: Index<ITURecommendation>,
@@ -26,76 +133,39 @@ export interface Workspace {
 
 
 export class Storage {
-  yaml: YAMLStorage;
+  public yaml: YAMLStorage;
+  public workspace: Workspace;
 
-  workspace: Workspace = {
-    publications: {},
-    recommendations: {},
-    issues: {},
-  };
-
-  constructor(private fs: any, private workDir: string) {
+  constructor(public fs: any, public workDir: string,
+      public storeManagers: { [key: string]: StoreManager<any> }) {
     this.fs = fs;
     this.workDir = workDir;
     this.yaml = new YAMLStorage(fs);
+
+    this.workspace = Object.keys(storeManagers).reduce((obj: any, key: string) => {
+      obj[key] = {};
+      return obj;
+    }, {}) as Workspace;
   }
 
   public async loadWorkspace(): Promise<Workspace> {
     return {
-      publications: await this.loadIndex<Publication>(PUBLICATIONS_ROOT),
-      recommendations: await this.loadIndex<ITURecommendation>(REC_ROOT),
-      issues: await this.loadIssueIndex(),
+      publications: await this.storeManagers.publications.getIndex(this),
+      recommendations: await this.storeManagers.recommendations.getIndex(this),
+      issues: await this.storeManagers.issues.getIndex(this),
     }
   }
 
   public async storeWorkspace(workspace: Workspace): Promise<boolean> {
-    await this.storeIndex(workspace.issues);
+    await this.storeManagers.issues.storeIndex(this, this.workspace.issues);
     this.workspace = await this.loadWorkspace();
-    return true;
-  }
-
-  private async loadIssueIndex(): Promise<Index<OBIssue>> {
-    const issues: Index<OBIssue> = await this.loadIndex<OBIssue>(OB_ISSUE_ROOT);
-
-    for (let [idx, issue] of Object.entries(issues)) {
-      if (!(issue.general || {}).messages) {
-        issue.general = { messages: [] };
-      }
-      if (!(issue.amendments || {}).messages) {
-        issue.amendments = { messages: [] };
-      }
-      issues[idx] = Object.assign({}, issue);
-    }
-    return issues;
-  }
-
-  private async loadIndex<O extends IndexableObject>(rootPath: string): Promise<Index<O>> {
-    const dirs = await this.fs.readdir(path.join(this.workDir, rootPath));
-    const items: Index<O> = {};
-
-    for (const dir of dirs) {
-      if (dir != '.DS_Store') {
-        const objData = await this.loadObject(path.join(rootPath, dir));
-        if (objData) {
-          items[objData.id] = objData as O;
-        }
-      }
-    }
-    return items;
-  }
-
-  private async storeIndex(idx: Index<OBIssue>): Promise<boolean> {
-    const items: OBIssue[] = Object.values(idx);
-    for (const obj of items) {
-      await this.storeObject(obj);
-    }
     return true;
   }
 
   // Loads object data from given directory, reading YAML files.
   // meta.yaml is treated specially, populating top-level object payload.
   // Other YAML files populate corresponding object properties.
-  private async loadObject(objDir: string): Promise<any | undefined> {
+  public async loadObject(objDir: string): Promise<any | undefined> {
     let objData: {[propName: string]: any};
 
     const metaFile = path.join(this.workDir, objDir, 'meta.yaml');
@@ -123,24 +193,6 @@ export class Storage {
     // Blindly hope that data structure loaded from YAML
     // is valid for given type.
     return objData;
-  }
-
-  private async storeObject(obj: OBIssue): Promise<OBIssue> {
-    const objDir = path.join(OB_ISSUE_ROOT, `${obj.id}`);
-    const objPath = path.join(this.workDir, objDir);
-
-    await this.fs.ensureDir(objPath);
-
-    const meta = {
-      id: obj.id,
-      publication_date: new Date(obj.publication_date),
-      cutoff_date: new Date(obj.cutoff_date),
-    };
-    await this.yaml.store(path.join(objPath, 'meta.yaml'), meta);
-    await this.yaml.store(path.join(objPath, 'general.yaml'), obj.general);
-    await this.yaml.store(path.join(objPath, 'amendments.yaml'), obj.amendments);
-    await this.yaml.store(path.join(objPath, 'annexes.yaml'), obj.annexes);
-    return obj;
   }
 }
 
@@ -182,7 +234,11 @@ export async function initStorage(): Promise<Storage> {
     });
   }
 
-  const storage = new Storage(fs, workDir);
+  const storage = new Storage(fs, workDir, {
+    issues: new IssueManager(),
+    publications: new PublicationManager(),
+    recommendations: new RecommendationManager(),
+  });
   storage.workspace = await storage.loadWorkspace();
   return storage;
 }
