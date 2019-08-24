@@ -2,16 +2,16 @@ import React, { useState } from 'react';
 import { Navbar, NavbarGroup, Position, UL, InputGroup, Button, Drawer, Card, H5 } from '@blueprintjs/core';
 import { Workspace } from 'main/storage';
 
-import {
-  OBIssue,
+import { OBIssue } from 'main/issues/models';
 
+import {
   Message,
   MessageType,
-
-  AmendmentMessage,
-  ApprovedRecommendationsMessage,
   RunningAnnexesMessage,
-} from 'main/issues/models';
+  ApprovedRecommendationsMessage,
+  TelephoneServiceMessage,
+  AmendmentMessage,
+} from 'main/issues/messages';
 
 import { DateStamp } from 'renderer/app/dates';
 import { RunningAnnex, getRunningAnnexesForIssue } from '../running-annexes';

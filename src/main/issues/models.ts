@@ -25,13 +25,3 @@ export interface OBIssue extends IndexableObject {
   amendments: MessageBlock,
   annexes: AnnexesBlock,
 }
-
-export { Message }
-export {
-  MessageType,
-  ExcludeTypeField,
-  ApprovedRecommendationsMessage,
-  RunningAnnexesMessage,
-  AmendmentMessage,
-  AmendmentTarget,
-} from './messages';

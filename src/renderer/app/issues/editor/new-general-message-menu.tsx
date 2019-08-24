@@ -1,6 +1,7 @@
 import React from 'react';
 import { Menu } from '@blueprintjs/core';
-import { Message, MessageType, OBIssue } from 'main/issues/models';
+import { OBIssue } from 'main/issues/models';
+import { Message, MessageType } from 'main/issues/messages';
 import { getMessageTypeTitle } from './message-templates';
 import * as styles from './styles.scss';
 

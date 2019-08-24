@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Button, Popover } from '@blueprintjs/core';
 import { Workspace } from 'main/storage';
-import { Message, AmendmentMessage, OBIssue } from 'main/issues/models';
+import { OBIssue } from 'main/issues/models';
+import { Message, AmendmentMessage } from 'main/issues/messages';
 
 import { useWorkspace, useWorkspaceRO } from 'renderer/app/storage/api';
 import { reducer } from './reducer';
