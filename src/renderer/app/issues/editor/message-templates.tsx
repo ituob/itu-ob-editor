@@ -25,6 +25,9 @@ function isApprovedRecommendations(msg: Message): msg is ApprovedRecommendations
 function isRunningAnnexes(msg: Message): msg is RunningAnnexesMessage {
   return msg.type === 'running_annexes';
 }
+function isTelephoneService(msg: Message): msg is TelephoneServiceMessage {
+  return msg.type === 'telephone_service';
+}
 function isAmendment(msg: Message): msg is AmendmentMessage {
   return msg.type === 'amendment';
 }
@@ -33,6 +36,8 @@ export function getMessageEditor(msg: Message): React.FC<MessageEditorProps> {
     return ApprovedRecommendationsEditor;
   } else if (isRunningAnnexes(msg)) {
     return RunningAnnexesEditor;
+  } else if (isTelephoneService(msg)) {
+    return TelephoneServiceMessageEditor;
   } else if (isAmendment(msg)) {
     return AmendmentEditor;
   } else {
@@ -77,6 +82,12 @@ export interface MessageEditorProps {
   message: Message,
   onChange: (updatedMessage: any) => void,
 }
+
+const TelephoneServiceMessageEditor: React.FC<MessageEditorProps> = function (props) {
+  return (
+    <p>Telephone service message editor</p>
+  );
+};
 
 const ApprovedRecommendationsEditor: React.FC<MessageEditorProps> = function (props) {
   const [ addDialogStatus, updateAddDialogStatus ] = useState(false);

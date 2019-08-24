@@ -26,7 +26,7 @@ export function NewGeneralMessageMenu(props: NewGeneralMessageMenuProps) {
         text={getMessageTypeTitle('telephone_service')}
         onClick={() => props.onCreate({
           type: 'telephone_service',
-          contents: {},
+          contents: [],
         })}
       />
       <Menu.Item

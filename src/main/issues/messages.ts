@@ -24,9 +24,20 @@ export interface CustomMessage {
   type: "custom",
   contents: any,
 }
+
+interface Communication {
+  date: Date,
+  contents: any,
+}
+interface CountryCommunicationSet {
+  country_name: string,
+  phone_code: string,
+  communications: Communication[],
+  contact: string,
+}
 export interface TelephoneServiceMessage {
   type: "telephone_service",
-  contents: any,
+  contents: CountryCommunicationSet[],
 }
 export interface ServiceRestrictionsMessage {
   type: "service_restrictions",
