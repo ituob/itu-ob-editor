@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Button, Popover } from '@blueprintjs/core';
+
 import { Workspace } from 'main/storage';
 import { OBIssue } from 'main/issues/models';
 import { Message, AmendmentMessage } from 'main/issues/messages';
 
 import { useWorkspace, useWorkspaceRO } from 'renderer/app/storage/api';
 import { reducer } from './reducer';
-import { getMessageEditor } from './message-templates';
+import { getMessageEditor } from './message-editor';
 import { NewGeneralMessageMenu } from './new-general-message-menu';
 import { NewAmendmentMessageMenu } from './new-amendment-menu';
 import { MessageItem } from './message-list-item';

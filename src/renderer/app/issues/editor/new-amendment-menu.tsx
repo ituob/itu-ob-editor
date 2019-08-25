@@ -1,8 +1,10 @@
 import React from 'react';
 import { Menu } from '@blueprintjs/core';
+
 import { Index, QuerySet } from 'main/storage/query';
 import { Publication } from 'main/lists/models';
 import { OBIssue } from 'main/issues/models';
+
 import { AmendmentMessage } from 'main/issues/messages';
 import { RunningAnnex, getRunningAnnexesForIssue } from '../running-annexes';
 import * as styles from './styles.scss';

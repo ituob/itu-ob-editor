@@ -7,6 +7,12 @@ import { app } from 'electron';
 import { YAMLStorage } from 'main/storage/yaml';
 import { Publication } from 'main/lists/models';
 import { OBIssue } from 'main/issues/models';
+import { Message } from 'main/issues/messages';
+
+import {
+  isTelephoneService,
+} from 'main/issues/messages';
+
 import { ITURecommendation } from 'main/recommendations/models';
 
 import { Index, IndexableObject } from './query';
@@ -14,7 +20,6 @@ import { Index, IndexableObject } from './query';
 
 const PUBLICATIONS_ROOT = 'lists';
 const REC_ROOT = 'recommendations';
-const OB_ISSUE_ROOT = 'issues';
 const YAML_EXT = '.yaml';
 
 
@@ -67,9 +72,10 @@ abstract class StoreManager<O extends IndexableObject> {
   };
 }
 
-class IssueManager extends StoreManager<OBIssue> {
+// TODO: Move to sub-module under main/issues, and subsequent managers similarly
+export class IssueManager extends StoreManager<OBIssue> {
   constructor() {
-    super(OB_ISSUE_ROOT);
+    super('issues');
   }
 
   public async store(obj: OBIssue, storage: Storage): Promise<boolean> {
@@ -95,6 +101,17 @@ class IssueManager extends StoreManager<OBIssue> {
     if (!(obj.general || {}).messages) {
       obj.general = { messages: [] };
     }
+
+    obj.general.messages = obj.general.messages.map((msg: Message) => {
+      if (isTelephoneService(msg)) {
+        if (!msg.contents.map) {
+          console.warn(`Incompatible Telephone Service message contents type: ${obj.id}`);
+          msg.contents = [];
+        }
+      }
+      return msg;
+    });
+
     if (!(obj.amendments || {}).messages) {
       obj.amendments = { messages: [] };
     }

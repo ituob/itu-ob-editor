@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, Card, Button } from '@blueprintjs/core';
 import { Message } from 'main/issues/messages';
-import { getMessageTypeTitle, getMessageSubtitle } from './message-templates';
+import { getMessageTypeTitle, getMessageSubtitle } from './messages';
 import * as styles from './styles.scss';
 
 
