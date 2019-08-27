@@ -27,7 +27,7 @@ export function useWorkspace<T>(request: string, reducer: any, initData: T, ...a
     getData();
     return undefined;
 
-  }, [request]);
+  }, [request, JSON.stringify(tt.timeline.present)]);
 
   return tt;
 }
