@@ -26,8 +26,8 @@ export function IssueEditor(props: IssueEditorProps) {
     { issues: {}, publications: {}, recommendations: {} },
     false);
 
-  var initialMessage: Message | undefined = undefined;
-  var initialSection: "amendments" | "general" | undefined = undefined;
+  var initialMessage: number | undefined = undefined;
+  var initialSection: "amendments" | "general" = "general";
 
   if (Object.keys(maybeIssue).length < 1) {
     // Silence React hooks :(
@@ -40,10 +40,10 @@ export function IssueEditor(props: IssueEditorProps) {
   const issue = maybeIssue as OBIssue;
 
   if (issue.general.messages.length > 0) {
-    initialMessage = maybeIssue.general.messages[0];
+    initialMessage = 0;
     initialSection = "general";
   } else if (issue.amendments.messages.length > 0) {
-    initialMessage = maybeIssue.amendments.messages[0];
+    initialMessage = 0;
     initialSection = "amendments";
   }
 
@@ -62,7 +62,7 @@ export function IssueEditor(props: IssueEditorProps) {
               newMessageIndex: idx,
             });
             setTimeout(() => {
-              selectMessage(msg);
+              selectMessage(idx);
               selectSection("general");
             }, 100);
           }}
@@ -85,7 +85,7 @@ export function IssueEditor(props: IssueEditorProps) {
               newMessageIndex: idx,
             });
             setTimeout(() => {
-              selectMessage(msg);
+              selectMessage(idx);
               selectSection("amendments");
             }, 100);
           }}
@@ -103,16 +103,15 @@ export function IssueEditor(props: IssueEditorProps) {
         {[...issue.general.messages.entries()].map(([idx, msg]: [number, Message]) => (
           <React.Fragment>
             <MessageItem
-              selected={msg == selectedMessage && selectedSection === 'general'}
+              selected={idx == selectedMessage && selectedSection === 'general'}
               message={msg}
-              onSelect={() => { selectMessage(msg); selectSection("general"); }}
+              onSelect={() => { selectMessage(idx); selectSection("general"); }}
               onDelete={() => {
                 wsIssue.dispatch({
                   type: 'REMOVE_GENERAL_MESSAGE',
                   messageIndex: idx,
                 });
                 selectMessage(undefined);
-                selectSection(undefined);
               }}
             />
             {newGeneralMessagePrompt(idx + 1)}
@@ -124,16 +123,15 @@ export function IssueEditor(props: IssueEditorProps) {
         {[...issue.amendments.messages.entries()].map(([idx, msg]: [number, Message]) => (
           <React.Fragment>
             <MessageItem
-              selected={msg == selectedMessage && selectedSection === 'amendments'}
+              selected={idx == selectedMessage && selectedSection === 'amendments'}
               message={msg}
-              onSelect={() => { selectMessage(msg); selectSection("amendments"); }}
+              onSelect={() => { selectMessage(idx); selectSection("amendments"); }}
               onDelete={() => {
                 wsIssue.dispatch({
                   type: 'REMOVE_AMENDMENT_MESSAGE',
                   messageIndex: idx,
                 });
                 selectMessage(undefined);
-                selectSection(undefined);
               }}
             />
             {newAmendmentMessagePrompt(idx + 1)}
@@ -142,26 +140,25 @@ export function IssueEditor(props: IssueEditorProps) {
 
       </div>
       <div className={styles.selectedMessagePane}>
-        {selectedMessage
+        {selectedMessage !== undefined
           ? <MessageEditor
               workspace={ws}
-              message={selectedMessage}
+              message={issue[selectedSection].messages[selectedMessage]}
               issue={issue}
               onChange={(updatedMessage: any) => {
                 if (selectedSection === "general") {
                   wsIssue.dispatch({
                     type: 'EDIT_GENERAL_MESSAGE',
-                    messageIndex: issue.general.messages.indexOf(selectedMessage as Message),
+                    messageIndex: selectedMessage,
                     messageData: updatedMessage,
                   });
                 } else if (selectedSection === "amendments") {
                   wsIssue.dispatch({
                     type: 'EDIT_AMENDMENT_MESSAGE',
-                    messageIndex: issue.amendments.messages.indexOf(selectedMessage as Message),
+                    messageIndex: selectedMessage,
                     messageData: updatedMessage,
                   });
                 }
-                selectMessage(updatedMessage);
               }}
             />
           : null
