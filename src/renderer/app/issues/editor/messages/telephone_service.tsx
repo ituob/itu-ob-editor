@@ -129,7 +129,7 @@ const NewCountryPrompt: React.FC<NewCountryPromptProps> = function ({ onCreate }
 export const TelephoneServiceMessageEditor: React.FC<MessageEditorProps> = function ({ message, onChange }) {
   var countryCommSets = (message as TelephoneServiceMessage).contents;
 
-  function addCountryPrompt(idx: number) {
+  function makeAddCountryPrompt(idx: number) {
     return <NewCountryPrompt
       key={`addCountry-${idx}`}
       onCreate={(countryCommSet) => {
@@ -139,7 +139,7 @@ export const TelephoneServiceMessageEditor: React.FC<MessageEditorProps> = funct
     />
   }
 
-  function addCountryCommPrompt(countryIdx: number, idx: number) {
+  function makeAddCommunicationPrompt(countryIdx: number, idx: number) {
     return <NewCommPrompt
       key={`addComm-${countryIdx}-${idx}`}
       onCreate={(comm) => {
@@ -166,12 +166,12 @@ export const TelephoneServiceMessageEditor: React.FC<MessageEditorProps> = funct
 
   return (
     <React.Fragment>
-      {addCountryPrompt(0)}
+      {makeAddCountryPrompt(0)}
 
       {countryCommSets.length > 0
         ? countryCommSets.map((countryCommSet: TSCountryCommunicationSet, countryIdx: number) => (
           <React.Fragment>
-            {addCountryCommPrompt(countryIdx, 0)}
+            {makeAddCommunicationPrompt(countryIdx, 0)}
 
             <article className={styles.tsCountryCommunicationSet} key={countryIdx}>
               <p>{countryCommSet.country_name} (country code +{countryCommSet.phone_code})</p>
@@ -188,13 +188,13 @@ export const TelephoneServiceMessageEditor: React.FC<MessageEditorProps> = funct
                         }} />
                     </article>
 
-                    {addCountryCommPrompt(countryIdx, commIdx + 1)}
+                    {makeAddCommunicationPrompt(countryIdx, commIdx + 1)}
                   </React.Fragment>))
                 : <p key="noCommsText">No communications to display for this country.</p>
               }
             </article>
 
-            {addCountryPrompt(countryIdx + 1)}
+            {makeAddCountryPrompt(countryIdx + 1)}
           </React.Fragment>
         ))
         : <p key="noCountryText">No country communications to display.</p>
