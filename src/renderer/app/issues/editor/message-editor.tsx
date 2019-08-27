@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { Classes, Dialog } from '@blueprintjs/core';
+
 import { Workspace } from 'main/storage';
 import { OBIssue } from 'main/issues/models';
 import { Message } from 'main/issues/messages';
@@ -15,6 +17,8 @@ import { ApprovedRecommendationsEditor } from './messages/approved_recommendatio
 import { RunningAnnexesEditor } from './messages/running_annexes';
 import { TelephoneServiceMessageEditor } from './messages/telephone_service';
 import { AmendmentEditor } from './messages/amendment';
+
+import * as styles from './styles.scss';
 
 
 /* Message editor spec.
@@ -46,3 +50,36 @@ export function getMessageEditor(msg: Message): React.FC<MessageEditorProps> {
     //throw new Error("Unknown message type");
   }
 }
+
+interface MessageEditorDialogProps {
+  isOpen: boolean,
+  onClose: () => void,
+  key?: string,
+  title?: string,
+  saveButton?: JSX.Element,
+  className?: string,
+}
+export const MessageEditorDialog: React.FC<MessageEditorDialogProps> = function (props) {
+  return (
+    <Dialog
+        key={props.key || "dialog"}
+        title={props.title || undefined}
+        isOpen={props.isOpen}
+        className={props.className || styles.messageEditorDialog}
+        onClose={props.onClose}
+        style={{
+          width: 'unset',
+        }}
+        >
+      <div className={Classes.DIALOG_BODY}>
+        {props.children}
+      </div>
+
+      {props.saveButton
+        ? <div className={Classes.DIALOG_FOOTER}>
+            {props.saveButton}
+          </div>
+        : ''}
+    </Dialog>
+  );
+};
