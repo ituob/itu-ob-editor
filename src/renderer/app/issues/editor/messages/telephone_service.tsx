@@ -70,7 +70,7 @@ const NewCommPrompt: React.FC<NewCommPromptProps> = function ({ onCreate }) {
   }
 
   return (
-    <React.Fragment>
+    <>
       <Button 
         key="dialogButton"
         icon="plus"
@@ -94,7 +94,7 @@ const NewCommPrompt: React.FC<NewCommPromptProps> = function ({ onCreate }) {
             onChange={(val: Date) => setCommDate(val)} />
         </FormGroup>
       </MessageEditorDialog>
-    </React.Fragment>
+    </>
   );
 };
 
@@ -219,12 +219,12 @@ export const TelephoneServiceMessageEditor: React.FC<MessageEditorProps> = funct
   }
 
   return (
-    <React.Fragment>
+    <>
       {makeAddCountryPrompt(0)}
 
       {countryCommSets.length > 0
         ? countryCommSets.map((countryCommSet: TSCountryCommunicationSet, countryIdx: number) => (
-          <React.Fragment>
+          <>
             {makeAddCommunicationPrompt(countryIdx, 0)}
 
             <article className={styles.tsCountryCommunicationSet} key={countryIdx}>
@@ -232,7 +232,7 @@ export const TelephoneServiceMessageEditor: React.FC<MessageEditorProps> = funct
 
               {countryCommSet.communications.length > 0
                 ? countryCommSet.communications.map((comm: TSCommunication, commIdx: number) => (
-                  <React.Fragment>
+                  <>
                     <article className={styles.tsCommunication} key={commIdx}>
                       <CommunicationEditor
                         comm={comm}
@@ -243,16 +243,16 @@ export const TelephoneServiceMessageEditor: React.FC<MessageEditorProps> = funct
                     </article>
 
                     {makeAddCommunicationPrompt(countryIdx, commIdx + 1)}
-                  </React.Fragment>))
+                  </>))
                 : <p key="noCommsText">No communications to display for this country.</p>
               }
             </article>
 
             {makeAddCountryPrompt(countryIdx + 1)}
-          </React.Fragment>
+          </>
         ))
         : <p key="noCountryText">No country communications to display.</p>
       }
-    </React.Fragment>
+    </>
   );
 };
