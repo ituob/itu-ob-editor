@@ -348,7 +348,7 @@ const TSCountryCommunicationDetailsEditor: React.FC<TSCountryCommunicationDetail
   }
 
   return (
-    <>
+    <div className={styles.tsCountryCommunicationEditor}>
       <FormGroup
           label="Communication date"
           intent="primary">
@@ -363,17 +363,21 @@ const TSCountryCommunicationDetailsEditor: React.FC<TSCountryCommunicationDetail
         />
       </FormGroup>
 
-      <Card>
-        <FreeformContents
-          doc={newContents}
-          onChange={(updatedDoc) => {
-            Object.keys(newContents).forEach(function(key) { delete newContents[key]; });
-            Object.assign(newContents, JSON.parse(JSON.stringify(updatedDoc, null, 2)));
-            _onChange();
-          }}
-        />
-      </Card>
-    </>
+      <FormGroup
+          label="Communication contents"
+          intent="primary">
+        <Card>
+          <FreeformContents
+            doc={newContents}
+            onChange={(updatedDoc) => {
+              Object.keys(newContents).forEach(function(key) { delete newContents[key]; });
+              Object.assign(newContents, JSON.parse(JSON.stringify(updatedDoc, null, 2)));
+              _onChange();
+            }}
+          />
+        </Card>
+      </FormGroup>
+    </div>
   );
 };
 

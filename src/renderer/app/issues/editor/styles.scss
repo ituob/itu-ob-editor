@@ -143,6 +143,15 @@
   padding-bottom: 2rem;
 }
 
+.tsCountryCommunicationEditor {
+  display: flex;
+  flex-flow: row nowrap;
+
+  > :first-child {
+    margin-right: 1rem;
+  }
+}
+
 .tsCommunication {
   color: red;
   border-radius: 0 !important;
@@ -150,17 +159,6 @@
 }
 
 .tsCommunicationList {
-  > * {
-    display: block;
-  }
-
-  > article {
-    margin: 1rem;
-  }
-
-  > button {
-    color: blue;
-  }
 }
 
 .messageEditorDialog {
