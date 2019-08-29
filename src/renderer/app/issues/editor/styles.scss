@@ -126,17 +126,41 @@
   max-width: 18em;
 }
 
+@mixin tsAddItemTrigger() {
+  width: 100%;
+  border-radius: 0 !important;
+}
+
 .addCommTrigger {
+  @include tsAddItemTrigger();
 }
 
 .addCountryTrigger {
+  @include tsAddItemTrigger();
 }
 
 .tsCountryCommunicationSet {
+  padding-bottom: 2rem;
 }
 
 .tsCommunication {
   color: red;
+  border-radius: 0 !important;
+  overflow: hidden;
+}
+
+.tsCommunicationList {
+  > * {
+    display: block;
+  }
+
+  > article {
+    margin: 1rem;
+  }
+
+  > button {
+    color: blue;
+  }
 }
 
 .messageEditorDialog {
