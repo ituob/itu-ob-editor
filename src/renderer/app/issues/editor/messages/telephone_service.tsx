@@ -447,11 +447,11 @@ const TSCountryCommunicationDetailsEditor: React.FC<TSCountryCommunicationDetail
     function ({ date, contents, onChange }) {
 
   const [newDate, setDate] = useState(date);
-  var newContents = Object.assign({}, contents);
+  const [newContents, setContents] = useState(Object.assign({}, contents));
 
-  function _onChange() {
+  useEffect(() => {
     onChange(newDate, newContents);
-  }
+  }, [newDate, newContents]);
 
   return (
     <div className={styles.tsCountryCommunicationEditor}>
@@ -462,26 +462,24 @@ const TSCountryCommunicationDetailsEditor: React.FC<TSCountryCommunicationDetail
           key="datePicker"
           canClearSelection={false}
           value={newDate}
-          onChange={(val: Date) => {
-            setDate(val);
-            _onChange();
-          }}
+          onChange={(val: Date) => setDate(val)}
         />
       </FormGroup>
 
       <FormGroup
           label="Communication contents"
           intent="primary">
-        <Card>
-          <FreeformContents
-            doc={newContents}
-            onChange={(updatedDoc) => {
-              Object.keys(newContents).forEach(function(key) { delete newContents[key]; });
-              Object.assign(newContents, JSON.parse(JSON.stringify(updatedDoc, null, 2)));
-              _onChange();
-            }}
-          />
-        </Card>
+        <FreeformContents
+          doc={newContents}
+          onChange={(updatedDoc: any) => {
+            setContents((previousDoc: any) => {
+              return {
+                ...previousDoc,
+                ...JSON.parse(JSON.stringify(updatedDoc, null, 2)),
+              };
+            });
+          }}
+        />
       </FormGroup>
     </div>
   );
