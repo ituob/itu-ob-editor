@@ -25,17 +25,15 @@ class ProseMirrorAdapter extends Editor {
     const editor = super.render();
 
     return (
-      <React.Fragment>
+      <>
         <MenuBar menu={menu} view={this.view} />
-
-        {this.props.objId}
 
         <Floater view={this.view}>
           <MenuBar menu={{ marks: menu.marks }} view={this.view} />
         </Floater>
 
         {editor}
-      </React.Fragment>
+      </>
     );
   }
 }
