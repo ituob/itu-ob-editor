@@ -354,6 +354,7 @@ const EditCommunicationDialog: React.FC<EditCommunicationDialogProps> = function
         title={title}
         isOpen={isOpen}
         onClose={onClose}
+        width="95vw"
         saveButton={
           <Button intent="primary" onClick={_onSave}>Save communication</Button>
         }>
@@ -422,6 +423,7 @@ const TSCountryDetailsEditor: React.FC<TSCountryDetailsEditorProps> = function (
         Contact info
         <TextArea
           value={newCountry.contact}
+          fill={true}
           key="contactInfo"
           onChange={(evt: React.FormEvent<HTMLElement>) => {
             setCountry({
