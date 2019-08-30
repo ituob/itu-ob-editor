@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { H4, H5, Card, Label, Button, FormGroup, InputGroup, TextArea } from '@blueprintjs/core';
+import { H4, Card, Label, Button, FormGroup, InputGroup, TextArea } from '@blueprintjs/core';
 import { DatePicker } from '@blueprintjs/datetime';
 
 import {
@@ -16,98 +16,36 @@ import { MessageEditorProps, MessageEditorDialog } from '../message-editor';
 import * as styles from '../styles.scss';
 
 
+function getNewCommStub(): TSCommunication {
+  return {
+    date: new Date(),
+    contents: {},
+  };
+}
+
+
+function getNewCountryStub(): TSCountryCommunicationSet {
+  return {
+    country_name: '',
+    phone_code: '',
+    contact: '',
+    communications: [],
+  };
+}
+
+
 export const TelephoneServiceMessageEditor: React.FC<MessageEditorProps> = function ({ message, onChange }) {
   var countryCommSets = (message as TelephoneServiceMessage).contents;
 
+  const [activeCountryIdx, setActiveCountryIdx] = useState(0);
+  const [activeCommIdx, setActiveCommIdx] = useState(0);
+  const [newCountryDialogState, toggleNewCountryDialogState] = useState(false);
+  const [editCountryDialogState, toggleEditCountryDialogState] = useState(false);
+  const [newCommDialogState, toggleNewCommDialogState] = useState(false);
+  const [editCommDialogState, toggleEditCommDialogState] = useState(false);
+
   function _onChange() {
-    onChange(Object.assign(
-      {},
-      (message as TelephoneServiceMessage),
-      { contents: countryCommSets }));
-  }
-
-  function getNewCommStub() {
-    return {
-      date: new Date(),
-      contents: {},
-    };
-  }
-  function getNewCountryStub() {
-    return {
-      country_name: '',
-      phone_code: '',
-      contact: '',
-      communications: [],
-    };
-  }
-
-  function makeAddCountryPrompt(idx: number) {
-    const hasCountries = Object.keys(countryCommSets).length > 0;
-
-    return (
-      <Button 
-        key={`addCountry-${idx}`}
-        icon="plus"
-        intent={hasCountries ? undefined : "primary"}
-        small={hasCountries ? true : false}
-        onClick={() => {
-          setActiveCountryIdx(idx);
-          toggleNewCountryDialogState(true);
-        }}
-        className={styles.addCountryTrigger}
-      >{hasCountries ? "Add country" : "Add another country"}</Button>
-    );
-  }
-
-  function makeEditCountryPrompt(idx: number) {
-    return (
-      <Button 
-        key={`editCountry-${idx}`}
-        icon="edit"
-        small={true}
-        minimal={true}
-        onClick={() => {
-          setActiveCountryIdx(idx);
-          console.debug(countryCommSets[activeCountryIdx]);
-          toggleEditCountryDialogState(true);
-        }}
-      >Edit country details</Button>
-    );
-  }
-
-  function makeAddCommunicationPrompt(countryIdx: number, idx: number) {
-    const hasCommunications = countryCommSets[countryIdx].communications.length > 0;
-
-    return (
-      <Button 
-        key={`addCommunication-${countryIdx}-${idx}`}
-        icon="plus"
-        intent={hasCommunications ? undefined : "success"}
-        small={hasCommunications ? true : false}
-        onClick={() => {
-          setActiveCountryIdx(countryIdx);
-          setActiveCommIdx(idx);
-          toggleNewCommDialogState(true);
-        }}
-        className={hasCommunications ? styles.addCommTrigger : ''}
-      >{hasCommunications ? "Add another communication" : "Add communication"}</Button>
-    );
-  }
-
-  function makeEditCommunicationPrompt(countryIdx: number, idx: number) {
-    return (
-      <Button 
-        key={`editCommunication-${countryIdx}-${idx}`}
-        icon="edit"
-        small={true}
-        minimal={true}
-        onClick={() => {
-          setActiveCountryIdx(countryIdx);
-          setActiveCommIdx(idx);
-          toggleEditCommDialogState(true);
-        }}
-      >Edit</Button>
-    );
+    onChange(Object.assign({}, (message as TelephoneServiceMessage), { contents: countryCommSets }));
   }
 
   function updateCommunication(countryIdx: number, commIdx: number, updatedComm: TSCommunication) {
@@ -125,46 +63,93 @@ export const TelephoneServiceMessageEditor: React.FC<MessageEditorProps> = funct
     });
   }
 
-  const [activeCountryIdx, setActiveCountryIdx] = useState(0);
-  const [activeCommIdx, setActiveCommIdx] = useState(0);
-  const [newCountryDialogState, toggleNewCountryDialogState] = useState(false);
-  const [editCountryDialogState, toggleEditCountryDialogState] = useState(false);
-  const [newCommDialogState, toggleNewCommDialogState] = useState(false);
-  const [editCommDialogState, toggleEditCommDialogState] = useState(false);
-
   return (
     <>
-      {makeAddCountryPrompt(0)}
+      <AddCountryPrompt
+        key="addFirstCountry"
+        onOpen={() => {
+          setActiveCountryIdx(0);
+          toggleNewCountryDialogState(true);
+        }}
+      />
 
       {countryCommSets.length > 0
         ? countryCommSets.map((countryCommSet: TSCountryCommunicationSet, countryIdx: number) => (
           <>
             <Card className={styles.tsCountryCommunicationSet} key={countryIdx}>
               <H4>
-                {countryCommSet.country_name} (country code +{countryCommSet.phone_code})
-                {makeEditCountryPrompt(countryIdx)}
+                {countryCommSet.country_name}
+                &nbsp;
+                (country code +{countryCommSet.phone_code})
               </H4>
 
-              <div className={styles.tsCommunicationList}>
-                {makeAddCommunicationPrompt(countryIdx, 0)}
+              <div className={styles.tsCountryButtons}>
+                <EditCountryPrompt
+                  key="editCountry"
+                  title={<>Edit country details & contact info</>}
+                  onOpen={() => {
+                    setActiveCountryIdx(countryIdx);
+                    toggleEditCountryDialogState(true);
+                  }}
+                />
 
+                <span>
+                  <Button
+                    icon="delete"
+                    small={true}
+                    minimal={true}
+                    intent="danger"
+                    onClick={() => {
+                      countryCommSets.splice(countryIdx, 1);
+                      _onChange();
+                    }}>Delete country</Button>
+
+                  <AddCommunicationPrompt
+                    key="addFirstComm"
+                    onOpen={() => {
+                      setActiveCountryIdx(countryIdx);
+                      setActiveCommIdx(0);
+                      toggleNewCommDialogState(true);
+                    }}
+                  />
+                </span>
+              </div>
+
+              <div className={styles.tsCommunicationList}>
                 {countryCommSet.communications.length > 0
                   ? countryCommSet.communications.map((comm: TSCommunication, commIdx: number) => (
                     <>
-                      <Card className={styles.tsCommunication} key={commIdx}>
-                        <H5>
-                          Communication of <DateStamp date={comm.date} />
-                          {makeEditCommunicationPrompt(countryIdx, commIdx)}
-                        </H5>
-                      </Card>
-
-                      {makeAddCommunicationPrompt(countryIdx, commIdx + 1)}
+                      <article className={styles.tsCommunication} key={commIdx}>
+                        <EditCommunicationPrompt
+                          key="editComm"
+                          title={<>Edit communication of <DateStamp date={comm.date} /></>}
+                          onOpen={() => {
+                            setActiveCountryIdx(countryIdx);
+                            setActiveCommIdx(commIdx);
+                            toggleEditCommDialogState(true);
+                          }}
+                        />
+                        <AddCommunicationPrompt
+                          key="addCommAfter"
+                          onOpen={() => {
+                            setActiveCountryIdx(countryIdx);
+                            setActiveCommIdx(commIdx + 1);
+                            toggleNewCommDialogState(true);
+                          }}
+                        />
+                      </article>
                     </>))
                   : ''}
               </div>
             </Card>
 
-            {makeAddCountryPrompt(countryIdx + 1)}
+            <AddCountryPrompt
+              key={`addCountryAfter-${countryIdx}`}
+              onOpen={() => {
+                setActiveCountryIdx(countryIdx + 1);
+                toggleNewCountryDialogState(true);
+              }}
+            />
           </>
         ))
         : ''}
@@ -232,6 +217,64 @@ export const TelephoneServiceMessageEditor: React.FC<MessageEditorProps> = funct
         : ''}
 
     </>
+  );
+};
+
+
+/* Prompts */
+
+
+interface AddCountryPromptProps {
+  onOpen: () => void,
+  title?: JSX.Element,
+}
+const AddCountryPrompt: React.FC<AddCountryPromptProps> = function ({ onOpen, title }) {
+  return (
+    <Button
+      className={styles.addCountryTrigger}
+      minimal={true}
+      icon="plus"
+      small={true}
+      onClick={onOpen}>Add country</Button>
+  );
+};
+
+
+interface EditCountryPromptProps {
+  onOpen: () => void,
+  title?: JSX.Element,
+}
+const EditCountryPrompt: React.FC<EditCountryPromptProps> = function ({ onOpen, title }) {
+  return (
+    <Button icon="edit" small={true} minimal={true} onClick={onOpen} title="Edit country details">
+      {title}
+    </Button>
+  );
+};
+
+
+interface AddCommunicationPromptProps {
+  onOpen: () => void,
+  title?: JSX.Element,
+}
+const AddCommunicationPrompt: React.FC<AddCommunicationPromptProps> = function ({ onOpen, title }) {
+  return (
+    <Button icon="plus" small={true} minimal={true} onClick={onOpen} title="Add communication">
+      {title}
+    </Button>
+  );
+};
+
+
+interface EditCommunicationPromptProps {
+  onOpen: () => void,
+  title?: JSX.Element,
+}
+const EditCommunicationPrompt: React.FC<EditCommunicationPromptProps> = function ({ onOpen, title }) {
+  return (
+    <Button icon="edit" small={true} minimal={true} onClick={onOpen} title="Edit communication">
+      {title}
+    </Button>
   );
 };
 

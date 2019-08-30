@@ -127,7 +127,6 @@
 }
 
 @mixin tsAddItemTrigger() {
-  width: 100%;
   border-radius: 0 !important;
 }
 
@@ -137,10 +136,11 @@
 
 .addCountryTrigger {
   @include tsAddItemTrigger();
+  width: 100%;
 }
 
 .tsCountryCommunicationSet {
-  padding-bottom: 2rem;
+  border-radius: 0 !important;
 }
 
 .tsCountryCommunicationEditor {
@@ -156,6 +156,16 @@
   color: red;
   border-radius: 0 !important;
   overflow: hidden;
+
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+}
+
+.tsCountryButtons {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
 }
 
 .tsCommunicationList {
