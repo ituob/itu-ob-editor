@@ -56,6 +56,7 @@ interface MessageEditorDialogProps {
   onClose: () => void,
   key?: string,
   title?: string,
+  width?: string,
   saveButton?: JSX.Element,
   className?: string,
 }
@@ -67,10 +68,8 @@ export const MessageEditorDialog: React.FC<MessageEditorDialogProps> = function 
         isOpen={props.isOpen}
         className={props.className || styles.messageEditorDialog}
         onClose={props.onClose}
-        style={{
-          width: 'unset',
-        }}
-        >
+        style={props.width ? { width: props.width } : {}}
+      >
       <div className={Classes.DIALOG_BODY}>
         {props.children}
       </div>
