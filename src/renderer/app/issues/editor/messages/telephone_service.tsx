@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { H4, Card, Label, Button, FormGroup, InputGroup, TextArea } from '@blueprintjs/core';
 import { DatePicker } from '@blueprintjs/datetime';
 
@@ -299,18 +299,11 @@ interface EditCountryDialogProps {
   onClose: () => void,
 }
 const EditCountryDialog: React.FC<EditCountryDialogProps> = function ({ isOpen, countryCommSet, title, onSave, onClose }) {
-  const [countryName, setCountryName] = useState(countryCommSet.country_name);
-  const [phoneCode, setPhoneCode] = useState(countryCommSet.phone_code);
-  const [contactInfo, setContactInfo] = useState(countryCommSet.contact);
+  const [newCountry, setCountry] = useState(Object.assign({}, countryCommSet));
 
   function _onSave() {
-    if (countryName != '' && phoneCode != '' && contactInfo != '') {
-      onSave({
-        country_name: countryName,
-        phone_code: phoneCode,
-        contact: contactInfo,
-        communications: countryCommSet.communications,
-      });
+    if (newCountry.country_name != '' && newCountry.phone_code != '' && newCountry.contact != '') {
+      onSave(newCountry);
       onClose();
     }
   }
@@ -329,13 +322,9 @@ const EditCountryDialog: React.FC<EditCountryDialogProps> = function ({ isOpen, 
             <Button intent="primary" onClick={_onSave}>Save country</Button>
           }>
         <TSCountryDetailsEditor
-          countryName={countryName}
-          phoneCode={phoneCode}
-          contactInfo={contactInfo}
-          onChange={(countryName: string, phoneCode: string, contactInfo: string) => {
-            setCountryName(countryName);
-            setPhoneCode(phoneCode);
-            setContactInfo(contactInfo);
+          country={newCountry}
+          onChange={(newCountry: TSCountryCommunicationSet) => {
+            setCountry(newCountry);
           }}
         />
       </MessageEditorDialog>
@@ -384,6 +373,69 @@ const EditCommunicationDialog: React.FC<EditCommunicationDialogProps> = function
 /* Editors */
 
 
+interface TSCountryDetailsEditorProps {
+  country: TSCountryCommunicationSet,
+  onChange: (updated: TSCountryCommunicationSet) => void,
+}
+const TSCountryDetailsEditor: React.FC<TSCountryDetailsEditorProps> = function ({ country, onChange }) {
+  const [newCountry, setCountry] = useState(country);
+
+  useEffect(() => {
+    onChange(newCountry);
+  }, [newCountry]);
+
+  return (
+    <>
+      <Label>
+        Country name
+        <InputGroup
+          value={newCountry.country_name}
+          key="countryName"
+          type="text"
+          large={true}
+          onChange={(evt: React.FormEvent<HTMLElement>) => {
+            setCountry({
+              ...newCountry,
+              country_name: (evt.target as HTMLInputElement).value as string,
+            });
+          }}
+        />
+      </Label>
+
+      <Label>
+        Phone code
+        <InputGroup
+          value={newCountry.phone_code}
+          key="phoneCode"
+          type="text"
+          large={true}
+          onChange={(evt: React.FormEvent<HTMLElement>) => {
+            setCountry({
+              ...newCountry,
+              phone_code: (evt.target as HTMLInputElement).value as string,
+            });
+          }}
+        />
+      </Label>
+
+      <Label>
+        Contact info
+        <TextArea
+          value={newCountry.contact}
+          key="contactInfo"
+          onChange={(evt: React.FormEvent<HTMLElement>) => {
+            setCountry({
+              ...newCountry,
+              contact: (evt.target as HTMLInputElement).value as string,
+            });
+          }}
+        />
+      </Label>
+    </>
+  );
+};
+
+
 interface TSCountryCommunicationDetailsEditorProps {
   date: Date,
   contents: any,
@@ -430,70 +482,5 @@ const TSCountryCommunicationDetailsEditor: React.FC<TSCountryCommunicationDetail
         </Card>
       </FormGroup>
     </div>
-  );
-};
-
-
-interface TSCountryDetailsEditorProps {
-  countryName: string,
-  phoneCode: string,
-  contactInfo: string,
-  onChange: (newCountryName: string, newPhoneCode: string, newContactInfo: string) => void,
-}
-const TSCountryDetailsEditor: React.FC<TSCountryDetailsEditorProps> =
-    function ({ countryName, phoneCode, contactInfo, onChange }) {
-
-  const [newCountryName, setCountryName] = useState(countryName);
-  const [newPhoneCode, setPhoneCode] = useState(phoneCode);
-  const [newContactInfo, setContactInfo] = useState(contactInfo);
-
-  function _onChange() {
-    onChange(newCountryName, newPhoneCode, newContactInfo);
-  }
-
-  return (
-    <>
-
-      <Label>
-        Country name
-        <InputGroup
-          value={newCountryName}
-          key="countryName"
-          type="text"
-          large={true}
-          onChange={(evt: React.FormEvent<HTMLElement>) => {
-            setCountryName((evt.target as HTMLInputElement).value as string);
-            _onChange();
-          }}
-        />
-      </Label>
-
-      <Label>
-        Phone code
-        <InputGroup
-          value={newPhoneCode}
-          key="phoneCode"
-          type="text"
-          large={true}
-          onChange={(evt: React.FormEvent<HTMLElement>) => {
-            setPhoneCode((evt.target as HTMLInputElement).value as string);
-            _onChange();
-          }}
-        />
-      </Label>
-
-      <Label>
-        Contact info
-        <TextArea
-          value={newContactInfo}
-          key="contactInfo"
-          onChange={(evt: React.FormEvent<HTMLElement>) => {
-            setContactInfo((evt.target as HTMLInputElement).value as string);
-            _onChange();
-          }}
-        />
-      </Label>
-
-    </>
   );
 };
