@@ -79,40 +79,42 @@ export const TelephoneServiceMessageEditor: React.FC<MessageEditorProps> = funct
             <Card className={styles.tsCountryCommunicationSet} key={countryIdx}>
               <H4>
                 {countryCommSet.country_name}
-                &nbsp;
-                (country code +{countryCommSet.phone_code})
+                &emsp;
+                +{countryCommSet.phone_code}
               </H4>
 
               <div className={styles.tsCountryButtons}>
-                <EditCountryPrompt
-                  key="editCountry"
-                  title={<>Edit country details & contact info</>}
-                  onOpen={() => {
-                    setActiveCountryIdx(countryIdx);
-                    toggleEditCountryDialogState(true);
-                  }}
-                />
-
                 <span>
+                  <EditCountryPrompt
+                    key="editCountry"
+                    title={<>Country details & contact info</>}
+                    onOpen={() => {
+                      setActiveCountryIdx(countryIdx);
+                      toggleEditCountryDialogState(true);
+                    }}
+                  />
+
                   <Button
                     icon="delete"
                     small={true}
                     minimal={true}
                     intent="danger"
+                    title="Delete country"
                     onClick={() => {
                       countryCommSets.splice(countryIdx, 1);
                       _onChange();
-                    }}>Delete country</Button>
-
-                  <AddCommunicationPrompt
-                    key="addFirstComm"
-                    onOpen={() => {
-                      setActiveCountryIdx(countryIdx);
-                      setActiveCommIdx(0);
-                      toggleNewCommDialogState(true);
-                    }}
-                  />
+                    }}>Delete</Button>
                 </span>
+
+                <AddCommunicationPrompt
+                  key="addFirstComm"
+                  title={<>Comm.</>}
+                  onOpen={() => {
+                    setActiveCountryIdx(countryIdx);
+                    setActiveCommIdx(0);
+                    toggleNewCommDialogState(true);
+                  }}
+                />
               </div>
 
               <div className={styles.tsCommunicationList}>
@@ -122,7 +124,7 @@ export const TelephoneServiceMessageEditor: React.FC<MessageEditorProps> = funct
                       <article className={styles.tsCommunication} key={commIdx}>
                         <EditCommunicationPrompt
                           key="editComm"
-                          title={<>Edit communication of <DateStamp date={comm.date} /></>}
+                          title={<>Communication of <DateStamp date={comm.date} /></>}
                           onOpen={() => {
                             setActiveCountryIdx(countryIdx);
                             setActiveCommIdx(commIdx);
@@ -131,6 +133,7 @@ export const TelephoneServiceMessageEditor: React.FC<MessageEditorProps> = funct
                         />
                         <AddCommunicationPrompt
                           key="addCommAfter"
+                          title={<>Comm.</>}
                           onOpen={() => {
                             setActiveCountryIdx(countryIdx);
                             setActiveCommIdx(commIdx + 1);
@@ -233,6 +236,7 @@ const AddCountryPrompt: React.FC<AddCountryPromptProps> = function ({ onOpen, ti
     <Button
       className={styles.addCountryTrigger}
       minimal={true}
+      intent="primary"
       icon="plus"
       small={true}
       onClick={onOpen}>Add country</Button>
@@ -246,7 +250,7 @@ interface EditCountryPromptProps {
 }
 const EditCountryPrompt: React.FC<EditCountryPromptProps> = function ({ onOpen, title }) {
   return (
-    <Button icon="edit" small={true} minimal={true} onClick={onOpen} title="Edit country details">
+    <Button icon="edit" minimal={true} onClick={onOpen} title="Edit country details">
       {title}
     </Button>
   );
@@ -259,7 +263,12 @@ interface AddCommunicationPromptProps {
 }
 const AddCommunicationPrompt: React.FC<AddCommunicationPromptProps> = function ({ onOpen, title }) {
   return (
-    <Button icon="plus" small={true} minimal={true} onClick={onOpen} title="Add communication">
+    <Button
+      icon="plus"
+      minimal={true}
+      onClick={onOpen}
+      title="Add communication"
+      intent="primary">
       {title}
     </Button>
   );
@@ -272,7 +281,7 @@ interface EditCommunicationPromptProps {
 }
 const EditCommunicationPrompt: React.FC<EditCommunicationPromptProps> = function ({ onOpen, title }) {
   return (
-    <Button icon="edit" small={true} minimal={true} onClick={onOpen} title="Edit communication">
+    <Button icon="edit" minimal={true} onClick={onOpen} title="Edit communication">
       {title}
     </Button>
   );
