@@ -121,15 +121,12 @@ Promise.all([ initStorage(), app.whenReady() ]).then((...args) => {
 
 function openHomeScreen() {
   if (homeWindow === null) {
-    homeWindow = _createWindow(
-      'home',
-      "ITU OB editor",
-      `c=home`, {
-        width: 400,
-        height: 400,
-        frame: process.platform === 'darwin' ? true : false,
-        titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
-      });
+    homeWindow = _createWindow({
+      component: 'home',
+      title: "ITU OB editor",
+      dimensions: { width: 400, height: 400, },
+      frameless: true,
+    });
     homeWindow.on('close', () => {
       homeWindow = null;
     });
@@ -140,15 +137,12 @@ function openHomeScreen() {
 
 function openIssueScheduler() {
   if (schedulerWindow === null) {
-    schedulerWindow = _createWindow(
-      'issueScheduler',
-      'Issue Scheduler',
-      'c=issueScheduler', {
-        width: 400,
-        minWidth: 380,
-        frame: process.platform === 'darwin' ? true : false,
-        titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
-      });
+    schedulerWindow = _createWindow({
+      component: 'issueScheduler',
+      title: 'Issue Scheduler',
+      frameless: true,
+      dimensions: { width: 400, minWidth: 380, },
+    });
     schedulerWindow.on('close', () => {
       schedulerWindow = null;
     });
@@ -159,15 +153,12 @@ function openIssueScheduler() {
 
 function openIssueEditor(issueId: string) {
   if (!issueEditorsOpen[issueId]) {
-    issueEditorsOpen[issueId] = _createWindow(
-      'issueEditor',
-      `Issue ${issueId}`,
-      `c=issueEditor&issueId=${issueId}`, {
-        width: 800,
-        height: 600,
-        frame: process.platform === 'darwin' ? true : false,
-        titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
-      });
+    issueEditorsOpen[issueId] = _createWindow({
+      component: 'issueEditor',
+      title: `Issue ${issueId}`,
+      componentParams: `issueId=${issueId}`,
+      dimensions: { width: 800, height: 600, },
+    });
     (issueEditorsOpen[issueId] as BrowserWindow).on('close', () => {
       issueEditorsOpen[issueId] = null;
     });
@@ -177,7 +168,49 @@ function openIssueEditor(issueId: string) {
 }
 
 
-function _createWindow(id: string, title: string, params: string, winParams: any): BrowserWindow {
+interface WindowMakerParams {
+  title: string,
+  component: string,
+  componentParams?: string,
+  dimensions?: { minWidth?: number, width?: number, height?: number },
+  frameless?: boolean,
+  winParams?: any,
+}
+type WindowMaker = (props: WindowMakerParams) => BrowserWindow;
+const _createWindow: WindowMaker = ({ title, component, componentParams, dimensions, frameless, winParams }) => {
+  const _winParams = {
+    width: (dimensions || {}).width,
+    height: (dimensions || {}).height,
+    frame: frameless === true && process.platform === 'darwin' ? true : false,
+    titleBarStyle: frameless === true && process.platform === 'darwin' ? 'hiddenInset' : undefined,
+    ...winParams,
+  };
+  const params = `c=${component}&${componentParams ? componentParams : ''}`;
+  const window = createWindow(component, params, _winParams);
+
+  windows.push(window);
+
+  window.on('closed', () => {
+    var deletedWindows: number[] = [];
+    for (const [idx, win] of windows.entries()) {
+      // When accessing the id attribute of a closed window,
+      // it’ll throw. We’ll mark its index for deletion then.
+      try {
+        win.id;
+      } catch (e) {
+        deletedWindows.push(idx - deletedWindows.length);
+      }
+    }
+    for (const idx of deletedWindows) {
+      windows.splice(idx, 1);
+    }
+  });
+
+  return window;
+}
+
+
+export function _createWindowOld(id: string, title: string, params: string, winParams: any): BrowserWindow {
   const window = createWindow(title, params, winParams);
 
   windows.push(window);
