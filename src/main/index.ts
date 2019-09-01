@@ -190,7 +190,7 @@ const _createWindow: WindowMaker = ({ title, component, componentParams, dimensi
     ...winParams,
   };
   const params = `c=${component}&${componentParams ? componentParams : ''}`;
-  const window = createWindow(component, params, _winParams);
+  const window = createWindow(title, params, _winParams);
 
   windows.push(window);
 
