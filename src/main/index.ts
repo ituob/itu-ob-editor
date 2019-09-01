@@ -212,28 +212,3 @@ const _createWindow: WindowMaker = ({ title, component, componentParams, dimensi
 
   return window;
 }
-
-
-export function _createWindowOld(id: string, title: string, params: string, winParams: any): BrowserWindow {
-  const window = createWindow(title, params, winParams);
-
-  windows.push(window);
-
-  window.on('closed', () => {
-    var deletedWindows: number[] = [];
-    for (const [idx, win] of windows.entries()) {
-      // When accessing the id attribute of a closed window,
-      // it’ll throw. We’ll mark its index for deletion then.
-      try {
-        win.id;
-      } catch (e) {
-        deletedWindows.push(idx - deletedWindows.length);
-      }
-    }
-    for (const idx of deletedWindows) {
-      windows.splice(idx, 1);
-    }
-  });
-
-  return window;
-}
