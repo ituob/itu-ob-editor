@@ -157,6 +157,7 @@ function openIssueEditor(issueId: string) {
       component: 'issueEditor',
       title: `Issue ${issueId}`,
       componentParams: `issueId=${issueId}`,
+      frameless: true,
       dimensions: { width: 800, height: 600, },
     });
     (issueEditorsOpen[issueId] as BrowserWindow).on('close', () => {
@@ -178,11 +179,14 @@ interface WindowMakerParams {
 }
 type WindowMaker = (props: WindowMakerParams) => BrowserWindow;
 const _createWindow: WindowMaker = ({ title, component, componentParams, dimensions, frameless, winParams }) => {
+  const _framelessOpts = {
+    frame: process.platform === 'darwin' ? true : false,
+    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
+  };
   const _winParams = {
     width: (dimensions || {}).width,
     height: (dimensions || {}).height,
-    frame: frameless === true && process.platform === 'darwin' ? true : false,
-    titleBarStyle: frameless === true && process.platform === 'darwin' ? 'hiddenInset' : undefined,
+    ...(frameless === true ? _framelessOpts : {}),
     ...winParams,
   };
   const params = `c=${component}&${componentParams ? componentParams : ''}`;
