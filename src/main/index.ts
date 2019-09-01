@@ -1,7 +1,7 @@
 import { app, Menu, ipcMain, BrowserWindow } from 'electron';
 import { createWindow } from './window';
 import { getMenu } from './menu';
-import { initStorage, Workspace, Storage } from './storage';
+import { initRepo, initStorage, Workspace, Storage } from './storage';
 import { reviveJsonValue } from './storage/api';
 import { QuerySet, sortIntegerAscending, sortIntegerDescending } from './storage/query';
 import { OBIssue } from './issues/models';
@@ -34,8 +34,8 @@ function makeWritableWSEndpoint(name: string, dataSaver: (...args: string[]) => 
 }
 
 
-Promise.all([ initStorage(), app.whenReady() ]).then((...args) => {
-  const storage: Storage = args[0][0];
+Promise.all([ initRepo(), initStorage(), app.whenReady() ]).then((...args) => {
+  const storage: Storage = args[0][1];
 
   openHomeScreen();
 

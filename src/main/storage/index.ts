@@ -5,15 +5,11 @@ import * as git from 'isomorphic-git';
 import { app } from 'electron';
 
 import { YAMLStorage } from 'main/storage/yaml';
-import { Publication } from 'main/lists/models';
 import { OBIssue } from 'main/issues/models';
 import { Message } from 'main/issues/messages';
-
-import {
-  isTelephoneService,
-} from 'main/issues/messages';
-
+import { isTelephoneService } from 'main/issues/messages';
 import { ITURecommendation } from 'main/recommendations/models';
+import { Publication } from 'main/lists/models';
 
 import { Index, IndexableObject } from './query';
 
@@ -21,6 +17,11 @@ import { Index, IndexableObject } from './query';
 const PUBLICATIONS_ROOT = 'lists';
 const REC_ROOT = 'recommendations';
 const YAML_EXT = '.yaml';
+
+
+const WORK_DIR = path.join(app.getPath('userData'), 'itu-ob-data');
+const REPO_URL = 'https://github.com/ituob/itu-ob-data';
+const CORS_PROXY = 'https://cors.isomorphic-git.org';
 
 
 abstract class StoreManager<O extends IndexableObject> {
@@ -217,48 +218,73 @@ export class Storage {
 }
 
 
-export async function initStorage(): Promise<Storage> {
-  const userDataPath = app.getPath('userData');
-  const workDir = path.join(userDataPath, 'itu-ob-data');
-  const repoUrl = 'https://github.com/ituob/itu-ob-data';
-  const corsProxy = 'https://cors.isomorphic-git.org';
-
-  git.plugins.set('fs', fs);
-
-  let gitInitialized: boolean;
-
-  try {
-    gitInitialized = (await fs.stat(path.join(workDir, '.git'))).isDirectory();
-  } catch (e) {
-    gitInitialized = false;
+export class GitController {
+  constructor(
+      private fs: any,
+      private repoUrl: string,
+      private workDir: string,
+      private corsProxy: string) {
+    git.plugins.set('fs', fs);
   }
 
-  if (gitInitialized === true) {
+  async isInitialized(): Promise<boolean> {
+    let gitInitialized: boolean;
+
+    try {
+      gitInitialized = (await this.fs.stat(path.join(this.workDir, '.git'))).isDirectory();
+    } catch (e) {
+      gitInitialized = false;
+    }
+
+    return gitInitialized;
+  }
+
+  async pull() {
     await git.pull({
-      dir: workDir,
+      dir: this.workDir,
       ref: 'master',
       singleBranch: true,
       fastForwardOnly: true,
     });
+  }
 
-  } else {
-    await fs.remove(workDir);
-    await fs.ensureDir(workDir);
+  async reset() {
+    await this.fs.remove(this.workDir);
+    await this.fs.ensureDir(this.workDir);
     await git.clone({
-      dir: workDir,
-      url: repoUrl,
+      dir: this.workDir,
+      url: this.repoUrl,
       ref: 'master',
       singleBranch: true,
       depth: 10,
-      corsProxy: corsProxy,
+      corsProxy: this.corsProxy,
     });
   }
+}
 
-  const storage = new Storage(fs, workDir, {
+
+export async function initRepo(): Promise<GitController> {
+  const gitCtrl = new GitController(fs, REPO_URL, WORK_DIR, CORS_PROXY);
+
+  if (!(await gitCtrl.isInitialized())) {
+    await gitCtrl.reset();
+  } else {
+    await gitCtrl.pull();
+  }
+
+  return gitCtrl;
+}
+
+
+// NOTE: Depends on repository being initialized!
+export async function initStorage(): Promise<Storage> {
+  const storage = new Storage(fs, WORK_DIR, {
     issues: new IssueManager(),
     publications: new PublicationManager(),
     recommendations: new RecommendationManager(),
   });
+
   storage.workspace = await storage.loadWorkspace();
+
   return storage;
 }
