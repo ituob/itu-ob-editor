@@ -22,12 +22,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
           vertical={true}
           fill={true}>
         <Button
-          text="Schedule issues"
+          text="Schedule"
+          title="Schedule future editions"
           icon="calendar"
           onClick={() => ipcRenderer.send('schedule-issues')}
         />
         <Button
-          text="Edit current issue"
+          text="Open current"
+          title="Edit current edition"
           disabled={futureIssues.length < 1}
           icon="edit"
           onClick={() => ipcRenderer.send('edit-issue', `${futureIssues[0].id}`)}
