@@ -218,13 +218,46 @@ export class Storage {
 }
 
 
+interface GitAuthentication {
+  oauth2format?: 'github' | 'gitlab' | 'bitbucket',
+  token?: string,
+  username?: string,
+  password?: string,
+}
+
+
+interface GitAuthor {
+  name?: string,
+  email?: string,
+}
+
+
 export class GitController {
+  private auth: GitAuthentication = {};
+  private author: GitAuthor = {};
+
   constructor(
       private fs: any,
       private repoUrl: string,
       private workDir: string,
       private corsProxy: string) {
     git.plugins.set('fs', fs);
+  }
+
+  async setAuthor(author: GitAuthor) {
+    this.author = author;
+  }
+
+  async setAuth(auth: GitAuthentication): Promise<boolean> {
+    try {
+      // Try fetching with auth; will throw if auth is invalid
+      git.fetch({dir: this.workDir, ...auth });
+    } catch (e) {
+      return false;
+    }
+
+    this.auth = auth;
+    return true;
   }
 
   async isInitialized(): Promise<boolean> {
@@ -245,6 +278,23 @@ export class GitController {
       ref: 'master',
       singleBranch: true,
       fastForwardOnly: true,
+      ...this.auth,
+    });
+  }
+
+  async commit(msg: string) {
+    await git.commit({
+      dir: this.workDir,
+      author: this.author,
+      message: msg,
+    });
+  }
+
+  async push() {
+    await git.push({
+      dir: this.workDir,
+      remote: 'origin',
+      ...this.auth,
     });
   }
 
@@ -258,6 +308,7 @@ export class GitController {
       singleBranch: true,
       depth: 10,
       corsProxy: this.corsProxy,
+      ...this.auth,
     });
   }
 }
