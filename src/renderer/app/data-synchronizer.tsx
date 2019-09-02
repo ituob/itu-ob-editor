@@ -1,16 +1,27 @@
 import { ipcRenderer } from 'electron';
 import React, { useState } from 'react';
-import { Card, FormGroup, TextArea, Callout, UL, Button } from '@blueprintjs/core';
+import { Card, Label, InputGroup, FormGroup, TextArea, Callout, UL, Button } from '@blueprintjs/core';
+
+import { GitAuthor } from 'main/storage';
+import { useWorkspaceRO } from 'renderer/app/storage/api';
 
 import * as styles from './styles.scss';
 
 
-const API_ENDPOINT = 'fetch-commit-push'
+const API_ENDPOINT = 'fetch-commit-push';
 
 
 interface DataSynchronizerProps {}
 export const DataSynchronizer: React.FC<DataSynchronizerProps> = function () {
   const [commitMsg, setCommitMsg] = useState('');
+  const [authorName, setAuthorName] = useState('');
+  const [authorEmail, setAuthorEmail] = useState('');
+
+  const cfgAuthor = useWorkspaceRO<GitAuthor>('git-author-info', {});
+
+  if (authorName === '' && cfgAuthor.name !== undefined) { setAuthorName(cfgAuthor.name); }
+  if (authorEmail === '' && cfgAuthor.email !== undefined) { setAuthorEmail(cfgAuthor.email); }
+
   const [errors, setErrors] = useState([] as string[]);
   const [finished, setFinished] = useState(false);
   const [started, setStarted] = useState(false);
@@ -22,18 +33,46 @@ export const DataSynchronizer: React.FC<DataSynchronizerProps> = function () {
     setFinished(true);
     setErrors(data.errors);
   }
+
   function handleSyncAction() {
     setErrors([]);
     ipcRenderer.on(`workspace-${API_ENDPOINT}`, handleResult);
-    ipcRenderer.send(`request-workspace-${API_ENDPOINT}`, commitMsg);
+    ipcRenderer.send(
+      `request-workspace-${API_ENDPOINT}`,
+      commitMsg,
+      authorName,
+      authorEmail);
     setFinished(false);
     setStarted(true);
   }
 
   return (
     <>
-      <Card key="commitMsg" className={styles.commitMessageCard}>
+      <Card key="commitInfo" className={styles.commitMessageCard}>
+        <Label>
+          Author name
+          <InputGroup
+            value={authorName}
+            key="authorName"
+            type="text"
+            onChange={(evt: React.FormEvent<HTMLElement>) => {
+              setAuthorName((evt.target as HTMLInputElement).value as string);
+            }}
+          />
+        </Label>
+        <Label>
+          Author email
+          <InputGroup
+            value={authorEmail}
+            key="authorEmail"
+            type="email"
+            onChange={(evt: React.FormEvent<HTMLElement>) => {
+              setAuthorEmail((evt.target as HTMLInputElement).value as string);
+            }}
+          />
+        </Label>
         <FormGroup
+            key="commitMsg"
             label="Change notice"
             intent="primary">
           <TextArea

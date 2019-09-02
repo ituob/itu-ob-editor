@@ -226,7 +226,7 @@ interface GitAuthentication {
 }
 
 
-interface GitAuthor {
+export interface GitAuthor {
   name?: string,
   email?: string,
 }
@@ -234,18 +234,25 @@ interface GitAuthor {
 
 export class GitController {
   private auth: GitAuthentication = {};
-  private author: GitAuthor = {};
 
   constructor(
       private fs: any,
       private repoUrl: string,
       private workDir: string,
       private corsProxy: string) {
+
     git.plugins.set('fs', fs);
   }
 
+  async getAuthor(): Promise<GitAuthor> {
+    const name = await git.config({ dir: this.workDir, path: 'user.name' });
+    const email = await git.config({ dir: this.workDir, path: 'user.email' });
+    return { name: name, email: email };
+  }
+
   async setAuthor(author: GitAuthor) {
-    this.author = author;
+    await git.config({ dir: this.workDir, path: 'user.name', value: author.name });
+    await git.config({ dir: this.workDir, path: 'user.email', value: author.email });
   }
 
   async setAuth(auth: GitAuthentication): Promise<boolean> {
@@ -285,8 +292,8 @@ export class GitController {
   async commit(msg: string) {
     await git.commit({
       dir: this.workDir,
-      author: this.author,
       message: msg,
+      author: {},
     });
   }
 

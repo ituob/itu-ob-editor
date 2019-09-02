@@ -45,9 +45,17 @@ Promise.all([ initRepo(), initStorage(), app.whenReady() ]).then((...args) => {
     return storage.workspace;
   });
 
-  makeReadableWSEndpoint<{ errors: string[] }>('fetch-commit-push', async (commitMsg: string) => {
+  makeReadableWSEndpoint<{ name?: string, email?: string }>('git-author-info', async () => {
+    return (await gitCtrl.getAuthor());
+  });
+
+  makeReadableWSEndpoint<{ errors: string[] }>('fetch-commit-push', async (
+      commitMsg: string,
+      authorName: string,
+      authorEmail: string) => {
     try {
       await gitCtrl.pull();
+      await gitCtrl.setAuthor({ name: authorName, email: authorEmail });
       await gitCtrl.commit(commitMsg);
       await gitCtrl.push();
     } catch (e) {
