@@ -1,7 +1,7 @@
 import { app, Menu, ipcMain, BrowserWindow } from 'electron';
 import { createWindow } from './window';
 import { getMenu } from './menu';
-import { initRepo, initStorage, Workspace, Storage } from './storage';
+import { initRepo, initStorage, GitController, Workspace, Storage } from './storage';
 import { reviveJsonValue } from './storage/api';
 import { QuerySet, sortIntegerAscending, sortIntegerDescending } from './storage/query';
 import { OBIssue } from './issues/models';
@@ -10,6 +10,7 @@ import { OBIssue } from './issues/models';
 // Keeps track of windows and ensures (?) they do not get garbage collected
 var windows: BrowserWindow[] = [];
 
+var synchronizerWindow: BrowserWindow | null = null;
 var schedulerWindow: BrowserWindow | null = null;
 var homeWindow: BrowserWindow | null = null;
 var issueEditorsOpen: { [id: string]: BrowserWindow | null } = {};
@@ -35,12 +36,24 @@ function makeWritableWSEndpoint(name: string, dataSaver: (...args: string[]) => 
 
 
 Promise.all([ initRepo(), initStorage(), app.whenReady() ]).then((...args) => {
+  const gitCtrl: GitController = args[0][0];
   const storage: Storage = args[0][1];
 
   openHomeScreen();
 
   makeReadableWSEndpoint<Workspace>('all', async () => {
     return storage.workspace;
+  });
+
+  makeReadableWSEndpoint<{ errors: string[] }>('fetch-commit-push', async (commitMsg: string) => {
+    try {
+      await gitCtrl.pull();
+      await gitCtrl.commit(commitMsg);
+      await gitCtrl.push();
+    } catch (e) {
+      return { errors: [e.toString()] };
+    }
+    return { errors: [] };
   });
 
   makeReadableWSEndpoint<OBIssue[]>('latest-published-issues', async () => {
@@ -102,6 +115,10 @@ Promise.all([ initRepo(), initStorage(), app.whenReady() ]).then((...args) => {
     openIssueEditor(issueId);
   });
 
+  ipcMain.on('sync-changes', (event: any) => {
+    openDataSynchronizer();
+  });
+
   // Quit application when all windows are closed
   app.on('window-all-closed', () => {
     // On macOS it is common for applications to stay open until the user explicitly quits
@@ -148,6 +165,21 @@ function openIssueScheduler() {
     });
   } else {
     schedulerWindow.focus();
+  }
+}
+
+function openDataSynchronizer() {
+  if (synchronizerWindow === null) {
+    synchronizerWindow = _createWindow({
+      component: 'dataSynchronizer',
+      title: 'Data Synchronizer',
+      dimensions: { width: 400, minWidth: 380, height: 400 },
+    });
+    synchronizerWindow.on('close', () => {
+      synchronizerWindow = null;
+    });
+  } else {
+    synchronizerWindow.focus();
   }
 }
 

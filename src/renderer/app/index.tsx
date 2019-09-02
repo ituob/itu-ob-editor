@@ -35,10 +35,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
           onClick={() => ipcRenderer.send('edit-issue', `${futureIssues[0].id}`)}
         />
         <Button
-          text="Sync your changes"
+          text="Sync changes"
+          title="Fetch latest changes & send yours"
           icon="git-merge"
-          disabled={true}
-          onClick={() => ipcRenderer.send('schedule-issues')}
+          disabled={false}
+          onClick={() => ipcRenderer.send('sync-changes')}
         />
       </ButtonGroup>
     </div>
@@ -47,3 +48,4 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
 
 export { IssueScheduler } from './issues/scheduler';
 export { IssueEditor } from './issues/editor';
+export { DataSynchronizer } from './data-synchronizer';

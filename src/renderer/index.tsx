@@ -1,7 +1,12 @@
 import * as ReactDOM from 'react-dom';
 import * as React from 'react';
 
-import { HomeScreen, IssueEditor, IssueScheduler } from './app';
+import {
+  HomeScreen,
+  IssueEditor,
+  IssueScheduler,
+  DataSynchronizer,
+} from './app';
 
 import '!style-loader!css-loader!@blueprintjs/datetime/lib/css/blueprint-datetime.css';
 import '!style-loader!css-loader!@blueprintjs/core/lib/css/blueprint.css';
@@ -29,5 +34,9 @@ if (searchParams.get('c') === 'home') {
 } else if (searchParams.get('c') === 'issueEditor') {
   ReactDOM.render(
     <IssueEditor issueId={searchParams.get('issueId') || ''} />,
+    app);
+} else if (searchParams.get('c') === 'dataSynchronizer') {
+  ReactDOM.render(
+    <DataSynchronizer />,
     app);
 }
