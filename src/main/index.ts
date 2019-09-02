@@ -20,9 +20,9 @@ const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) { app.exit(0); }
 
 
-function makeReadableWSEndpoint<T>(name: string, dataGetter: (...args: string[]) => T): void {
-  ipcMain.on(`request-workspace-${name}`, (evt: any, ...args: string[]) => {
-    evt.reply(`workspace-${name}`, JSON.stringify(dataGetter(...args)));
+function makeReadableWSEndpoint<T>(name: string, handler: (...args: string[]) => Promise<T>): void {
+  ipcMain.on(`request-workspace-${name}`, async (evt: any, ...args: string[]) => {
+    evt.reply(`workspace-${name}`, JSON.stringify(await handler(...args)));
   });
 }
 
@@ -39,18 +39,18 @@ Promise.all([ initRepo(), initStorage(), app.whenReady() ]).then((...args) => {
 
   openHomeScreen();
 
-  makeReadableWSEndpoint<Workspace>('all', () => {
+  makeReadableWSEndpoint<Workspace>('all', async () => {
     return storage.workspace;
   });
 
-  makeReadableWSEndpoint<OBIssue[]>('latest-published-issues', () => {
+  makeReadableWSEndpoint<OBIssue[]>('latest-published-issues', async () => {
     const issues = new QuerySet<OBIssue>(storage.workspace.issues);
     return issues.filter((item) => {
       return new Date(item[1].publication_date).getTime() < new Date().getTime();
     }).orderBy(sortIntegerDescending).all().slice(0, 1);
   });
 
-  makeReadableWSEndpoint<OBIssue[]>('future-issues', () => {
+  makeReadableWSEndpoint<OBIssue[]>('future-issues', async () => {
     const issues = new QuerySet<OBIssue>(storage.workspace.issues);
     return issues.filter(item => {
       return new Date(item[1].publication_date).getTime() >= new Date().getTime();
@@ -64,7 +64,7 @@ Promise.all([ initRepo(), initStorage(), app.whenReady() ]).then((...args) => {
     storage.storeWorkspace(storage.workspace);
   });
 
-  makeReadableWSEndpoint<OBIssue>('issue', (issueId: string) => {
+  makeReadableWSEndpoint<OBIssue>('issue', async (issueId: string) => {
     const issues = new QuerySet<OBIssue>(storage.workspace.issues);
     const issue = issues.get(issueId);
 
