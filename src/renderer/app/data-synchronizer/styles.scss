@@ -1,0 +1,42 @@
+@mixin card {
+  border-radius: 0 !important;
+  overflow: hidden;
+}
+
+.card {
+  @include card;
+}
+
+.resultCard {
+  @include card;
+}
+
+.dataSyncBase {
+  display: flex;
+  flex-flow: row nowrap;
+
+  > * {
+    flex: 1;
+  }
+}
+
+.committerAndAuth {
+  min-width: 50%;
+  max-width: 50%;
+}
+
+.commitInfo {
+  min-width: 50%;
+  max-width: 50%;
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.commitMsgCard {
+  @include card;
+}
+
+.commitButtonCard {
+  @include card;
+  flex: 1;
+}

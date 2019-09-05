@@ -65,70 +65,89 @@ export const DataSynchronizer: React.FC<DataSynchronizerProps> = function () {
 
   return (
     <>
-      <Card key="gitAuth" className={styles.gitAuthCard}>
-        <Label>
-          Git username
-          <InputGroup
-            value={username}
-            key="username"
-            type="text"
-            onChange={(evt: React.FormEvent<HTMLElement>) => {
-              setUsername((evt.target as HTMLInputElement).value as string);
-            }}
-          />
-        </Label>
-        <Label>
-          Password
-          <InputGroup
-            value={password}
-            key="password"
-            type="password"
-            onChange={(evt: React.FormEvent<HTMLElement>) => {
-              setPassword((evt.target as HTMLInputElement).value as string);
-            }}
-          />
-        </Label>
-      </Card>
+      <div className={styles.dataSyncBase}>
+        <div className={styles.committerAndAuth}>
+          <Card key="gitAuth" className={styles.card}>
+            <Label>
+              Git username
+              <InputGroup
+                value={username}
+                key="username"
+                type="text"
+                onChange={(evt: React.FormEvent<HTMLElement>) => {
+                  setUsername((evt.target as HTMLInputElement).value as string);
+                }}
+              />
+            </Label>
+            <Label>
+              Password
+              <InputGroup
+                value={password}
+                key="password"
+                type="password"
+                onChange={(evt: React.FormEvent<HTMLElement>) => {
+                  setPassword((evt.target as HTMLInputElement).value as string);
+                }}
+              />
+            </Label>
+          </Card>
 
-      <Card key="commitInfo" className={styles.commitMessageCard}>
-        <Label>
-          Author name
-          <InputGroup
-            value={authorName}
-            key="authorName"
-            type="text"
-            onChange={(evt: React.FormEvent<HTMLElement>) => {
-              setAuthorName((evt.target as HTMLInputElement).value as string);
-            }}
-          />
-        </Label>
-        <Label>
-          Author email
-          <InputGroup
-            value={authorEmail}
-            key="authorEmail"
-            type="email"
-            onChange={(evt: React.FormEvent<HTMLElement>) => {
-              setAuthorEmail((evt.target as HTMLInputElement).value as string);
-            }}
-          />
-        </Label>
-        <FormGroup
-            key="commitMsg"
-            label="Change notice"
-            intent="primary">
-          <TextArea
-            value={commitMsg}
-            fill={true}
-            onChange={(evt: React.FormEvent<HTMLElement>) => {
-              setCommitMsg((evt.target as HTMLInputElement).value as string);
-            }}
-          />
-        </FormGroup>
-      </Card>
+          <Card key="committerInfo" className={styles.card}>
+            <Label>
+              Author name
+              <InputGroup
+                value={authorName}
+                key="authorName"
+                type="text"
+                onChange={(evt: React.FormEvent<HTMLElement>) => {
+                  setAuthorName((evt.target as HTMLInputElement).value as string);
+                }}
+              />
+            </Label>
+            <Label>
+              Author email
+              <InputGroup
+                value={authorEmail}
+                key="authorEmail"
+                type="email"
+                onChange={(evt: React.FormEvent<HTMLElement>) => {
+                  setAuthorEmail((evt.target as HTMLInputElement).value as string);
+                }}
+              />
+            </Label>
+          </Card>
+        </div>
+
+        <div className={styles.commitInfo}>
+          <Card key="commitMsg" className={styles.commitMsgCard}>
+            <FormGroup
+                key="commitMsg"
+                label="Change notice"
+                intent="primary">
+              <TextArea
+                value={commitMsg}
+                fill={true}
+                large={true}
+                onChange={(evt: React.FormEvent<HTMLElement>) => {
+                  setCommitMsg((evt.target as HTMLInputElement).value as string);
+                }}
+              />
+            </FormGroup>
+          </Card>
+
+          <Card key="commitButton" className={styles.commitButtonCard}>
+            <Button
+              icon="git-merge"
+              intent="primary"
+              disabled={complete === false || started === true}
+              title="Fetch other site editors’ changes, and submit yours"
+              onClick={handleSyncAction}>Sync</Button>
+          </Card>
+        </div>
+      </div>
 
       {finished === true
-        ? <Card key="resultMessage">
+        ? <Card key="resultMessage" className={styles.resultCard}>
             <Callout
               intent={errors.length > 0 ? "warning" : "success"}
               title={errors.length > 0 ? "Errors encountered during sync" : "Sync completed"}>
@@ -143,15 +162,6 @@ export const DataSynchronizer: React.FC<DataSynchronizerProps> = function () {
             </Callout>
           </Card>
         : ''}
-
-      <Card key="commitButton">
-        <Button
-          icon="git-merge"
-          intent="primary"
-          disabled={complete === false || started === true}
-          title="Fetch other site editors’ changes, and submit yours"
-          onClick={handleSyncAction}>Sync</Button>
-      </Card>
     </>
   );
 };
