@@ -8,7 +8,7 @@ import { OBIssue } from './issues/models';
 import { makeEndpoint, makeWriteOnlyEndpoint } from './api';
 
 
-/* Generic stuff, to be moved into the framework */
+/* Generic helpers, to be moved into the framework. */
 
 
 // Ensure only one instance of the app can run at a time on given user’s machine
@@ -16,7 +16,7 @@ const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) { app.exit(0); }
 
 
-/* This window-controlling stuff may be moved out to a separate module,
+/* This window-controlling helpers may be moved out to a separate module,
    and/or encapsulated in a class,
    as long as windows don’t get accidentally garbage-collected. */
 
@@ -86,7 +86,7 @@ const _createWindow: WindowMaker = ({ title, component, componentParams, dimensi
 }
 
 
-/* App-specific stuff */
+/* App-specific initialization */
 
 
 const APP_TITLE = "ITU OB editor";
