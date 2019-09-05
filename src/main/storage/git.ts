@@ -64,6 +64,21 @@ export class GitController {
     return gitInitialized;
   }
 
+  async addAllChanges() {
+    await git.add({
+      dir: this.workDir,
+      filepath: '.',
+    });
+  }
+
+  async listChangedFiles(): Promise<string[]> {
+    const FILE = 0, HEAD = 1, WORKDIR = 2;
+
+    return (await git.statusMatrix({ dir: this.workDir }))
+      .filter(row => row[HEAD] !== row[WORKDIR])
+      .map(row => row[FILE]);
+  }
+
   async pull() {
     await git.pull({
       dir: this.workDir,
