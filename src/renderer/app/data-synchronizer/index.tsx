@@ -36,6 +36,10 @@ export const DataSynchronizer: React.FC<DataSynchronizerProps> = function () {
     setStarted(false);
     setFinished(true);
     setErrors(data.errors);
+
+    if (data.errors.length < 1) {
+      setCommitMsg('');
+    }
   }
 
   function handleSyncAction() {
