@@ -60,6 +60,7 @@ Promise.all([ initRepo(), initStorage(), app.whenReady() ]).then((...args) => {
     }).orderBy(sortIntegerAscending).all()
   });
 
+  // TODO: Refactor into schedule-issue and do it one at a time?
   makeWriteOnlyEndpoint('future-issues', (rawData: string) => {
     const issues = JSON.parse(rawData, JSON.parse(rawData, reviveJsonValue));
 
