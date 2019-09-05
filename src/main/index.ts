@@ -5,15 +5,10 @@ import { initRepo, initStorage, GitController, Workspace, Storage } from './stor
 import { reviveJsonValue } from './storage/api';
 import { QuerySet, sortIntegerAscending, sortIntegerDescending } from './storage/query';
 import { OBIssue } from './issues/models';
+import { makeEndpoint, makeWriteOnlyEndpoint } from './api';
 
 
-// Keeps track of windows and ensures (?) they do not get garbage collected
-var windows: BrowserWindow[] = [];
-
-var synchronizerWindow: BrowserWindow | null = null;
-var schedulerWindow: BrowserWindow | null = null;
-var homeWindow: BrowserWindow | null = null;
-var issueEditorsOpen: { [id: string]: BrowserWindow | null } = {};
+/* Generic stuff, to be moved into the framework */
 
 
 // Ensure only one instance of the app can run at a time on given user’s machine
@@ -21,18 +16,80 @@ const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) { app.exit(0); }
 
 
-function makeReadableWSEndpoint<T>(name: string, handler: (...args: string[]) => Promise<T>): void {
-  ipcMain.on(`request-workspace-${name}`, async (evt: any, ...args: string[]) => {
-    evt.reply(`workspace-${name}`, JSON.stringify(await handler(...args)));
-  });
+/* This window-controlling stuff may be moved out to a separate module,
+   and/or encapsulated in a class,
+   as long as windows don’t get accidentally garbage-collected. */
+
+// Keeps track of windows and ensures (?) they do not get garbage collected
+var windows: BrowserWindow[] = [];
+
+// Allows to locate window ID by label
+var windowsByTitle: { [title: string]: BrowserWindow } = {};
+
+function windowIsOpen(title: string): boolean {
+  return windowsByTitle[title] !== undefined;
+}
+
+// Iterate over array of windows and try accessing window ID.
+// If it throws, window was closed and we remove it from the array.
+// Supposed to be run after any window is closed.
+function cleanUpWindows() {
+  var deletedWindows: number[] = [];
+  for (const [idx, win] of windows.entries()) {
+    // When accessing the id attribute of a closed window,
+    // it’ll throw. We’ll mark its index for deletion then.
+    try {
+      win.id;
+    } catch (e) {
+      deletedWindows.push(idx - deletedWindows.length);
+    }
+  }
+  for (const idx of deletedWindows) {
+    windows.splice(idx, 1);
+  }
+}
+
+interface WindowMakerParams {
+  title: string,
+  component: string,
+  componentParams?: string,
+  dimensions?: { minWidth?: number, width?: number, height?: number },
+  frameless?: boolean,
+  winParams?: any,
+}
+type WindowMaker = (props: WindowMakerParams) => BrowserWindow;
+const _createWindow: WindowMaker = ({ title, component, componentParams, dimensions, frameless, winParams }) => {
+
+  if (windowIsOpen(title)) {
+    windowsByTitle[title].focus();
+    return windowsByTitle[title];
+  }
+
+  const _framelessOpts = {
+    frame: process.platform === 'darwin' ? true : false,
+    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
+  };
+  const _winParams = {
+    width: (dimensions || {}).width,
+    height: (dimensions || {}).height,
+    ...(frameless === true ? _framelessOpts : {}),
+    ...winParams,
+  };
+  const params = `c=${component}&${componentParams ? componentParams : ''}`;
+  const window = createWindow(title, params, _winParams);
+
+  windows.push(window);
+  windowsByTitle[title] = window;
+  window.on('closed', () => { delete windowsByTitle[title]; cleanUpWindows(); });
+
+  return window;
 }
 
 
-function makeWritableWSEndpoint(name: string, dataSaver: (...args: string[]) => void): void {
-  ipcMain.on(`store-workspace-${name}`, (evt: any, ...args: string[]) => {
-    dataSaver(...args);
-  });
-}
+/* App-specific stuff */
+
+
+const APP_TITLE = "ITU OB editor";
 
 
 Promise.all([ initRepo(), initStorage(), app.whenReady() ]).then((...args) => {
@@ -41,15 +98,15 @@ Promise.all([ initRepo(), initStorage(), app.whenReady() ]).then((...args) => {
 
   openHomeScreen();
 
-  makeReadableWSEndpoint<Workspace>('all', async () => {
+  makeEndpoint<Workspace>('all', async () => {
     return storage.workspace;
   });
 
-  makeReadableWSEndpoint<{ name?: string, email?: string }>('git-author-info', async () => {
+  makeEndpoint<{ name?: string, email?: string }>('git-author-info', async () => {
     return (await gitCtrl.getAuthor());
   });
 
-  makeReadableWSEndpoint<{ errors: string[] }>('fetch-commit-push', async (
+  makeEndpoint<{ errors: string[] }>('fetch-commit-push', async (
       commitMsg: string,
       authorName: string,
       authorEmail: string) => {
@@ -64,28 +121,28 @@ Promise.all([ initRepo(), initStorage(), app.whenReady() ]).then((...args) => {
     return { errors: [] };
   });
 
-  makeReadableWSEndpoint<OBIssue[]>('latest-published-issues', async () => {
+  makeEndpoint<OBIssue[]>('latest-published-issues', async () => {
     const issues = new QuerySet<OBIssue>(storage.workspace.issues);
     return issues.filter((item) => {
       return new Date(item[1].publication_date).getTime() < new Date().getTime();
     }).orderBy(sortIntegerDescending).all().slice(0, 1);
   });
 
-  makeReadableWSEndpoint<OBIssue[]>('future-issues', async () => {
+  makeEndpoint<OBIssue[]>('future-issues', async () => {
     const issues = new QuerySet<OBIssue>(storage.workspace.issues);
     return issues.filter(item => {
       return new Date(item[1].publication_date).getTime() >= new Date().getTime();
     }).orderBy(sortIntegerAscending).all()
   });
 
-  makeWritableWSEndpoint('future-issues', (rawData: string) => {
+  makeWriteOnlyEndpoint('future-issues', (rawData: string) => {
     const issues = JSON.parse(rawData, JSON.parse(rawData, reviveJsonValue));
 
     storage.workspace.issues = issues;
     storage.storeWorkspace(storage.workspace);
   });
 
-  makeReadableWSEndpoint<OBIssue>('issue', async (issueId: string) => {
+  makeEndpoint<OBIssue>('issue', async (issueId: string) => {
     const issues = new QuerySet<OBIssue>(storage.workspace.issues);
     const issue = issues.get(issueId);
 
@@ -98,7 +155,7 @@ Promise.all([ initRepo(), initStorage(), app.whenReady() ]).then((...args) => {
     return issue;
   });
 
-  makeWritableWSEndpoint('issue', (issueId: string, rawData: string) => {
+  makeWriteOnlyEndpoint('issue', (issueId: string, rawData: string) => {
     const issueData = JSON.parse(rawData, JSON.parse(rawData, reviveJsonValue));
     storage.workspace.issues[issueId] = issueData;
     storage.storeWorkspace(storage.workspace);
@@ -114,8 +171,8 @@ Promise.all([ initRepo(), initStorage(), app.whenReady() ]).then((...args) => {
   });
 
   ipcMain.on('scheduled-new-issue', (event: any) => {
-    if (homeWindow !== null) {
-      homeWindow.webContents.send('update-current-issue');
+    if (windowsByTitle[APP_TITLE]) {
+      windowsByTitle[APP_TITLE].webContents.send('update-current-issue');
     }
   });
 
@@ -145,110 +202,37 @@ Promise.all([ initRepo(), initStorage(), app.whenReady() ]).then((...args) => {
 
 
 function openHomeScreen() {
-  if (homeWindow === null) {
-    homeWindow = _createWindow({
-      component: 'home',
-      title: "ITU OB editor",
-      dimensions: { width: 400, height: 400, },
-      frameless: true,
-    });
-    homeWindow.on('close', () => {
-      homeWindow = null;
-    });
-  } else {
-    homeWindow.focus();
-  }
+  _createWindow({
+    component: 'home',
+    title: APP_TITLE,
+    dimensions: { width: 400, height: 400, },
+    frameless: true,
+  });
 }
 
 function openIssueScheduler() {
-  if (schedulerWindow === null) {
-    schedulerWindow = _createWindow({
-      component: 'issueScheduler',
-      title: 'Issue Scheduler',
-      frameless: true,
-      dimensions: { width: 400, minWidth: 380, },
-    });
-    schedulerWindow.on('close', () => {
-      schedulerWindow = null;
-    });
-  } else {
-    schedulerWindow.focus();
-  }
+  _createWindow({
+    component: 'issueScheduler',
+    title: 'Issue Scheduler',
+    frameless: true,
+    dimensions: { width: 400, minWidth: 380, },
+  });
 }
 
 function openDataSynchronizer() {
-  if (synchronizerWindow === null) {
-    synchronizerWindow = _createWindow({
-      component: 'dataSynchronizer',
-      title: 'Data Synchronizer',
-      dimensions: { width: 400, minWidth: 380, height: 400 },
-    });
-    synchronizerWindow.on('close', () => {
-      synchronizerWindow = null;
-    });
-  } else {
-    synchronizerWindow.focus();
-  }
+  _createWindow({
+    component: 'dataSynchronizer',
+    title: 'Data Synchronizer',
+    dimensions: { width: 400, minWidth: 380, height: 400 },
+  });
 }
 
 function openIssueEditor(issueId: string) {
-  if (!issueEditorsOpen[issueId]) {
-    issueEditorsOpen[issueId] = _createWindow({
-      component: 'issueEditor',
-      title: `Issue ${issueId}`,
-      componentParams: `issueId=${issueId}`,
-      frameless: true,
-      dimensions: { width: 800, height: 600, },
-    });
-    (issueEditorsOpen[issueId] as BrowserWindow).on('close', () => {
-      issueEditorsOpen[issueId] = null;
-    });
-  } else {
-    (issueEditorsOpen[issueId] as BrowserWindow).focus();
-  }
-}
-
-
-interface WindowMakerParams {
-  title: string,
-  component: string,
-  componentParams?: string,
-  dimensions?: { minWidth?: number, width?: number, height?: number },
-  frameless?: boolean,
-  winParams?: any,
-}
-type WindowMaker = (props: WindowMakerParams) => BrowserWindow;
-const _createWindow: WindowMaker = ({ title, component, componentParams, dimensions, frameless, winParams }) => {
-  const _framelessOpts = {
-    frame: process.platform === 'darwin' ? true : false,
-    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
-  };
-  const _winParams = {
-    width: (dimensions || {}).width,
-    height: (dimensions || {}).height,
-    ...(frameless === true ? _framelessOpts : {}),
-    ...winParams,
-  };
-  const params = `c=${component}&${componentParams ? componentParams : ''}`;
-  const window = createWindow(title, params, _winParams);
-
-  windows.push(window);
-
-  window.on('closed', () => {
-    var deletedWindows: number[] = [];
-    for (const [idx, win] of windows.entries()) {
-      // When accessing the id attribute of a closed window,
-      // it’ll throw. We’ll mark its index for deletion then.
-      try {
-        win.id;
-      } catch (e) {
-        deletedWindows.push(idx - deletedWindows.length);
-      }
-    }
-    for (const idx of deletedWindows) {
-      windows.splice(idx, 1);
-    }
+  _createWindow({
+    component: 'issueEditor',
+    title: `Issue ${issueId}`,
+    componentParams: `issueId=${issueId}`,
+    frameless: true,
+    dimensions: { width: 800, height: 600, },
   });
-
-  return window;
 }
