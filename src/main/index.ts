@@ -1,9 +1,12 @@
+import * as path from 'path';
+
 import { app, Menu, ipcMain } from 'electron';
 
 import { getMenu } from './menu';
 import { makeEndpoint, makeWriteOnlyEndpoint } from './api';
 import { openWindow, getWindowByTitle, windows } from './window';
-import { initRepo, initStorage, GitController, Workspace, Storage } from './storage';
+import { initStorage, Workspace, Storage } from './storage';
+import { initRepo, GitController } from './storage/git';
 
 import { reviveJsonValue } from './storage/api';
 import { QuerySet, sortIntegerAscending, sortIntegerDescending } from './storage/query';
@@ -13,15 +16,52 @@ import { OBIssue } from './issues/models';
 const APP_TITLE = "ITU OB editor";
 
 
+const WORK_DIR = path.join(app.getPath('userData'), 'itu-ob-data');
+const REPO_URL = 'https://github.com/ituob/itu-ob-data';
+const CORS_PROXY_URL = 'https://cors.isomorphic-git.org';
+
+
 // Ensure only one instance of the app can run at a time on given user’s machine
 if (!app.requestSingleInstanceLock()) { app.exit(0); }
 
 
-Promise.all([ initRepo(), initStorage(), app.whenReady() ]).then((...args) => {
+Promise.all([
+  initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL),
+  initStorage(WORK_DIR),
+  app.whenReady(),
+]).then((...args) => {
+
   const gitCtrl: GitController = args[0][0];
   const storage: Storage = args[0][1];
 
+  // Open home screen
   openHomeScreen();
+
+  // Quit application when all windows are closed
+  app.on('window-all-closed', () => {
+    // On macOS it is common for applications to stay open until the user explicitly quits
+    if (process.platform !== 'darwin') {
+      app.quit()
+    }
+  });
+
+  // Reopen home window on app reactivation
+  app.on('activate', () => {
+    // On macOS it is common to re-create a window even after all windows have been closed
+    if (windows.length < 1) {
+      openHomeScreen();
+    }
+  });
+
+
+  // Set up app menu
+  Menu.setApplicationMenu(getMenu({
+    openIssueScheduler,
+    openHomeScreen,
+  }));
+
+
+  /* Set up endpoints */
 
   makeEndpoint<Workspace>('all', async () => {
     return storage.workspace;
@@ -34,10 +74,13 @@ Promise.all([ initRepo(), initStorage(), app.whenReady() ]).then((...args) => {
   makeEndpoint<{ errors: string[] }>('fetch-commit-push', async (
       commitMsg: string,
       authorName: string,
-      authorEmail: string) => {
+      authorEmail: string,
+      gitUsername: string,
+      gitPassword: string) => {
     try {
       await gitCtrl.pull();
       await gitCtrl.setAuthor({ name: authorName, email: authorEmail });
+      await gitCtrl.setAuth({ username: gitUsername, password: gitPassword });
       await gitCtrl.commit(commitMsg);
       await gitCtrl.push();
     } catch (e) {
@@ -87,10 +130,8 @@ Promise.all([ initRepo(), initStorage(), app.whenReady() ]).then((...args) => {
     storage.storeWorkspace(storage.workspace);
   });
 
-  Menu.setApplicationMenu(getMenu({
-    openIssueScheduler,
-    openHomeScreen,
-  }));
+
+  /* Set up window-opening endpoints */
 
   ipcMain.on('schedule-issues', (event: any) => {
     openIssueScheduler();
@@ -111,22 +152,10 @@ Promise.all([ initRepo(), initStorage(), app.whenReady() ]).then((...args) => {
     openDataSynchronizer();
   });
 
-  // Quit application when all windows are closed
-  app.on('window-all-closed', () => {
-    // On macOS it is common for applications to stay open until the user explicitly quits
-    if (process.platform !== 'darwin') {
-      app.quit()
-    }
-  });
-
-  app.on('activate', () => {
-    // On macOS it is common to re-create a window even after all windows have been closed
-    if (windows.length < 1) {
-      openHomeScreen();
-    }
-  });
 });
 
+
+/* App-specific window-opening helpers */
 
 function openHomeScreen() {
   openWindow({
