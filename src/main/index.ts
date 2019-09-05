@@ -77,15 +77,35 @@ Promise.all([
       authorEmail: string,
       gitUsername: string,
       gitPassword: string) => {
+
+    await gitCtrl.setAuthor({ name: authorName, email: authorEmail });
+
+    try {
+      await gitCtrl.setAuth({ username: gitUsername, password: gitPassword });
+    } catch (e) {
+      return { errors: [`Error while authenticating: ${e.toString()}`] };
+    }
+
     try {
       await gitCtrl.pull();
-      await gitCtrl.setAuthor({ name: authorName, email: authorEmail });
-      await gitCtrl.setAuth({ username: gitUsername, password: gitPassword });
-      await gitCtrl.commit(commitMsg);
+    } catch (e) {
+      return { errors: [`Error while fetching and merging changes: ${e.toString()}`] };
+    }
+
+    const changedFiles = await gitCtrl.listChangedFiles();
+    if (changedFiles.length < 1) {
+      return { errors: ["No changes to submit!"] };
+    }
+
+    await gitCtrl.addAllChanges();
+    await gitCtrl.commit(commitMsg);
+
+    try {
       await gitCtrl.push();
     } catch (e) {
-      return { errors: [e.toString()] };
+      return { errors: [`Error while pushing changes: ${e.toString()}`] };
     }
+
     return { errors: [] };
   });
 
