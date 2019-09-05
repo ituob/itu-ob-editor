@@ -52,6 +52,13 @@ export const DataSynchronizer: React.FC<DataSynchronizerProps> = function () {
     setStarted(true);
   }
 
+  const complete = (
+    authorName != '' &&
+    authorEmail != '' &&
+    username != '' &&
+    password != '' &&
+    commitMsg != '');
+
   return (
     <>
       <Card key="gitAuth" className={styles.gitAuthCard}>
@@ -137,7 +144,7 @@ export const DataSynchronizer: React.FC<DataSynchronizerProps> = function () {
         <Button
           icon="git-merge"
           intent="primary"
-          disabled={started === true}
+          disabled={complete === false || started === true}
           title="Fetch other site editors’ changes, and submit yours"
           onClick={handleSyncAction}>Sync</Button>
       </Card>
