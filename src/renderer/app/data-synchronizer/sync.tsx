@@ -11,8 +11,8 @@ import * as styles from './styles.scss';
 const API_ENDPOINT = 'fetch-commit-push';
 
 
-interface DataSynchronizerProps {}
-export const DataSynchronizer: React.FC<DataSynchronizerProps> = function () {
+interface ChangeCommitterProps {}
+export const ChangeCommitter: React.FC<ChangeCommitterProps> = function () {
   const [commitMsg, setCommitMsg] = useState('');
   const [authorName, setAuthorName] = useState('');
   const [authorEmail, setAuthorEmail] = useState('');
