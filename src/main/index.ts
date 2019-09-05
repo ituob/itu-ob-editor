@@ -179,7 +179,7 @@ function openDataSynchronizer() {
   openWindow({
     component: 'dataSynchronizer',
     title: 'Data Synchronizer',
-    dimensions: { width: 400, minWidth: 380, height: 400 },
+    dimensions: { width: 800, minWidth: 600, height: 550 },
   });
 }
 
