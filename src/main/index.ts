@@ -8,7 +8,8 @@ import { OBIssue } from './issues/models';
 import { makeEndpoint, makeWriteOnlyEndpoint } from './api';
 
 
-/* Generic helpers, to be moved into the framework. */
+/* Generic helpers
+   TODO (#4): Move into the framework */
 
 
 // Ensure only one instance of the app can run at a time on given user’s machine

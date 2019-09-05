@@ -4,6 +4,7 @@ import { useTimeTravel, TimeTravel } from 'renderer/app/useTimeTravel';
 import { reviveJsonValue } from 'main/storage/api';
 
 
+// TODO (#4): Refactor into generic main APIs, rather than Workspace-centered
 export function useWorkspace<T>(request: string, reducer: any, initData: T, ...args: string[]) {
   function storeData(data: any) {
     ipcRenderer.send(`store-workspace-${request}`, ...args, JSON.stringify(data));
