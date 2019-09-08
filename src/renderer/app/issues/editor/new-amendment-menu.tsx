@@ -1,6 +1,6 @@
 import React from 'react';
 import { Menu, Button } from '@blueprintjs/core';
-import { Select, ItemPredicate, ItemRenderer, ItemListRenderer } from '@blueprintjs/select';
+import { Select, ItemPredicate, ItemRenderer, ItemListRenderer, renderFilteredItems } from '@blueprintjs/select';
 
 import { Index, QuerySet } from 'main/storage/query';
 import { Publication } from 'main/lists/models';
@@ -63,6 +63,7 @@ export const NewAmendmentPrompt: React.FC<NewAmendmentPromptProps> = function (p
         targetTagName: 'div',
       }}
       className={styles.addMessageTriggerContainer}
+      initialContent={filterUsageTip}
       items={items}
       itemRenderer={NewAmendmentMenuItemRenderer}
       itemListRenderer={NewAmendmentMenuRenderer}
@@ -79,6 +80,14 @@ export const NewAmendmentPrompt: React.FC<NewAmendmentPromptProps> = function (p
 };
 
 
+const noResultsMessage = (
+  <Menu.Item disabled={true} text="No matching publications!" />
+);
+
+const filterUsageTip = (
+  <Menu.Item disabled={true} text="Type publication title or rec. ID…" />
+);
+
 interface AmendablePublication {
   title: string,
   id: string,
@@ -86,13 +95,13 @@ interface AmendablePublication {
 }
 
 const NewAmendmentMenuRenderer: ItemListRenderer<AmendablePublication> =
-    function ({ filteredItems, itemsParentRef, query, renderItem }) {
-  const renderedItems = filteredItems.map(renderItem).
-    filter(item => item != null).
-    slice(0, MAX_MENU_ITEMS_TO_SHOW); 
+    function (props) {
   return (
-    <Menu ulRef={itemsParentRef} className={styles.newMessageMenu}>
-      {renderedItems}
+    <Menu ulRef={props.itemsParentRef} className={styles.newMessageMenu}>
+      {renderFilteredItems({
+        ...props,
+        filteredItems: props.filteredItems.slice(0, MAX_MENU_ITEMS_TO_SHOW),
+      }, noResultsMessage, filterUsageTip)}
     </Menu>
   );
 };
