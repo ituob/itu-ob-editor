@@ -1,22 +1,26 @@
 import React from 'react';
-import { Menu } from '@blueprintjs/core';
+import { Menu, Button } from '@blueprintjs/core';
+import { Select, ItemPredicate, ItemRenderer, ItemListRenderer } from '@blueprintjs/select';
 
 import { Index, QuerySet } from 'main/storage/query';
 import { Publication } from 'main/lists/models';
 import { OBIssue } from 'main/issues/models';
+import { Message, AmendmentMessage } from 'main/issues/messages';
 
-import { AmendmentMessage } from 'main/issues/messages';
-import { RunningAnnex, getRunningAnnexesForIssue } from '../running-annexes';
+import { getRunningAnnexesForIssue } from '../running-annexes';
+
+import { NewMessagePromptProps } from './message-editor';
 import * as styles from './styles.scss';
 
 
-interface NewAmendmentMessageMenuProps {
-  issue: OBIssue,
+const MAX_MENU_ITEMS_TO_SHOW = 7;
+
+
+type NewAmendmentPromptProps = NewMessagePromptProps & {
   issueIndex: Index<OBIssue>,
   publicationIndex: Index<Publication>,
-  onCreate: (message: AmendmentMessage) => void,
 }
-export function NewAmendmentMessageMenu(props: NewAmendmentMessageMenuProps) {
+export const NewAmendmentPrompt: React.FC<NewAmendmentPromptProps> = function (props) {
   const runningAnnexes = getRunningAnnexesForIssue(
     props.issue,
     props.issueIndex,
@@ -26,54 +30,98 @@ export function NewAmendmentMessageMenu(props: NewAmendmentMessageMenuProps) {
   const nonAnnexedPublications = new QuerySet<Publication>(props.publicationIndex).
     filter((item: [string, Publication]) => annexedPublicationIds.indexOf(item[0]) < 0).all();
 
-  function createAmendmentMessage(
-      forPublication: Publication,
-      atPosition: Date | null | undefined = undefined) {
+  const items = [...runningAnnexes.map(annex => { return {
+    title: annex.publication.title.en,
+    id: annex.publication.id,
+    position: annex.publication.positionOn,
+  }}), ...nonAnnexedPublications.map(pub => { return {
+    title: pub.title.en,
+    id: pub.id,
+    position: null,
+  }})];
+
+  function createAmendmentMessage(pub: AmendablePublication) {
     let positionString: string | undefined;
-    if (atPosition) {
-      positionString: `${atPosition.getFullYear()}-${atPosition.getMonth()}-${atPosition.getDate()}`
+    const position = pub.position;
+    if (position != null) {
+      positionString = `${position.getFullYear()}-${position.getMonth()}-${position.getDate()}`;
     }
-    props.onCreate({
+    return {
       type: 'amendment',
       target: {
-        publication: forPublication.id,
+        publication: pub.id,
         position_on: positionString,
       },
       contents: {},
-    });
+    } as Message;
   }
 
   return (
-    <Menu className={styles.newMessageMenu}>
+    <NewAmendmentSelector
+      popoverProps={{
+        wrapperTagName: 'div',
+        targetTagName: 'div',
+      }}
+      className={styles.addMessageTriggerContainer}
+      items={items}
+      itemRenderer={NewAmendmentMenuItemRenderer}
+      itemListRenderer={NewAmendmentMenuRenderer}
+      itemPredicate={NewAmendmentMenuItemFilter}
+      itemDisabled={(item) => {
+        return props.issue.amendments.messages.map(amd => {
+          return (amd as AmendmentMessage).target.publication;
+        }).indexOf(item.id) >= 0;
+      }}
+      onItemSelect={(pub: AmendablePublication) =>
+        props.handleNewMessage(createAmendmentMessage(pub), props.idx)}
+    ><Button icon="plus" className={styles.addMessageTrigger} /></NewAmendmentSelector>
+  );
+};
 
-      {runningAnnexes.length > 0
-        ? <React.Fragment>
-            <Menu.Divider title="Amend annexed list" />
-            {runningAnnexes.map((annex: RunningAnnex) => (
-              <Menu.Item
-                key={annex.publication.id}
-                text={annex.publication.title.en}
-                onClick={() => createAmendmentMessage(annex.publication, annex.positionOn)}
-                shouldDismissPopover={true}
-              />
-            ))}
-          </React.Fragment>
-        : null}
 
-      {nonAnnexedPublications.length > 0
-        ? <React.Fragment>
-            <Menu.Divider title="Amend another publication" />
-            {nonAnnexedPublications.map((pub: Publication) => (
-              <Menu.Item
-                key={pub.id}
-                text={pub.title.en}
-                onClick={() => createAmendmentMessage(pub)}
-                shouldDismissPopover={true}
-              />
-            ))}
-          </React.Fragment>
-        : null}
+interface AmendablePublication {
+  title: string,
+  id: string,
+  position: Date | null,
+}
 
+const NewAmendmentMenuRenderer: ItemListRenderer<AmendablePublication> =
+    function ({ filteredItems, itemsParentRef, query, renderItem }) {
+  const renderedItems = filteredItems.map(renderItem).
+    filter(item => item != null).
+    slice(0, MAX_MENU_ITEMS_TO_SHOW); 
+  return (
+    <Menu ulRef={itemsParentRef} className={styles.newMessageMenu}>
+      {renderedItems}
     </Menu>
   );
-}
+};
+
+const NewAmendmentMenuItemRenderer: ItemRenderer<AmendablePublication> =
+    function (pub, { handleClick, modifiers, query }) {
+
+  return (
+    <Menu.Item
+      key={pub.id}
+      text={pub.title}
+      onClick={handleClick}
+      active={modifiers.active}
+      disabled={modifiers.disabled} />
+  );
+};
+
+const NewAmendmentMenuItemFilter: ItemPredicate<AmendablePublication> =
+    function (query, pub, _index, exactMatch) {
+
+  const normalizedTitle: string = pub.title.toLowerCase();
+  const normalizedId: string = pub.id.toLowerCase();
+  const normalizedQuery: string = query.toLowerCase();
+
+  if (exactMatch) {
+    return normalizedTitle === normalizedQuery;
+  } else {
+    return `${normalizedId} ${normalizedTitle}`.indexOf(normalizedQuery) >= 0;
+  }
+};
+
+const NewAmendmentSelector = Select.ofType<AmendablePublication>();

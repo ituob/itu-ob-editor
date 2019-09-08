@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
-import { Button, Popover } from '@blueprintjs/core';
 
 import { Workspace } from 'main/storage';
 import { OBIssue } from 'main/issues/models';
-import { Message, AmendmentMessage } from 'main/issues/messages';
+import { Message } from 'main/issues/messages';
 
 import { useWorkspace, useWorkspaceRO } from 'renderer/app/storage/api';
 import { reducer } from './reducer';
 import { getMessageEditor } from './message-editor';
-import { NewGeneralMessageMenu } from './new-general-message-menu';
-import { NewAmendmentMessageMenu } from './new-amendment-menu';
+import { NewGeneralMessagePrompt } from './new-general-message-menu';
+import { NewAmendmentPrompt } from './new-amendment-menu';
 import { MessageItem } from './message-list-item';
 import * as styles from './styles.scss';
 
@@ -50,48 +49,28 @@ export function IssueEditor(props: IssueEditorProps) {
   const [ selectedMessage, selectMessage ] = useState(initialMessage);
   const [ selectedSection, selectSection ] = useState(initialSection);
 
-  function newGeneralMessagePrompt(idx: number) {
-    return (
-      <NewMessagePrompt menu={
-        <NewGeneralMessageMenu
-          issue={issue}
-          onCreate={(msg) => {
-            wsIssue.dispatch({
-              type: 'ADD_GENERAL_MESSAGE',
-              message: msg,
-              newMessageIndex: idx,
-            });
-            setTimeout(() => {
-              selectMessage(idx);
-              selectSection("general");
-            }, 100);
-          }}
-        />
-      } />
-    );
+  function handleNewGeneralMessage(msg: Message, atIndex: number) {
+    wsIssue.dispatch({
+      type: 'ADD_GENERAL_MESSAGE',
+      message: msg,
+      newMessageIndex: atIndex,
+    });
+    setTimeout(() => {
+      selectMessage(atIndex);
+      selectSection("general");
+    }, 100);
   }
 
-  function newAmendmentMessagePrompt(idx: number) {
-    return (
-      <NewMessagePrompt menu={
-        <NewAmendmentMessageMenu
-          issue={issue}
-          issueIndex={ws.issues}
-          publicationIndex={ws.publications}
-          onCreate={(msg: AmendmentMessage) => {
-            wsIssue.dispatch({
-              type: 'ADD_AMENDMENT_MESSAGE',
-              message: msg as Message,
-              newMessageIndex: idx,
-            });
-            setTimeout(() => {
-              selectMessage(idx);
-              selectSection("amendments");
-            }, 100);
-          }}
-        />
-      } />
-    );
+  function handleNewAmendment(msg: Message, atIndex: number) {
+    wsIssue.dispatch({
+      type: 'ADD_AMENDMENT_MESSAGE',
+      message: msg,
+      newMessageIndex: atIndex,
+    });
+    setTimeout(() => {
+      selectMessage(atIndex);
+      selectSection("amendments");
+    }, 100);
   }
 
   return (
@@ -99,7 +78,7 @@ export function IssueEditor(props: IssueEditorProps) {
       <div className={styles.messageListPane}>
 
         <h2 className={styles.issueSectionHeader}>General</h2>
-        {newGeneralMessagePrompt(0)}
+        <NewGeneralMessagePrompt idx={0} issue={issue} handleNewMessage={handleNewGeneralMessage} />
         {[...issue.general.messages.entries()].map(([idx, msg]: [number, Message]) => (
           <React.Fragment>
             <MessageItem
@@ -114,12 +93,17 @@ export function IssueEditor(props: IssueEditorProps) {
                 selectMessage(undefined);
               }}
             />
-            {newGeneralMessagePrompt(idx + 1)}
+            <NewGeneralMessagePrompt idx={idx + 1} issue={issue} handleNewMessage={handleNewGeneralMessage} />
           </React.Fragment>
         ))}
 
         <h2 className={styles.issueSectionHeader}>Amendments</h2>
-        {newAmendmentMessagePrompt(0)}
+        <NewAmendmentPrompt
+          idx={0}
+          issue={issue}
+          issueIndex={ws.issues}
+          publicationIndex={ws.publications}
+          handleNewMessage={handleNewAmendment} />
         {[...issue.amendments.messages.entries()].map(([idx, msg]: [number, Message]) => (
           <React.Fragment>
             <MessageItem
@@ -134,7 +118,12 @@ export function IssueEditor(props: IssueEditorProps) {
                 selectMessage(undefined);
               }}
             />
-            {newAmendmentMessagePrompt(idx + 1)}
+            <NewAmendmentPrompt
+              idx={idx + 1}
+              issue={issue}
+              issueIndex={ws.issues}
+              publicationIndex={ws.publications}
+              handleNewMessage={handleNewAmendment} />
           </React.Fragment>
         ))}
 
@@ -184,20 +173,4 @@ function MessageEditor(props: any) {
     throw new Error("MessageEditor received no message");
   }
   return null;
-}
-
-
-interface NewMessagePromptProps {
-  menu: JSX.Element,
-}
-export function NewMessagePrompt(props: NewMessagePromptProps) {
-  return (
-    <Popover
-        wrapperTagName={'div'}
-        targetTagName={'div'}
-        className={styles.addMessageTriggerContainer}
-        content={props.menu}>
-      <Button icon="plus" className={styles.addMessageTrigger} />
-    </Popover>
-  )
 }

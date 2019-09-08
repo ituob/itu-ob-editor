@@ -1,18 +1,36 @@
 import React from 'react';
-import { Menu } from '@blueprintjs/core';
+import { Popover, Button, Menu } from '@blueprintjs/core';
 
 import { OBIssue } from 'main/issues/models';
 import { Message, MessageType } from 'main/issues/messages';
 
+import { NewMessagePromptProps } from './message-editor';
 import { getMessageTypeTitle } from './messages';
 import * as styles from './styles.scss';
+
+
+export const NewGeneralMessagePrompt: React.FC<NewMessagePromptProps> = function (props) {
+  return (
+    <Popover
+      wrapperTagName={'div'}
+      targetTagName={'div'}
+      className={styles.addMessageTriggerContainer}
+      content={
+        <NewGeneralMessageMenu
+          issue={props.issue}
+          onCreate={(msg: Message) => props.handleNewMessage(msg, props.idx)}
+        />
+      }
+    ><Button icon="plus" className={styles.addMessageTrigger} /></Popover>
+  );
+};
 
 
 interface NewGeneralMessageMenuProps {
   issue: OBIssue,
   onCreate: (message: Message) => void,
 }
-export function NewGeneralMessageMenu(props: NewGeneralMessageMenuProps) {
+const NewGeneralMessageMenu: React.FC<NewGeneralMessageMenuProps> = function (props) {
   const existing: Message[] = props.issue.general.messages;
 
   function alreadyExists(type: MessageType) {
@@ -80,4 +98,4 @@ export function NewGeneralMessageMenu(props: NewGeneralMessageMenuProps) {
       />
     </Menu>
   );
-}
+};

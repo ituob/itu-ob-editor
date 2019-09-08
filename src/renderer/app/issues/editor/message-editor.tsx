@@ -21,6 +21,15 @@ import { AmendmentEditor } from './messages/amendment';
 import * as styles from './styles.scss';
 
 
+/* New message prompt props. */
+
+export interface NewMessagePromptProps {
+  idx: number,
+  issue: OBIssue,
+  handleNewMessage: (msg: Message, atIndex: number) => void,
+}
+
+
 /* Message editor spec.
 
    Editor implementations (React functional components) are given a ``message``
