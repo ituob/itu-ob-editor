@@ -32,7 +32,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = function ({ message, 
         {items.map((item: SRItem, idx: number) => (
           <>
             <SimpleEditableCard
-                key={idx}
+                key="item"
                 onDelete={() => {
                   updateItems(items => { items.splice(idx, 1); return items; })
                   _onChange();
@@ -101,11 +101,10 @@ const AddSRItemDialog: React.FC<AddSRItemDialogProps> = function ({ isOpen, titl
             disabled={ob === undefined || page === undefined || country === ''}
             onClick={_onSave}>Add item</Button>
         }>
-      <Label>
+      <Label key="country">
         Country name
         <InputGroup
           value={country}
-          key="country"
           type="text"
           large={true}
           onChange={(evt: React.FormEvent<HTMLElement>) => {
@@ -113,11 +112,10 @@ const AddSRItemDialog: React.FC<AddSRItemDialogProps> = function ({ isOpen, titl
           }}
         />
       </Label>
-      <Label>
+      <Label key="ob">
         OB edition number
         <InputGroup
           value={ob ? ob.toString() : ''}
-          key="ob"
           type="number"
           large={true}
           onChange={(evt: React.FormEvent<HTMLElement>) => {
@@ -125,11 +123,10 @@ const AddSRItemDialog: React.FC<AddSRItemDialogProps> = function ({ isOpen, titl
           }}
         />
       </Label>
-      <Label>
+      <Label key="page">
         Page number
         <InputGroup
           value={page ? page.toString() : ''}
-          key="page"
           type="number"
           large={true}
           onChange={(evt: React.FormEvent<HTMLElement>) => {
