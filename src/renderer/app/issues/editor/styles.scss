@@ -13,6 +13,8 @@
   text-transform: uppercase;
 
   color: $pt-text-color-disabled;
+
+  -webkit-app-region: drag;
 }
 
 .twoPaneEditor {
