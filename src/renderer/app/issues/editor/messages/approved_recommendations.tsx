@@ -6,7 +6,6 @@ import { AddCardTrigger, SimpleEditableCard } from 'renderer/app/widgets/editabl
 import * as widgetStyles from 'renderer/app/widgets/styles.scss';
 
 import { ITURecCode, ITURecVersion } from 'main/recommendations/models';
-
 import { ApprovedRecommendationsMessage } from 'main/issues/messages/approved_recommendations';
 
 import { MessageEditorProps, MessageEditorDialog } from '../message-editor';
