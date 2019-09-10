@@ -22,11 +22,18 @@ interface SimpleEditableCardProps {
   selected?: boolean,
   onDelete?: () => void,
   onSelect?: () => void 
+  extended?: boolean;
 }
 export const SimpleEditableCard: React.FC<SimpleEditableCardProps> = function (props) {
   return (
     <Card
-        className={`${styles.editableCard} ${props.selected ? styles.editableCardSelected : ''}`}
+        className={`
+          ${styles.editableCard}
+          ${props.selected ? styles.editableCardSelected : ''}
+          ${props.extended ? styles.editableCardExtended : ''}
+          ${props.onSelect ? styles.editableCardSelectable : ''}
+          ${props.onDelete ? styles.editableCardDeletable : ''}
+        `}
         onClick={props.onSelect}>
 
       <Text ellipsize={true}>
