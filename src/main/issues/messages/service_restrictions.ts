@@ -1,4 +1,4 @@
-interface ServiceRestrictionsItem {
+export interface SRItem {
   // Country name
   country: string,
 
@@ -11,5 +11,5 @@ interface ServiceRestrictionsItem {
 
 export interface ServiceRestrictionsMessage {
   type: "service_restrictions",
-  items: ServiceRestrictionsItem[],
+  items: SRItem[],
 }
