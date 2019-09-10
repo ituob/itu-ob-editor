@@ -14,6 +14,7 @@ import { DateStamp } from 'renderer/app/dates';
 import { FreeformContents } from '../freeform-contents';
 import { MessageEditorProps, MessageEditorDialog } from '../message-editor';
 
+import * as widgetStyles from 'renderer/app/widgets/styles.scss';
 import * as styles from '../styles.scss';
 
 
@@ -66,7 +67,7 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
 
   return (
     <>
-      <h2 key="paneHeader" className={styles.issueSectionHeader}>Telephone Service</h2>
+      <h2 key="paneHeader" className={widgetStyles.paneHeader}>Telephone Service</h2>
 
       <AddCardTrigger
         key="addFirstCountry"

@@ -10,6 +10,8 @@ import { getMessageEditor } from './message-editor';
 import { NewGeneralMessagePrompt } from './new-general-message-menu';
 import { NewAmendmentPrompt } from './new-amendment-menu';
 import { MessageItem } from './message-list-item';
+
+import * as widgetStyles from 'renderer/app/widgets/styles.scss';
 import * as styles from './styles.scss';
 
 
@@ -77,7 +79,7 @@ export function IssueEditor(props: IssueEditorProps) {
     <div className={styles.twoPaneEditor}>
       <div className={styles.messageListPane}>
 
-        <h2 className={styles.issueSectionHeader}>General</h2>
+        <h2 className={widgetStyles.paneHeader}>General</h2>
         <NewGeneralMessagePrompt idx={0} issue={issue} handleNewMessage={handleNewGeneralMessage} />
         {[...issue.general.messages.entries()].map(([idx, msg]: [number, Message]) => (
           <>
@@ -97,7 +99,7 @@ export function IssueEditor(props: IssueEditorProps) {
           </>
         ))}
 
-        <h2 className={styles.issueSectionHeader}>Amendments</h2>
+        <h2 className={widgetStyles.paneHeader}>Amendments</h2>
         <NewAmendmentPrompt
           idx={0}
           issue={issue}

@@ -1,22 +1,5 @@
 @import "~@blueprintjs/core/lib/scss/variables";
 
-.issueSectionHeader {
-  padding: 0 20px;
-  height: $pt-navbar-height;
-  display: flex;
-  flex-flow: row nowrap;
-  align-items: center !important;
-  justify-content: center;
-  font-size: 100%;
-
-  margin: 0;
-  text-transform: uppercase;
-
-  color: $pt-text-color-disabled;
-
-  -webkit-app-region: drag;
-}
-
 .twoPaneEditor {
   display: flex;
   flex-flow: row nowrap;
