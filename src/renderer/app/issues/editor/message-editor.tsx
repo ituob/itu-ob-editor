@@ -55,7 +55,7 @@ export function getMessageEditor(msg: Message): React.FC<MessageEditorProps> {
   } else if (isAmendment(msg)) {
     return AmendmentEditor;
   } else {
-    return () => <p>Messages of type {msg.type} aren’t supported yet.</p>
+    return () => <p>Messages of type {msg.type} aren’t supported.</p>
     //throw new Error("Unknown message type");
   }
 }
