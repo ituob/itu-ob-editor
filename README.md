@@ -1,5 +1,11 @@
 # ITU OB editor
 
+Standalone application for editing [ITU OB website](https://ituob.org) data at https://github.com/ituob/itu-ob-data/.
+
+The website is statically generated using Jekyll.
+
+The app is based on Electron and is intended to be run on any OS supported by Electron.
+
 ## Get the app
 
 Download (unsigned) binaries from [Releases](https://github.com/ituob/itu-ob-editor/releases/).
