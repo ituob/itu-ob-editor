@@ -1,6 +1,7 @@
 import React from 'react';
-import { Menu, Button } from '@blueprintjs/core';
+import { Menu } from '@blueprintjs/core';
 import { Select, ItemPredicate, ItemRenderer, ItemListRenderer, renderFilteredItems } from '@blueprintjs/select';
+import { AddCardTriggerButton } from 'renderer/app/widgets/editable-card-list';
 
 import { Index, QuerySet } from 'main/storage/query';
 import { Publication } from 'main/lists/models';
@@ -10,6 +11,8 @@ import { Message, AmendmentMessage } from 'main/issues/messages';
 import { getRunningAnnexesForIssue } from '../running-annexes';
 
 import { NewMessagePromptProps } from './message-editor';
+
+import * as editableCardListStyles from 'renderer/app/widgets/editable-card-list/styles.scss';
 import * as styles from './styles.scss';
 
 
@@ -62,7 +65,7 @@ export const NewAmendmentPrompt: React.FC<NewAmendmentPromptProps> = function (p
         wrapperTagName: 'div',
         targetTagName: 'div',
       }}
-      className={styles.addMessageTriggerContainer}
+      className={editableCardListStyles.addCardTriggerContainer}
       initialContent={filterUsageTip}
       items={items}
       itemRenderer={NewAmendmentMenuItemRenderer}
@@ -75,7 +78,7 @@ export const NewAmendmentPrompt: React.FC<NewAmendmentPromptProps> = function (p
       }}
       onItemSelect={(pub: AmendablePublication) =>
         props.handleNewMessage(createAmendmentMessage(pub), props.idx)}
-    ><Button icon="plus" className={styles.addMessageTrigger} /></NewAmendmentSelector>
+    ><AddCardTriggerButton /></NewAmendmentSelector>
   );
 };
 

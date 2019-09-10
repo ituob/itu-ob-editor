@@ -1,0 +1,66 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
+.addCardTriggerContainer {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  z-index: 4;
+
+  &:hover {
+    cursor: pointer;
+  }
+
+  .addCardTrigger {
+    border-radius: 100% !important;
+    background: white !important;
+
+    transform: scale(0.6);
+
+    &:hover {
+      transform: scale(0.8);
+    }
+  }
+
+  // Hack to preserve external class name
+  :global .bp3-active {
+    transform: scale(1) !important;
+  }
+}
+
+.editableCard {
+  $deleteButtonW: 4em;
+
+  -webkit-app-region: no-drag;
+
+  border-radius: 0 !important;
+  flex: 1;
+
+  height: $pt-navbar-height;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+
+  position: relative;
+  padding: 0 20px !important;
+  padding-right: $deleteButtonW + .5em !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &:hover {
+    cursor: pointer;
+  }
+  .editableCardDeleteButton {
+    width: $deleteButtonW;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 .5em !important;
+  }
+}
+.editableCardSelected {
+  background: $light-gray2 !important;
+}

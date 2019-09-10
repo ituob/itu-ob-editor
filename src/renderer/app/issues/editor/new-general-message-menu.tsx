@@ -1,11 +1,14 @@
 import React from 'react';
-import { Popover, Button, Menu } from '@blueprintjs/core';
+import { Popover, Menu } from '@blueprintjs/core';
+import { AddCardTriggerButton } from 'renderer/app/widgets/editable-card-list';
 
 import { OBIssue } from 'main/issues/models';
 import { Message, MessageType } from 'main/issues/messages';
 
 import { NewMessagePromptProps } from './message-editor';
 import { getMessageTypeTitle } from './messages';
+
+import * as editableCardListStyles from 'renderer/app/widgets/editable-card-list/styles.scss';
 import * as styles from './styles.scss';
 
 
@@ -14,14 +17,14 @@ export const NewGeneralMessagePrompt: React.FC<NewMessagePromptProps> = function
     <Popover
       wrapperTagName={'div'}
       targetTagName={'div'}
-      className={styles.addMessageTriggerContainer}
+      className={editableCardListStyles.addCardTriggerContainer}
       content={
         <NewGeneralMessageMenu
           issue={props.issue}
           onCreate={(msg: Message) => props.handleNewMessage(msg, props.idx)}
         />
       }
-    ><Button icon="plus" className={styles.addMessageTrigger} /></Popover>
+    ><AddCardTriggerButton /></Popover>
   );
 };
 
