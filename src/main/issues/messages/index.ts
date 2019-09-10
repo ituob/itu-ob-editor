@@ -2,6 +2,7 @@ import { AmendmentMessage } from './amendment';
 import { ApprovedRecommendationsMessage } from './approved_recommendations';
 import { RunningAnnexesMessage } from './running_annexes';
 import { TelephoneServiceMessage } from './telephone_service';
+import { TelephoneServiceMessageV2 } from './telephone_service_2';
 
 
 export interface CustomMessage {
@@ -22,6 +23,7 @@ export type Message =
   ApprovedRecommendationsMessage |
   RunningAnnexesMessage |
   TelephoneServiceMessage |
+  TelephoneServiceMessageV2 |
   ServiceRestrictionsMessage |
   CallbackProceduresMessage |
   AmendmentMessage |
@@ -49,6 +51,9 @@ export function isRunningAnnexes(msg: Message): msg is RunningAnnexesMessage {
 export function isTelephoneService(msg: Message): msg is TelephoneServiceMessage {
   return msg.type === 'telephone_service';
 }
+export function isTelephoneServiceV2(msg: Message): msg is TelephoneServiceMessageV2 {
+  return msg.type === 'telephone_service_2';
+}
 export function isAmendment(msg: Message): msg is AmendmentMessage {
   return msg.type === 'amendment';
 }
@@ -57,6 +62,7 @@ export function isAmendment(msg: Message): msg is AmendmentMessage {
 export {
   ApprovedRecommendationsMessage,
   TelephoneServiceMessage,
+  TelephoneServiceMessageV2,
   AmendmentMessage,
   RunningAnnexesMessage,
 }

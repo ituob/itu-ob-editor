@@ -11,6 +11,8 @@ export function getMessageTypeTitle(type: MessageType): string {
     return  "Approved Recommendations";
   } else if (type === 'running_annexes') {
     return "Lists Annexed";
+  } else if (type === 'telephone_service_2') {
+    return "Telephone Service";
   } else if (type === 'telephone_service') {
     return "Telephone Service";
   } else if (type === 'callback_procedures') {
@@ -29,6 +31,8 @@ export function getMessageTypeTitle(type: MessageType): string {
 export function getMessageSubtitle(msg: Message): string | undefined {
   if (msg.type === 'amendment') {
     return `to ${((msg as AmendmentMessage).target || {}).publication}`;
+  } else if (msg.type === 'telephone_service') {
+    return "(old)";
   }
   return undefined;
 }

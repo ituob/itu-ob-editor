@@ -43,9 +43,9 @@ const NewGeneralMessageMenu: React.FC<NewGeneralMessageMenuProps> = function (pr
 
       <Menu.Item
         key="telephone_service"
-        text={getMessageTypeTitle('telephone_service')}
+        text={getMessageTypeTitle('telephone_service_2')}
         onClick={() => props.onCreate({
-          type: 'telephone_service',
+          type: 'telephone_service_2',
           contents: [],
         })}
       />

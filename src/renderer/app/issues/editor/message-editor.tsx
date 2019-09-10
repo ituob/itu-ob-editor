@@ -10,12 +10,12 @@ import {
   isApprovedRecommendations,
   isRunningAnnexes,
   isAmendment,
-  isTelephoneService,
+  isTelephoneServiceV2,
 } from 'main/issues/messages';
 
 import { ApprovedRecommendationsEditor } from './messages/approved_recommendations';
 import { RunningAnnexesEditor } from './messages/running_annexes';
-import { TelephoneServiceMessageEditor } from './messages/telephone_service';
+import { TelephoneServiceMessageEditorV2 } from './messages/telephone_service_2';
 import { AmendmentEditor } from './messages/amendment';
 
 import * as styles from './styles.scss';
@@ -50,8 +50,8 @@ export function getMessageEditor(msg: Message): React.FC<MessageEditorProps> {
     return ApprovedRecommendationsEditor;
   } else if (isRunningAnnexes(msg)) {
     return RunningAnnexesEditor;
-  } else if (isTelephoneService(msg)) {
-    return TelephoneServiceMessageEditor;
+  } else if (isTelephoneServiceV2(msg)) {
+    return TelephoneServiceMessageEditorV2;
   } else if (isAmendment(msg)) {
     return AmendmentEditor;
   } else {
