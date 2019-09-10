@@ -4,7 +4,6 @@ import * as fs from 'fs-extra';
 import { YAMLStorage } from 'main/storage/yaml';
 import { OBIssue } from 'main/issues/models';
 import { Message } from 'main/issues/messages';
-import { isTelephoneService } from 'main/issues/messages';
 import { ITURecommendation } from 'main/recommendations/models';
 import { Publication } from 'main/lists/models';
 
@@ -99,12 +98,13 @@ export class IssueManager extends StoreManager<OBIssue> {
     }
 
     obj.general.messages = obj.general.messages.map((msg: Message) => {
-      if (isTelephoneService(msg)) {
-        if (!msg.contents.map) {
-          console.warn(`Incompatible Telephone Service message contents type: ${obj.id}`);
-          msg.contents = [];
-        }
-      }
+      // Validate issue messages. TODO (#10): Make part of message plugin definition.
+      // if (isTelephoneServiceV2(msg)) {
+      //   if (!msg.contents.map) {
+      //     console.warn(`Incompatible Telephone Service message contents type: ${obj.id}`);
+      //     msg.contents = [];
+      //   }
+      // }
       return msg;
     });
 
