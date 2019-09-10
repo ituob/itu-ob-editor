@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { H4, Card, Label, Button, FormGroup, InputGroup, TextArea } from '@blueprintjs/core';
+import { H4, Label, Button, FormGroup, InputGroup, TextArea } from '@blueprintjs/core';
+import { AddCardTrigger, SimpleEditableCard } from 'renderer/app/widgets/editable-card-list';
 import { DatePicker } from '@blueprintjs/datetime';
 
 import {
@@ -65,9 +66,11 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
 
   return (
     <>
-      <AddCountryPrompt
+      <h2 key="paneHeader" className={styles.issueSectionHeader}>Telephone Service</h2>
+
+      <AddCardTrigger
         key="addFirstCountry"
-        onOpen={() => {
+        onClick={() => {
           setActiveCountryIdx(0);
           toggleNewCountryDialogState(true);
         }}
@@ -76,7 +79,10 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
       {countryCommSets.length > 0
         ? countryCommSets.map((countryCommSet: TSCountryCommunicationSet, countryIdx: number) => (
           <>
-            <Card className={styles.tsCountryCommunicationSet} key={countryIdx}>
+            <SimpleEditableCard extended={true} key={countryIdx} onDelete={() => {
+              countryCommSets.splice(countryIdx, 1);
+              _onChange();
+            }}>
               <H4>
                 {countryCommSet.country_name}
                 &emsp;
@@ -93,17 +99,6 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
                       toggleEditCountryDialogState(true);
                     }}
                   />
-
-                  <Button
-                    icon="delete"
-                    small={true}
-                    minimal={true}
-                    intent="danger"
-                    title="Delete country"
-                    onClick={() => {
-                      countryCommSets.splice(countryIdx, 1);
-                      _onChange();
-                    }}>Delete</Button>
                 </span>
 
                 <AddCommunicationPrompt
@@ -131,6 +126,18 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
                             toggleEditCommDialogState(true);
                           }}
                         />
+
+                        <Button
+                          icon="delete"
+                          small={true}
+                          minimal={true}
+                          intent="danger"
+                          title="Delete communication"
+                          onClick={() => {
+                            countryCommSet.communications.splice(commIdx, 1);
+                            _onChange();
+                          }}>Delete</Button>
+
                         <AddCommunicationPrompt
                           key="addCommAfter"
                           title={<>Comm.</>}
@@ -144,11 +151,11 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
                     </>))
                   : ''}
               </div>
-            </Card>
+            </SimpleEditableCard>
 
-            <AddCountryPrompt
-              key={`addCountryAfter-${countryIdx}`}
-              onOpen={() => {
+            <AddCardTrigger
+              key="addAnother"
+              onClick={() => {
                 setActiveCountryIdx(countryIdx + 1);
                 toggleNewCountryDialogState(true);
               }}
@@ -225,23 +232,6 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
 
 
 /* Prompts */
-
-
-interface AddCountryPromptProps {
-  onOpen: () => void,
-  title?: JSX.Element,
-}
-const AddCountryPrompt: React.FC<AddCountryPromptProps> = function ({ onOpen, title }) {
-  return (
-    <Button
-      className={styles.addCountryTrigger}
-      minimal={true}
-      intent="primary"
-      icon="plus"
-      small={true}
-      onClick={onOpen}>Add country</Button>
-  );
-};
 
 
 interface EditCountryPromptProps {
