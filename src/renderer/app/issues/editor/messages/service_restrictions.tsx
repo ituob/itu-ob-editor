@@ -78,9 +78,6 @@ interface AddSRItemDialogProps {
   onClose: () => void,
 }
 const AddSRItemDialog: React.FC<AddSRItemDialogProps> = function ({ isOpen, title, onSave, onClose }) {
-  //const initialOb: number | null = null;
-  // const initialPage: number | null = null;
-
   const [country, setCountry] = useState('');
   const [ob, setOb] = useState(undefined as number | undefined);
   const [page, setPage] = useState(undefined as number | undefined);
