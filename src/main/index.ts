@@ -11,6 +11,7 @@ import { initRepo, GitController } from './storage/git';
 import { reviveJsonValue } from './storage/api';
 import { QuerySet, sortIntegerAscending, sortIntegerDescending } from './storage/query';
 import { OBIssue } from './issues/models';
+import { MessageTypeRegistry } from './issues/messages/registry';
 
 
 const APP_TITLE = "ITU OB editor";
@@ -19,6 +20,9 @@ const APP_TITLE = "ITU OB editor";
 const WORK_DIR = path.join(app.getPath('userData'), 'itu-ob-data');
 const REPO_URL = 'https://github.com/ituob/itu-ob-data';
 const CORS_PROXY_URL = 'https://cors.isomorphic-git.org';
+
+
+export const obMessageTypeRegistry = new MessageTypeRegistry();
 
 
 // Ensure only one instance of the app can run at a time on given user’s machine

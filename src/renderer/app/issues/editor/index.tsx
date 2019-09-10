@@ -4,9 +4,10 @@ import { Workspace } from 'main/storage';
 import { OBIssue } from 'main/issues/models';
 import { Message } from 'main/issues/messages';
 
+import { obMessageTypeRegistry } from 'main';
+
 import { useWorkspace, useWorkspaceRO } from 'renderer/app/storage/api';
 import { reducer } from './reducer';
-import { getMessageEditor } from './message-editor';
 import { NewGeneralMessagePrompt } from './new-general-message-menu';
 import { NewAmendmentPrompt } from './new-amendment-menu';
 import { MessageItem } from './message-list-item';
@@ -78,7 +79,10 @@ export function IssueEditor(props: IssueEditorProps) {
       <div className={styles.messageListPane}>
 
         <h2 className={styles.issueSectionHeader}>General</h2>
-        <NewGeneralMessagePrompt idx={0} issue={issue} handleNewMessage={handleNewGeneralMessage} />
+        <NewGeneralMessagePrompt
+          idx={0}
+          issue={issue}
+          handleNewMessage={handleNewGeneralMessage} />
         {[...issue.general.messages.entries()].map(([idx, msg]: [number, Message]) => (
           <React.Fragment>
             <MessageItem
@@ -93,7 +97,10 @@ export function IssueEditor(props: IssueEditorProps) {
                 selectMessage(undefined);
               }}
             />
-            <NewGeneralMessagePrompt idx={idx + 1} issue={issue} handleNewMessage={handleNewGeneralMessage} />
+            <NewGeneralMessagePrompt
+              idx={idx + 1}
+              issue={issue}
+              handleNewMessage={handleNewGeneralMessage} />
           </React.Fragment>
         ))}
 
@@ -160,7 +167,7 @@ export function IssueEditor(props: IssueEditorProps) {
 
 function MessageEditor(props: any) {
   if (props.message) {
-    const EditorCls = getMessageEditor(props.message);
+    const EditorCls = obMessageTypeRegistry.getPlugin(props.message).getEditor();
     return (
       <EditorCls
         workspace={props.workspace}

@@ -1,7 +1,42 @@
-import { AmendmentMessage } from './amendment';
-import { ApprovedRecommendationsMessage } from './approved_recommendations';
-import { RunningAnnexesMessage } from './running_annexes';
-import { TelephoneServiceMessage } from './telephone_service';
+import { obMessageTypeRegistry } from 'main';
+
+import {
+  MessageModel as AmendmentMessage,
+  msgType as amendmentMsgPlugin,
+} from './amendment';
+
+import {
+  MessageModel as ApprovedRecommendationsMessage,
+  msgType as approvedRecommendationsMsgPlugin,
+} from './approved_recommendations';
+
+import {
+  MessageModel as RunningAnnexesMessage,
+  msgType as runningAnnexesMsgPlugin,
+} from './running_annexes';
+
+import {
+  MessageModel as TelephoneServiceMessage,
+  msgType as telephoneServiceMsgPlugin,
+} from './telephone_service';
+
+import {
+  MessageModel as TelephoneService2Message,
+  msgType as telephoneService2MsgPlugin,
+} from './telephone_service_2';
+
+
+const msgTypePlugins = [
+  amendmentMsgPlugin,
+  approvedRecommendationsMsgPlugin,
+  runningAnnexesMsgPlugin,
+  telephoneServiceMsgPlugin,
+  telephoneService2MsgPlugin,
+];
+
+for (let plugin of msgTypePlugins) {
+  obMessageTypeRegistry.register('running_annexes', plugin);
+}
 
 
 export interface CustomMessage {
@@ -22,6 +57,7 @@ export type Message =
   ApprovedRecommendationsMessage |
   RunningAnnexesMessage |
   TelephoneServiceMessage |
+  TelephoneService2Message |
   ServiceRestrictionsMessage |
   CallbackProceduresMessage |
   AmendmentMessage |
@@ -51,12 +87,4 @@ export function isTelephoneService(msg: Message): msg is TelephoneServiceMessage
 }
 export function isAmendment(msg: Message): msg is AmendmentMessage {
   return msg.type === 'amendment';
-}
-
-
-export {
-  ApprovedRecommendationsMessage,
-  TelephoneServiceMessage,
-  AmendmentMessage,
-  RunningAnnexesMessage,
 }

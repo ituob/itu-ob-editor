@@ -5,7 +5,7 @@ import { OBIssue } from 'main/issues/models';
 import { Message, MessageType } from 'main/issues/messages';
 
 import { NewMessagePromptProps } from './message-editor';
-import { getMessageTypeTitle } from './messages';
+import { obMessageTypes } from 'main';
 import * as styles from './styles.scss';
 
 
@@ -43,15 +43,15 @@ const NewGeneralMessageMenu: React.FC<NewGeneralMessageMenuProps> = function (pr
 
       <Menu.Item
         key="telephone_service"
-        text={getMessageTypeTitle('telephone_service')}
+        text={obMessageTypes.getPlugin('telephone_service_2').promptTitle}
         onClick={() => props.onCreate({
-          type: 'telephone_service',
+          type: 'telephone_service_2',
           contents: [],
         })}
       />
       <Menu.Item
         key="custom"
-        text={getMessageTypeTitle('custom')}
+        text={obMessageTypes.getPlugin('custom').promptTitle}
         onClick={() => props.onCreate({
           type: 'custom',
           contents: {},
@@ -61,7 +61,7 @@ const NewGeneralMessageMenu: React.FC<NewGeneralMessageMenuProps> = function (pr
       <Menu.Divider />
       <Menu.Item
         key="service_restrictions"
-        text={getMessageTypeTitle('service_restrictions')}
+        text={obMessageTypes.getPlugin('service_restrictions').promptTitle}
         disabled={alreadyExists('service_restrictions')}
         onClick={() => props.onCreate({
           type: 'service_restrictions',
@@ -70,7 +70,7 @@ const NewGeneralMessageMenu: React.FC<NewGeneralMessageMenuProps> = function (pr
       />
       <Menu.Item
         key="callback_procedures"
-        text={getMessageTypeTitle('callback_procedures')}
+        text={obMessageTypes.getPlugin('callback_procedures').promptTitle}
         disabled={alreadyExists('callback_procedures')}
         onClick={() => props.onCreate({
           type: 'callback_procedures',
@@ -80,7 +80,7 @@ const NewGeneralMessageMenu: React.FC<NewGeneralMessageMenuProps> = function (pr
       <Menu.Divider />
       <Menu.Item
         key="approved_recommendations"
-        text={getMessageTypeTitle('approved_recommendations')}
+        text={obMessageTypes.getPlugin('approved_recommendations').promptTitle}
         disabled={alreadyExists('approved_recommendations')}
         onClick={() => props.onCreate({
           type: 'approved_recommendations',
@@ -89,7 +89,7 @@ const NewGeneralMessageMenu: React.FC<NewGeneralMessageMenuProps> = function (pr
       />
       <Menu.Item
         key="running_annexes"
-        text={getMessageTypeTitle('running_annexes')}
+        text={obMessageTypes.getPlugin('running_annexes').promptTitle}
         disabled={existing.filter(msg => msg.type === 'running_annexes').length > 0}
         onClick={() => props.onCreate({
           type: 'running_annexes',

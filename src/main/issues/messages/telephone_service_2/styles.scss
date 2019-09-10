@@ -1,0 +1,44 @@
+@mixin tsAddItemTrigger() {
+  border-radius: 0 !important;
+}
+
+.addCommTrigger {
+  @include tsAddItemTrigger();
+}
+
+.addCountryTrigger {
+  @include tsAddItemTrigger();
+  width: 100%;
+}
+
+.tsCountryCommunicationSet {
+  border-radius: 0 !important;
+}
+
+.tsCountryCommunicationEditor {
+  display: flex;
+  flex-flow: row nowrap;
+
+  > :first-child {
+    margin-right: 1rem;
+  }
+}
+
+.tsCommunication {
+  color: red;
+  border-radius: 0 !important;
+  overflow: hidden;
+
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+}
+
+.tsCountryButtons {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+}
+
+.tsCommunicationList {
+}

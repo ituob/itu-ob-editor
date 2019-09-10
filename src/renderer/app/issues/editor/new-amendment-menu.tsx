@@ -5,8 +5,8 @@ import { Select, ItemPredicate, ItemRenderer, ItemListRenderer, renderFilteredIt
 import { Index, QuerySet } from 'main/storage/query';
 import { Publication } from 'main/lists/models';
 import { OBIssue } from 'main/issues/models';
-import { Message, AmendmentMessage } from 'main/issues/messages';
-
+import { Message } from 'main/issues/messages';
+import { MessageModel as AmendmentMessage } from 'main/issues/messages/amendment'; 
 import { getRunningAnnexesForIssue } from '../running-annexes';
 
 import { NewMessagePromptProps } from './message-editor';

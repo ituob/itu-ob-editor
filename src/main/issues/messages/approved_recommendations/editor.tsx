@@ -3,10 +3,10 @@ import { Card, Drawer, H5, Position, Navbar, NavbarGroup, Button, InputGroup } f
 
 import { ApprovedRecommendationsMessage } from 'main/issues/messages/approved_recommendations';
 
-import { MessageEditorProps } from '../message-editor';
+import { MessageEditorProps } from '../base';
 
 
-export const ApprovedRecommendationsEditor: React.FC<MessageEditorProps> = function (props) {
+export const Editor: React.FC<MessageEditorProps> = function (props) {
   const [ addDialogStatus, updateAddDialogStatus ] = useState(false);
   const [ newRecCode, updateNewRecCode ] = useState('');
   const [ newRecVersion, updateNewRecVersion ] = useState('');

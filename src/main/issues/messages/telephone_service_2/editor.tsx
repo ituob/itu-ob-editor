@@ -6,14 +6,14 @@ import {
   TSCommunication,
   TSCountryCommunicationSet,
   TelephoneServiceMessage,
-} from 'main/issues/messages/telephone_service';
+} from '.';
 
 import { DateStamp } from 'renderer/app/dates';
 
-import { FreeformContents } from '../freeform-contents';
-import { MessageEditorProps, MessageEditorDialog } from '../message-editor';
+import { FreeformContents } from 'renderer/app/issues/editor/freeform-contents';
+import { MessageEditorProps, MessageEditorDialog } from 'renderer/app/issues/editor/message-editor';
 
-import * as styles from '../styles.scss';
+import * as styles from './styles.scss';
 
 
 function getNewCommStub(): TSCommunication {

@@ -1,12 +1,12 @@
 import React from 'react';
 import { Card, Button } from '@blueprintjs/core';
 
+import { FreeformContents } from 'renderer/app/issues/editor/freeform-contents';
 import { AmendmentMessage } from 'main/issues/messages/amendment';
-import { FreeformContents } from '../freeform-contents';
-import { MessageEditorProps } from '../message-editor';
+import { MessageEditorProps } from '../base';
 
 
-export const AmendmentEditor: React.FC<MessageEditorProps> = function ({ message, onChange }) {
+export const Editor: React.FC<MessageEditorProps> = function ({ message, onChange }) {
   var doc = Object.assign({}, (message as AmendmentMessage).contents);
 
   return (
@@ -32,4 +32,4 @@ export const AmendmentEditor: React.FC<MessageEditorProps> = function ({ message
       />
     </Card>
   );
-}
+};

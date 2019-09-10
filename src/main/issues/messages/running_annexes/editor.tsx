@@ -5,10 +5,11 @@ import { RunningAnnexesMessage } from 'main/issues/messages/running_annexes';
 
 import { DateStamp } from 'renderer/app/dates';
 import { RunningAnnex, getRunningAnnexesForIssue } from 'renderer/app/issues/running-annexes';
-import { MessageEditorProps } from '../message-editor';
+
+import { MessageEditorProps } from '../base';
 
 
-export const RunningAnnexesEditor: React.FC<MessageEditorProps> = function (props) {
+export const Editor: React.FC<MessageEditorProps> = function (props) {
   const extraPublicationIDs = (props.message as RunningAnnexesMessage).extra_links;
   const runningAnnexes = getRunningAnnexesForIssue(
     props.issue,
@@ -38,4 +39,3 @@ export const RunningAnnexesEditor: React.FC<MessageEditorProps> = function (prop
     </React.Fragment>
   );
 };
-
