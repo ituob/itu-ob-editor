@@ -38,18 +38,6 @@
 
   cursor: default;
   -webkit-app-region: drag;
-
-  &:before {
-    content: " ";
-    display: block;
-    position: fixed;
-    z-index: 3;
-    top: 0;
-    left: 0;
-    width: $paneWidth;
-    height: $topDraggableRegionHeight;
-    -webkit-app-region: drag;
-  }
 }
 .selectedMessagePane {
   flex: 1;
