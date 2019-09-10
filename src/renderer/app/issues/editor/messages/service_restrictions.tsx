@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Card, Label, Button, InputGroup, Text } from '@blueprintjs/core';
+import { Label, Button, InputGroup } from '@blueprintjs/core';
+import { AddCardTrigger, SimpleEditableCard } from 'renderer/app/widgets/editable-card-list';
 
 import { ServiceRestrictionsMessage, SRItem } from 'main/issues/messages/service_restrictions';
 
@@ -22,23 +23,33 @@ export const MessageEditor: React.FC<MessageEditorProps> = function ({ message, 
     <>
       <h2 className={styles.issueSectionHeader}>Service Restrictions</h2>
       <>
-        <AddSRItemPrompt
+        <AddCardTrigger
           key="addFirstItem"
-          onOpen={() => {
+          onClick={() => {
             setActiveItemIdx(0);
             toggleNewItemDialogState(true);
-          }}
-        />
+          }} />
         {items.map((item: SRItem, idx: number) => (
-          <Card key={idx}>
-            <Text ellipsize={true}>
-              {item.country}
-              —
-              {item.ob}
-              —
-              {item.page}
-            </Text>
-          </Card>
+          <>
+            <SimpleEditableCard
+                key={idx}
+                onDelete={() => {
+                  updateItems(items => { items.splice(idx, 1); return items; })
+                  _onChange();
+                }}>
+              <strong>{item.country}</strong>
+              &emsp;
+              OB No. {item.ob},
+              p. {item.page}
+            </SimpleEditableCard>
+
+            <AddCardTrigger
+              key="addItem"
+              onClick={() => {
+                setActiveItemIdx(idx + 1);
+                toggleNewItemDialogState(true);
+              }} />
+          </>
         ))}
       </>
 
@@ -56,21 +67,6 @@ export const MessageEditor: React.FC<MessageEditorProps> = function ({ message, 
           />
         : ''}
     </>
-  );
-};
-
-
-interface AddSRItemPromptProps {
-  onOpen: () => void,
-}
-const AddSRItemPrompt: React.FC<AddSRItemPromptProps> = function ({ onOpen }) {
-  return (
-    <Button
-      className={styles.addCountryTrigger}
-      minimal={true}
-      intent="primary"
-      icon="plus"
-      onClick={onOpen} />
   );
 };
 
