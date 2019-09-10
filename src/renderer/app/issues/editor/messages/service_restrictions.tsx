@@ -94,7 +94,6 @@ const AddSRItemDialog: React.FC<AddSRItemDialogProps> = function ({ isOpen, titl
         title={title}
         isOpen={isOpen}
         onClose={onClose}
-        width="95vw"
         saveButton={
           <Button
             intent="primary"
