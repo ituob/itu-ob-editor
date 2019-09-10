@@ -80,7 +80,7 @@ export function IssueEditor(props: IssueEditorProps) {
         <h2 className={styles.issueSectionHeader}>General</h2>
         <NewGeneralMessagePrompt idx={0} issue={issue} handleNewMessage={handleNewGeneralMessage} />
         {[...issue.general.messages.entries()].map(([idx, msg]: [number, Message]) => (
-          <React.Fragment>
+          <>
             <MessageItem
               selected={idx == selectedMessage && selectedSection === 'general'}
               message={msg}
@@ -94,7 +94,7 @@ export function IssueEditor(props: IssueEditorProps) {
               }}
             />
             <NewGeneralMessagePrompt idx={idx + 1} issue={issue} handleNewMessage={handleNewGeneralMessage} />
-          </React.Fragment>
+          </>
         ))}
 
         <h2 className={styles.issueSectionHeader}>Amendments</h2>
@@ -105,7 +105,7 @@ export function IssueEditor(props: IssueEditorProps) {
           publicationIndex={ws.publications}
           handleNewMessage={handleNewAmendment} />
         {[...issue.amendments.messages.entries()].map(([idx, msg]: [number, Message]) => (
-          <React.Fragment>
+          <>
             <MessageItem
               selected={idx == selectedMessage && selectedSection === 'amendments'}
               message={msg}
@@ -124,7 +124,7 @@ export function IssueEditor(props: IssueEditorProps) {
               issueIndex={ws.issues}
               publicationIndex={ws.publications}
               handleNewMessage={handleNewAmendment} />
-          </React.Fragment>
+          </>
         ))}
 
       </div>
