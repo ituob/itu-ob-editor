@@ -15,7 +15,7 @@ import {
 } from 'main/issues/messages';
 
 import { ApprovedRecommendationsEditor } from './messages/approved_recommendations';
-import { RunningAnnexesEditor } from './messages/running_annexes';
+import { MessageEditor as RunningAnnexesEditor } from './messages/running_annexes';
 import { TelephoneServiceMessageEditorV2 } from './messages/telephone_service_2';
 import { AmendmentEditor } from './messages/amendment';
 import { MessageEditor as ServiceRestrictionsMessageEditor } from './messages/service_restrictions';

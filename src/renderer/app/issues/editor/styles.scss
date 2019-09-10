@@ -87,3 +87,9 @@
     margin-bottom: 0;
   }
 }
+
+.messageEditorTabs {
+  :global .bp3-tab-list {
+    margin: 0 1rem;
+  }
+}
