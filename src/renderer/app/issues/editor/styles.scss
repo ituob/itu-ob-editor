@@ -27,6 +27,7 @@
     overflow-y: auto;
   }
 }
+
 .messageListPane {
   $paneWidth: 20em;
 
@@ -40,6 +41,7 @@
   cursor: default;
   -webkit-app-region: drag;
 }
+
 .selectedMessagePane {
   flex: 1;
   box-shadow: $pt-elevation-shadow-1;
