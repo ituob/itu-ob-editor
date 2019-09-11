@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Spinner } from '@blueprintjs/core';
 
 import { Workspace } from 'main/storage';
 import { OBIssue } from 'main/issues/models';
@@ -35,7 +36,7 @@ export function IssueEditor(props: IssueEditorProps) {
     useState(initialMessage);
     useState(initialSection);
 
-    return <p>Loading…</p>;
+    return <Spinner className={styles.spinner} />;
   }
 
   const issue = maybeIssue as OBIssue;

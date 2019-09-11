@@ -1,5 +1,13 @@
 @import "~@blueprintjs/core/lib/scss/variables";
 
+.spinner {
+  position: absolute;
+  display: block;
+  top: 50%;
+  left: 50%;
+  transform: translateY(-50%) translateX(-50%);
+}
+
 .twoPaneEditor {
   display: flex;
   flex-flow: row nowrap;
