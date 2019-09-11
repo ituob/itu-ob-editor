@@ -67,7 +67,7 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
 
   return (
     <>
-      <PaneHeader>Telephone Service</PaneHeader>
+      <PaneHeader align="left">Telephone Service</PaneHeader>
 
       <AddCardTrigger
         key="addFirstCountry"

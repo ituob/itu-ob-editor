@@ -5,16 +5,16 @@ import * as styles from './styles.scss';
 interface PaneHeaderProps {
   loud?: boolean,
   headingLevel?: number,
-  alignment?: 'left' | 'right',
+  align?: 'left' | 'right',
   className?: string,
 }
 export const PaneHeader: React.FC<PaneHeaderProps> = function (props) {
   const HeadingTag = `h${props.headingLevel || 2}`;
 
   let alignmentClass: string;
-  if (props.alignment === 'left') {
+  if (props.align === 'left') {
     alignmentClass = styles.paneHeaderAlignedLeft;
-  } else if (props.alignment === 'right') {
+  } else if (props.align === 'right') {
     alignmentClass = styles.paneHeaderAlignedRight;
   } else {
     alignmentClass = '';

@@ -79,10 +79,10 @@ export function IssueEditor(props: IssueEditorProps) {
   return (
     <div className={styles.twoPaneEditor}>
       <div className={styles.messageListPane}>
-        <PaneHeader alignment="right" loud={true} className={styles.paneHeader}>No. {issue.id}</PaneHeader>
+        <PaneHeader align="right" loud={true} className={styles.paneHeader}>No. {issue.id}</PaneHeader>
 
         <div className={styles.paneBody}>
-          <PaneHeader alignment="left">General messages</PaneHeader>
+          <PaneHeader align="left">General messages</PaneHeader>
           <NewGeneralMessagePrompt idx={0} issue={issue} handleNewMessage={handleNewGeneralMessage} />
 
           {[...issue.general.messages.entries()].map(([idx, msg]: [number, Message]) => (
@@ -103,7 +103,7 @@ export function IssueEditor(props: IssueEditorProps) {
             </>
           ))}
 
-          <PaneHeader alignment="left">Amendments</PaneHeader>
+          <PaneHeader align="left">Amendments</PaneHeader>
           <NewAmendmentPrompt
             idx={0}
             issue={issue}

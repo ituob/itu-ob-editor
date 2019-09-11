@@ -12,7 +12,7 @@ export const AmendmentEditor: React.FC<MessageEditorProps> = function ({ message
 
   return (
     <>
-      <PaneHeader>Amendment</PaneHeader>
+      <PaneHeader align="left">Amendment</PaneHeader>
 
       <Card>
         <FreeformContents

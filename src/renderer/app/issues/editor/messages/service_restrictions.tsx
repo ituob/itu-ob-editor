@@ -21,7 +21,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = function ({ message, 
 
   return (
     <>
-      <PaneHeader>Service Restrictions</PaneHeader>
+      <PaneHeader align="left">Service Restrictions</PaneHeader>
       <>
         <AddCardTrigger
           key="addFirstItem"

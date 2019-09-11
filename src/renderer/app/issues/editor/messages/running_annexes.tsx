@@ -26,7 +26,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = function (props) {
 
   return (
     <>
-      <PaneHeader className={styles.paneHeader}>Lists Annexed</PaneHeader>
+      <PaneHeader align="left">Lists Annexed</PaneHeader>
 
       <Tabs className={`${styles.messageEditorTabs} ${styles.paneBody}`}>
         <Tab
