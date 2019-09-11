@@ -138,7 +138,11 @@ class RecommendationManager extends StoreManager<ITURecommendation> {
 }
 
 
-export interface Workspace {
+interface WorkspaceBase {
+  [indexName: string]: Index<any>
+}
+
+export interface Workspace extends WorkspaceBase {
   publications: Index<Publication>,
   recommendations: Index<ITURecommendation>,
   issues: Index<OBIssue>,
