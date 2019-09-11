@@ -9,6 +9,7 @@ export interface SRItem {
   page: number,
 }
 
+
 export interface ServiceRestrictionsMessage {
   type: "service_restrictions",
   items: SRItem[],

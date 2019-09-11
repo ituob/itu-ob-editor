@@ -5,6 +5,7 @@ import { Translatable } from 'renderer/app/localizer';
 
 export type PublicationID = string;
 
+
 export interface Publication extends IndexableObject {
   title: Translatable,
   id: PublicationID,

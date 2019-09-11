@@ -6,12 +6,14 @@ export interface TSCommunication {
   contents: any,
 }
 
+
 export interface TSCountryCommunicationSet {
   country_name: string,
   phone_code: string,
   communications: TSCommunication[],
   contact: string,
 }
+
 
 export interface TelephoneServiceMessageV2 {
   type: "telephone_service_2",
