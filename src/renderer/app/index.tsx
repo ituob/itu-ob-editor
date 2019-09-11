@@ -16,6 +16,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
   return (
     <div className={styles.homeMenuContainer}>
       <ButtonGroup
+          className={styles.mainButtonGroup}
           large={true}
           vertical={true}
           fill={true}>
