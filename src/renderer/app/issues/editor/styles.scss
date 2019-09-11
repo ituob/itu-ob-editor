@@ -8,26 +8,37 @@
   transform: translateY(-50%) translateX(-50%);
 }
 
+.paneHeader {
+  box-shadow: $pt-elevation-shadow-1;
+  flex-grow: 0;
+  z-index: 5;
+}
+
+.paneBody {
+  overflow-y: auto;
+  flex: 1;
+  position: relative;
+  padding-bottom: 3rem;
+}
+
 .twoPaneEditor {
   display: flex;
   flex-flow: row nowrap;
   align-items: stretch;
   height: 100vh;
-
-  > * {
-    overflow-y: auto;
-  }
 }
 
 .messageListPane {
   $paneWidth: 20em;
 
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow-y: hidden;
+
   background: $pt-app-background-color;
   width: $paneWidth;
   position: relative;
-  padding-bottom: 3em;
+
+  display: flex;
+  flex-flow: column nowrap;
 
   cursor: default;
   -webkit-app-region: drag;
@@ -38,6 +49,7 @@
   box-shadow: $pt-elevation-shadow-3;
   position: relative;
   z-index: 2;
+  overflow-y: auto;
 }
 
 .newMessageMenu {

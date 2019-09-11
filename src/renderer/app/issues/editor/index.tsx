@@ -11,8 +11,8 @@ import { getMessageEditor } from './message-editor';
 import { NewGeneralMessagePrompt } from './new-general-message-menu';
 import { NewAmendmentPrompt } from './new-amendment-menu';
 import { MessageItem } from './message-list-item';
+import { PaneHeader } from 'renderer/app/widgets/pane-header';
 
-import * as widgetStyles from 'renderer/app/widgets/styles.scss';
 import * as styles from './styles.scss';
 
 
@@ -79,56 +79,60 @@ export function IssueEditor(props: IssueEditorProps) {
   return (
     <div className={styles.twoPaneEditor}>
       <div className={styles.messageListPane}>
+        <PaneHeader alignment="right" loud={true} className={styles.paneHeader}>No. {issue.id}</PaneHeader>
 
-        <h2 className={widgetStyles.paneHeader}>General</h2>
-        <NewGeneralMessagePrompt idx={0} issue={issue} handleNewMessage={handleNewGeneralMessage} />
-        {[...issue.general.messages.entries()].map(([idx, msg]: [number, Message]) => (
-          <>
-            <MessageItem
-              selected={idx == selectedMessage && selectedSection === 'general'}
-              message={msg}
-              onSelect={() => { selectMessage(idx); selectSection("general"); }}
-              onDelete={() => {
-                wsIssue.dispatch({
-                  type: 'REMOVE_GENERAL_MESSAGE',
-                  messageIndex: idx,
-                });
-                selectMessage(undefined);
-              }}
-            />
-            <NewGeneralMessagePrompt idx={idx + 1} issue={issue} handleNewMessage={handleNewGeneralMessage} />
-          </>
-        ))}
+        <div className={styles.paneBody}>
+          <PaneHeader alignment="left">General messages</PaneHeader>
+          <NewGeneralMessagePrompt idx={0} issue={issue} handleNewMessage={handleNewGeneralMessage} />
 
-        <h2 className={widgetStyles.paneHeader}>Amendments</h2>
-        <NewAmendmentPrompt
-          idx={0}
-          issue={issue}
-          issueIndex={ws.issues}
-          publicationIndex={ws.publications}
-          handleNewMessage={handleNewAmendment} />
-        {[...issue.amendments.messages.entries()].map(([idx, msg]: [number, Message]) => (
-          <>
-            <MessageItem
-              selected={idx == selectedMessage && selectedSection === 'amendments'}
-              message={msg}
-              onSelect={() => { selectMessage(idx); selectSection("amendments"); }}
-              onDelete={() => {
-                wsIssue.dispatch({
-                  type: 'REMOVE_AMENDMENT_MESSAGE',
-                  messageIndex: idx,
-                });
-                selectMessage(undefined);
-              }}
-            />
-            <NewAmendmentPrompt
-              idx={idx + 1}
-              issue={issue}
-              issueIndex={ws.issues}
-              publicationIndex={ws.publications}
-              handleNewMessage={handleNewAmendment} />
-          </>
-        ))}
+          {[...issue.general.messages.entries()].map(([idx, msg]: [number, Message]) => (
+            <>
+              <MessageItem
+                selected={idx == selectedMessage && selectedSection === 'general'}
+                message={msg}
+                onSelect={() => { selectMessage(idx); selectSection("general"); }}
+                onDelete={() => {
+                  wsIssue.dispatch({
+                    type: 'REMOVE_GENERAL_MESSAGE',
+                    messageIndex: idx,
+                  });
+                  selectMessage(undefined);
+                }}
+              />
+              <NewGeneralMessagePrompt idx={idx + 1} issue={issue} handleNewMessage={handleNewGeneralMessage} />
+            </>
+          ))}
+
+          <PaneHeader alignment="left">Amendments</PaneHeader>
+          <NewAmendmentPrompt
+            idx={0}
+            issue={issue}
+            issueIndex={ws.issues}
+            publicationIndex={ws.publications}
+            handleNewMessage={handleNewAmendment} />
+          {[...issue.amendments.messages.entries()].map(([idx, msg]: [number, Message]) => (
+            <>
+              <MessageItem
+                selected={idx == selectedMessage && selectedSection === 'amendments'}
+                message={msg}
+                onSelect={() => { selectMessage(idx); selectSection("amendments"); }}
+                onDelete={() => {
+                  wsIssue.dispatch({
+                    type: 'REMOVE_AMENDMENT_MESSAGE',
+                    messageIndex: idx,
+                  });
+                  selectMessage(undefined);
+                }}
+              />
+              <NewAmendmentPrompt
+                idx={idx + 1}
+                issue={issue}
+                issueIndex={ws.issues}
+                publicationIndex={ws.publications}
+                handleNewMessage={handleNewAmendment} />
+            </>
+          ))}
+        </div>
 
       </div>
       <div className={styles.selectedMessagePane}>

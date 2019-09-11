@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Label, Button, InputGroup } from '@blueprintjs/core';
 import { AddCardTrigger, SimpleEditableCard } from 'renderer/app/widgets/editable-card-list';
-import * as widgetStyles from 'renderer/app/widgets/styles.scss';
+import { PaneHeader } from 'renderer/app/widgets/pane-header';
 
 import { ServiceRestrictionsMessage, SRItem } from 'main/issues/messages/service_restrictions';
 
@@ -21,7 +21,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = function ({ message, 
 
   return (
     <>
-      <h2 className={widgetStyles.paneHeader}>Service Restrictions</h2>
+      <PaneHeader>Service Restrictions</PaneHeader>
       <>
         <AddCardTrigger
           key="addFirstItem"

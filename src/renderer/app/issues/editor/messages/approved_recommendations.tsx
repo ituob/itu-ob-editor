@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 
 import { Button, Label, InputGroup } from '@blueprintjs/core';
 import { AddCardTrigger, SimpleEditableCard } from 'renderer/app/widgets/editable-card-list';
-import * as widgetStyles from 'renderer/app/widgets/styles.scss';
+import { PaneHeader } from 'renderer/app/widgets/pane-header';
 
 import { ITURecCode, ITURecVersion } from 'main/recommendations/models';
 import { ApprovedRecommendationsMessage } from 'main/issues/messages/approved_recommendations';
@@ -22,7 +22,7 @@ export const ApprovedRecommendationsEditor: React.FC<MessageEditorProps> = funct
 
   return (
     <>
-      <h2 key="paneHeader" className={widgetStyles.paneHeader}>Approved Recommendations</h2>
+      <PaneHeader>Approved Recommendations</PaneHeader>
 
       <AddCardTrigger key="addNew" onClick={() => {
         toggleNewRecDialogStatus(true);

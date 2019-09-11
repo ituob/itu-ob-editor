@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Card } from '@blueprintjs/core';
-import * as widgetStyles from 'renderer/app/widgets/styles.scss';
+import { PaneHeader } from 'renderer/app/widgets/pane-header';
 
 import { AmendmentMessage } from 'main/issues/messages/amendment';
 import { FreeformContents } from '../freeform-contents';
@@ -12,7 +12,7 @@ export const AmendmentEditor: React.FC<MessageEditorProps> = function ({ message
 
   return (
     <>
-      <h2 key="paneHeader" className={widgetStyles.paneHeader}>Amendment</h2>
+      <PaneHeader>Amendment</PaneHeader>
 
       <Card>
         <FreeformContents

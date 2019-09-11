@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { H4, Label, Button, FormGroup, InputGroup, TextArea } from '@blueprintjs/core';
 import { AddCardTrigger, SimpleEditableCard } from 'renderer/app/widgets/editable-card-list';
 import { DatePicker } from '@blueprintjs/datetime';
+import { PaneHeader } from 'renderer/app/widgets/pane-header';
 
 import {
   TSCommunication,
@@ -14,7 +15,6 @@ import { DateStamp } from 'renderer/app/dates';
 import { FreeformContents } from '../freeform-contents';
 import { MessageEditorProps, MessageEditorDialog } from '../message-editor';
 
-import * as widgetStyles from 'renderer/app/widgets/styles.scss';
 import * as styles from '../styles.scss';
 
 
@@ -67,7 +67,7 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
 
   return (
     <>
-      <h2 key="paneHeader" className={widgetStyles.paneHeader}>Telephone Service</h2>
+      <PaneHeader>Telephone Service</PaneHeader>
 
       <AddCardTrigger
         key="addFirstCountry"

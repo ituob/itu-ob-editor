@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, Tab, Button, Label, InputGroup } from '@blueprintjs/core';
 import { AddCardTrigger, SimpleEditableCard } from 'renderer/app/widgets/editable-card-list';
-import * as widgetStyles from 'renderer/app/widgets/styles.scss';
+import { PaneHeader } from 'renderer/app/widgets/pane-header';
 
 import { RunningAnnexesMessage } from 'main/issues/messages/running_annexes';
 
@@ -26,9 +26,9 @@ export const MessageEditor: React.FC<MessageEditorProps> = function (props) {
 
   return (
     <>
-      <h2 key="paneHeader" className={widgetStyles.paneHeader}>Lists Annexed</h2>
+      <PaneHeader className={styles.paneHeader}>Lists Annexed</PaneHeader>
 
-      <Tabs className={styles.messageEditorTabs}>
+      <Tabs className={`${styles.messageEditorTabs} ${styles.paneBody}`}>
         <Tab
           id="autoAnnexes"
           title="Running annexes"
