@@ -1,3 +1,4 @@
+import { Translatable } from 'renderer/app/localizer';
 import { PublicationID } from 'main/lists/models';
 
 
@@ -10,5 +11,5 @@ export interface AmendmentTarget {
 export interface AmendmentMessage {
   type: "amendment",
   target: AmendmentTarget,
-  contents: any,
+  contents: Translatable<any>,
 }

@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { H4, Label, Button, FormGroup, InputGroup, TextArea } from '@blueprintjs/core';
 import { AddCardTrigger, SimpleEditableCard } from 'renderer/app/widgets/editable-card-list';
 import { DatePicker } from '@blueprintjs/datetime';
 import { PaneHeader } from 'renderer/app/widgets/pane-header';
+
+import { LangConfigContext } from 'renderer/app/localizer';
 
 import {
   TSCommunication,
@@ -18,19 +20,19 @@ import { MessageEditorProps, MessageEditorDialog } from '../message-editor';
 import * as styles from '../styles.scss';
 
 
-function getNewCommStub(): TSCommunication {
+function getNewCommStub(lang: string): TSCommunication {
   return {
     date: new Date(),
-    contents: {},
+    contents: { [lang]: {} },
   };
 }
 
 
-function getNewCountryStub(): TSCountryCommunicationSet {
+function getNewCountryStub(lang: string): TSCountryCommunicationSet {
   return {
-    country_name: '',
+    country_name: { [lang]: '' },
     phone_code: '',
-    contact: '',
+    contact: { [lang]: '' },
     communications: [],
   };
 }
@@ -38,6 +40,8 @@ function getNewCountryStub(): TSCountryCommunicationSet {
 
 export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = function ({ message, onChange }) {
   var countryCommSets = (message as TelephoneServiceMessageV2).contents;
+
+  const lang = useContext(LangConfigContext);
 
   const [activeCountryIdx, setActiveCountryIdx] = useState(0);
   const [activeCommIdx, setActiveCommIdx] = useState(0);
@@ -85,7 +89,7 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
               _onChange();
             }}>
               <H4>
-                {countryCommSet.country_name}
+                {countryCommSet.country_name[lang.default]}
                 &emsp;
                 +{countryCommSet.phone_code}
               </H4>
@@ -169,7 +173,7 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
         ? <EditCountryDialog
             key="addCountry"
             title="Add country"
-            countryCommSet={getNewCountryStub()}
+            countryCommSet={getNewCountryStub(lang.default)}
             isOpen={true}
             onClose={() => toggleNewCountryDialogState(false)}
             onSave={(countryCommSet: TSCountryCommunicationSet) => {
@@ -201,7 +205,7 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
         ? <EditCommunicationDialog
             key="addCommunication"
             title="Add communication"
-            comm={getNewCommStub()}
+            comm={getNewCommStub(lang.default)}
             isOpen={true}
             onClose={() => toggleNewCommDialogState(false)}
             onSave={(comm) => {
@@ -235,10 +239,7 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
 /* Prompts */
 
 
-interface EditCountryPromptProps {
-  onOpen: () => void,
-  title?: JSX.Element,
-}
+interface EditCountryPromptProps { onOpen: () => void, title?: JSX.Element }
 const EditCountryPrompt: React.FC<EditCountryPromptProps> = function ({ onOpen, title }) {
   return (
     <Button icon="edit" minimal={true} onClick={onOpen} title="Edit country details">
@@ -248,28 +249,17 @@ const EditCountryPrompt: React.FC<EditCountryPromptProps> = function ({ onOpen, 
 };
 
 
-interface AddCommunicationPromptProps {
-  onOpen: () => void,
-  title?: JSX.Element,
-}
+interface AddCommunicationPromptProps { onOpen: () => void, title?: JSX.Element }
 const AddCommunicationPrompt: React.FC<AddCommunicationPromptProps> = function ({ onOpen, title }) {
   return (
-    <Button
-      icon="plus"
-      minimal={true}
-      onClick={onOpen}
-      title="Add communication"
-      intent="primary">
+    <Button icon="plus" minimal={true} onClick={onOpen} title="Add communication" intent="primary">
       {title}
     </Button>
   );
 };
 
 
-interface EditCommunicationPromptProps {
-  onOpen: () => void,
-  title?: JSX.Element,
-}
+interface EditCommunicationPromptProps { onOpen: () => void, title?: JSX.Element }
 const EditCommunicationPrompt: React.FC<EditCommunicationPromptProps> = function ({ onOpen, title }) {
   return (
     <Button icon="edit" minimal={true} onClick={onOpen} title="Edit communication">
@@ -290,10 +280,15 @@ interface EditCountryDialogProps {
   onClose: () => void,
 }
 const EditCountryDialog: React.FC<EditCountryDialogProps> = function ({ isOpen, countryCommSet, title, onSave, onClose }) {
+  const lang = useContext(LangConfigContext);
+
   const [newCountry, setCountry] = useState(Object.assign({}, countryCommSet));
 
   function _onSave() {
-    if (newCountry.country_name != '' && newCountry.phone_code != '' && newCountry.contact != '') {
+    if (
+        newCountry.country_name[lang.default] != '' &&
+        newCountry.phone_code != '' &&
+        newCountry.contact[lang.default] != '') {
       onSave(newCountry);
       onClose();
     }
@@ -332,11 +327,13 @@ interface EditCommunicationDialogProps {
   onClose: () => void,
 }
 const EditCommunicationDialog: React.FC<EditCommunicationDialogProps> = function ({ isOpen, comm, title, onSave, onClose }) {
+  const lang = useContext(LangConfigContext);
+
   const [commDate, setCommDate] = useState(comm.date);
-  const [commContents, setCommContents] = useState(comm.contents);
+  const [commContents, setCommContents] = useState(comm.contents[lang.default]);
 
   function _onSave() {
-    onSave({ date: commDate, contents: commContents });
+    onSave({ date: commDate, contents: { [lang.default]: commContents }});
     onClose();
   }
 
@@ -370,6 +367,8 @@ interface TSCountryDetailsEditorProps {
   onChange: (updated: TSCountryCommunicationSet) => void,
 }
 const TSCountryDetailsEditor: React.FC<TSCountryDetailsEditorProps> = function ({ country, onChange }) {
+  const lang = useContext(LangConfigContext);
+
   const [newCountry, setCountry] = useState(country);
 
   useEffect(() => {
@@ -381,14 +380,17 @@ const TSCountryDetailsEditor: React.FC<TSCountryDetailsEditorProps> = function (
       <Label>
         Country name
         <InputGroup
-          value={newCountry.country_name}
+          value={newCountry.country_name[lang.default]}
           key="countryName"
           type="text"
           large={true}
           onChange={(evt: React.FormEvent<HTMLElement>) => {
             setCountry({
               ...newCountry,
-              country_name: (evt.target as HTMLInputElement).value as string,
+              country_name: {
+                ...newCountry.country_name,
+                [lang.default]: (evt.target as HTMLInputElement).value as string,
+              },
             });
           }}
         />
@@ -413,13 +415,16 @@ const TSCountryDetailsEditor: React.FC<TSCountryDetailsEditorProps> = function (
       <Label>
         Contact info
         <TextArea
-          value={newCountry.contact}
+          value={newCountry.contact[lang.default]}
           fill={true}
           key="contactInfo"
           onChange={(evt: React.FormEvent<HTMLElement>) => {
             setCountry({
               ...newCountry,
-              contact: (evt.target as HTMLInputElement).value as string,
+              contact: {
+                ...newCountry.contact,
+                [lang.default]: (evt.target as HTMLInputElement).value as string,
+              },
             });
           }}
         />

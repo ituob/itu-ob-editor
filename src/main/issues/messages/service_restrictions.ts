@@ -1,6 +1,9 @@
+import { Translatable } from 'renderer/app/localizer';
+
+
 export interface SRItem {
   // Country name
-  country: string,
+  country: Translatable<string>,
 
   // OB edition ID
   ob: number,

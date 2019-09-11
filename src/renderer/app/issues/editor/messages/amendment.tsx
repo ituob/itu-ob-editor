@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Button, Card } from '@blueprintjs/core';
 import { PaneHeader } from 'renderer/app/widgets/pane-header';
+
+import { LangConfigContext } from 'renderer/app/localizer';
 
 import { AmendmentMessage } from 'main/issues/messages/amendment';
 import { FreeformContents } from '../freeform-contents';
@@ -8,7 +10,9 @@ import { MessageEditorProps } from '../message-editor';
 
 
 export const AmendmentEditor: React.FC<MessageEditorProps> = function ({ message, onChange }) {
-  var doc = Object.assign({}, (message as AmendmentMessage).contents);
+  const lang = useContext(LangConfigContext);
+
+  var doc = Object.assign({}, (message as AmendmentMessage).contents[lang.default]);
 
   return (
     <>
@@ -28,8 +32,9 @@ export const AmendmentEditor: React.FC<MessageEditorProps> = function ({ message
         <Button
           onClick={() => {
             console.debug("updated", doc);
-            console.debug("updated", Object.assign({}, (message as AmendmentMessage), { contents: doc }));
-            onChange(Object.assign({}, (message as AmendmentMessage), { contents: doc }));
+            const msg = message as AmendmentMessage;
+            console.debug("updated", Object.assign({}, msg, { contents: { ...msg.contents, [lang.default]: doc } }));
+            onChange(Object.assign({}, msg, { contents: { ...msg.contents, [lang.default]: doc } }));
           }}
           text="Save"
           intent="primary"

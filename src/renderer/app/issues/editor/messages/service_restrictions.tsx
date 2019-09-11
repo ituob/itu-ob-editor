@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Label, Button, InputGroup } from '@blueprintjs/core';
 import { AddCardTrigger, SimpleEditableCard } from 'renderer/app/widgets/editable-card-list';
 import { PaneHeader } from 'renderer/app/widgets/pane-header';
+
+import { LangConfigContext } from 'renderer/app/localizer';
 
 import { ServiceRestrictionsMessage, SRItem } from 'main/issues/messages/service_restrictions';
 
@@ -10,6 +12,8 @@ import { MessageEditorProps, MessageEditorDialog } from '../message-editor';
 
 export const MessageEditor: React.FC<MessageEditorProps> = function ({ message, onChange }) {
   const initialItems = (message as ServiceRestrictionsMessage).items;
+
+  const lang = useContext(LangConfigContext);
 
   const [items, updateItems] = useState(initialItems);
   const [activeItemIdx, setActiveItemIdx] = useState(0);
@@ -37,7 +41,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = function ({ message, 
                   updateItems(items => { items.splice(idx, 1); return items; })
                   _onChange();
                 }}>
-              <strong>{item.country}</strong>
+              <strong>{item.country[lang.default]}</strong>
               &emsp;
               OB No. {item.ob},
               p. {item.page}
@@ -78,13 +82,19 @@ interface AddSRItemDialogProps {
   onClose: () => void,
 }
 const AddSRItemDialog: React.FC<AddSRItemDialogProps> = function ({ isOpen, title, onSave, onClose }) {
+  const lang = useContext(LangConfigContext);
+
   const [country, setCountry] = useState('');
   const [ob, setOb] = useState(undefined as number | undefined);
   const [page, setPage] = useState(undefined as number | undefined);
 
   function _onSave() {
     if (ob !== undefined && page !== undefined && country !== '') {
-      onSave({ country, ob: ob as number, page: page as number });
+      onSave({
+        country: { [lang.default]: country },
+        ob: ob as number,
+        page: page as number,
+      });
       onClose();
     }
   }

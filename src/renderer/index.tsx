@@ -1,5 +1,7 @@
 import * as ReactDOM from 'react-dom';
-import * as React from 'react';
+import React, { useState } from 'react';
+
+import { LangConfigContext } from './app/localizer';
 
 import {
   HomeScreen,
@@ -15,28 +17,52 @@ import * as styles from './styles.scss';
 
 
 // Electron Webpack skeleton guarantees that #app exists in index.html
-const app = document.getElementById('app') as HTMLElement;
+const appRoot = document.getElementById('app') as HTMLElement;
 
-app.classList.add(styles.app);
+appRoot.classList.add(styles.app);
 
 const searchParams = new URLSearchParams(window.location.search);
 
-if (searchParams.get('c') === 'home') { 
-  ReactDOM.render(
-    <HomeScreen />,
-    app);
+const App: React.FC<{}> = function () {
+  let component: JSX.Element;
 
-} else if (searchParams.get('c') === 'issueScheduler') { 
-  ReactDOM.render(
-    <IssueScheduler />,
-    app);
+  if (searchParams.get('c') === 'home') { 
+    component = <HomeScreen />;
 
-} else if (searchParams.get('c') === 'issueEditor') {
-  ReactDOM.render(
-    <IssueEditor issueId={searchParams.get('issueId') || ''} />,
-    app);
-} else if (searchParams.get('c') === 'dataSynchronizer') {
-  ReactDOM.render(
-    <DataSynchronizer />,
-    app);
-}
+  } else if (searchParams.get('c') === 'issueScheduler') { 
+    component = <IssueScheduler />;
+
+  } else if (searchParams.get('c') === 'issueEditor') {
+    component = <IssueEditor issueId={searchParams.get('issueId') || ''} />;
+
+  } else if (searchParams.get('c') === 'dataSynchronizer') {
+    component = <DataSynchronizer />;
+
+  } else {
+    component = <p>Unknown component requested!</p>;
+  }
+
+  const [langConfig, setLangConfig] = useState({
+    available: { en: 'English', zh: 'Chinese', ru: 'Russian' },
+    default: 'en',
+    selected: 'en',
+    select: (langId: string) => {
+      setLangConfig(langConfig => Object.assign({}, langConfig, { selected: langId }));
+    },
+  });
+
+  return (
+    <LangConfigContext.Provider value={langConfig}>
+      {component}
+    </LangConfigContext.Provider>
+  );
+};
+
+
+ReactDOM.render(<App />, appRoot);
+
+
+// } else if (searchParams.get('c') === 'translator') {
+//   ReactDOM.render(
+//     <Translator issueId={searchParams.get('issueId') || ''} />,
+//     app);
