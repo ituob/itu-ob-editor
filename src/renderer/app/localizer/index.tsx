@@ -1,46 +1,64 @@
-import * as React from 'react';
+import React, { useContext } from 'react';
 import * as styles from './styles.scss';
 
 
-export interface Language { id: string, title: string }
-export interface LangConfig { default: Language, selected: Language }
-export interface Translatable { [lang: string]: string; }
+export interface SupportedLanguages { [id: string]: string }
+export interface LangConfig { default: string, selected: string }
+export interface Translatable<T> { [id: string]: T; }
 
-interface TranslatableComponentProps { what: Translatable, lang: LangConfig }
-export class Trans extends React.Component<TranslatableComponentProps, {}> {
-  render() {
-    const translatable = this.props.what;
-    const lang = this.props.lang;
 
-    const translated = translatable[lang.selected.id];
-    if (!translated) {
-      // Register missing translation
-    }
-
-    return <span>{translated || translatable[lang.default.id] || translatable}</span>;
-  }
+interface LangConfigContextSpec extends LangConfig {
+  available: SupportedLanguages,
+  select(id: string): void,
 }
 
-interface LangSelectorProps {
-  available: Language[],
-  selected: Language,
-  onSelect: (lang: Language) => void,
-}
-export class LangSelector extends React.Component<LangSelectorProps, {}> {
-  render() {
-    return (
-      <p className={styles.langSelector}>
-        {this.props.available.map((lang: Language) =>
-          lang.id === this.props.selected.id
-          ? <strong className={styles.lang}>{lang.title}</strong>
-          : <a
-              className={styles.lang}
-              href="javascript: void 0;"
-              onClick={() => this.props.onSelect(lang)}>
-              {lang.title}
-            </a>
-        )}
-      </p>
-    );
-  }
-}
+
+export const LangConfigContext = React.createContext<LangConfigContextSpec>({
+  available: { en: 'English', zh: 'Chinese', ru: 'Russian' },
+  default: 'en',
+  selected: 'en',
+  select: (id: string) => {},
+});
+
+
+interface TranslatableComponentProps { what: Translatable<string> }
+export const Trans: React.FC<TranslatableComponentProps> = function ({ what }) {
+  const lang = useContext(LangConfigContext);
+  const translated = what[lang.selected];
+  const untranslated = what[lang.default];
+
+  // const translated = translatable[lang.selected.id];
+  // if (!translated) {
+  //   // Register missing translation
+  // }
+
+  return <span>{translated || untranslated || '(malformed translatable string)'}</span>;
+};
+
+
+interface LangSelectorProps {}
+export const LangSelector: React.FC<LangSelectorProps> = function () {
+  const lang = useContext(LangConfigContext);
+
+  return (
+    <p className={styles.langSelector}>
+      {Object.keys(lang.available).map((langId: string) =>
+        langId === lang.selected
+        ? <strong className={styles.lang}>{lang.available[langId]}</strong>
+        : <a
+            className={styles.lang}
+            href="javascript: void 0;"
+            onClick={() => lang.select(langId)}>
+            {lang.available[langId]}
+          </a>
+      )}
+    </p>
+  );
+};
+
+
+export function getUntranslated(
+    translatables: Translatable<any>[],
+    forLanguageId: string): Translatable<any>[] {
+  return translatables.filter(translatable => translatable[forLanguageId] !== undefined);
+};

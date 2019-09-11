@@ -16,5 +16,5 @@ export interface Recommendation {
 export interface ITURecommendation extends IndexableObject {
   id: ITURecCode,
   version: ITURecVersion,
-  title: Translatable,
+  title: Translatable<string>,
 }
