@@ -6,11 +6,9 @@ import { useWorkspaceRO } from 'renderer/app/storage/api';
 import * as styles from './styles.scss';
 
 
-type State = OBIssue[];
-
 interface HomeScreenProps {}
 export const HomeScreen: React.FC<HomeScreenProps> = function () {
-  const futureIssues = useWorkspaceRO<State>(
+  const futureIssues = useWorkspaceRO<OBIssue[]>(
     'future-issues',
     [],
     true);
