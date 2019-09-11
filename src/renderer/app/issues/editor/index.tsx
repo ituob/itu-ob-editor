@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Spinner } from '@blueprintjs/core';
+import { Spinner, NonIdealState } from '@blueprintjs/core';
 
 import { Workspace } from 'main/storage';
 import { OBIssue } from 'main/issues/models';
@@ -157,8 +157,11 @@ export function IssueEditor(props: IssueEditorProps) {
                 }
               }}
             />
-          : null
-        }
+          : <NonIdealState
+              icon="info-sign"
+              title="No message selected"
+              description="Add or select a message on the left to start."
+            />}
       </div>
     </div>
   )
