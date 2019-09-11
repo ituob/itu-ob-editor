@@ -4,6 +4,8 @@ import { PublicationID } from 'main/lists/models';
 
 export interface AmendmentTarget {
   publication: PublicationID,
+
+  // Date of some sort
   position_on: string | undefined,
 }
 

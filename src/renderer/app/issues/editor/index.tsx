@@ -20,6 +20,8 @@ interface IssueEditorProps {
   issueId: string,
 }
 export function IssueEditor(props: IssueEditorProps) {
+  // This rendering logic can (should) be refactored.
+
   const wsIssue = useWorkspace<OBIssue | {}>('issue', reducer, {}, props.issueId);
   const maybeIssue = wsIssue.state;
 
