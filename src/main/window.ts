@@ -25,8 +25,8 @@ interface WindowOpenerParams {
   frameless?: boolean,
   winParams?: any,
 }
-type WindowOpener = (props: WindowOpenerParams) => BrowserWindow;
-export const openWindow: WindowOpener = ({
+export type WindowOpener = (props: WindowOpenerParams) => Promise<BrowserWindow>;
+export const openWindow: WindowOpener = async ({
     title,
     component, componentParams,
     dimensions, frameless,
@@ -51,7 +51,7 @@ export const openWindow: WindowOpener = ({
   };
 
   const params = `c=${component}&${componentParams ? componentParams : ''}`;
-  const window = createWindow(title, params, _winParams);
+  const window = await createWindow(title, params, _winParams);
 
   windows.push(window);
   windowsByTitle[title] = window;
@@ -86,11 +86,19 @@ function cleanUpWindows() {
 }
 
 
-function createWindow(title: string, params: string, winParams: any): BrowserWindow {
+function createWindow(title: string, params: string, winParams: any): Promise<BrowserWindow> {
   const window = new BrowserWindow({
     webPreferences: {nodeIntegration: true},
     title: title,
+    show: false,
     ...winParams
+  });
+
+  const promise = new Promise<BrowserWindow>((resolve, reject) => {
+    window.once('ready-to-show', () => {
+      window.show();
+      resolve(window);
+    });
   });
 
   if (isDevelopment) {
@@ -114,5 +122,5 @@ function createWindow(title: string, params: string, winParams: any): BrowserWin
     });
   });
 
-  return window;
+  return promise;
 }

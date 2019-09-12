@@ -86,7 +86,7 @@ export function IssueScheduler(props: IssueSchedulerProps) {
             <IssueScheduleCard
               key={issue.id}
               issue={issue}
-              onEditClick={() => ipcRenderer.send('edit-issue', `${issue.id}`)}
+              onEditClick={() => ipcRenderer.sendSync('open-issue-editor', `${issue.id}`)}
             />
           )
         : <p>No OB issues in the database.</p>}

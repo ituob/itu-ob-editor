@@ -1,9 +1,9 @@
-import { app, Menu, MenuItemConstructorOptions } from 'electron';
+import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from 'electron';
 
 
 interface MenuActions {
-  openIssueScheduler: () => void,
-  openHomeScreen: () => void,
+  openIssueScheduler: () => Promise<BrowserWindow>,
+  openHomeScreen: () => Promise<BrowserWindow>,
 }
 
 export function getMenu ({ openIssueScheduler, openHomeScreen }: MenuActions) {

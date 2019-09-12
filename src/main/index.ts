@@ -3,7 +3,7 @@ import * as path from 'path';
 import { app, Menu, ipcMain } from 'electron';
 
 import { getMenu } from './menu';
-import { makeEndpoint, makeWriteOnlyEndpoint } from './api';
+import { makeEndpoint, makeWriteOnlyEndpoint, makeWindowEndpoint } from './api';
 import { openWindow, getWindowByTitle, windows } from './window';
 import { initStorage, Workspace, Storage } from './storage';
 import { initRepo } from './storage/git';
@@ -14,6 +14,13 @@ import { OBIssue } from './issues/models';
 
 
 const APP_TITLE = "ITU OB editor";
+
+const ISSUE_SCHEDULER_WINDOW_OPTS = {
+  component: 'issueScheduler',
+  title: 'Issue Scheduler',
+  frameless: true,
+  dimensions: { width: 400, minWidth: 380, },
+};
 
 
 const WORK_DIR = path.join(app.getPath('userData'), 'itu-ob-data');
@@ -54,7 +61,7 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
 
     // Set up app menu
     Menu.setApplicationMenu(getMenu({
-      openIssueScheduler,
+      openIssueScheduler: async () => await openWindow(ISSUE_SCHEDULER_WINDOW_OPTS),
       openHomeScreen,
     }));
 
@@ -151,9 +158,15 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
 
     /* Set up window-opening endpoints */
 
-    ipcMain.on('schedule-issues', (event: any) => {
-      openIssueScheduler();
-    });
+    makeWindowEndpoint('issue-scheduler', () => ISSUE_SCHEDULER_WINDOW_OPTS);
+
+    makeWindowEndpoint('issue-editor', (issueId: string) => { return {
+      component: 'issueEditor',
+      title: `Issue ${issueId}`,
+      componentParams: `issueId=${issueId}`,
+      frameless: true,
+      dimensions: { width: 800, height: 600, },
+    }});
 
     ipcMain.on('scheduled-new-issue', (event: any) => {
       const homeWindow = getWindowByTitle(APP_TITLE);
@@ -162,52 +175,20 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
       }
     });
 
-    ipcMain.on('edit-issue', (event: any, issueId: string) => {
-      openIssueEditor(issueId);
-    });
-
-    ipcMain.on('sync-changes', (event: any) => {
-      openDataSynchronizer();
-    });
+    makeWindowEndpoint('data-synchronizer', () => { return {
+      component: 'dataSynchronizer',
+      title: 'Data Synchronizer',
+      dimensions: { width: 800, minWidth: 600, height: 550 },
+    }});
 
   });
 });
 
-
-/* App-specific window-opening helpers */
-
-function openHomeScreen() {
-  openWindow({
+async function openHomeScreen() {
+  return await openWindow({
     component: 'home',
     title: APP_TITLE,
-    dimensions: { width: 400, height: 400, },
+    dimensions: { width: 300, height: 400, },
     frameless: true,
-  });
-}
-
-function openIssueScheduler() {
-  openWindow({
-    component: 'issueScheduler',
-    title: 'Issue Scheduler',
-    frameless: true,
-    dimensions: { width: 400, minWidth: 380, },
-  });
-}
-
-function openDataSynchronizer() {
-  openWindow({
-    component: 'dataSynchronizer',
-    title: 'Data Synchronizer',
-    dimensions: { width: 800, minWidth: 600, height: 550 },
-  });
-}
-
-function openIssueEditor(issueId: string) {
-  openWindow({
-    component: 'issueEditor',
-    title: `Issue ${issueId}`,
-    componentParams: `issueId=${issueId}`,
-    frameless: true,
-    dimensions: { width: 800, height: 600, },
   });
 }
