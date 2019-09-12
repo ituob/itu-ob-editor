@@ -130,7 +130,7 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
 
     // TODO: Refactor into schedule-issue and do it one at a time?
     makeWriteOnlyEndpoint('future-issues', (rawData: string) => {
-      const issues = JSON.parse(rawData, JSON.parse(rawData, reviveJsonValue));
+      const issues = JSON.parse(rawData, reviveJsonValue);
 
       storage.workspace.issues = issues;
       storage.storeWorkspace(storage.workspace);
@@ -150,7 +150,7 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
     });
 
     makeWriteOnlyEndpoint('issue', (issueId: string, rawData: string) => {
-      const issueData = JSON.parse(rawData, JSON.parse(rawData, reviveJsonValue));
+      const issueData = JSON.parse(rawData, reviveJsonValue);
       storage.workspace.issues[issueId] = issueData;
       storage.storeWorkspace(storage.workspace);
     });
