@@ -1,5 +1,6 @@
 import * as ReactDOM from 'react-dom';
 import React, { useState } from 'react';
+import { NonIdealState } from '@blueprintjs/core';
 
 import { LangConfigContext } from './app/localizer';
 
@@ -39,7 +40,9 @@ const App: React.FC<{}> = function () {
     component = <DataSynchronizer />;
 
   } else {
-    component = <p>Unknown component requested!</p>;
+    component = <NonIdealState
+      icon="error"
+      title="Unknown component requested" />;
   }
 
   const [langConfig, setLangConfig] = useState({
