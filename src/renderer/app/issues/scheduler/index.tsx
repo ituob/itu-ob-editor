@@ -1,7 +1,7 @@
 import moment from 'moment';
 import { ipcRenderer, remote } from 'electron';
 import * as React from 'react';
-import { Callout, Position, Classes, H3, H5, Button, Card, Drawer } from '@blueprintjs/core';
+import { NonIdealState, Callout, Position, Classes, H3, H5, Button, Card, Drawer } from '@blueprintjs/core';
 import { DatePicker } from '@blueprintjs/datetime';
 
 import { OBIssue } from 'main/issues/models';
@@ -89,7 +89,7 @@ export function IssueScheduler(props: IssueSchedulerProps) {
               onEditClick={() => ipcRenderer.sendSync('open-issue-editor', `${issue.id}`)}
             />
           )
-        : <p>No OB issues in the database.</p>}
+        : <NonIdealState icon="zoom-out" title="No OB editions found" />}
       {existingIssues.length < 20
         ? <NewIssueScheduleButton
             issue={newIssueTemplate}
