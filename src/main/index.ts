@@ -160,13 +160,13 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
 
     makeWindowEndpoint('issue-scheduler', () => ISSUE_SCHEDULER_WINDOW_OPTS);
 
-    makeWindowEndpoint('issue-editor', (issueId: string) => { return {
+    makeWindowEndpoint('issue-editor', (issueId: string) => ({
       component: 'issueEditor',
       title: `Issue ${issueId}`,
       componentParams: `issueId=${issueId}`,
       frameless: true,
       dimensions: { width: 800, height: 600, },
-    }});
+    }));
 
     ipcMain.on('scheduled-new-issue', (event: any) => {
       const homeWindow = getWindowByTitle(APP_TITLE);
@@ -175,11 +175,11 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
       }
     });
 
-    makeWindowEndpoint('data-synchronizer', () => { return {
+    makeWindowEndpoint('data-synchronizer', () => ({
       component: 'dataSynchronizer',
       title: 'Data Synchronizer',
       dimensions: { width: 800, minWidth: 600, height: 550 },
-    }});
+    }));
 
   });
 });
