@@ -1,0 +1,21 @@
+.paneBody {
+  overflow-y: auto;
+  flex: 1;
+  position: relative;
+  padding-bottom: 3rem;
+}
+
+@mixin twoPaneWindowLayout($leftPaneWidth) {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: stretch;
+  height: 100vh;
+
+  > * {
+    flex: 1;
+  }
+  > :first-child {
+    flex: unset;
+    width: $leftPaneWidth;
+  }
+}
