@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import { Icon } from '@blueprintjs/core';
 import * as styles from './styles.scss';
 
 
@@ -36,21 +37,47 @@ export const Trans: React.FC<TranslatableComponentProps> = function ({ what }) {
 };
 
 
-interface LangSelectorProps {}
-export const LangSelector: React.FC<LangSelectorProps> = function () {
+interface LangSelectorProps {
+  value?: Translatable<string | any>,
+}
+export const LangSelector: React.FC<LangSelectorProps> = function ({ value }) {
   const lang = useContext(LangConfigContext);
+
+  let translated: boolean | undefined = undefined;
+  let hasDefault: boolean | undefined = undefined;
+
+  if (value) {
+    translated = value[lang.selected] ? true : false;
+    hasDefault = value[lang.default] ? true : false;
+  }
+
+  console.debug(value, translated, hasDefault);
 
   return (
     <p className={styles.langSelector}>
       {Object.keys(lang.available).map((langId: string) =>
-        langId === lang.selected
-        ? <strong className={styles.lang}>{lang.available[langId]}</strong>
-        : <a
-            className={styles.lang}
-            href="javascript: void 0;"
-            onClick={() => lang.select(langId)}>
-            {lang.available[langId]}
-          </a>
+        <>
+
+          {langId === lang.selected
+            ? <strong className={styles.lang}>
+                {langId}
+              </strong>
+            : <a
+                  className={styles.lang}
+                  href="javascript: void 0;"
+                  onClick={() => lang.select(langId)}>
+                <span>{langId}</span>
+              </a>}
+
+          {value !== undefined
+            ? <>
+                {value[langId]
+                  ? ''
+                  : <Icon icon="error" intent="danger" />}
+              </>
+            : ''}
+
+        </>
       )}
     </p>
   );
