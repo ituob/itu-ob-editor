@@ -49,6 +49,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
           onClick={() => ipcRenderer.sendSync('open-data-doctor')}
         />
         <Button
+          text="Preflight"
+          title="Check for issues"
+          icon="form"
+          disabled={true}
+          onClick={() => ipcRenderer.sendSync('open-preflight')}
+        />
+        <Button
           text="Sync changes"
           title="Fetch latest changes & send yours"
           icon="git-merge"
@@ -64,3 +71,4 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
 export { IssueScheduler } from './issues/scheduler';
 export { IssueEditor } from './issues/editor';
 export { DataSynchronizer } from './data-synchronizer';
+export { Preflight } from './preflight';
