@@ -68,6 +68,10 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
 
     /* Set up endpoints */
 
+    makeEndpoint<Index<any>>('storage-search', async (query?: string) => {
+      return await storage.findObjects(query);
+    });
+
     makeEndpoint<Workspace>('all', async () => {
       return storage.workspace;
     });

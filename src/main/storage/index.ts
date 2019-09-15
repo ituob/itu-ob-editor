@@ -37,6 +37,22 @@ abstract class StoreManager<O extends IndexableObject> {
     return this._index;
   };
 
+  public async findObjects(storage: Storage, query?: string): Promise<Index<O>> {
+    const index = await this.getIndex(storage);
+    if (query !== undefined) {
+      var results: Index<O> = {};
+      for (let key of Object.keys(index)) {
+        const obj = index[key]
+        if (this.objectMatchesQuery(obj, query)) {
+          results[key] = obj;
+        }
+      }
+      return results;
+    } else {
+      return index;
+    }
+  }
+
   private async _loadIndex(storage: Storage): Promise<Index<O>> {
     const rootPath = this.rootDir;
     const dirs = await storage.fs.readdir(path.join(storage.workDir, rootPath));
@@ -65,6 +81,10 @@ abstract class StoreManager<O extends IndexableObject> {
   public postLoad(obj: any): O {
     return obj as O;
   };
+
+  public objectMatchesQuery(obj: O, query: string): boolean {
+    return false;
+  }
 }
 
 // TODO: Move to sub-module under main/issues, and subsequent managers similarly
@@ -112,6 +132,10 @@ export class IssueManager extends StoreManager<OBIssue> {
       obj.amendments = { messages: [] };
     }
     return obj;
+  }
+
+  public objectMatchesQuery(obj: OBIssue, query: string) {
+    return `${obj.id}` === query.trim();
   }
 }
 
@@ -163,6 +187,14 @@ export class Storage {
       obj[key] = {};
       return obj;
     }, {}) as Workspace;
+  }
+
+  public async findObjects(query?: string): Promise<Workspace> {
+    return {
+      publications: await this.storeManagers.publications.findObjects(this, query),
+      recommendations: await this.storeManagers.recommendations.findObjects(this, query),
+      issues: await this.storeManagers.issues.findObjects(this, query),
+    };
   }
 
   public async loadWorkspace(): Promise<Workspace> {
