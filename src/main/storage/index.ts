@@ -28,14 +28,14 @@ abstract class StoreManager<O extends IndexableObject> {
       await this.store(obj, storage);
     }
     return true;
-  };
+  }
 
   public async getIndex(storage: Storage): Promise<Index<O>> {
     if (this._index === undefined) {
       this._index = await this._loadIndex(storage);
     }
     return this._index;
-  };
+  }
 
   public async findObjects(storage: Storage, query?: string): Promise<Index<O>> {
     const index = await this.getIndex(storage);
@@ -80,7 +80,7 @@ abstract class StoreManager<O extends IndexableObject> {
   // (in cases when partial data is stored or migration took place previously)
   public postLoad(obj: any): O {
     return obj as O;
-  };
+  }
 
   public objectMatchesQuery(obj: O, query: string): boolean {
     return false;
@@ -202,7 +202,7 @@ export class Storage {
       publications: await this.storeManagers.publications.getIndex(this),
       recommendations: await this.storeManagers.recommendations.getIndex(this),
       issues: await this.storeManagers.issues.getIndex(this),
-    }
+    };
   }
 
   public async storeWorkspace(workspace: Workspace): Promise<boolean> {
