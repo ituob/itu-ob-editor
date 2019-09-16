@@ -172,7 +172,13 @@ export function IssueEditor(props: IssueEditorProps) {
 }
 
 
-function MessageEditor(props: any) {
+interface MessageEditorProps {
+  workspace: Workspace,
+  message: Message,
+  issue: OBIssue,
+  onChange: (updatedMessage: Message) => void,
+}
+const MessageEditor: React.FC<MessageEditorProps> = function (props) {
   if (props.message) {
     const EditorCls = getMessageEditor(props.message);
     return (
@@ -184,7 +190,11 @@ function MessageEditor(props: any) {
       />
     );
   } else {
-    throw new Error("MessageEditor received no message");
+    return (
+      <NonIdealState
+        icon="error"
+        title="Error loading message"
+      />
+    );
   }
-  return null;
-}
+};
