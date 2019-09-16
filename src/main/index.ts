@@ -178,7 +178,7 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
       return issue;
     });
 
-    makeWriteOnlyEndpoint('issue', (issue: OBIssue) => {
+    makeWriteOnlyEndpoint('issue', ({ issueId }: { issueId: string }, issue: OBIssue) => {
       storage.workspace.issues[issue.id] = issue;
       storage.storeWorkspace(storage.workspace);
     });
