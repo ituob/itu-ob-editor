@@ -56,12 +56,13 @@ export const LangSelector: React.FC<LangSelectorProps> = function ({ value }) {
                 <span>{langId}</span>
               </a>}
 
-          {value !== undefined
-            ? <>
-                {value[langId]
-                  ? ''
-                  : <Icon icon="error" intent="danger" />}
-              </>
+          {value !== undefined && value[langId] === undefined
+            ? <Icon
+                icon="error"
+                intent="danger"
+                title={`Missing translation for ${lang.available[langId]}`}
+                htmlTitle={`Missing translation for ${lang.available[langId]}`}
+              />
             : ''}
 
         </>
