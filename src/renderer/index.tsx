@@ -3,12 +3,14 @@ import React, { useState } from 'react';
 import { NonIdealState } from '@blueprintjs/core';
 
 import { LangConfigContext } from 'sse/localizer/renderer';
+import { DataSynchronizer } from 'sse/storage/renderer/data-synchronizer';
+import { Spotlight } from 'sse/spotlight/renderer';
+import { Preflight } from 'sse/preflight/renderer';
 
 import {
   HomeScreen,
   IssueEditor,
   IssueScheduler,
-  DataSynchronizer,
 } from './app';
 
 import '!style-loader!css-loader!@blueprintjs/datetime/lib/css/blueprint-datetime.css';
@@ -38,6 +40,12 @@ const App: React.FC<{}> = function () {
 
   } else if (searchParams.get('c') === 'dataSynchronizer') {
     component = <DataSynchronizer />;
+
+  } else if (searchParams.get('c') === 'spotlight') {
+    component = <Spotlight />;
+
+  } else if (searchParams.get('c') === 'preflight') {
+    component = <Preflight />;
 
   } else {
     component = <NonIdealState

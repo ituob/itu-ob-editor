@@ -209,6 +209,19 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
       }
     });
 
+    makeWindowEndpoint('spotlight', () => ({
+      component: 'spotlight',
+      title: 'Spotlight',
+      frameless: true,
+      dimensions: { width: 800, height: 200 },
+    }));
+
+    makeWindowEndpoint('preflight', () => ({
+      component: 'preflight',
+      title: 'Preflight',
+      dimensions: { width: 800, minWidth: 600, height: 550 },
+    }));
+
     makeWindowEndpoint('data-synchronizer', () => ({
       component: 'dataSynchronizer',
       title: 'Data Synchronizer',

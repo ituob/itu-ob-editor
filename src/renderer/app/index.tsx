@@ -46,14 +46,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
           text="Preflight"
           title="Check for issues"
           icon="form"
-          disabled={true}
           onClick={() => ipcRenderer.sendSync('open-preflight')}
         />
         <Button
           text="Sync changes"
-          title="Fetch latest changes & send yours"
+          title="Fetch latest changes & submit yours"
           icon="git-merge"
-          disabled={false}
           onClick={() => ipcRenderer.sendSync('open-data-synchronizer')}
         />
 
@@ -63,13 +61,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
 };
 
 
-/* Register pluggable things */
+/* TODO: Register pluggable things */
 
 
 /* Export window components */
 
 export { IssueScheduler } from './issues/scheduler';
 export { IssueEditor } from './issues/editor';
-export { DataSynchronizer } from 'sse/storage/renderer/data-synchronizer';
-export { Spotlight } from 'sse/spotlight/renderer';
-export { Preflight } from 'sse/preflight/renderer';
