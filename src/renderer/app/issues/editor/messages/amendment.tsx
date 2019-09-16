@@ -1,10 +1,11 @@
 import React, { useContext } from 'react';
 import { Button, Card } from '@blueprintjs/core';
-import { PaneHeader } from 'renderer/app/widgets/pane-header';
 
-import { LangConfigContext } from 'renderer/app/localizer';
+import { PaneHeader } from 'sse/renderer/widgets/pane-header';
+import { LangConfigContext } from 'sse/localizer/renderer';
 
-import { AmendmentMessage } from 'main/issues/messages/amendment';
+import { AmendmentMessage } from 'models/messages/amendment';
+
 import { FreeformContents } from '../freeform-contents';
 import { MessageEditorProps } from '../message-editor';
 

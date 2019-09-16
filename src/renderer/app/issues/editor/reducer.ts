@@ -1,4 +1,4 @@
-import { OBIssue } from 'main/issues/models';
+import { OBIssue } from 'models/issues';
 
 
 export function reducer(issue: OBIssue, action: any) {

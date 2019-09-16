@@ -1,6 +1,6 @@
 import React from 'react';
-import { SimpleEditableCard } from 'renderer/app/widgets/editable-card-list';
-import { Message } from 'main/issues/messages';
+import { SimpleEditableCard } from 'sse/renderer/widgets/editable-card-list';
+import { Message } from 'models/messages';
 import { getMessageTypeTitle, getMessageSubtitle } from './messages';
 
 

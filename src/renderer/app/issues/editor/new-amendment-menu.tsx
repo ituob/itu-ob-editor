@@ -1,18 +1,17 @@
 import React from 'react';
 import { Menu } from '@blueprintjs/core';
 import { Select, ItemPredicate, ItemRenderer, ItemListRenderer, renderFilteredItems } from '@blueprintjs/select';
-import { AddCardTriggerButton } from 'renderer/app/widgets/editable-card-list';
 
-import { Index, QuerySet } from 'main/storage/query';
-import { Publication } from 'main/lists/models';
-import { OBIssue } from 'main/issues/models';
-import { Message, AmendmentMessage } from 'main/issues/messages';
+import { Index, QuerySet } from 'sse/storage/query';
+import { AddCardTriggerButton } from 'sse/renderer/widgets/editable-card-list';
+import * as editableCardListStyles from 'sse/renderer/widgets/editable-card-list/styles.scss';
+
+import { Publication } from 'models/publications';
+import { OBIssue } from 'models/issues';
+import { Message, AmendmentMessage } from 'models/messages';
 
 import { getRunningAnnexesForIssue } from '../running-annexes';
-
 import { NewMessagePromptProps } from './message-editor';
-
-import * as editableCardListStyles from 'renderer/app/widgets/editable-card-list/styles.scss';
 import * as styles from './styles.scss';
 
 
@@ -72,7 +71,7 @@ export const NewAmendmentPrompt: React.FC<NewAmendmentPromptProps> = function (p
       itemListRenderer={NewAmendmentMenuRenderer}
       itemPredicate={NewAmendmentMenuItemFilter}
       itemDisabled={(item) => {
-        return props.issue.amendments.messages.map(amd => {
+        return props.issue.amendments.messages.map((amd: Message) => {
           return (amd as AmendmentMessage).target.publication;
         }).indexOf(item.id) >= 0;
       }}

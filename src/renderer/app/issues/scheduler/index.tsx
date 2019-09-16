@@ -1,13 +1,15 @@
 import moment from 'moment';
+
 import { ipcRenderer, remote } from 'electron';
+
 import * as React from 'react';
 import { NonIdealState, Callout, Position, Classes, H3, H5, Button, Card, Drawer } from '@blueprintjs/core';
 import { DatePicker } from '@blueprintjs/datetime';
 
-import { OBIssue } from 'main/issues/models';
+import { OBIssue } from 'models/issues';
 
-import { useWorkspace, useWorkspaceRO } from 'renderer/app/storage/api';
-import { DateStamp } from 'renderer/app/dates';
+import { useWorkspace, useWorkspaceRO } from 'sse/api/renderer';
+import { DateStamp } from 'renderer/widgets/dates';
 
 import * as styles from './styles.scss';
 

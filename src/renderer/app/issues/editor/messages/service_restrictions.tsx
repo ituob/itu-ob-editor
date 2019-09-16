@@ -1,11 +1,11 @@
 import React, { useState, useContext } from 'react';
 import { Label, Button, InputGroup } from '@blueprintjs/core';
-import { AddCardTrigger, SimpleEditableCard } from 'renderer/app/widgets/editable-card-list';
-import { PaneHeader } from 'renderer/app/widgets/pane-header';
 
-import { LangConfigContext } from 'renderer/app/localizer';
+import { AddCardTrigger, SimpleEditableCard } from 'sse/renderer/widgets/editable-card-list';
+import { PaneHeader } from 'sse/renderer/widgets/pane-header';
+import { LangConfigContext } from 'sse/localizer/renderer';
 
-import { ServiceRestrictionsMessage, SRItem } from 'main/issues/messages/service_restrictions';
+import { ServiceRestrictionsMessage, SRItem } from 'models/messages/service_restrictions';
 
 import { MessageEditorProps, MessageEditorDialog } from '../message-editor';
 

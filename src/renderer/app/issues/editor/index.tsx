@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { Spinner, NonIdealState } from '@blueprintjs/core';
 
-import { Workspace } from 'main/storage';
-import { OBIssue } from 'main/issues/models';
-import { Message } from 'main/issues/messages';
+import { useWorkspace, useWorkspaceRO } from 'sse/api/renderer';
+import { PaneHeader } from 'sse/renderer/widgets/pane-header';
 
-import { useWorkspace, useWorkspaceRO } from 'renderer/app/storage/api';
+import { OBIssue } from 'models/issues';
+import { Message } from 'models/messages';
+
+import { Workspace } from 'main/storage';
+
 import { reducer } from './reducer';
 import { getMessageEditor } from './message-editor';
 import { NewGeneralMessagePrompt } from './new-general-message-menu';
 import { NewAmendmentPrompt } from './new-amendment-menu';
 import { MessageItem } from './message-list-item';
-import { PaneHeader } from 'renderer/app/widgets/pane-header';
 
 import * as styles from './styles.scss';
 
@@ -22,7 +24,7 @@ interface IssueEditorProps {
 export function IssueEditor(props: IssueEditorProps) {
   // This rendering logic can (should) be refactored.
 
-  const wsIssue = useWorkspace<OBIssue | {}>('issue', reducer, {}, props.issueId);
+  const wsIssue = useWorkspace<OBIssue | {}>('issue', reducer, {}, { issueId: props.issueId });
   const maybeIssue = wsIssue.state;
 
   const ws = useWorkspaceRO<Workspace>(

@@ -2,11 +2,11 @@ import * as moment from 'moment';
 import React, { useState, useEffect } from 'react';
 
 import { Button, Label, InputGroup } from '@blueprintjs/core';
-import { AddCardTrigger, SimpleEditableCard } from 'renderer/app/widgets/editable-card-list';
-import { PaneHeader } from 'renderer/app/widgets/pane-header';
+import { AddCardTrigger, SimpleEditableCard } from 'sse/renderer/widgets/editable-card-list';
+import { PaneHeader } from 'sse/renderer/widgets/pane-header';
 
-import { ITURecCode, ITURecVersion } from 'main/recommendations/models';
-import { ApprovedRecommendationsMessage } from 'main/issues/messages/approved_recommendations';
+import { ITURecCode, ITURecVersion } from 'models/recommendations';
+import { ApprovedRecommendationsMessage } from 'models/messages/approved_recommendations';
 
 import { MessageEditorProps, MessageEditorDialog } from '../message-editor';
 

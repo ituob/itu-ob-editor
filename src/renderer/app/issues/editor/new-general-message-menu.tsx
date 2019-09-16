@@ -1,14 +1,14 @@
 import React from 'react';
 import { Popover, Menu } from '@blueprintjs/core';
-import { AddCardTriggerButton } from 'renderer/app/widgets/editable-card-list';
 
-import { OBIssue } from 'main/issues/models';
-import { Message, MessageType } from 'main/issues/messages';
+import { AddCardTriggerButton } from 'sse/renderer/widgets/editable-card-list';
+import * as editableCardListStyles from 'sse/renderer/widgets/editable-card-list/styles.scss';
+
+import { OBIssue } from 'models/issues';
+import { Message, MessageType } from 'models/messages';
 
 import { NewMessagePromptProps } from './message-editor';
 import { getMessageTypeTitle } from './messages';
-
-import * as editableCardListStyles from 'renderer/app/widgets/editable-card-list/styles.scss';
 import * as styles from './styles.scss';
 
 

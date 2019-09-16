@@ -1,25 +1,23 @@
 import React from 'react';
-
 import { Classes, Dialog } from '@blueprintjs/core';
 
 import { Workspace } from 'main/storage';
-import { OBIssue } from 'main/issues/models';
-import { Message } from 'main/issues/messages';
 
+import { OBIssue } from 'models/issues';
 import {
+  Message,
   isApprovedRecommendations,
   isServiceRestrictions,
   isRunningAnnexes,
   isAmendment,
   isTelephoneServiceV2,
-} from 'main/issues/messages';
+} from 'models/messages';
 
 import { ApprovedRecommendationsEditor } from './messages/approved_recommendations';
 import { MessageEditor as RunningAnnexesEditor } from './messages/running_annexes';
 import { TelephoneServiceMessageEditorV2 } from './messages/telephone_service_2';
 import { AmendmentEditor } from './messages/amendment';
 import { MessageEditor as ServiceRestrictionsMessageEditor } from './messages/service_restrictions';
-
 import * as styles from './styles.scss';
 
 

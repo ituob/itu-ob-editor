@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { H4, Label, Button, FormGroup, InputGroup, TextArea } from '@blueprintjs/core';
-import { AddCardTrigger, SimpleEditableCard } from 'renderer/app/widgets/editable-card-list';
 import { DatePicker } from '@blueprintjs/datetime';
-import { PaneHeader } from 'renderer/app/widgets/pane-header';
 
-import { LangConfigContext } from 'renderer/app/localizer';
+import { AddCardTrigger, SimpleEditableCard } from 'sse/renderer/widgets/editable-card-list';
+import { PaneHeader } from 'sse/renderer/widgets/pane-header';
+import { LangConfigContext } from 'sse/localizer/renderer';
 
 import {
   TSCommunication,
   TSCountryCommunicationSet,
   TelephoneServiceMessageV2,
-} from 'main/issues/messages/telephone_service_2';
+} from 'models/messages/telephone_service_2';
 
-import { DateStamp } from 'renderer/app/dates';
+import { DateStamp } from 'renderer/widgets/dates';
 
 import { FreeformContents } from '../freeform-contents';
 import { MessageEditorProps, MessageEditorDialog } from '../message-editor';

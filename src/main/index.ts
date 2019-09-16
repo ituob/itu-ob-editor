@@ -2,15 +2,16 @@ import * as path from 'path';
 
 import { app, Menu, ipcMain } from 'electron';
 
-import { getMenu } from './menu';
-import { makeEndpoint, makeWriteOnlyEndpoint, makeWindowEndpoint } from './api';
-import { openWindow, getWindowByTitle, windows } from './window';
-import { initStorage, Workspace, Storage } from './storage';
-import { initRepo } from './storage/git';
+import { openWindow, getWindowByTitle, windows } from 'sse/main/window';
+import { makeEndpoint, makeWriteOnlyEndpoint, makeWindowEndpoint } from 'sse/api/main';
+import { QuerySet, sortIntegerAscending, sortIntegerDescending } from 'sse/storage/query';
+import { Index, IndexableObject } from 'sse/storage/query';
+import { initRepo } from 'sse/storage/main/git-controller';
 
-import { reviveJsonValue } from './storage/api';
-import { QuerySet, sortIntegerAscending, sortIntegerDescending } from './storage/query';
-import { OBIssue } from './issues/models';
+import { OBIssue } from 'models/issues';
+
+import { getMenu } from './menu';
+import { initStorage, Workspace, Storage } from './storage';
 
 
 const APP_TITLE = "ITU OB editor";
@@ -68,7 +69,33 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
 
     /* Set up endpoints */
 
-    makeEndpoint<Index<any>>('storage-search', async (query?: string) => {
+    // TODO: Implement time travel (undo/redo) via main API endpoints.
+    // Store whole workspace in one timeline, or have per-index / per-object timelines
+    // and reconcile them somehow;
+    // possibly record timeline states into a temporary file;
+    // allow dispatching reducer actions through API endpoints (including types UNDO/REDO).
+
+    for (let indexName of Object.keys(storage.workspace)) {
+      makeEndpoint<Index<any>>(`storage-${indexName}-all`, async (newIndex?: Index<any>) => {
+        if (newIndex) {
+          await storage.storeWorkspace({ ...storage.workspace, [indexName]: newIndex });
+        }
+        return storage.workspace[indexName];
+      });
+      makeEndpoint<IndexableObject>(`storage-${indexName}`, async ({ objectId }: { objectId: string }, newObject?: IndexableObject) => {
+        if (newObject) {
+          await storage.storeManagers[indexName].store(newObject, storage);
+        }
+        return storage.workspace[indexName][objectId];
+      });
+      makeEndpoint<boolean>(`storage-${indexName}-delete`, async ({ objectId }: { objectId: string }) => {
+        delete storage.workspace[indexName][objectId];
+        await storage.storeManagers[indexName].storeIndex(storage, storage.workspace[indexName]);
+        return true;
+      });
+    }
+
+    makeEndpoint<Index<any>>('storage-search', async ({ query }: { query?: string }) => {
       return await storage.findObjects(query);
     });
 
@@ -133,14 +160,12 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
     });
 
     // TODO: Refactor into schedule-issue and do it one at a time?
-    makeWriteOnlyEndpoint('future-issues', (rawData: string) => {
-      const issues = JSON.parse(rawData, reviveJsonValue);
-
+    makeWriteOnlyEndpoint('future-issues', (issues: Index<OBIssue>) => {
       storage.workspace.issues = issues;
       storage.storeWorkspace(storage.workspace);
     });
 
-    makeEndpoint<OBIssue>('issue', async (issueId: string) => {
+    makeEndpoint<OBIssue>('issue', async ({ issueId }: { issueId: string }) => {
       const issues = new QuerySet<OBIssue>(storage.workspace.issues);
       const issue = issues.get(issueId);
 
@@ -153,9 +178,8 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
       return issue;
     });
 
-    makeWriteOnlyEndpoint('issue', (issueId: string, rawData: string) => {
-      const issueData = JSON.parse(rawData, reviveJsonValue);
-      storage.workspace.issues[issueId] = issueData;
+    makeWriteOnlyEndpoint('issue', (issue: OBIssue) => {
+      storage.workspace.issues[issue.id] = issue;
       storage.storeWorkspace(storage.workspace);
     });
 
@@ -169,6 +193,12 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
       title: `Issue ${issueId}`,
       componentParams: `issueId=${issueId}`,
       frameless: true,
+      dimensions: { width: 800, height: 600, },
+    }));
+
+    makeWindowEndpoint('data-doctor', () => ({
+      component: 'dataDoctor',
+      title: "Data doctor",
       dimensions: { width: 800, height: 600, },
     }));
 

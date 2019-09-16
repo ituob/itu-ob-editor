@@ -1,8 +1,9 @@
 import { ipcRenderer } from 'electron';
 import React from 'react';
 import { ButtonGroup, Button } from '@blueprintjs/core';
-import { OBIssue } from 'main/issues/models';
-import { useWorkspaceRO } from 'renderer/app/storage/api';
+
+import { useWorkspaceRO } from 'sse/api/renderer';
+import { OBIssue } from 'models/issues';
 import * as styles from './styles.scss';
 
 
@@ -34,19 +35,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
           icon="timeline-events"
           onClick={() => ipcRenderer.sendSync('open-issue-scheduler')}
         />
+
         <Button
-          text="Translate"
-          disabled={true}
-          title="Translate edition contents"
-          icon="translate"
-          onClick={() => ipcRenderer.sendSync('open-translator')}
-        />
-        <Button
-          text="Edit database"
-          disabled={true}
-          title="Back-fill legacy edition data"
-          icon="database"
-          onClick={() => ipcRenderer.sendSync('open-data-doctor')}
+          text="Spotlight"
+          title="Find things"
+          icon="search"
+          onClick={() => ipcRenderer.sendSync('open-spotlight')}
         />
         <Button
           text="Preflight"
@@ -68,7 +62,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
   );
 };
 
+
+/* Register pluggable things */
+
+
+/* Export window components */
+
 export { IssueScheduler } from './issues/scheduler';
 export { IssueEditor } from './issues/editor';
-export { DataSynchronizer } from './data-synchronizer';
-export { Preflight } from './preflight';
+export { DataSynchronizer } from 'sse/storage/renderer/data-synchronizer';
+export { Spotlight } from 'sse/spotlight/renderer';
+export { Preflight } from 'sse/preflight/renderer';

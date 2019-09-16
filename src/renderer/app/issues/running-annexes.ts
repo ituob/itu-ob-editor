@@ -1,6 +1,7 @@
-import { Publication } from 'main/lists/models';
-import { OBIssue } from 'main/issues/models';
-import { Index, QuerySet, sortIntegerAscending } from 'main/storage/query';
+import { Index, QuerySet, sortIntegerAscending } from 'sse/storage/query';
+
+import { Publication } from 'models/publications';
+import { OBIssue } from 'models/issues';
 
 
 export interface RunningAnnex {

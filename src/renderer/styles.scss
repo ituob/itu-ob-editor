@@ -1,25 +1,5 @@
 @import "~normalize.css";
 
-@keyframes spin {
-  100% { transform: rotate(360deg); }
-}
-
-.bodyLoading {
-  &:after {
-    background: whiteSmoke;
-    display: block;
-    position: absolute;
-    left: calc(50% - 50px);
-    top: calc(50% - 50px);
-    width: 100px;
-    height: 100px;
-    content: " ";
-    background: url(../static/itu-logo.png) center center no-repeat;
-    background-size: contain;
-    animation: spin 4s linear infinite;
-  }
-}
-
 body, html, .app {
   height: 100%;
 }

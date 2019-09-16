@@ -2,7 +2,7 @@ import {
   Message,
   MessageType,
   AmendmentMessage,
-} from 'main/issues/messages';
+} from 'models/messages';
 
 
 // TODO: Refactor these; amendment title should be publication

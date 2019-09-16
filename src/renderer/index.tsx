@@ -2,7 +2,7 @@ import * as ReactDOM from 'react-dom';
 import React, { useState } from 'react';
 import { NonIdealState } from '@blueprintjs/core';
 
-import { LangConfigContext } from './app/localizer';
+import { LangConfigContext } from 'sse/localizer/renderer';
 
 import {
   HomeScreen,
@@ -63,9 +63,3 @@ const App: React.FC<{}> = function () {
 
 
 ReactDOM.render(<App />, appRoot);
-
-
-// } else if (searchParams.get('c') === 'translator') {
-//   ReactDOM.render(
-//     <Translator issueId={searchParams.get('issueId') || ''} />,
-//     app);
