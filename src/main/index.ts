@@ -196,12 +196,6 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
       dimensions: { width: 800, height: 600, },
     }));
 
-    makeWindowEndpoint('data-doctor', () => ({
-      component: 'dataDoctor',
-      title: "Data doctor",
-      dimensions: { width: 800, height: 600, },
-    }));
-
     ipcMain.on('scheduled-new-issue', (event: any) => {
       const homeWindow = getWindowByTitle(APP_TITLE);
       if (homeWindow !== undefined) {
