@@ -35,45 +35,59 @@ export const Trans: React.FC<TranslatableComponentProps> = function ({ what }) {
 
 
 interface LangSelectorProps {
-  value?: Translatable<string | any>,
+  value?: Translatable<any>,
 }
 export const LangSelector: React.FC<LangSelectorProps> = function ({ value }) {
-  const lang = useContext(LangConfigContext);
+  const cfg = useContext(LangConfigContext);
 
   return (
     <p className={styles.langSelector}>
-      {Object.keys(lang.available).map((langId: string) =>
-        <>
-
-          {langId === lang.selected
-            ? <strong className={styles.lang}>
-                {langId}
-              </strong>
-            : <a
-                  className={styles.lang}
-                  href="javascript: void 0;"
-                  onClick={() => lang.select(langId)}>
-                <span>{langId}</span>
-              </a>}
-
-          {value !== undefined && value[langId] === undefined
-            ? <Icon
-                icon="error"
-                intent="danger"
-                title={`Missing translation for ${lang.available[langId]}`}
-                htmlTitle={`Missing translation for ${lang.available[langId]}`}
-              />
-            : ''}
-
-        </>
+      {Object.keys(cfg.available).map((langId: string) =>
+        <LangSelectorButton
+          id={langId}
+          title={cfg.available[langId]}
+          isSelected={langId === cfg.selected}
+          onSelect={() => cfg.select(langId)}
+          hasTranslation={(value !== undefined) ? (value[langId] === undefined) : undefined}
+        />
       )}
     </p>
   );
 };
 
 
-export function getUntranslated(
-    translatables: Translatable<any>[],
-    forLanguageId: string): Translatable<any>[] {
-  return translatables.filter(translatable => translatable[forLanguageId] !== undefined);
+interface LangSelectorButtonProps {
+  id: string,
+  title: string,
+  isSelected: boolean,
+  onSelect: () => void,
+  hasTranslation: boolean | undefined,
+}
+const LangSelectorButton: React.FC<LangSelectorButtonProps> = function (props) {
+  return (
+    <>
+
+      {props.isSelected
+        ? <strong className={styles.lang}>
+            {props.id}
+          </strong>
+        : <a
+              className={styles.lang}
+              title={`Select ${props.title}`}
+              href="javascript: void 0;"
+              onClick={props.onSelect}>
+            <span>{props.id}</span>
+          </a>}
+
+      {props.hasTranslation === false
+        ? <Icon
+            icon="error"
+            intent="danger"
+            title={`Missing translation for ${props.title}`}
+            htmlTitle={`Missing translation for ${props.title}`}
+          />
+        : ''}
+
+    </>
+  );
 };
