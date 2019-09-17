@@ -59,11 +59,3 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
     </div>
   );
 };
-
-
-/* TODO: Register pluggable things */
-
-
-/* Export window components */
-
-export { IssueEditor } from './issues/editor';

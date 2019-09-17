@@ -4,10 +4,10 @@ import { Tabs, Tab, Button, Label, InputGroup } from '@blueprintjs/core';
 import { AddCardTrigger, SimpleEditableCard } from 'sse/renderer/widgets/editable-card-list';
 import { PaneHeader } from 'sse/renderer/widgets/pane-header';
 
+import { RunningAnnex, getRunningAnnexesForIssue } from 'models/running-annexes';
 import { RunningAnnexesMessage } from 'models/messages/running_annexes';
 
 import { DateStamp } from 'renderer/widgets/dates';
-import { RunningAnnex, getRunningAnnexesForIssue } from 'renderer/app/issues/running-annexes';
 
 import { MessageEditorProps, MessageEditorDialog } from '../message-editor';
 import * as styles from '../styles.scss';

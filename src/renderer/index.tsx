@@ -7,13 +7,17 @@ import { DataSynchronizer } from 'sse/storage/renderer/data-synchronizer';
 import { Spotlight } from 'sse/spotlight/renderer';
 import { Preflight } from 'sse/preflight/renderer';
 
-import { HomeScreen, IssueEditor } from './app';
+import { HomeScreen } from './home';
+import { IssueEditor } from './issue-editor';
 import { IssueScheduler } from './issue-scheduler';
 
 import '!style-loader!css-loader!@blueprintjs/datetime/lib/css/blueprint-datetime.css';
 import '!style-loader!css-loader!@blueprintjs/core/lib/css/blueprint.css';
 import '!style-loader!css-loader!./normalize.css';
 import * as styles from './styles.scss';
+
+
+/* TODO: Register pluggable things */
 
 
 // Electron Webpack skeleton guarantees that #app exists in index.html

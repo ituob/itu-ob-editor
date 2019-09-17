@@ -9,8 +9,8 @@ import * as editableCardListStyles from 'sse/renderer/widgets/editable-card-list
 import { Publication } from 'models/publications';
 import { OBIssue } from 'models/issues';
 import { Message, AmendmentMessage } from 'models/messages';
+import { getRunningAnnexesForIssue } from 'models/running-annexes';
 
-import { getRunningAnnexesForIssue } from '../running-annexes';
 import { NewMessagePromptProps } from './message-editor';
 import * as styles from './styles.scss';
 
