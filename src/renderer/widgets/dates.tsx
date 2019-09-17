@@ -2,18 +2,17 @@ import * as React from 'react';
 
 
 interface DateStampProps { date: Date }
-
-export function DateStamp(props: DateStampProps) {
+export const DateStamp: React.FC<DateStampProps> = function(props) {
   return (
-    <React.Fragment>
+    <>
       <span className={'day'}>{props.date.getDate()}</span
         ><span className={'separator'}>.</span
         ><span className={'month'}>{monthAsRoman(props.date.getMonth() + 1)}</span
         ><span className={'separator'}>.</span
         ><span className={'year'}>{props.date.getFullYear()}</span>
-    </React.Fragment>
+    </>
   );
-}
+};
 
 
 // Takes number of the month (starting with 1 for January)
