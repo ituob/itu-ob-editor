@@ -1,27 +1,25 @@
 import * as moment from 'moment';
 
 import React, { useEffect, useState } from 'react';
-import { Button, InputGroup, FormGroup } from '@blueprintjs/core';
+import { Icon } from '@blueprintjs/core';
 import { DatePicker } from '@blueprintjs/datetime';
 
+import { Index } from 'sse/storage/query';
 import { PaneHeader } from 'sse/renderer/widgets';
 import { apiRequest } from 'sse/api/renderer';
 
 import { DateStamp } from 'renderer/widgets/dates';
 import { ScheduledIssue } from 'models/issues';
 
+import { IssueDraft, ScheduleForm } from './schedule-form';
+import { UpcomingIssues } from './upcoming';
+
 import * as styles from './styles.scss';
-
-
-interface IssueDraft {
-  id: string,
-  publication_date?: Date,
-  cutoff_date?: Date,
-};
 
 
 export const IssueScheduler: React.FC<{}> = function () {
   const [schedule, updateSchedule] = useState([] as ScheduledIssue[]);
+  const [issueIndex, updateIssueIndex] = useState({} as Index<ScheduledIssue>);
   const [date, selectDate] = useState(null as Date | null);
   const [hoveredDate, hoverDate] = useState(null as Date | null);
   const [newIssueDraft, updateNewIssueDraft] = useState(null as IssueDraft | null);
@@ -30,9 +28,9 @@ export const IssueScheduler: React.FC<{}> = function () {
   const [maxDate, setMaxDate] = useState(undefined as Date | undefined);
 
   async function fetchSchedule() {
-    const scheduledIssues = await apiRequest<ScheduledIssue[]>('ob-schedule');
-    console.debug("Fetched schedule!");
-    updateSchedule(scheduledIssues);
+    const scheduledIssues = await apiRequest<Index<ScheduledIssue>>('ob-schedule');
+    updateSchedule(Object.values(scheduledIssues));
+    updateIssueIndex(scheduledIssues);
   }
 
   useEffect(() => { fetchSchedule() }, []);
@@ -51,7 +49,7 @@ export const IssueScheduler: React.FC<{}> = function () {
           updateNewIssueDraft({ ...newIssueDraft, publication_date: definitelyDate });
         }
       } else {
-        updateNewIssueDraft({ id: '', cutoff_date: definitelyDate });
+        updateNewIssueDraft({ id: undefined, cutoff_date: definitelyDate });
       }
       selectDate(null);
     }
@@ -74,10 +72,13 @@ export const IssueScheduler: React.FC<{}> = function () {
     }
   }, [hoveredDate]);
 
-  function saveNewSchedule() {
-    console.debug("Storing draft!", newIssueDraft);
-    fetchSchedule();
-    updateNewIssueDraft(null);
+  async function saveNewSchedule() {
+    if (newIssueDraft && newIssueDraft.publication_date && newIssueDraft.cutoff_date) {
+      const draft = newIssueDraft as ScheduledIssue;
+      await apiRequest<void>('ob-schedule-add', JSON.stringify(draft));
+      updateNewIssueDraft(null);
+      await fetchSchedule();
+    }
   }
 
   function isDisabledDay(date: Date): boolean {
@@ -96,148 +97,84 @@ export const IssueScheduler: React.FC<{}> = function () {
 
   return (
     <div className={styles.issueScheduler}>
-      <PaneHeader align="right">OB schedule</PaneHeader>
-      <div className={styles.paneBody}>
+      <div className={styles.calendarPane}>
+        <PaneHeader align="right">OB schedule</PaneHeader>
+        <div className={styles.paneBody}>
+          <DatePicker
+            modifiers={{
+              isPublicationDate: (date) => getIssueWithPublication(date, schedule) !== null,
+              isCutoffDate: (date) => getIssueWithCutoff(date, schedule) !== null,
+              isNewPublicationDate: (date) => (
+                (newIssueDraft || {} as IssueDraft).publication_date
+                ? moment((newIssueDraft as IssueDraft).publication_date).isSame(date, 'day') : false),
+              isNewCutoffDate: (date) => (
+                (newIssueDraft || {} as IssueDraft).cutoff_date
+                ? moment((newIssueDraft as IssueDraft).cutoff_date).isSame(date, 'day') : false),
+            }}
+            dayPickerProps={{
+              onDayMouseEnter: (date) => hoverDate(date),
+              onDayMouseLeave: () => hoverDate(null),
+              disabledDays: isDisabledDay,
+              showOutsideDays: false,
+            }}
+            minDate={minDate}
+            maxDate={maxDate}
+            value={date || undefined}
+            onChange={(date, isUserChange) => isUserChange ? selectDate(date) : void 0}
+          />
 
-        <DatePicker
-          modifiers={{
-            isPublicationDate: (date) => getIssueWithPublication(date, schedule) !== null,
-            isCutoffDate: (date) => getIssueWithCutoff(date, schedule) !== null,
-            isNewPublicationDate: (date) => (
-              (newIssueDraft || {id: ''} as IssueDraft).publication_date
-              ? moment((newIssueDraft as IssueDraft).publication_date).isSame(date, 'day') : false),
-            isNewCutoffDate: (date) => (
-              (newIssueDraft || {id: ''} as IssueDraft).cutoff_date
-              ? moment((newIssueDraft as IssueDraft).cutoff_date).isSame(date, 'day') : false),
-          }}
-          dayPickerProps={{
-            onDayMouseEnter: (date) => hoverDate(date),
-            onDayMouseLeave: () => hoverDate(null),
-            disabledDays: isDisabledDay,
-            showOutsideDays: false,
-          }}
-          minDate={minDate}
-          maxDate={maxDate}
-          value={date || undefined}
-          onChange={(date, isUserChange) => isUserChange ? selectDate(date) : void 0}
-        />
+          {hoveredDate
+            ? <div className={styles.daySchedule}>
+                {daySchedule && !newIssueDraft
+                  ? <p>
+                      <Icon icon="info-sign" />
+                      &nbsp;
+                      Edition <strong>no. {daySchedule.id}</strong> is scheduled 
+                      {moment(daySchedule.publication_date).isSame(hoveredDate, 'day')
+                        ? ' to be published '
+                        : ' for cutoff '}
+                      on this day.
+                    </p>
+                  : ''}
 
-        {!newIssueDraft && hoveredDate
-          ? <div className={styles.daySchedule}>
-              <span className={styles.dayScheduleHeader}><DateStamp date={hoveredDate as Date} /></span>
+                {!newIssueDraft
+                  ? <p>Click to schedule <strong>new edition cutoff</strong> on this day.</p>
+                  : ''}
 
-              {!daySchedule && !newIssueDraft
-                ? <p>Click to schedule <strong>new edition cutoff</strong> on this day.</p>
-                : ''}
+                {newIssueDraft && !newIssueDraft.publication_date
+                  ? <p>Click to schedule <strong>publication date</strong> on this day.</p>
+                  : ''}
 
-              {daySchedule && !newIssueDraft
-                ? <p>Edition <strong>no. {daySchedule.id}</strong> is scheduled on this day.</p>
-                : ''}
-            </div>
-          : ''}
-
-        {newIssueDraft
-          ? <ScheduleForm
-              draft={newIssueDraft as IssueDraft}
-              onChange={updateNewIssueDraft}
-              onSave={saveNewSchedule}
-              onCancel={() => { updateNewIssueDraft(null); selectDate(null); }}
-            />
-          : ''}
+                <span className={styles.dayScheduleHeader}><DateStamp date={hoveredDate as Date} /></span>
+              </div>
+            : ''}
+        </div>
       </div>
+
+      {newIssueDraft
+        ? <div className={styles.selectedDayPane}>
+            <PaneHeader align="left">Schedule new edition</PaneHeader>
+
+            <div className={styles.paneBody}>
+              <ScheduleForm
+                draft={newIssueDraft as IssueDraft}
+                onChange={updateNewIssueDraft}
+                onSave={saveNewSchedule}
+                onCancel={() => { updateNewIssueDraft(null) }}
+              />
+            </div>
+          </div>
+        : <div className={styles.upcomingIssuesPane}>
+            <PaneHeader align="left">Upcoming issues</PaneHeader>
+
+            <div className={styles.paneBody}>
+              <UpcomingIssues issues={issueIndex} />
+            </div>
+          </div>
+      }
     </div>
   );
 };
-
-
-interface ScheduleFormProps {
-  draft: IssueDraft,
-  maxId?: number,
-  minId?: number,
-  onChange: (draft: IssueDraft | null) => void,
-  onSave: () => void,
-  onCancel: () => void,
-}
-const ScheduleForm: React.FC<ScheduleFormProps> = function ({ draft, maxId, minId, onChange, onSave, onCancel }) {
-  function validateId(val: string): string[] {
-    const maybeNumId = parseInt(val, 10);
-    if (isNaN(maybeNumId)) {
-      return ['a number'];
-    }
-
-    const numId = maybeNumId as number;
-    var requirements: string[] = [];
-
-    if (numId < (minId || 0)) {
-      requirements.push(`larger than ${minId || 'zero'}`);
-    }
-    if (numId > (maxId || Number.MAX_SAFE_INTEGER)) {
-      requirements.push(`smaller than ${maxId || 'infinity'}`);
-    }
-    return requirements;
-  }
-
-  const idRequirements = validateId(draft.id);
-
-  return (
-    <div className={styles.scheduleForm}>
-      <FormGroup
-          label="Schedule new edition"
-          labelFor="issue-id"
-          intent={idRequirements.length > 0 ? 'danger' : undefined}
-          helperText={idRequirements.length > 0
-            ? `Should be ${idRequirements.join(', ')}`
-            : undefined}>
-        <InputGroup
-          type="text"
-          id="issue-id"
-          placeholder="Edition no., e.g., 1234"
-          value={draft.id}
-          intent={idRequirements.length > 0 ? 'danger' : undefined}
-          onChange={(evt: React.FormEvent<HTMLElement>) => {
-            onChange({ ...draft, id: (evt.target as HTMLInputElement).value as string });
-          }}
-        />
-      </FormGroup>
-
-      <p className={styles.scheduleFormCutoffDate}>
-        <span>Cutoff:</span>
-        <span>
-          {draft.cutoff_date !== undefined
-            ? <DateStamp date={draft.cutoff_date} />
-            : <>Click day to set</>}
-        </span>
-        <Button
-          small={true}
-          minimal={true}
-          onClick={() => onChange({ ...draft, cutoff_date: undefined })}
-          icon={draft.cutoff_date !== undefined ? 'edit' : 'blank'} />
-      </p>
-
-      <p className={styles.scheduleFormPublicationDate}>
-        <span>Publication:</span>
-        <span>
-          {draft.publication_date !== undefined
-            ? <DateStamp date={draft.publication_date} />
-            : <>Click day to set</>}
-        </span>
-        <Button
-          small={true}
-          minimal={true}
-          onClick={() => onChange({ ...draft, publication_date: undefined })}
-          icon={draft.publication_date !== undefined ? 'edit' : 'blank'} />
-      </p>
-
-      <div className={styles.scheduleFormActions}>
-        {draft.id !== '' && draft.publication_date !== undefined && draft.cutoff_date !== undefined
-          ? <Button intent="primary" onClick={onSave} title="Save new issue schedule">Save</Button>
-          : ''}
-
-        <Button onClick={onCancel}>Cancel</Button>
-      </div>
-    </div>
-  );
-}
 
 
 function getDaySchedule(forDate: Date, issues: ScheduledIssue[]): ScheduledIssue | null {

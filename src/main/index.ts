@@ -26,7 +26,7 @@ const ISSUE_SCHEDULER_WINDOW_OPTS = {
   component: 'issueScheduler',
   title: 'OB schedule',
   frameless: true,
-  dimensions: { width: 275, minWidth: 250, height: 500 },
+  dimensions: { width: 600, height: 500 },
 };
 
 
@@ -170,7 +170,10 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
       });
     });
 
-    makeEndpoint<void>('ob-schedule-add', async (issue: ScheduledIssue) => {
+    makeEndpoint<{ success: boolean }>('ob-schedule-add', async (issue: ScheduledIssue) => {
+      storage.workspace.issues[issue.id] = issue as OBIssue;
+      await storage.storeWorkspace(storage.workspace);
+      return { success: true };
     });
 
     // TODO: Refactor into schedule-issue and do it one at a time?
