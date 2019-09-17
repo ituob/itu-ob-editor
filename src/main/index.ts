@@ -8,7 +8,7 @@ import { QuerySet, sortIntegerAscending, sortIntegerDescending } from 'sse/stora
 import { Index, IndexableObject } from 'sse/storage/query';
 import { initRepo } from 'sse/storage/main/git-controller';
 
-import { OBIssue } from 'models/issues';
+import { OBIssue, ScheduledIssue } from 'models/issues';
 
 import { getMenu } from './menu';
 import { initStorage, Workspace, Storage } from './storage';
@@ -24,9 +24,9 @@ const CORS_PROXY_URL = 'https://cors.isomorphic-git.org';
 
 const ISSUE_SCHEDULER_WINDOW_OPTS = {
   component: 'issueScheduler',
-  title: 'Issue Scheduler',
+  title: 'OB schedule',
   frameless: true,
-  dimensions: { width: 400, minWidth: 380, },
+  dimensions: { width: 275, minWidth: 250, height: 500 },
 };
 
 
@@ -157,6 +157,20 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
       return issues.filter(item => {
         return new Date(item[1].publication_date).getTime() >= new Date().getTime();
       }).orderBy(sortIntegerAscending).all()
+    });
+
+    makeEndpoint<ScheduledIssue[]>('ob-schedule', async () => {
+      const issues = new QuerySet<OBIssue>(storage.workspace.issues);
+      return issues.orderBy(sortIntegerAscending).all().map(issue => {
+        return {
+          id: issue.id,
+          publication_date: issue.publication_date,
+          cutoff_date: issue.cutoff_date,
+        };
+      });
+    });
+
+    makeEndpoint<void>('ob-schedule-add', async (issue: ScheduledIssue) => {
     });
 
     // TODO: Refactor into schedule-issue and do it one at a time?

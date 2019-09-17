@@ -7,11 +7,8 @@ import { DataSynchronizer } from 'sse/storage/renderer/data-synchronizer';
 import { Spotlight } from 'sse/spotlight/renderer';
 import { Preflight } from 'sse/preflight/renderer';
 
-import {
-  HomeScreen,
-  IssueEditor,
-  IssueScheduler,
-} from './app';
+import { HomeScreen, IssueEditor } from './app';
+import { IssueScheduler } from './issue-scheduler';
 
 import '!style-loader!css-loader!@blueprintjs/datetime/lib/css/blueprint-datetime.css';
 import '!style-loader!css-loader!@blueprintjs/core/lib/css/blueprint.css';

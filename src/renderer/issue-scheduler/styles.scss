@@ -1,0 +1,113 @@
+@mixin dayWithDot($modifier, $ofColor) {
+  &:not(.DayPicker-Day--outside) {
+    position: relative;
+
+    &:#{$modifier} {
+      background: $ofColor;
+      content: "";
+
+      display: block;
+      height: .4rem;
+      width: .4rem;
+      overflow: hidden;
+
+      position: absolute;
+      right: .1rem;
+      top: 40%;
+
+      @if ($modifier == 'after') {
+        transform: translateY(-51%);
+      } @else {
+        transform: translateY(51%);
+      }
+    }
+  }
+}
+
+@mixin scheduleFormDateRow($color) {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+
+  > :last-child {
+    margin-left: .5rem;
+  }
+  > :first-child {
+    flex: 1;
+    color: $color;
+  }
+}
+
+$pubColorLight: #3DCC91;
+$pubColorDark: #15B371;
+$cutColorLight: #FFB366;
+$cutColorDark: #F29D49;
+
+
+.issueScheduler {
+  height: 100vh;
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+
+.paneBody {
+  flex: 1;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem 2rem 2rem;
+  overflow-y: auto;
+
+  .daySchedule {
+    align-self: stretch;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: stretch;
+
+    .dayScheduleHeader {
+      margin-bottom: 1rem;
+    }
+  }
+}
+
+
+.scheduleForm {
+  align-self: stretch;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: stretch;
+
+  .scheduleFormPublicationDate {
+    @include scheduleFormDateRow($pubColorDark);
+  }
+
+  .scheduleFormCutoffDate {
+    @include scheduleFormDateRow($cutColorDark);
+  }
+
+  .scheduleFormActions {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-around;
+
+    > * {
+      flex: 1;
+    }
+  }
+}
+
+
+:global .DayPicker-Day--isPublicationDate {
+  @include dayWithDot(before, $pubColorDark);
+}
+:global .DayPicker-Day--isCutoffDate {
+  @include dayWithDot(after, $cutColorDark);
+}
+:global .DayPicker-Day--isNewPublicationDate {
+  background: $pubColorLight !important;
+}
+:global .DayPicker-Day--isNewCutoffDate {
+  background: $cutColorLight !important;
+}

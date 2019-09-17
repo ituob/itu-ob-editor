@@ -66,5 +66,4 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
 
 /* Export window components */
 
-export { IssueScheduler } from './issues/scheduler';
 export { IssueEditor } from './issues/editor';
