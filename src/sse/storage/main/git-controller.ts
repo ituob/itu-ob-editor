@@ -2,6 +2,8 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as git from 'isomorphic-git';
 
+import { makeEndpoint } from 'sse/api/main';
+
 import { GitAuthor, GitAuthentication } from '../git';
 
 
@@ -105,6 +107,52 @@ export class GitController {
       corsProxy: this.corsProxy,
       ...this.auth,
     });
+  }
+
+  setUpAPIEndpoints() {
+
+    makeEndpoint<{ name?: string, email?: string }>('git-author-info', async () => {
+      return (await this.getAuthor());
+    });
+
+    makeEndpoint<{ errors: string[] }>('fetch-commit-push', async (
+        commitMsg: string,
+        authorName: string,
+        authorEmail: string,
+        gitUsername: string,
+        gitPassword: string) => {
+
+      await this.setAuthor({ name: authorName, email: authorEmail });
+
+      try {
+        await this.setAuth({ username: gitUsername, password: gitPassword });
+      } catch (e) {
+        return { errors: [`Error while authenticating: ${e.toString()}`] };
+      }
+
+      try {
+        await this.pull();
+      } catch (e) {
+        return { errors: [`Error while fetching and merging changes: ${e.toString()}`] };
+      }
+
+      const changedFiles = await this.listChangedFiles();
+      if (changedFiles.length < 1) {
+        return { errors: ["No changes to submit!"] };
+      }
+
+      await this.addAllChanges();
+      await this.commit(commitMsg);
+
+      try {
+        await this.push();
+      } catch (e) {
+        return { errors: [`Error while pushing changes: ${e.toString()}`] };
+      }
+
+      return { errors: [] };
+    });
+
   }
 }
 
