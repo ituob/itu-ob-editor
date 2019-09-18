@@ -4,8 +4,8 @@ import { app, Menu, ipcMain } from 'electron';
 
 import { openWindow, getWindowByTitle, windows } from 'sse/main/window';
 import { makeEndpoint, makeWriteOnlyEndpoint, makeWindowEndpoint } from 'sse/api/main';
-import { QuerySet, sortIntegerAscending, sortIntegerDescending } from 'sse/storage/query';
-import { Index, IndexableObject } from 'sse/storage/query';
+import { QuerySet, sortIntegerAscending } from 'sse/storage/query';
+import { Index } from 'sse/storage/query';
 import { initRepo } from 'sse/storage/main/git-controller';
 
 import { OBIssue, ScheduledIssue } from 'models/issues';
@@ -75,25 +75,8 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
     // possibly record timeline states into a temporary file;
     // allow dispatching reducer actions through API endpoints (including types UNDO/REDO).
 
-    for (let indexName of Object.keys(storage.workspace)) {
-      makeEndpoint<Index<any>>(`storage-${indexName}-all`, async (newIndex?: Index<any>) => {
-        if (newIndex) {
-          await storage.storeWorkspace({ ...storage.workspace, [indexName]: newIndex });
-        }
-        return storage.workspace[indexName];
-      });
-      makeEndpoint<IndexableObject>(`storage-${indexName}`, async ({ objectId }: { objectId: string }, newObject?: IndexableObject) => {
-        if (newObject) {
-          await storage.storeManagers[indexName].store(newObject, storage);
-        }
-        return storage.workspace[indexName][objectId];
-      });
-      makeEndpoint<boolean>(`storage-${indexName}-delete`, async ({ objectId }: { objectId: string }) => {
-        delete storage.workspace[indexName][objectId];
-        await storage.storeManagers[indexName].storeIndex(storage, storage.workspace[indexName]);
-        return true;
-      });
-    }
+    storage.setUpAPIEndpoints();
+    gitCtrl.setUpAPIEndpoints();
 
     makeEndpoint<Index<any>>('storage-search', async ({ query }: { query?: string }) => {
       return await storage.findObjects(query);
@@ -103,54 +86,7 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
       return storage.workspace;
     });
 
-    makeEndpoint<{ name?: string, email?: string }>('git-author-info', async () => {
-      return (await gitCtrl.getAuthor());
-    });
 
-    makeEndpoint<{ errors: string[] }>('fetch-commit-push', async (
-        commitMsg: string,
-        authorName: string,
-        authorEmail: string,
-        gitUsername: string,
-        gitPassword: string) => {
-
-      await gitCtrl.setAuthor({ name: authorName, email: authorEmail });
-
-      try {
-        await gitCtrl.setAuth({ username: gitUsername, password: gitPassword });
-      } catch (e) {
-        return { errors: [`Error while authenticating: ${e.toString()}`] };
-      }
-
-      try {
-        await gitCtrl.pull();
-      } catch (e) {
-        return { errors: [`Error while fetching and merging changes: ${e.toString()}`] };
-      }
-
-      const changedFiles = await gitCtrl.listChangedFiles();
-      if (changedFiles.length < 1) {
-        return { errors: ["No changes to submit!"] };
-      }
-
-      await gitCtrl.addAllChanges();
-      await gitCtrl.commit(commitMsg);
-
-      try {
-        await gitCtrl.push();
-      } catch (e) {
-        return { errors: [`Error while pushing changes: ${e.toString()}`] };
-      }
-
-      return { errors: [] };
-    });
-
-    makeEndpoint<OBIssue[]>('latest-published-issues', async () => {
-      const issues = new QuerySet<OBIssue>(storage.workspace.issues);
-      return issues.filter((item) => {
-        return new Date(item[1].publication_date).getTime() < new Date().getTime();
-      }).orderBy(sortIntegerDescending).all().slice(0, 1);
-    });
     /* Home screen */
 
     makeEndpoint<{ id: number | null }>('current-issue-id', async () => {
@@ -160,6 +96,9 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
       }).orderBy(sortIntegerAscending).all()[0] || null;
       return currentIssue ? { id: currentIssue.id } : { id: null };
     });
+
+
+    /* Issue scheduler */
 
     makeEndpoint<ScheduledIssue[]>('ob-schedule', async () => {
       const issues = new QuerySet<OBIssue>(storage.workspace.issues);
@@ -178,11 +117,6 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
       return { success: true };
     });
 
-    // TODO: Refactor into schedule-issue and do it one at a time?
-    makeWriteOnlyEndpoint('future-issues', (issues: Index<OBIssue>) => {
-      storage.workspace.issues = issues;
-      storage.storeWorkspace(storage.workspace);
-    });
 
     makeEndpoint<OBIssue>('issue', async ({ issueId }: { issueId: string }) => {
       const issues = new QuerySet<OBIssue>(storage.workspace.issues);
