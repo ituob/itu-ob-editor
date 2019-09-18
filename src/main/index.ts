@@ -172,7 +172,7 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
 
     makeEndpoint<{ success: boolean }>('ob-schedule-add', async (issue: ScheduledIssue) => {
       storage.workspace.issues[issue.id] = issue as OBIssue;
-      await storage.storeWorkspace(storage.workspace);
+      await storage.storeWorkspace();
       return { success: true };
     });
 
@@ -197,7 +197,7 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
 
     makeWriteOnlyEndpoint('issue', ({ issueId }: { issueId: string }, issue: OBIssue) => {
       storage.workspace.issues[issue.id] = issue;
-      storage.storeWorkspace(storage.workspace);
+      storage.storeWorkspace();
     });
 
 
