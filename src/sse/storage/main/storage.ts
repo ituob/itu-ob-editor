@@ -1,7 +1,10 @@
 import * as path from 'path';
 
+import { makeEndpoint } from 'sse/api/main';
+
 import { Index, IndexableObject } from '../query';
 import { Workspace } from '../workspace';
+
 import { YAMLStorage } from './yaml';
 
 
@@ -99,7 +102,12 @@ export abstract class Storage<W extends Workspace> {
 
   public abstract async findObjects(query?: string): Promise<W>
   public abstract async loadWorkspace(): Promise<W>
-  public abstract async storeWorkspace(workspace: W): Promise<boolean>
+
+  async storeWorkspace(): Promise<boolean> {
+    return Promise.all([...Object.keys(this.storeManagers).map(async (key) => {
+      return await this.storeManagers[key].storeIndex(this, this.workspace[key]);
+    })]).then(this.loadWorkspace.bind(this)).then(() => true);
+  }
 
   // Loads object data from given directory, reading YAML files.
   // meta.yaml is treated specially, populating top-level object payload.
@@ -132,5 +140,30 @@ export abstract class Storage<W extends Workspace> {
     // Blindly hope that data structure loaded from YAML
     // is valid for given type.
     return objData;
+  }
+
+  setUpAPIEndpoints() {
+    for (let indexName of Object.keys(this.workspace)) {
+      makeEndpoint<Index<any>>(`storage-${indexName}-all`, async (newIndex?: Index<any>) => {
+        if (newIndex) {
+          await this.storeManagers[indexName].storeIndex(this, newIndex);
+          await this.loadWorkspace();
+        }
+        return this.workspace[indexName];
+      });
+      makeEndpoint<IndexableObject>(`storage-${indexName}`, async ({ objectId }: { objectId: string }, newObject?: IndexableObject) => {
+        if (newObject) {
+          await this.storeManagers[indexName].store(newObject, this);
+          await this.loadWorkspace();
+        }
+        return this.workspace[indexName][objectId];
+      });
+      makeEndpoint<boolean>(`storage-${indexName}-delete`, async ({ objectId }: { objectId: string }) => {
+        delete this.workspace[indexName][objectId];
+        await this.storeManagers[indexName].storeIndex(this, this.workspace[indexName]);
+        await this.loadWorkspace();
+        return true;
+      });
+    }
   }
 }
