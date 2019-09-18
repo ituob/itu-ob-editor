@@ -111,11 +111,6 @@ export class Storage extends BaseStorage<Workspace> {
       issues: await this.storeManagers.issues.getIndex(this),
     };
   }
-  public async storeWorkspace(workspace: Workspace): Promise<boolean> {
-    await this.storeManagers.issues.storeIndex(this, this.workspace.issues);
-    this.workspace = await this.loadWorkspace();
-    return true;
-  }
 }
 
 
