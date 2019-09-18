@@ -8,6 +8,7 @@ import { reviveJsonValue } from './utils';
 // TODO (#4): Refactor into generic main APIs, rather than Workspace-centered
 
 
+// TODO: Handle JSON stringification of arguments?
 export async function apiRequest<T>(request: string, ...args: string[]): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     function handleResp(evt: any, rawData: string) {
