@@ -1,18 +1,20 @@
 import { ipcRenderer } from 'electron';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ButtonGroup, Button } from '@blueprintjs/core';
 
-import { useWorkspaceRO } from 'sse/api/renderer';
-import { OBIssue } from 'models/issues';
+import { apiRequest } from 'sse/api/renderer';
 import * as styles from './styles.scss';
 
 
 interface HomeScreenProps {}
 export const HomeScreen: React.FC<HomeScreenProps> = function () {
-  const futureIssues = useWorkspaceRO<OBIssue[]>(
-    'future-issues',
-    [],
-    true);
+  const [currentIssue, setCurrentIssue] = useState({ id: null } as { id: number | null });
+
+  useEffect(() => {
+    (async () =>
+      setCurrentIssue(await apiRequest<{ id: number | null }>('current-issue-id'))
+    )();
+  }, []);
 
   return (
     <div className={styles.homeMenuContainer}>
@@ -23,11 +25,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
           fill={true}>
 
         <Button
-          text={futureIssues.length > 0 ? `Open no. ${futureIssues[0].id}` : "Open current"}
+          text={currentIssue.id !== null ? `Open no. ${currentIssue.id}` : "Open current"}
           title="Edit current edition"
-          disabled={futureIssues.length < 1}
+          disabled={currentIssue.id === null}
           icon="edit"
-          onClick={() => ipcRenderer.sendSync('open-issue-editor', `${futureIssues[0].id}`)}
+          onClick={() => currentIssue.id ? ipcRenderer.sendSync('open-issue-editor', `${currentIssue.id}`) : void 0}
         />
         <Button
           text="Schedule"

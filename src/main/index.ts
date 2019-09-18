@@ -151,12 +151,14 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
         return new Date(item[1].publication_date).getTime() < new Date().getTime();
       }).orderBy(sortIntegerDescending).all().slice(0, 1);
     });
+    /* Home screen */
 
-    makeEndpoint<OBIssue[]>('future-issues', async () => {
+    makeEndpoint<{ id: number | null }>('current-issue-id', async () => {
       const issues = new QuerySet<OBIssue>(storage.workspace.issues);
-      return issues.filter(item => {
+      const currentIssue: OBIssue | null = issues.filter(item => {
         return new Date(item[1].publication_date).getTime() >= new Date().getTime();
-      }).orderBy(sortIntegerAscending).all()
+      }).orderBy(sortIntegerAscending).all()[0] || null;
+      return currentIssue ? { id: currentIssue.id } : { id: null };
     });
 
     makeEndpoint<ScheduledIssue[]>('ob-schedule', async () => {
