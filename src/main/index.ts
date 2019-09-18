@@ -118,10 +118,15 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
     });
 
 
+    /* Issue editor */
+
     makeEndpoint<OBIssue>('issue', async ({ issueId }: { issueId: string }) => {
       const issues = new QuerySet<OBIssue>(storage.workspace.issues);
       const issue = issues.get(issueId);
 
+      if (!issue) {
+        throw new Error(`Issue ${issueId} not found`);
+      }
       if (!(issue.general || {}).messages) {
         issue.general = { messages: [] };
       }
