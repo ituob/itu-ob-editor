@@ -2,7 +2,7 @@
 
 Standalone application for editing [ITU OB website](https://ituob.org) data at https://github.com/ituob/itu-ob-data/.
 
-The website is statically generated using Jekyll.
+The website and OB deliverables are statically generated using Jekyll ([site source](https://github.com/ituob/ituob.org/)).
 
 The app is based on Electron and is intended to be run on any OS supported by Electron.
 
