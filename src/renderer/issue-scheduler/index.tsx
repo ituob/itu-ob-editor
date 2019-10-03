@@ -81,20 +81,6 @@ export const IssueScheduler: React.FC<{}> = function () {
     }
   }
 
-  function isDisabledDay(date: Date): boolean {
-    if (newIssueDraft !== null) {
-      if (!newIssueDraft.cutoff_date) {
-        return (
-          getDaySchedule(date, schedule) !== null ||
-          getDaySchedule(moment(date).subtract(1, 'days').toDate(), schedule) !== null);
-      } else {
-        return getDaySchedule(date, schedule) !== null;
-      }
-    } else {
-      return false;
-    }
-  }
-
   return (
     <div className={styles.issueScheduler}>
       <div className={styles.calendarPane}>
@@ -114,7 +100,6 @@ export const IssueScheduler: React.FC<{}> = function () {
             dayPickerProps={{
               onDayMouseEnter: (date) => hoverDate(date),
               onDayMouseLeave: () => hoverDate(null),
-              disabledDays: isDisabledDay,
               showOutsideDays: false,
             }}
             minDate={minDate}
