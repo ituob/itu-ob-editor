@@ -3,7 +3,7 @@ import { ipcRenderer } from 'electron';
 
 import React from 'react';
 import { NonIdealState, Card, H3 } from '@blueprintjs/core';
-import { Index, QuerySet, sortIntegerAscending, sortIntegerDescending } from 'sse/storage/query';
+import { Index, QuerySet } from 'sse/storage/query';
 import { DateStamp } from 'renderer/widgets/dates';
 import { ScheduledIssue } from 'models/issues';
 import * as styles from './styles.scss';
@@ -14,16 +14,7 @@ interface UpcomingIssuesProps {
 }
 export const UpcomingIssues: React.FC<UpcomingIssuesProps> = function({ issues }) {
   const qs = new QuerySet<ScheduledIssue>(issues);
-
-  const previousIssues = qs.filter((item) => {
-    return new Date(item[1].publication_date).getTime() < new Date().getTime();
-  }).orderBy(sortIntegerDescending).all().slice(0, 1);
-
-  const futureIssues = qs.filter(item => {
-    return new Date(item[1].publication_date).getTime() >= new Date().getTime();
-  }).orderBy(sortIntegerAscending).all();
-
-  const existingIssues = [...previousIssues, ...futureIssues];
+  const existingIssues = qs.all();
 
   return (
     <div className={styles.upcomingIssues}>

@@ -1,4 +1,5 @@
 import * as path from 'path';
+import * as moment from 'moment';
 
 import { app, Menu, ipcMain } from 'electron';
 
@@ -100,9 +101,17 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
 
     /* Issue scheduler */
 
-    makeEndpoint<ScheduledIssue[]>('ob-schedule', async () => {
+    makeEndpoint<ScheduledIssue[]>('ob-schedule', async ({ month }: { month: Date | null}) => {
       const issues = new QuerySet<OBIssue>(storage.workspace.issues);
-      return issues.orderBy(sortIntegerAscending).all().map(issue => {
+      return issues.orderBy(sortIntegerAscending).filter(item => {
+        if (month) {
+          return (
+            moment(item[1].publication_date).isSame(month, 'month') ||
+            moment(item[1].cutoff_date).isSame(month, 'month'));
+        } else {
+          return new Date(item[1].publication_date).getTime() >= new Date().getTime();
+        }
+      }).all().map(issue => {
         return {
           id: issue.id,
           publication_date: issue.publication_date,

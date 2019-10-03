@@ -20,46 +20,46 @@ import * as styles from './styles.scss';
 export const IssueScheduler: React.FC<{}> = function () {
   const [schedule, updateSchedule] = useState([] as ScheduledIssue[]);
   const [issueIndex, updateIssueIndex] = useState({} as Index<ScheduledIssue>);
-  const [date, selectDate] = useState(null as Date | null);
+  const [date, selectDate] = useState(new Date());
+  const [month, selectMonth] = useState(new Date());
   const [hoveredDate, hoverDate] = useState(null as Date | null);
   const [newIssueDraft, updateNewIssueDraft] = useState(null as IssueDraft | null);
   const [daySchedule, updateDaySchedule] = useState(null as ScheduledIssue | null);
   const [minDate, setMinDate] = useState(undefined as Date | undefined);
   const [maxDate, setMaxDate] = useState(undefined as Date | undefined);
 
-  async function fetchSchedule() {
-    const scheduledIssues = await apiRequest<Index<ScheduledIssue>>('ob-schedule');
+  async function fetchSchedule(month: Date | null) {
+    const scheduledIssues = await apiRequest<Index<ScheduledIssue>>(
+      'ob-schedule',
+      JSON.stringify({ month }));
     updateSchedule(Object.values(scheduledIssues));
     updateIssueIndex(scheduledIssues);
   }
 
-  useEffect(() => { fetchSchedule() }, []);
+  function startOrUpdateDraft(withDate: Date) {
+    if (newIssueDraft !== null) {
+      // We are in the process of scheduling new issue
+      const draft = newIssueDraft as IssueDraft;
 
-  useEffect(() => {
-    if (date !== null) {
-      const definitelyDate = date as Date;
-
-      if (newIssueDraft !== null) {
-        // We are in the process of scheduling new issue
-        const draft = newIssueDraft as IssueDraft;
-
-        if (!draft.cutoff_date) {
-          updateNewIssueDraft({ ...newIssueDraft, cutoff_date: definitelyDate });
-        } else if (!draft.publication_date) {
-          updateNewIssueDraft({ ...newIssueDraft, publication_date: definitelyDate });
-        }
-      } else {
-        updateNewIssueDraft({ id: undefined, cutoff_date: definitelyDate });
+      if (!draft.cutoff_date) {
+        updateNewIssueDraft({ ...newIssueDraft, cutoff_date: withDate });
+      } else if (!draft.publication_date) {
+        updateNewIssueDraft({ ...newIssueDraft, publication_date: withDate });
       }
-      selectDate(null);
+    } else {
+      updateNewIssueDraft({ id: undefined, cutoff_date: withDate });
     }
-  }, [date]);
+  }
+
+  useEffect(() => { fetchSchedule(null) }, []);
+
+  useEffect(() => { fetchSchedule(month) }, [month]);
 
   useEffect(() => {
     if (newIssueDraft !== null) {
       const draft = newIssueDraft as IssueDraft;
-      setMaxDate(draft.publication_date ? moment(draft.publication_date).subtract(1, 'days').toDate() : undefined);
-      setMinDate(draft.cutoff_date ? moment(draft.cutoff_date).add(1, 'days').toDate() : undefined);
+      setMaxDate(draft.publication_date);
+      setMinDate(draft.cutoff_date);
     } else {
       setMaxDate(undefined);
       setMinDate(undefined);
@@ -77,7 +77,7 @@ export const IssueScheduler: React.FC<{}> = function () {
       const draft = newIssueDraft as ScheduledIssue;
       await apiRequest<void>('ob-schedule-add', JSON.stringify(draft));
       updateNewIssueDraft(null);
-      await fetchSchedule();
+      await fetchSchedule(month || null);
     }
   }
 
@@ -104,8 +104,12 @@ export const IssueScheduler: React.FC<{}> = function () {
             }}
             minDate={minDate}
             maxDate={maxDate}
-            value={date || undefined}
-            onChange={(date, isUserChange) => isUserChange ? selectDate(date) : void 0}
+            value={date}
+            onChange={(newDate, isUserChange) => {
+              if (isUserChange) { startOrUpdateDraft(newDate || date); }
+              if (newDate !== null) { selectDate(newDate); }
+              if (!moment(newDate).isSame(date, 'month')) { selectMonth(newDate); }
+            }}
           />
 
           {hoveredDate
