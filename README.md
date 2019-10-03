@@ -33,7 +33,7 @@ If the app errors out, a fix could be to manually delete the cloned data reposit
 
 ## Implementation Guide
 
-### File layout under `src/`:
+### File layout under `src/`
 
 * `sse/` directory contains static site editor framework foundation.
 
