@@ -122,12 +122,20 @@ export const IssueScheduler: React.FC<{}> = function () {
                     </p>
                   : ''}
 
-                {!newIssueDraft
-                  ? <p>Click to schedule <strong>new edition cutoff</strong> on this day.</p>
+                {!newIssueDraft || !newIssueDraft.cutoff_date
+                  ? <p>
+                      <Icon icon="edit" />
+                      &nbsp;
+                      Click to schedule a <strong>cutoff date</strong> on this day.
+                    </p>
                   : ''}
 
-                {newIssueDraft && !newIssueDraft.publication_date
-                  ? <p>Click to schedule <strong>publication date</strong> on this day.</p>
+                {newIssueDraft && !newIssueDraft.publication_date && moment(hoveredDate).isAfter(minDate)
+                  ? <p>
+                      <Icon icon="edit" />
+                      &nbsp;
+                      Click to schedule a <strong>publication date</strong> on this day.
+                    </p>
                   : ''}
 
                 <span className={styles.dayScheduleHeader}><DateStamp date={hoveredDate as Date} /></span>
