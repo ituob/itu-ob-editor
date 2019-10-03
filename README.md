@@ -54,9 +54,9 @@ If the app errors out, a fix could be to manually delete the cloned data reposit
   Contains app initialization, menu definitions, and sets up main thread API endpoints
   that browser windows can call from renderer thread.
 
-* `renderer/`: Conventional Electron’s renderer thread initialization.
+* `renderer/`: Electron’s renderer thread initialization.
 
-  Organized by high-level React components (usually each has its own window).
+  Organized by high-level React component.
 
 * `static/`: Application icons.
 
