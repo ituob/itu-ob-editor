@@ -39,6 +39,12 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = function ({ draft, maxI
   }
 
   const idRequirements = validateId(draft.id);
+  const idRequirementsText = idRequirements.length > 0
+    ? `Should be ${idRequirements.join(', ')}.`
+    : undefined;
+  const rescheduleNote = draft.id
+    ? `Note: if edition ${draft.id} already exists, it will be rescheduled.`
+    : undefined;
 
   return (
     <div className={styles.scheduleForm}>
@@ -46,9 +52,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = function ({ draft, maxI
           label="New edition no.:"
           labelFor="issue-id"
           intent={idRequirements.length > 0 ? 'danger' : undefined}
-          helperText={idRequirements.length > 0
-            ? `Should be ${idRequirements.join(', ')}.`
-            : undefined}>
+          helperText={idRequirementsText || rescheduleNote}>
         <InputGroup
           type="number"
           id="issue-id"

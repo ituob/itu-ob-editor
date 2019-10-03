@@ -138,7 +138,7 @@ export const IssueScheduler: React.FC<{}> = function () {
 
       {newIssueDraft
         ? <div className={styles.selectedDayPane}>
-            <PaneHeader align="left">Schedule new edition</PaneHeader>
+            <PaneHeader align="left">Schedule OB edition</PaneHeader>
 
             <div className={styles.paneBody}>
               <ScheduleForm
