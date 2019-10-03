@@ -33,21 +33,67 @@ If the app errors out, a fix could be to manually delete the cloned data reposit
 
 ## Implementation Guide
 
-Core implementation is under `src/renderer`.
+### File layout under `src/`:
 
-* `styles.scss`: Styles relevant before the app is loaded.
-* `app/`: Application & its components.
+* `sse/` directory contains static site editor framework foundation.
 
-### UI framework
+  This is the only directory not specific to ITU OB..
+
+  Within it, modules are organized by functionality.
+  Each module may contain `renderer` and/or `main` submodules;
+  those contain units usable in Electron’s renderer (e.g., React components)
+  or main (e.g., storage-related code) threads respectively.
+  Anything not under those two modules is (must be) importable anywhere regardless
+  of thread.
+
+  For example, `storage` contains code for handling Git repository interaction (main-only),
+  and also offers a “data synchronizer” UI component (renderer-only).
+
+* `main/`: Electron’s main thread code.
+
+  Contains app initialization, menu definitions, and sets up main thread API endpoints
+  that browser windows can call from renderer thread.
+
+* `renderer/`: Conventional Electron’s renderer thread initialization.
+
+  Organized by high-level React components (usually each has its own window).
+
+* `static/`: Application icons.
+
+### Interaction between main and renderer threads
+
+The app is organized in a way where a lot of the functionality involves API calls
+between main and renderer threads. E.g., when a window needs to be opened,
+renderer code (browser window) would call a main API endpoint, and main thread
+will launch the window as required.
+
+### Renderer
+
+#### Window initialization
+
+When opening a new window, the framework supplies GET query parameter `c`
+which specifies the component to be loaded at top level in the window.
+(See: `src/sse/main/window.ts`.)
+
+Based on that value, renderer initialization picks
+the appropriate React component class.
+
+If a top-level component is expected to be passed any props
+renderer initialization will expect GET query parameters to be passed.
+Only string prop values can be expected by top-level components.
+(For example, issue editor expects OB edition ID to be passed.)
+(See: `src/renderer/index.tsx`.)
+
+#### UI framework
 
 This project uses Blueprint 3 as main UI framework.
 
-### Authoring React components
+#### Authoring React components
 
 The convention is to use functional components.
 Styling is kept in `styles.scss` files next to each component.
 
-### Assigning SCSS classes in React components
+#### Assigning SCSS classes in React components
 
 Local scoping is set by default for SCSS modules.
 [See more in Webpack CSS loader docs.](https://github.com/webpack-contrib/css-loader#scope)
