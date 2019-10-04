@@ -2,7 +2,7 @@ import * as moment from 'moment';
 import { ipcRenderer } from 'electron';
 
 import React from 'react';
-import { NonIdealState, Card, H3 } from '@blueprintjs/core';
+import { NonIdealState, Card, H3, Icon, Tooltip, Position } from '@blueprintjs/core';
 import { Index, QuerySet } from 'sse/storage/query';
 import { DateStamp } from 'renderer/widgets/dates';
 import { ScheduledIssue } from 'models/issues';
@@ -42,12 +42,24 @@ const IssueScheduleCard: React.FC<IssueScheduleCardProps> = function ({ issue, o
     <Card
         onClick={onEditClick}
         className={`${styles.issueScheduleCard} ${isPast ? styles.pastIssueCard : ''}`}>
-      <H3>{issue.id}</H3>
+
+      <H3 className={styles.headerLabel}>{issue.id}</H3>
 
       <p className={styles.scheduleInfo}>
-        <span>Publication: <DateStamp date={issue.publication_date} /></span>
-        <span>Cutoff: <DateStamp date={issue.cutoff_date} /></span>
+        <Tooltip content="Cutoff date" position={Position.RIGHT}>
+          <span className={styles.cutoffDate}>
+            <Icon icon="cut" />
+            <DateStamp date={issue.cutoff_date} />
+          </span>
+        </Tooltip>
+        <Tooltip content="Publication date" position={Position.LEFT}>
+          <span className={styles.publicationDate}>
+            <Icon icon="document-share" />
+            <DateStamp date={issue.publication_date} />
+          </span>
+        </Tooltip>
       </p>
+
     </Card>
   );
 };

@@ -125,24 +125,69 @@ $cutColorDark: #D9822B;
 .issueScheduleCard {
   border-radius: 0 !important;
   cursor: pointer;
+
+  .headerLabel {
+    position: relative;
+
+    &::after {
+      transition: content .2s linear, color .2s linear;
+      display: block;
+      position: absolute;
+      right: 0;
+      top: 0;
+      content: unset;
+      font-size: .7rem;
+      text-transform: uppercase;
+      font-weight: normal;
+    }
+  }
+
+  &:hover {
+    .headerLabel {
+      color: $pt-link-color;
+      &::after {
+        content: "click to open" !important;
+        color: $pt-link-color;
+      }
+    }
+  }
 }
 
 
 .pastIssueCard {
-  opacity: 0.5;
+  .headerLabel::after {
+    content: "published" !important;
+    color: $pubColorDark;
+  }
 }
 
 
 .scheduleInfo {
   display: flex;
-  flex-flow: row wrap;
+  flex-flow: row nowrap;
+  white-space: nowrap;
+  justify-content: space-between;
 
   > * {
-    flex: 1;
-    white-space: nowrap;
+    flex: 0;
+  }
 
-    &:first-child {
-      margin-right: 1em;
+  .cutoffDate, .publicationDate {
+    > :first-child {
+      margin-right: .5rem;
+      transform: scale(.8);
+    }
+  }
+
+  .cutoffDate {
+    > :first-child {
+      color: $cutColorDark;
+    }
+  }
+
+  .publicationDate {
+    > :first-child {
+      color: $pubColorDark;
     }
   }
 }

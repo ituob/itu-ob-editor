@@ -51,8 +51,6 @@ export const IssueScheduler: React.FC<{}> = function () {
     }
   }
 
-  useEffect(() => { fetchSchedule(null) }, []);
-
   useEffect(() => { fetchSchedule(month) }, [month]);
 
   useEffect(() => {
@@ -84,7 +82,7 @@ export const IssueScheduler: React.FC<{}> = function () {
   return (
     <div className={styles.issueScheduler}>
       <div className={styles.calendarPane}>
-        <PaneHeader align="right">OB schedule</PaneHeader>
+        <PaneHeader align="right">OB calendar</PaneHeader>
         <div className={styles.paneBody}>
           <DatePicker
             modifiers={{
@@ -150,7 +148,7 @@ export const IssueScheduler: React.FC<{}> = function () {
 
       {newIssueDraft
         ? <div className={styles.selectedDayPane}>
-            <PaneHeader align="left">Schedule OB edition</PaneHeader>
+            <PaneHeader align="left">Schedule edition</PaneHeader>
 
             <div className={styles.paneBody}>
               <ScheduleForm
@@ -162,7 +160,7 @@ export const IssueScheduler: React.FC<{}> = function () {
             </div>
           </div>
         : <div className={styles.upcomingIssuesPane}>
-            <PaneHeader align="left">Upcoming issues</PaneHeader>
+            <PaneHeader align="left">Editions</PaneHeader>
 
             <div className={styles.paneBody}>
               <UpcomingIssues issues={issueIndex} />
