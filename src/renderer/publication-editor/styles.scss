@@ -1,0 +1,23 @@
+.pubEditorWindow {
+  height: 100vh;
+  display: flex;
+  flex-flow: column nowrap;
+
+  .windowBody, .actionButtons {
+    padding: 0 20px 0 14px;
+  }
+
+  .windowBody {
+    flex: 1;
+  }
+
+  .actionButtons {
+    display: flex;
+    flex-flow: row nowrap;
+    padding-bottom: 1rem;
+
+    > * {
+      flex: 1;
+    }
+  }
+}

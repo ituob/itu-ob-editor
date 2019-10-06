@@ -153,6 +153,14 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
 
     /* Set up window-opening endpoints */
 
+    makeWindowEndpoint('publication-editor', (id: string) => ({
+      component: 'publicationEditor',
+      title: `Publication ${id}`,
+      componentParams: `pubId=${id}`,
+      frameless: true,
+      dimensions: { width: 800, height: 600, },
+    }));
+
     makeWindowEndpoint('issue-scheduler', () => ISSUE_SCHEDULER_WINDOW_OPTS);
 
     makeWindowEndpoint('issue-editor', (issueId: string) => ({

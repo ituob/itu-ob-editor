@@ -1,3 +1,5 @@
+import { ipcRenderer } from 'electron';
+
 import React from 'react';
 import { Menu } from '@blueprintjs/core';
 import { Select, ItemPredicate, ItemRenderer, ItemListRenderer, renderFilteredItems } from '@blueprintjs/select';
@@ -98,12 +100,19 @@ interface AmendablePublication {
 
 const NewAmendmentMenuRenderer: ItemListRenderer<AmendablePublication> =
     function (props) {
+
+  const filteredItems = props.filteredItems.slice(0, MAX_MENU_ITEMS_TO_SHOW);
+
   return (
     <Menu ulRef={props.itemsParentRef} className={styles.newMessageMenu}>
       {renderFilteredItems({
         ...props,
-        filteredItems: props.filteredItems.slice(0, MAX_MENU_ITEMS_TO_SHOW),
+        filteredItems: filteredItems,
       }, noResultsMessage, filterUsageTip)}
+
+      {filteredItems.length < 1
+        ? renderLaunchPublicationCreator(props.query, true)
+        : ''}
     </Menu>
   );
 };
@@ -134,5 +143,22 @@ const NewAmendmentMenuItemFilter: ItemPredicate<AmendablePublication> =
     return `${normalizedId} ${normalizedTitle}`.indexOf(normalizedQuery) >= 0;
   }
 };
+
+const renderLaunchPublicationCreator = function (query: string, active: boolean) {
+  function _handleClick() {
+    ipcRenderer.sendSync('open-publication-editor', query);
+  }
+
+  return (
+    <Menu.Item
+      icon="add"
+      text={`Create “${query}”…`}
+      title="Define new publication with this ID"
+      active={active}
+      onClick={_handleClick}
+      shouldDismissPopover={true}
+    />
+  );
+}
 
 const NewAmendmentSelector = Select.ofType<AmendablePublication>();

@@ -10,6 +10,7 @@ import { Preflight } from 'sse/preflight/renderer';
 import { HomeScreen } from './home';
 import { IssueEditor } from './issue-editor';
 import { IssueScheduler } from './issue-scheduler';
+import { PublicationEditor } from './publication-editor';
 
 import '!style-loader!css-loader!@blueprintjs/datetime/lib/css/blueprint-datetime.css';
 import '!style-loader!css-loader!@blueprintjs/core/lib/css/blueprint.css';
@@ -38,6 +39,9 @@ const App: React.FC<{}> = function () {
 
   } else if (searchParams.get('c') === 'issueEditor') {
     component = <IssueEditor issueId={searchParams.get('issueId') || ''} />;
+
+  } else if (searchParams.get('c') === 'publicationEditor') {
+    component = <PublicationEditor publicationId={searchParams.get('pubId') || ''} />;
 
   } else if (searchParams.get('c') === 'dataSynchronizer') {
     component = <DataSynchronizer />;
