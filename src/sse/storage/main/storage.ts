@@ -88,7 +88,7 @@ export abstract class Storage<W extends Workspace> {
   public yaml: YAMLStorage;
   public workspace: W;
 
-  constructor(public fs: any, public workDir: string,
+  constructor(public fs: typeof import('fs-extra'), public workDir: string,
       public storeManagers: { [key: string]: StoreManager<any> }) {
     this.fs = fs;
     this.workDir = workDir;
