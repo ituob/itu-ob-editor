@@ -23,28 +23,72 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
     title: { [lang.default]: '' },
   } as Publication);
 
-  const [isNew, setIsNew] = useState(true);
-
-  const save = async () => {
-    const result = await apiRequest<Publication>(
-      'storage-publications',
-      JSON.stringify({ objectId: publicationId }),
-      JSON.stringify(publication));
-    console.debug("Saved successfully", result);
-    await load();
+  const fieldRequirements = {
+    title: {
+      specified: `have a title in ${lang.available[lang.default]}`,
+    },
+    id: {
+      unique: `have a unique ID (“${publication.id}” is already taken)`,
+      specified: `have a unique string ID`,
+    },
   };
 
-  const load = async () => {
-    const result = await apiRequest<Publication>(
+  type UnmetRequirements = {
+    [F in keyof typeof fieldRequirements]?: {
+      [R in keyof (typeof fieldRequirements)[F]]?: boolean
+    }
+  };
+
+  const [isNew, setIsNew] = useState(true);
+  const [canSave, setCanSave] = useState(false);
+  const [unmetRequirements, setUnmetRequirements] = useState({} as UnmetRequirements);
+
+  useEffect(() => { load(); }, []);
+
+  useEffect(() => { setCanSave(Object.keys(unmetRequirements).length === 0); }, [unmetRequirements]);
+
+  useEffect(() => {
+    setCanSave(false);
+    (async () => {
+      const reqs = await getUnmetRequirements();
+      setUnmetRequirements(reqs);
+    })();
+  }, [isNew, publication.id, publication.title]);
+
+  async function getUnmetRequirements() {
+    var result: UnmetRequirements = {};
+
+    if (publication.title[lang.default] === '') {
+      result['title'] = { ...result.title, specified: false };
+    }
+
+    if (publication.id === '') {
+      result['id'] = { ...result.id, specified: false };
+    } else if (isNew) {
+      const alreadyExists = (await get(publication.id)) !== null;
+      if (alreadyExists) {
+        result['id'] = { ...result.id, unique: false };
+      }
+    }
+
+    return result;
+  }
+
+  async function save() {
+    await apiRequest<Publication>(
       'storage-publications',
-      JSON.stringify({ objectId: publicationId }));
+      JSON.stringify({ objectId: publication.id }),
+      JSON.stringify(publication));
+    await load();
+  }
+
+  async function load() {
+    const result = await get(publication.id);
     if (result !== null) {
       setIsNew(false);
       setPublication(result);
     }
-  };
-
-  useEffect(() => { load(); }, []);
+  }
 
   return (
     <div className={styles.pubEditorWindow}>
@@ -54,15 +98,19 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
         <FormGroup
             key="id"
             label="ID"
+            intent={unmetRequirements.id ? "danger" : undefined}
             helperText={
               <ul>
+                {unmetRequirements.id
+                  ? Object.keys(unmetRequirements.id).map(msgId => <li>Must {fieldRequirements.id[msgId as keyof typeof fieldRequirements.id]}.</li>)
+                  : ''}
                 <li>Use uppercase English string as publication ID: e.g., BUREAUFAX.</li>
                 <li>Choose an ID consistent with publication URL on ITU website, if possible.</li>
                 <li>Note: you can’t change this later easily.</li>
               </ul>
             }>
           <InputGroup
-            value={publicationId}
+            value={publication.id}
             type="text"
             large={true}
             readOnly={!isNew}
@@ -75,7 +123,17 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
           />
         </FormGroup>
 
-        <FormGroup key="title" label={`Title in ${lang.available[lang.default]}`}>
+        <FormGroup
+            key="title"
+            intent={unmetRequirements.title ? "danger" : undefined}
+            helperText={
+              <ul>
+                {unmetRequirements.title
+                  ? Object.keys(unmetRequirements.title).map(msgId => <li>Must {fieldRequirements.title[msgId as keyof typeof fieldRequirements.title]}.</li>)
+                  : ''}
+              </ul>
+            }
+            label={`Title in ${lang.available[lang.default]}`}>
           <InputGroup
             value={publication.title[lang.default]}
             type="text"
@@ -110,10 +168,15 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
       <footer className={styles.actionButtons}>
         <Button
           large={true}
-          disabled={(publication.title[lang.default] || '') === ''}
+          disabled={canSave !== true}
           intent="success"
           onClick={save}>Save</Button>
       </footer>
     </div>
   );
+};
+
+
+async function get(id: string) {
+  return await apiRequest<Publication>('storage-publications', JSON.stringify({ objectId: id }));
 }
