@@ -74,7 +74,17 @@ class PublicationManager extends StoreManager<Publication> {
   }
 
   public async store(obj: Publication, storage: Storage): Promise<boolean> {
-    return false;
+    const objPath = path.join(storage.workDir, this.rootDir, `${obj.id}`);
+    await storage.fs.ensureDir(objPath);
+
+    const meta = {
+      id: obj.id,
+      title: obj.title,
+      url: obj.url,
+      recommendation: obj.recommendation,
+    };
+    await storage.yaml.store(path.join(objPath, 'meta.yaml'), meta);
+    return true;
   }
 }
 
