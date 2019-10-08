@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
+import { ipcRenderer } from 'electron';
+
+import React, { useState, useEffect } from 'react';
 import { Spinner, NonIdealState } from '@blueprintjs/core';
 
-import { useWorkspace, useWorkspaceRO } from 'sse/api/renderer';
+import { useWorkspace, apiRequest } from 'sse/api/renderer';
 import { PaneHeader } from 'sse/renderer/widgets/pane-header';
+import { Index } from 'sse/storage/query';
 
 import { OBIssue } from 'models/issues';
+import { Publication } from 'models/publications';
+import { ITURecommendation } from 'models/recommendations';
 import { Message } from 'models/messages';
 
 import { Workspace } from 'main/storage';
@@ -27,10 +32,23 @@ export function IssueEditor(props: IssueEditorProps) {
   const wsIssue = useWorkspace<OBIssue | {}>('issue', reducer, {}, { issueId: props.issueId });
   const maybeIssue = wsIssue.state;
 
-  const ws = useWorkspaceRO<Workspace>(
-    'all',
-    { issues: {}, publications: {}, recommendations: {} },
-    false);
+  const [ws, updateWs] = useState({ issues: {}, publications: {}, recommendations: {} } as Workspace);
+
+  async function fetchWorkspace() {
+    updateWs({
+      issues: await apiRequest<Index<OBIssue>>('storage-issues-all'),
+      publications: await apiRequest<Index<Publication>>('storage-publications-all'),
+      recommendations: await apiRequest<Index<ITURecommendation>>('storage-recommendations-all'),
+    });
+  }
+
+  useEffect(() => {
+    fetchWorkspace();
+    ipcRenderer.on('publications-changed', fetchWorkspace);
+    return function cleanup() {
+      ipcRenderer.removeListener('publications-changed', fetchWorkspace);
+    };
+  }, []);
 
   var initialMessage: number | undefined = undefined;
   var initialSection: "amendments" | "general" = "general";
