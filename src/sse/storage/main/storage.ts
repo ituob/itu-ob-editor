@@ -52,7 +52,7 @@ export abstract class StoreManager<O extends IndexableObject> {
   private async _loadIndex(storage: Storage<any>): Promise<Index<O>> {
     const rootPath = this.rootDir;
     const dirs = await storage.fs.readdir(path.join(storage.workDir, rootPath));
-    const idx: Index<O> = {};
+    var idx: Index<O> = {};
 
     for (const dir of dirs) {
       if (dir != '.DS_Store') {
