@@ -3,7 +3,7 @@ import * as moment from 'moment';
 
 import { app, Menu, ipcMain } from 'electron';
 
-import { openWindow, getWindowByTitle, windows } from 'sse/main/window';
+import { openWindow, getWindowByTitle, getWindow, windows } from 'sse/main/window';
 import { makeEndpoint, makeWriteOnlyEndpoint, makeWindowEndpoint } from 'sse/api/main';
 import { QuerySet, sortIntegerAscending } from 'sse/storage/query';
 import { Index } from 'sse/storage/query';
@@ -76,7 +76,14 @@ initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
     // possibly record timeline states into a temporary file;
     // allow dispatching reducer actions through API endpoints (including types UNDO/REDO).
 
-    storage.setUpAPIEndpoints();
+    storage.setUpAPIEndpoints((notify: string[]) => {
+      if (notify.indexOf('publications') >= 0) {
+        const issueEditor = getWindow(win => win.getTitle().indexOf('Issue ') === 0);
+        if (issueEditor) {
+          issueEditor.webContents.send('publications-changed');
+        }
+      }
+    });
     gitCtrl.setUpAPIEndpoints();
 
     makeEndpoint<Index<any>>('storage-search', async ({ query }: { query?: string }) => {

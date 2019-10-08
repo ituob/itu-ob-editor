@@ -144,19 +144,21 @@ export abstract class Storage<W extends Workspace> {
     return objData;
   }
 
-  setUpAPIEndpoints() {
+  setUpAPIEndpoints(notifier: (notify: string[]) => void) {
     for (let indexName of Object.keys(this.workspace)) {
 
       makeEndpoint<Index<any>>(`storage-${indexName}-all`, async () => {
         return this.workspace[indexName];
       }, async ({ newData, notify }) => {
         await this.storeManagers[indexName].storeIndex(this, newData);
+        notifier([indexName, ...(notify || [])]);
       });
 
       makeEndpoint<IndexableObject>(`storage-${indexName}`, async ({ objectId }: { objectId: string }) => {
         return this.workspace[indexName][objectId];
       }, async ({ newData, notify }) => {
         await this.storeManagers[indexName].store(newData, this);
+        notifier([indexName, ...(notify || [])]);
       });
 
       makeEndpoint<boolean>(`storage-${indexName}-delete`, async ({ objectId }: { objectId: string }) => {
