@@ -66,6 +66,11 @@ export function getWindowByTitle(title: string): BrowserWindow | undefined {
 }
 
 
+export function getWindow(func: (win: BrowserWindow) => boolean): BrowserWindow | undefined {
+  return windows.find(func);
+}
+
+
 // Iterate over array of windows and try accessing window ID.
 // If it throws, window was closed and we remove it from the array.
 // Supposed to be run after any window is closed
