@@ -78,7 +78,7 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
     await apiRequest<Publication>(
       'storage-publications',
       JSON.stringify({ objectId: publication.id }),
-      JSON.stringify(publication));
+      JSON.stringify({ newData: publication }));
     await load();
   }
 

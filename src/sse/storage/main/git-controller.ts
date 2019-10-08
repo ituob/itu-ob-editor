@@ -115,12 +115,19 @@ export class GitController {
       return (await this.getAuthor());
     });
 
-    makeEndpoint<{ errors: string[] }>('fetch-commit-push', async (
+    makeEndpoint<{ errors: string[] }>('fetch-commit-push', async ({
+        commitMsg,
+        authorName,
+        authorEmail,
+        gitUsername,
+        gitPassword,
+      }: {
         commitMsg: string,
         authorName: string,
         authorEmail: string,
         gitUsername: string,
-        gitPassword: string) => {
+        gitPassword: string
+      }) => {
 
       await this.setAuthor({ name: authorName, email: authorEmail });
 

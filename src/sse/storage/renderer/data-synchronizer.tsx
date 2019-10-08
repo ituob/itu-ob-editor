@@ -48,11 +48,13 @@ export const DataSynchronizer: React.FC<DataSynchronizerProps> = function () {
     ipcRenderer.on(`workspace-${API_ENDPOINT}`, handleResult);
     ipcRenderer.send(
       `request-workspace-${API_ENDPOINT}`,
-      commitMsg,
-      authorName,
-      authorEmail,
-      username,
-      password);
+      JSON.stringify({
+        commitMsg,
+        authorName,
+        authorEmail,
+        gitUsername: username,
+        gitPassword: password,
+      }));
     setFinished(false);
     setStarted(true);
   }

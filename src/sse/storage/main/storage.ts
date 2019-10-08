@@ -146,26 +146,25 @@ export abstract class Storage<W extends Workspace> {
 
   setUpAPIEndpoints() {
     for (let indexName of Object.keys(this.workspace)) {
-      makeEndpoint<Index<any>>(`storage-${indexName}-all`, async (newIndex?: Index<any>) => {
-        if (newIndex) {
-          await this.storeManagers[indexName].storeIndex(this, newIndex);
-          await this.loadWorkspace();
-        }
+
+      makeEndpoint<Index<any>>(`storage-${indexName}-all`, async () => {
         return this.workspace[indexName];
+      }, async ({ newData, notify }) => {
+        await this.storeManagers[indexName].storeIndex(this, newData);
       });
-      makeEndpoint<IndexableObject>(`storage-${indexName}`, async ({ objectId }: { objectId: string }, newObject?: IndexableObject) => {
-        if (newObject) {
-          await this.storeManagers[indexName].store(newObject, this);
-          await this.loadWorkspace();
-        }
+
+      makeEndpoint<IndexableObject>(`storage-${indexName}`, async ({ objectId }: { objectId: string }) => {
         return this.workspace[indexName][objectId];
+      }, async ({ newData, notify }) => {
+        await this.storeManagers[indexName].store(newData, this);
       });
+
       makeEndpoint<boolean>(`storage-${indexName}-delete`, async ({ objectId }: { objectId: string }) => {
         delete this.workspace[indexName][objectId];
         await this.storeManagers[indexName].storeIndex(this, this.workspace[indexName]);
-        await this.loadWorkspace();
         return true;
       });
+
     }
   }
 }
