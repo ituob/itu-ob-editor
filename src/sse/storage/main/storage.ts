@@ -59,7 +59,9 @@ export abstract class StoreManager<O extends IndexableObject> {
         const objData = await storage.loadObject(path.join(rootPath, dir));
         if (objData) {
           const obj: O = this.postLoad(objData);
-          idx[obj.id] = obj;
+          if (obj.id) {
+            idx[obj.id] = obj;
+          }
         }
       }
     }
