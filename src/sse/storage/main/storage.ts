@@ -23,6 +23,8 @@ export abstract class StoreManager<O extends IndexableObject> {
     for (const obj of items) {
       await this.store(obj, storage);
     }
+
+    this._index = idx;
     return true;
   }
 
@@ -71,8 +73,28 @@ export abstract class StoreManager<O extends IndexableObject> {
   // TODO: Use methods `toStoreableObject(obj: O) => any` & `toUseableObject(data: any) => O`
   // to prepare object for storage & post-process loaded data
 
+  //public abstract async store(obj: O, storage: Storage<any>): Promise<boolean>;
+
   // Stores object in DB
-  public abstract async store(obj: O, storage: Storage<any>): Promise<boolean>;
+  public async store(obj: O, storage: Storage<any>): Promise<boolean> {
+    const objDir = path.join(this.rootDir, `${obj.id}`);
+    const objPath = path.join(storage.workDir, objDir);
+    const storeable = this.toStoreableObject(obj);
+    const idx = await this.getIndex(storage);
+
+    await storage.fs.ensureDir(objPath);
+    for (const key of Object.keys(storeable)) {
+      await storage.yaml.store(path.join(objPath, `${key}.yaml`), storeable[key]);
+    }
+
+    idx[obj.id] = obj;
+    this._index = idx;
+    return true;
+  }
+
+  public toStoreableObject(obj: O): any {
+    return { meta: obj as any };
+  };
 
   // Converts object data into valid object, if needed
   // (in cases when partial data is stored or migration took place previously)
@@ -103,12 +125,19 @@ export abstract class Storage<W extends Workspace> {
   }
 
   public abstract async findObjects(query?: string): Promise<W>
-  public abstract async loadWorkspace(): Promise<W>
+
+  public async loadWorkspace(): Promise<void> {
+    this.workspace = await Object.keys(this.storeManagers).reduce(async (objP: Promise<any>, key: string) => {
+      const obj = await objP;
+      obj[key] = await this.storeManagers[key].getIndex(this);
+      return obj;
+    }, Promise.resolve({})) as W;
+  }
 
   async storeWorkspace(): Promise<boolean> {
     return Promise.all([...Object.keys(this.storeManagers).map(async (key) => {
       return await this.storeManagers[key].storeIndex(this, this.workspace[key]);
-    })]).then(this.loadWorkspace.bind(this)).then(() => true);
+    })]).then(() => true);
   }
 
   // Loads object data from given directory, reading YAML files.
