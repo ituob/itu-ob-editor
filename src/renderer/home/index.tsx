@@ -11,9 +11,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
   const [currentIssue, setCurrentIssue] = useState({ id: null } as { id: number | null });
 
   useEffect(() => {
-    (async () =>
-      setCurrentIssue(await apiRequest<{ id: number | null }>('current-issue-id'))
-    )();
+    (async () => {
+      const currentIssue = await apiRequest<{ id: number | null }>('current-issue-id');
+      setCurrentIssue(currentIssue);
+    })();
   }, []);
 
   return (
