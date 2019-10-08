@@ -4,10 +4,14 @@ import { openWindow } from 'sse/main/window';
 import { reviveJsonValue } from './utils';
 
 
-export function makeEndpoint<T>(name: string, handler: (...args: any[]) => Promise<T>): void {
-  ipcMain.on(`request-workspace-${name}`, async (evt: any, ...args: string[]) => {
-    const parsedArgs: any[] = args.map(val => JSON.parse(val, reviveJsonValue));
-    evt.reply(`workspace-${name}`, JSON.stringify(await handler(...parsedArgs)));
+type Saver<T> = (newObj: T) => Promise<void>;
+type Fetcher<T> = (params: any) => Promise<T>;
+
+export function makeEndpoint<T>(name: string, fetcher: Fetcher<T>, saver?: Saver<{ newData: T, notify?: string[] }>) {
+  ipcMain.on(`request-workspace-${name}`, async (evt: any, params?: string, newObj?: string) => {
+    const parsedParams: any = JSON.parse(params || '{}', reviveJsonValue);
+    if (saver && newObj) { await saver(JSON.parse(newObj, reviveJsonValue)); }
+    evt.reply(`workspace-${name}`, JSON.stringify(await fetcher(parsedParams)));
   });
 }
 
