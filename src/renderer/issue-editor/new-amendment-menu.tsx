@@ -101,7 +101,11 @@ interface AmendablePublication {
 const NewAmendmentMenuRenderer: ItemListRenderer<AmendablePublication> =
     function (props) {
 
+  const hasExactMatch = props.filteredItems.
+    find(i => i.id.toLowerCase() === props.query.trim().toLowerCase()) !== undefined;
   const filteredItems = props.filteredItems.slice(0, MAX_MENU_ITEMS_TO_SHOW);
+
+  console.debug(props);
 
   return (
     <Menu ulRef={props.itemsParentRef} className={styles.newMessageMenu}>
@@ -110,9 +114,9 @@ const NewAmendmentMenuRenderer: ItemListRenderer<AmendablePublication> =
         filteredItems: filteredItems,
       }, noResultsMessage, filterUsageTip)}
 
-      {filteredItems.length < 1
-        ? renderLaunchPublicationCreator(props.query, true)
-        : ''}
+      {props.query !== '' && hasExactMatch === false
+        ? renderLaunchPublicationCreator(props.query)
+        : null}
     </Menu>
   );
 };
@@ -126,6 +130,7 @@ const NewAmendmentMenuItemRenderer: ItemRenderer<AmendablePublication> =
       text={pub.title}
       onClick={handleClick}
       active={modifiers.active}
+      title={modifiers.disabled ? `Publication ${pub.title} was already amended in this edition` : undefined}
       disabled={modifiers.disabled} />
   );
 };
@@ -144,21 +149,21 @@ const NewAmendmentMenuItemFilter: ItemPredicate<AmendablePublication> =
   }
 };
 
-const renderLaunchPublicationCreator = function (query: string, active: boolean) {
-  function _handleClick() {
-    ipcRenderer.sendSync('open-publication-editor', query);
-  }
+const renderLaunchPublicationCreator = function (query: string) {
+  const MAX_ID_LENGTH_IN_PROMPT = 5;
 
   return (
     <Menu.Item
       icon="add"
-      text={`Create “${query}”…`}
+      text={`Use “${(query.length > MAX_ID_LENGTH_IN_PROMPT) ? query.substr(0, MAX_ID_LENGTH_IN_PROMPT - 1) + '…' : query}” as new ID`}
       title="Define new publication with this ID"
-      active={active}
-      onClick={_handleClick}
-      shouldDismissPopover={true}
+      onClick={() => launchPublicationEditor(query)}
     />
   );
+}
+
+function launchPublicationEditor(forPublicationWithId: string) {
+  ipcRenderer.sendSync('open-publication-editor', forPublicationWithId);
 }
 
 const NewAmendmentSelector = Select.ofType<AmendablePublication>();
