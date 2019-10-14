@@ -59,6 +59,12 @@ export class GitController {
     return gitInitialized;
   }
 
+  async getOriginUrl(): Promise<string | undefined> {
+    return ((await git.listRemotes({
+      dir: this.workDir,
+    })).find(r => r.remote === 'origin') || { url: undefined }).url;
+  }
+
   async addAllChanges() {
     await git.add({
       dir: this.workDir,
