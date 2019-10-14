@@ -7,7 +7,7 @@ import { openWindow, getWindowByTitle, getWindow, windows } from 'sse/main/windo
 import { makeEndpoint, makeWriteOnlyEndpoint, makeWindowEndpoint } from 'sse/api/main';
 import { QuerySet, sortIntegerAscending } from 'sse/storage/query';
 import { Index } from 'sse/storage/query';
-import { initRepo } from 'sse/storage/main/git-controller';
+import { setRepoUrl, initRepo } from 'sse/storage/main/git-controller';
 
 import { OBIssue, ScheduledIssue } from 'models/issues';
 
@@ -19,7 +19,7 @@ const APP_TITLE = "ITU OB editor";
 
 
 const WORK_DIR = path.join(app.getPath('userData'), 'itu-ob-data');
-const REPO_URL = 'https://github.com/ituob/itu-ob-data';
+const DEFAULT_REPO_URL = 'https://github.com/ituob/itu-ob-data';
 const CORS_PROXY_URL = 'https://cors.isomorphic-git.org';
 
 
@@ -35,12 +35,11 @@ const ISSUE_SCHEDULER_WINDOW_OPTS = {
 if (!app.requestSingleInstanceLock()) { app.exit(0); }
 
 
-initRepo(WORK_DIR, REPO_URL, CORS_PROXY_URL).then((gitCtrl) => {
-  Promise.all([
-    initStorage(WORK_DIR),
-    app.whenReady(),
-  ]).then((...args) => {
-    const storage: Storage = args[0][0];
+app.whenReady().
+then(() => setRepoUrl(DEFAULT_REPO_URL)).
+then(repoUrl => initRepo(WORK_DIR, repoUrl, CORS_PROXY_URL)).
+then(gitCtrl => {
+  initStorage(WORK_DIR).then((storage: Storage) => {
 
     // Open home screen
     openHomeScreen();

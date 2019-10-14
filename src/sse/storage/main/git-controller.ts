@@ -2,7 +2,12 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as git from 'isomorphic-git';
 
+import { ipcMain } from 'electron';
+
 import { makeEndpoint } from 'sse/api/main';
+import { Setting, manager as settings } from 'sse/settings/main';
+import { makeWindowEndpoint } from 'sse/api/main';
+import { openWindow } from 'sse/main/window';
 
 import { GitAuthor, GitAuthentication } from '../git';
 
@@ -178,4 +183,54 @@ export async function initRepo(
   }
 
   return gitCtrl;
+}
+
+
+class GitRepoURLSetting extends Setting<string> {
+  toUseable(val: string) {
+    return val;
+  }
+}
+
+settings.configurePane({
+  id: 'dataSync',
+  label: "Data synchronization",
+  icon: 'git-merge',
+});
+
+
+settings.register(new Setting<string>(
+  'gitRepoUrl',
+  "Git repository URL",
+  'dataSync',
+));
+
+
+/* Promises to return a string containing configured repository URL.
+   If repository URL is not configured (e.g., on first run, or after reset)
+   opens a window asking the user to specify the URL. */
+export async function setRepoUrl(defaultUrl?: string): Promise<string> {
+  const repoUrl: string = await settings.getValue<GitRepoURLSetting>('gitRepoUrl') as string;
+  const REPO_CONFIG_WINDOW_OPTS = {
+    component: 'repoConfig',
+    title: 'Repository Configuration',
+    componentParams: `defaultUrl=${defaultUrl || ''}&currentUrl=${repoUrl || ''}`,
+    dimensions: { width: 800, height: 550 },
+  };
+
+  makeWindowEndpoint('repo-configuration', () => REPO_CONFIG_WINDOW_OPTS);
+
+  return new Promise<string>(async (resolve, reject) => {
+    if (!repoUrl) {
+      await openWindow(REPO_CONFIG_WINDOW_OPTS);
+
+      ipcMain.on('set-setting', (evt: any, name: string, value: string) => {
+        if (name === 'repoUrl') {
+          resolve(value);
+        }
+      });
+    } else {
+      resolve(repoUrl);
+    }
+  });
 }
