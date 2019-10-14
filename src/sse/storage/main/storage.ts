@@ -70,10 +70,7 @@ export abstract class StoreManager<O extends IndexableObject> {
     return idx;
   }
 
-  // TODO: Use methods `toStoreableObject(obj: O) => any` & `toUseableObject(data: any) => O`
-  // to prepare object for storage & post-process loaded data
-
-  //public abstract async store(obj: O, storage: Storage<any>): Promise<boolean>;
+  // TODO: Use `toUseableObject(data: any) => O` to post-process loaded data
 
   // Stores object in DB
   public async store(obj: O, storage: Storage<any>): Promise<boolean> {
