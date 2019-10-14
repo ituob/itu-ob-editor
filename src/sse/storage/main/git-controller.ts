@@ -182,10 +182,15 @@ export async function initRepo(
 
   const gitCtrl = new GitController(fs, repoUrl, workDir, corsProxyUrl);
 
-  if (!(await gitCtrl.isInitialized())) {
-    await gitCtrl.reset();
+  if ((await gitCtrl.isInitialized()) === true) {
+    const remoteUrl = await gitCtrl.getOriginUrl();
+    if (remoteUrl && remoteUrl.trim() === repoUrl.trim()) {
+      await gitCtrl.pull();
+    } else {
+      await gitCtrl.reset();
+    }
   } else {
-    await gitCtrl.pull();
+    await gitCtrl.reset();
   }
 
   return gitCtrl;
