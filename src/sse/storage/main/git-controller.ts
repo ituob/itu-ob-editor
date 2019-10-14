@@ -235,11 +235,17 @@ export async function setRepoUrl(defaultUrl?: string): Promise<string> {
     if (!repoUrl) {
       await openWindow(REPO_CONFIG_WINDOW_OPTS);
 
-      ipcMain.on('set-setting', (evt: any, name: string, value: string) => {
-        if (name === 'repoUrl') {
+      function handleSetting(evt: any, name: string, value: string) {
+        console.debug('got setting', name, value);
+        settings.setValue(name, value);
+        if (name === 'gitRepoUrl') {
           resolve(value);
         }
-      });
+        ipcMain.removeListener('set-setting', handleSetting);
+        evt.reply('ok');
+      }
+
+      ipcMain.on('set-setting', handleSetting);
     } else {
       resolve(repoUrl);
     }
