@@ -4,6 +4,7 @@ import { NonIdealState } from '@blueprintjs/core';
 
 import { LangConfigContext } from 'sse/localizer/renderer';
 import { DataSynchronizer } from 'sse/storage/renderer/data-synchronizer';
+import { RepositoryConfigurator } from 'sse/storage/renderer/repository-configurator';
 import { Spotlight } from 'sse/spotlight/renderer';
 import { Preflight } from 'sse/preflight/renderer';
 
@@ -51,6 +52,11 @@ const App: React.FC<{}> = function () {
 
   } else if (searchParams.get('c') === 'preflight') {
     component = <Preflight />;
+
+  } else if (searchParams.get('c') === 'repoConfig') {
+    component = <RepositoryConfigurator
+      defaultUrl={searchParams.get('defaultUrl') || ''}
+      currentUrl={searchParams.get('currentUrl') || ''} />;
 
   } else {
     component = <NonIdealState
