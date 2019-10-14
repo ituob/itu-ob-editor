@@ -112,23 +112,13 @@ export const IssueScheduler: React.FC<{}> = function () {
 
           {hoveredDate
             ? <div className={styles.daySchedule}>
-                {daySchedule && !newIssueDraft
-                  ? <p>
-                      <Icon icon="info-sign" />
-                      &nbsp;
-                      Edition <strong>no. {daySchedule.id}</strong> is scheduled 
-                      {moment(daySchedule.publication_date).isSame(hoveredDate, 'day')
-                        ? ' to be published '
-                        : ' for cutoff '}
-                      on this day.
-                    </p>
-                  : ''}
-
                 {!newIssueDraft || !newIssueDraft.cutoff_date
                   ? <p>
                       <Icon icon="edit" />
                       &nbsp;
-                      Click to schedule a <strong>cutoff date</strong> on this day.
+                      {newIssueDraft
+                        ? <>Click to&nbsp;schedule the</>
+                        : <>Click to&nbsp;schedule an&nbsp;edition with</>}&nbsp;<strong className={styles.cutDateLabel}>cutoff&nbsp;date</strong> on&nbsp;<DateStamp date={hoveredDate as Date} />.
                     </p>
                   : ''}
 
@@ -136,13 +126,38 @@ export const IssueScheduler: React.FC<{}> = function () {
                   ? <p>
                       <Icon icon="edit" />
                       &nbsp;
-                      Click to schedule a <strong>publication date</strong> on this day.
+                      Click to&nbsp;schedule
+                      the&nbsp;<strong className={styles.pubDateLabel}>publication&nbsp;date</strong> on&nbsp;<DateStamp date={hoveredDate as Date} />.
                     </p>
                   : ''}
 
-                <span className={styles.dayScheduleHeader}><DateStamp date={hoveredDate as Date} /></span>
+                {newIssueDraft && newIssueDraft.publication_date && newIssueDraft.cutoff_date
+                  ? <p>
+                      <Icon icon="arrow-right" />
+                      &nbsp;
+                      Fill&nbsp; edition details and&nbsp;save the&nbsp;new&nbsp;schedule.
+                    </p>
+                  : ''}
+
+                {daySchedule && !newIssueDraft
+                  ? <p>
+                      <Icon icon="info-sign" />
+                      &nbsp;
+                      Something is already scheduled on this day.
+                    </p>
+                  : ''}
               </div>
             : ''}
+
+            {!hoveredDate && newIssueDraft && newIssueDraft.publication_date && newIssueDraft.cutoff_date
+              ? <div className={styles.daySchedule}>
+                  <p>
+                    <Icon icon="arrow-right" />
+                    &nbsp;
+                    Fill&nbsp; edition details and&nbsp;save the&nbsp;new&nbsp;schedule.
+                  </p>
+                </div>
+              : ''}
         </div>
       </div>
 
