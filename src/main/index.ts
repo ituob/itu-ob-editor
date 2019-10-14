@@ -35,6 +35,15 @@ const ISSUE_SCHEDULER_WINDOW_OPTS = {
 if (!app.requestSingleInstanceLock()) { app.exit(0); }
 
 
+// Quit application when all windows are closed
+app.on('window-all-closed', () => {
+  // On macOS it is common for applications to stay open until the user explicitly quits
+  if (process.platform !== 'darwin') {
+    app.quit()
+  }
+});
+
+
 app.whenReady().
 then(() => setRepoUrl(DEFAULT_REPO_URL)).
 then(repoUrl => initRepo(WORK_DIR, repoUrl, CORS_PROXY_URL)).
@@ -43,14 +52,6 @@ then(gitCtrl => {
 
     // Open home screen
     openHomeScreen();
-
-    // Quit application when all windows are closed
-    app.on('window-all-closed', () => {
-      // On macOS it is common for applications to stay open until the user explicitly quits
-      if (process.platform !== 'darwin') {
-        app.quit()
-      }
-    });
 
     // Reopen home window on app reactivation
     app.on('activate', () => {
