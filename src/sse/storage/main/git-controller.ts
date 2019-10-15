@@ -6,8 +6,7 @@ import { ipcMain } from 'electron';
 
 import { makeEndpoint } from 'sse/api/main';
 import { Setting, manager as settings } from 'sse/settings/main';
-import { makeWindowEndpoint } from 'sse/api/main';
-import { openWindow } from 'sse/main/window';
+import { WindowOpenerParams, openWindow } from 'sse/main/window';
 
 import { GitAuthor, GitAuthentication } from '../git';
 
@@ -214,34 +213,24 @@ export async function initRepo(
 
 /* Promises to return a string containing configured repository URL.
    If repository URL is not configured (e.g., on first run, or after reset)
-   opens a window asking the user to specify the URL. */
-export async function setRepoUrl(defaultUrl?: string): Promise<string> {
+   opens a window with specified options.
+   The window is expected to ask the user to specify the URL and send a `'set-setting'`
+   event for `'gitRepoUrl'`. */
+export async function setRepoUrl(configWindow: WindowOpenerParams): Promise<string> {
   const repoUrl: string = await settings.getValue('gitRepoUrl') as string;
-
-  const REPO_CONFIG_WINDOW_OPTS = {
-    component: 'repoConfig',
-    title: 'Repository Configuration',
-    componentParams: `defaultUrl=${defaultUrl || ''}`,
-    dimensions: { width: 800, height: 550 },
-  };
-
-  makeWindowEndpoint('repo-configuration', () => REPO_CONFIG_WINDOW_OPTS);
 
   return new Promise<string>(async (resolve, reject) => {
     if (!repoUrl) {
-      await openWindow(REPO_CONFIG_WINDOW_OPTS);
+      await openWindow(configWindow);
+      ipcMain.on('set-setting', handleSetting);
 
       function handleSetting(evt: any, name: string, value: string) {
-        console.debug('got setting', name, value);
-        settings.setValue(name, value);
         if (name === 'gitRepoUrl') {
+          ipcMain.removeListener('set-setting', handleSetting);
           resolve(value);
         }
-        ipcMain.removeListener('set-setting', handleSetting);
         evt.reply('ok');
       }
-
-      ipcMain.on('set-setting', handleSetting);
     } else {
       resolve(repoUrl);
     }

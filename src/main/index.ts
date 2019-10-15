@@ -24,6 +24,14 @@ const DEFAULT_REPO_URL = 'https://github.com/ituob/itu-ob-data';
 const CORS_PROXY_URL = 'https://cors.isomorphic-git.org';
 
 
+const WELCOME_SCREEN_WINDOW_OPTS: WindowOpenerParams = {
+  component: 'welcomeConfig',
+  title: 'Welcome',
+  componentParams: `defaultRepoUrl=${DEFAULT_REPO_URL || ''}`,
+  dimensions: { width: 800, height: 600, minWidth: 600, minHeight: 600 },
+  frameless: true,
+};
+
 const ISSUE_SCHEDULER_WINDOW_OPTS: WindowOpenerParams = {
   component: 'issueScheduler',
   title: 'OB schedule',
@@ -49,8 +57,8 @@ app.on('window-all-closed', () => {
 
 
 app.whenReady().
-then(() => setRepoUrl(DEFAULT_REPO_URL)).
-then(repoUrl => initRepo(WORK_DIR, repoUrl, CORS_PROXY_URL)).
+then(() => setRepoUrl(WELCOME_SCREEN_WINDOW_OPTS)).
+then(repoUrl => initRepo(WORK_DIR, repoUrl || DEFAULT_REPO_URL, CORS_PROXY_URL)).
 then(gitCtrl => {
   initStorage(WORK_DIR).then(storage => {
 

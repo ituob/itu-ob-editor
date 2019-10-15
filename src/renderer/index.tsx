@@ -4,7 +4,6 @@ import { NonIdealState } from '@blueprintjs/core';
 
 import { LangConfigContext } from 'sse/localizer/renderer';
 import { DataSynchronizer } from 'sse/storage/renderer/data-synchronizer';
-import { RepositoryConfigurator } from 'sse/storage/renderer/repository-configurator';
 import { Spotlight } from 'sse/spotlight/renderer';
 import { Preflight } from 'sse/preflight/renderer';
 
@@ -12,6 +11,7 @@ import { HomeScreen } from './home';
 import { IssueEditor } from './issue-editor';
 import { IssueScheduler } from './issue-scheduler';
 import { PublicationEditor } from './publication-editor';
+import { WelcomeConfigScreen } from './welcome';
 
 import '!style-loader!css-loader!@blueprintjs/datetime/lib/css/blueprint-datetime.css';
 import '!style-loader!css-loader!@blueprintjs/core/lib/css/blueprint.css';
@@ -53,9 +53,8 @@ const App: React.FC<{}> = function () {
   } else if (searchParams.get('c') === 'preflight') {
     component = <Preflight />;
 
-  } else if (searchParams.get('c') === 'repoConfig') {
-    component = <RepositoryConfigurator
-      defaultUrl={searchParams.get('defaultUrl') || ''} />;
+  } else if (searchParams.get('c') === 'welcomeConfig') {
+    component = <WelcomeConfigScreen defaultRepoUrl={searchParams.get('defaultRepoUrl') || ''} />;
 
   } else {
     component = <NonIdealState
