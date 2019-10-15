@@ -28,7 +28,7 @@ const ISSUE_SCHEDULER_WINDOW_OPTS = {
   component: 'issueScheduler',
   title: 'OB schedule',
   frameless: true,
-  dimensions: { width: 600, height: 500 },
+  dimensions: { width: 600, height: 500, minWidth: 600, minHeight: 400 },
 };
 
 
@@ -180,7 +180,7 @@ then(gitCtrl => {
       title: `Issue ${issueId}`,
       componentParams: `issueId=${issueId}`,
       frameless: true,
-      dimensions: { width: 800, height: 600, },
+      dimensions: { width: 800, height: 600, minWidth: 700, minHeight: 500 },
     }));
 
     ipcMain.on('scheduled-new-issue', (event: any) => {
@@ -200,13 +200,13 @@ then(gitCtrl => {
     makeWindowEndpoint('preflight', () => ({
       component: 'preflight',
       title: 'Preflight',
-      dimensions: { width: 800, minWidth: 600, height: 550 },
+      dimensions: { width: 800, minWidth: 600, height: 650, minHeight: 650 },
     }));
 
     makeWindowEndpoint('data-synchronizer', () => ({
       component: 'dataSynchronizer',
       title: 'Data Synchronizer',
-      dimensions: { width: 800, minWidth: 600, height: 550 },
+      dimensions: { width: 800, minWidth: 600, height: 640, minHeight: 640 },
     }));
 
   });
@@ -216,7 +216,7 @@ async function openHomeScreen() {
   return await openWindow({
     component: 'home',
     title: APP_TITLE,
-    dimensions: { width: 300, height: 400, },
+    dimensions: { width: 300, height: 400, minWidth: 300, minHeight: 300 },
     frameless: true,
   });
 }
