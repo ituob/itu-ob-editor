@@ -1,3 +1,5 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
 @mixin card {
   border-radius: 0 !important;
   overflow: hidden;
@@ -13,54 +15,69 @@
   display: flex;
   flex-flow: row nowrap;
   align-items: stretch;
-}
-
-.repoUrlRow {
-  @include card;
-  @extend .dataSyncRow;
-
-  > :first-child {
-    flex: 1;
-  }
-}
-
-.repoAuthRow, .committerInfoRow {
-  @include card;
-  @extend .dataSyncRow;
 
   > * {
     flex: 1;
   }
-}
-
-.repoUrlRow, .repoAuthRow, .committerInfoRow {
   > :first-child {
     margin-right: 1rem;
   }
 }
 
-.commitRow {
+.repoUrlCard {
   @include card;
+
+  > :first-child {
+    flex: 1;
+  }
+}
+
+.repoConfigCollapsible {
+  :global .bp3-collapse-body > * {
+    background: $pt-app-background-color;
+  }
+}
+
+.repoAuthCard, .committerInfoCard {
+  @include card;
+}
+
+.committerInfoCard, .commitCard {
+  > :first-child {
+    color: $pt-text-color-muted;
+  }
+}
+
+.commitCard {
+  @include card;
+  overflow: unset;
 
   flex: 1;
   display: flex;
   flex-flow: column nowrap;
   justify-content: flex-start;
-  align-items: flex-end;
+  align-items: flex-start;
 
-  > :first-child {
+  .formGroup {
     align-self: stretch;
     flex: 1;
+    flex-shrink: 0;
 
     :global .bp3-form-content {
       flex: 1;
+      flex-shrink: 0;
       textarea {
-        height: 100%;
+        min-height: 100%;
       }
     }
   }
+
+  .syncButton {
+    align-self: flex-end;
+  }
 }
 
-.resultRow {
+.resultCard {
   @include card;
+  background: $pt-app-background-color !important;
 }
