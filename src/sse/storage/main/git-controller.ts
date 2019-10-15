@@ -70,10 +70,10 @@ export class GitController {
     return gitInitialized;
   }
 
-  async getOriginUrl(): Promise<string | undefined> {
+  async getOriginUrl(): Promise<string | null> {
     return ((await git.listRemotes({
       dir: this.workDir,
-    })).find(r => r.remote === 'origin') || { url: undefined }).url;
+    })).find(r => r.remote === 'origin') || { url: null }).url;
   }
 
   async addAllChanges() {
@@ -133,7 +133,7 @@ export class GitController {
 
   setUpAPIEndpoints() {
 
-    makeEndpoint<{ originURL: string | undefined, author: GitAuthor }>('git-config', async () => {
+    makeEndpoint<{ originURL: string | null, author: GitAuthor }>('git-config', async () => {
       return {
         originURL: await this.getOriginUrl(),
         author: await this.getAuthor(),
@@ -198,7 +198,7 @@ export async function initRepo(
 
   if ((await gitCtrl.isInitialized()) === true) {
     const remoteUrl = await gitCtrl.getOriginUrl();
-    if (remoteUrl && remoteUrl.trim() === repoUrl.trim()) {
+    if (remoteUrl !== null && remoteUrl.trim() === repoUrl.trim()) {
       await gitCtrl.pull();
     } else {
       await gitCtrl.reset();

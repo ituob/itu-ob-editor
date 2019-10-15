@@ -25,18 +25,22 @@ export const DataSynchronizer: React.FC<DataSynchronizerProps> = function () {
   const [repoConfigOpenState, updateRepoConfigOpenState] = useState(false);
   const [repoConfigComplete, updateRepoConfigComplete] = useState(false);
 
-  const repoCfg = useWorkspaceRO<{ author: GitAuthor, originURL: string | undefined }>(
+  const repoCfg = useWorkspaceRO<{ author: GitAuthor, originURL: string | null | undefined }>(
     'git-config',
     { originURL: undefined, author: {} });
 
   useEffect(() => {
-    const _complete = (
-      username.trim() !== '' &&
-      password.trim() !== '' &&
-      (repoCfg.originURL || '').trim() !== '');
+    if (repoCfg.originURL !== undefined) {
+      const _complete = (
+        username.trim() !== '' &&
+        password.trim() !== '' &&
+        (repoCfg.originURL || '').trim() !== '');
 
-    updateRepoConfigComplete(_complete);
-    updateRepoConfigOpenState(!_complete);
+      updateRepoConfigComplete(_complete);
+      if (repoConfigOpenState === false && _complete === false) {
+        updateRepoConfigOpenState(true);
+      }
+    }
   }, [username, password, repoCfg.originURL]);
 
   const [errors, setErrors] = useState([] as string[]);
@@ -103,7 +107,7 @@ export const DataSynchronizer: React.FC<DataSynchronizerProps> = function () {
                 label="Repository URL"
                 helperText={<Callout intent="warning">Note: resetting the URL will cause you to lose any unsubmitted changes.</Callout>}>
               <InputGroup
-                defaultValue={repoCfg.originURL}
+                defaultValue={repoCfg.originURL || ''}
                 disabled={true}
                 type="text"
                 rightElement={
