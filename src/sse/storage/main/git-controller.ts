@@ -197,12 +197,6 @@ export async function initRepo(
 }
 
 
-class GitRepoURLSetting extends Setting<string> {
-  toUseable(val: string) {
-    return val;
-  }
-}
-
 settings.configurePane({
   id: 'dataSync',
   label: "Data synchronization",
@@ -221,7 +215,7 @@ settings.register(new Setting<string>(
    If repository URL is not configured (e.g., on first run, or after reset)
    opens a window asking the user to specify the URL. */
 export async function setRepoUrl(defaultUrl?: string): Promise<string> {
-  const repoUrl: string = await settings.getValue<GitRepoURLSetting>('gitRepoUrl') as string;
+  const repoUrl: string = await settings.getValue('gitRepoUrl') as string;
   const REPO_CONFIG_WINDOW_OPTS = {
     component: 'repoConfig',
     title: 'Repository Configuration',
