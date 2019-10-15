@@ -37,7 +37,7 @@ If the app errors out, a fix could be to manually delete the cloned data reposit
 
 * `sse/` directory contains static site editor framework foundation.
 
-  This is the only directory not specific to ITU OB..
+  This is the only directory not specific to ITU OB.
 
   Within it, modules are organized by functionality.
   Each module may contain `renderer` and/or `main` submodules;
