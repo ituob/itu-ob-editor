@@ -38,7 +38,7 @@ class SettingManager {
     const setting = this.get(id);
 
     if (setting) {
-      if (!this.data) {
+      if (this.data === null) {
         let settingsFileExists: boolean;
         try {
           settingsFileExists = (await fs.stat(SETTINGS_PATH)).isFile();
@@ -46,7 +46,7 @@ class SettingManager {
           settingsFileExists = false;
         }
         if (settingsFileExists) {
-          this.data = await this.yaml.load(SETTINGS_PATH);
+          this.data = (await this.yaml.load(SETTINGS_PATH)) || {};
         } else {
           this.data = {};
         }
