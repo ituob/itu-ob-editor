@@ -18,7 +18,10 @@ export interface Pane {
 
 
 export class Setting<T> {
-  constructor(public id: string, public label: string, public paneId: string) {}
+  constructor(
+    public id: string,
+    public label: string,
+    public paneId: string) {}
   toUseable(val: unknown): T { return val as T };
   toStoreable(val: T): any { return val as any };
 }
@@ -31,8 +34,8 @@ class SettingManager {
 
   constructor(private yaml: YAMLStorage) {}
 
-  public async getValue<S extends Setting<any>>(id: string): Promise<unknown> {
-    const setting = this.get(id) as S;
+  public async getValue(id: string): Promise<unknown> {
+    const setting = this.get(id);
 
     if (setting) {
       if (!this.data) {
@@ -48,15 +51,33 @@ class SettingManager {
           this.data = {};
         }
       }
-      return setting.toUseable(this.data[id]);
+      const rawVal = this.data[id];
+      return rawVal !== undefined ? setting.toUseable(rawVal) : undefined;
     } else {
-      throw new Error(`Setting is not found: ${id}`);
+      throw new Error(`Setting to get value for is not found: ${id}`);
     }
   }
 
-  public async setValue<S extends Setting<any>>(id: string, val: unknown) {
-    const storeable = (this.get(id) as S).toStoreable(val);
-    this.data[id] = storeable;
+  public async setValue(id: string, val: unknown) {
+    const setting = this.get(id);
+    if (setting) {
+      const storeable = setting.toStoreable(val);
+      this.data[id] = storeable;
+      await this.commit();
+    } else {
+      throw new Error(`Setting to set value for is not found: ${id}`);
+    }
+  }
+
+  public async deleteValue(id: string) {
+    delete this.data[id];
+    await this.commit();
+    console.debug("Deleted value", id);
+  }
+
+  private async commit() {
+    await fs.remove(SETTINGS_PATH);
+    console.debug("Removed", SETTINGS_PATH);
     await this.yaml.store(SETTINGS_PATH, this.data);
   }
 
@@ -67,6 +88,7 @@ class SettingManager {
   public register(setting: Setting<any>) {
     if (this.panes.find(p => p.id === setting.paneId)) {
       this.registry.push(setting);
+
     } else {
       throw new Error("Invalid pane ID");
     }
