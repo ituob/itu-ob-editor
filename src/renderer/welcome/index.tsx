@@ -5,8 +5,8 @@ import { clipboard } from 'electron';
 import { H2, UL, Button, Callout } from '@blueprintjs/core';
 
 import { RepositoryConfigurator } from 'sse/storage/renderer/repository-configurator';
+import { getStatic } from 'sse/renderer/static';
 import * as styles from './styles.scss';
-import logo from 'static/itu-logo.png';
 
 
 interface WelcomeConfigProps {
@@ -20,7 +20,7 @@ export const WelcomeConfigScreen: React.FC<WelcomeConfigProps> = function ({ def
   return (
     <div className={styles.base}>
       <div className={styles.intro}>
-        <img src={logo} alt="ITU" className={styles.logo} />
+        <img src={getStatic('itu-logo.png')} alt="ITU" className={styles.logo} />
         <H2 className={styles.welcomeMessage}>Operational Bulletin Editor</H2>
       </div>
 
