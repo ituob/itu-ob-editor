@@ -52,7 +52,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
           onClick={() => ipcRenderer.sendSync('open-preflight')}
         />
         <Button
-          text="Sync changes"
+          text="Merge"
           title="Fetch latest changes & submit yours"
           icon="git-merge"
           onClick={() => ipcRenderer.sendSync('open-data-synchronizer')}

@@ -213,7 +213,7 @@ then(gitCtrl => {
 
     makeWindowEndpoint('data-synchronizer', () => ({
       component: 'dataSynchronizer',
-      title: 'Data Synchronizer',
+      title: 'Merge Changes',
       dimensions: { width: 800, minWidth: 600, height: 640, minHeight: 640 },
     }));
 
