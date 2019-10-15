@@ -1,19 +1,20 @@
-import { remote, ipcRenderer } from 'electron';
-import React, { useState } from 'react';
+import { remote } from 'electron';
+import React from 'react';
 import { Label, InputGroup, Button } from '@blueprintjs/core';
+
+import { useSetting } from 'sse/settings/renderer';
 
 import * as styles from './repository-configurator.scss';
 
 
 interface RepositoryConfiguratorProps {
   defaultUrl: string;
-  currentUrl: string;
 }
-export const RepositoryConfigurator: React.FC<RepositoryConfiguratorProps> = function ({ defaultUrl, currentUrl }) {
-  const [newUrl, setNewUrl] = useState(currentUrl);
+export const RepositoryConfigurator: React.FC<RepositoryConfiguratorProps> = function ({ defaultUrl }) {
+  const url = useSetting<string>('gitRepoUrl', '');
 
   async function handleSaveAction() {
-    await ipcRenderer.send('set-setting', 'gitRepoUrl', newUrl.trim() || defaultUrl.trim());
+    await url.commit();
     remote.getCurrentWindow().hide();
   }
 
@@ -23,12 +24,13 @@ export const RepositoryConfigurator: React.FC<RepositoryConfiguratorProps> = fun
         <Label>
           Enter Git repository URL
           <InputGroup
-            value={newUrl}
+            value={url.value}
             key="username"
+            large={true}
             type="text"
             placeholder={defaultUrl}
             onChange={(evt: React.FormEvent<HTMLElement>) => {
-              setNewUrl((evt.target as HTMLInputElement).value as string);
+              url.set((evt.target as HTMLInputElement).value as string);
             }}
           />
         </Label>
@@ -36,9 +38,9 @@ export const RepositoryConfigurator: React.FC<RepositoryConfiguratorProps> = fun
         <Button
             intent="primary"
             title="Confirm"
-            disabled={newUrl.trim() === '' && defaultUrl.trim() === ''}
+            disabled={url.value.trim() === '' && defaultUrl.trim() === ''}
             onClick={handleSaveAction}>
-          {newUrl.trim() !== '' ? "Save" : "Use default"}
+          {url.value.trim() !== '' ? "Save" : "Use default"}
         </Button>
       </div>
     </>

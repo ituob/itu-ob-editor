@@ -220,7 +220,7 @@ export async function setRepoUrl(defaultUrl?: string): Promise<string> {
   const REPO_CONFIG_WINDOW_OPTS = {
     component: 'repoConfig',
     title: 'Repository Configuration',
-    componentParams: `defaultUrl=${defaultUrl || ''}&currentUrl=${repoUrl || ''}`,
+    componentParams: `defaultUrl=${defaultUrl || ''}`,
     dimensions: { width: 800, height: 550 },
   };
 

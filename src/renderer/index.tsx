@@ -55,8 +55,7 @@ const App: React.FC<{}> = function () {
 
   } else if (searchParams.get('c') === 'repoConfig') {
     component = <RepositoryConfigurator
-      defaultUrl={searchParams.get('defaultUrl') || ''}
-      currentUrl={searchParams.get('currentUrl') || ''} />;
+      defaultUrl={searchParams.get('defaultUrl') || ''} />;
 
   } else {
     component = <NonIdealState
