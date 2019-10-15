@@ -10,7 +10,7 @@ interface RepositoryConfiguratorProps {
   className: string;
 }
 export const RepositoryConfigurator: React.FC<RepositoryConfiguratorProps> = function ({ defaultUrl, className }) {
-  const url = useSetting<string>('gitRepoUrl', '');
+  const url = useSetting<string>('gitRepoUrl', defaultUrl);
 
   async function handleSaveAction() {
     await url.commit();
@@ -18,19 +18,14 @@ export const RepositoryConfigurator: React.FC<RepositoryConfiguratorProps> = fun
   }
 
   let urlIsValid: boolean;
-
-  if (url.value.trim() === '') {
-    // It’s optional
+  try {
+    new URL(url.value);
     urlIsValid = true;
-  } else {
-    try {
-      new URL(url.value);
-      urlIsValid = true;
-    } catch (e) {
-      console.error(e);
-      urlIsValid = false;
-    }
+  } catch (e) {
+    urlIsValid = false;
   }
+
+  const usingUpstream = url.value.trim() === defaultUrl.trim();
 
   return (
     <>
@@ -55,11 +50,11 @@ export const RepositoryConfigurator: React.FC<RepositoryConfiguratorProps> = fun
         <Button
             className="confirm-button"
             key="confirm"
-            intent={url.value.trim() !== '' ? "primary" : "warning"}
+            intent={!usingUpstream ? "primary" : "warning"}
             large={true}
-            disabled={(url.value.trim() === '' && defaultUrl.trim() === '') || urlIsValid !== true}
+            disabled={urlIsValid !== true}
             onClick={handleSaveAction}>
-          {url.value.trim() !== '' ? "Launch with this repository URL" : "Launch with upstream repository"}
+          {!usingUpstream ? "Launch with this repository URL" : "Launch with upstream repository"}
         </Button>
       </div>
     </>
