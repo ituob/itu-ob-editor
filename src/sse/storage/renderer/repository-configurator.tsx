@@ -1,7 +1,6 @@
 import { remote } from 'electron';
 import React from 'react';
 import { Label, InputGroup, Button } from '@blueprintjs/core';
-
 import { useSetting } from 'sse/settings/renderer';
 
 import * as styles from './repository-configurator.scss';

@@ -22,7 +22,9 @@ export const DataSynchronizer: React.FC<DataSynchronizerProps> = function () {
   const [authorName, setAuthorName] = useState('');
   const [authorEmail, setAuthorEmail] = useState('');
 
-  const repoCfg = useWorkspaceRO<{ author: GitAuthor, originURL: string | undefined }>('git-config', { originURL: undefined, author: {} });
+  const repoCfg = useWorkspaceRO<{ author: GitAuthor, originURL: string | undefined }>(
+    'git-config',
+    { originURL: undefined, author: {} });
 
   if (authorName === '' && repoCfg.author.name !== undefined) { setAuthorName(repoCfg.author.name); }
   if (authorEmail === '' && repoCfg.author.email !== undefined) { setAuthorEmail(repoCfg.author.email); }

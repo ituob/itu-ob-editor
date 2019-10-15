@@ -13,7 +13,7 @@ import { setRepoUrl, initRepo } from 'sse/storage/main/git-controller';
 import { OBIssue, ScheduledIssue } from 'models/issues';
 
 import { getMenu } from './menu';
-import { initStorage, Workspace, Storage } from './storage';
+import { initStorage, Workspace } from './storage';
 
 
 const APP_TITLE = "ITU OB editor";
@@ -43,7 +43,7 @@ settings.setUpAPIEndpoints();
 app.on('window-all-closed', () => {
   // On macOS it is common for applications to stay open until the user explicitly quits
   if (process.platform !== 'darwin') {
-    app.quit()
+    app.quit();
   }
 });
 
@@ -52,7 +52,7 @@ app.whenReady().
 then(() => setRepoUrl(DEFAULT_REPO_URL)).
 then(repoUrl => initRepo(WORK_DIR, repoUrl, CORS_PROXY_URL)).
 then(gitCtrl => {
-  initStorage(WORK_DIR).then((storage: Storage) => {
+  initStorage(WORK_DIR).then(storage => {
 
     // Open home screen
     openHomeScreen();
@@ -88,6 +88,7 @@ then(gitCtrl => {
         }
       }
     });
+
     gitCtrl.setUpAPIEndpoints();
 
     makeEndpoint<Index<any>>('storage-search', async ({ query }: { query?: string }) => {
