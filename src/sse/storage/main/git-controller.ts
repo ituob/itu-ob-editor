@@ -217,6 +217,7 @@ export async function initRepo(
    opens a window asking the user to specify the URL. */
 export async function setRepoUrl(defaultUrl?: string): Promise<string> {
   const repoUrl: string = await settings.getValue('gitRepoUrl') as string;
+
   const REPO_CONFIG_WINDOW_OPTS = {
     component: 'repoConfig',
     title: 'Repository Configuration',
