@@ -1,7 +1,7 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
-import { app } from 'electron';
+import { app, ipcMain } from 'electron';
 
 import { YAMLStorage } from 'sse/storage/main/yaml';
 
@@ -96,6 +96,24 @@ class SettingManager {
 
   public configurePane(pane: Pane) {
     this.panes.push(pane);
+  }
+
+  public setUpAPIEndpoints() {
+    ipcMain.on('set-setting', (evt: any, name: string, value: any) => {
+      console.debug('Got setting', name, value);
+      return this.setValue(name, value);
+    });
+
+    ipcMain.on('get-setting', (evt: any, name: string) => {
+      const value = this.getValue(name);
+      console.debug('Sending setting', name, `${value}`);
+      evt.reply(value);
+    });
+
+    ipcMain.on('clear-setting', async (evt: any, name: string) => {
+      await this.deleteValue(name);
+      evt.reply('ok');
+    });
   }
 }
 
