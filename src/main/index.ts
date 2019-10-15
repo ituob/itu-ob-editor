@@ -5,6 +5,7 @@ import { app, Menu, ipcMain } from 'electron';
 
 import { openWindow, getWindowByTitle, getWindow, windows } from 'sse/main/window';
 import { makeEndpoint, makeWriteOnlyEndpoint, makeWindowEndpoint } from 'sse/api/main';
+import { manager as settings } from 'sse/settings/main';
 import { QuerySet, sortIntegerAscending } from 'sse/storage/query';
 import { Index } from 'sse/storage/query';
 import { setRepoUrl, initRepo } from 'sse/storage/main/git-controller';
@@ -33,6 +34,9 @@ const ISSUE_SCHEDULER_WINDOW_OPTS = {
 
 // Ensure only one instance of the app can run at a time on given user’s machine
 if (!app.requestSingleInstanceLock()) { app.exit(0); }
+
+
+settings.setUpAPIEndpoints();
 
 
 // Quit application when all windows are closed
