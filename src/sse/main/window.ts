@@ -21,7 +21,7 @@ interface WindowOpenerParams {
   title: string,
   component: string,
   componentParams?: string,
-  dimensions?: { minWidth?: number, width?: number, height?: number },
+  dimensions?: { minHeight?: number, minWidth?: number, width?: number, height?: number },
   frameless?: boolean,
   winParams?: any,
 }
@@ -45,7 +45,9 @@ export const openWindow: WindowOpener = async ({
 
   const _winParams = {
     width: (dimensions || {}).width,
+    minWidth: (dimensions || {}).minWidth,
     height: (dimensions || {}).height,
+    minHeight: (dimensions || {}).minHeight,
     ...(frameless === true ? _framelessOpts : {}),
     ...winParams,
   };
