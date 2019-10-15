@@ -134,8 +134,11 @@ export class GitController {
 
   setUpAPIEndpoints() {
 
-    makeEndpoint<{ name?: string, email?: string }>('git-author-info', async () => {
-      return (await this.getAuthor());
+    makeEndpoint<{ originURL: string | undefined, author: GitAuthor }>('git-config', async () => {
+      return {
+        originURL: await this.getOriginUrl(),
+        author: await this.getAuthor(),
+      };
     });
 
     makeEndpoint<{ errors: string[] }>('fetch-commit-push', async ({
