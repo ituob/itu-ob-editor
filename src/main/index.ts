@@ -3,7 +3,7 @@ import * as moment from 'moment';
 
 import { app, Menu, ipcMain } from 'electron';
 
-import { openWindow, getWindowByTitle, getWindow, windows } from 'sse/main/window';
+import { WindowOpenerParams, openWindow, getWindowByTitle, getWindow, windows } from 'sse/main/window';
 import { makeEndpoint, makeWriteOnlyEndpoint, makeWindowEndpoint } from 'sse/api/main';
 import { manager as settings } from 'sse/settings/main';
 import { QuerySet, sortIntegerAscending } from 'sse/storage/query';
@@ -24,7 +24,7 @@ const DEFAULT_REPO_URL = 'https://github.com/ituob/itu-ob-data';
 const CORS_PROXY_URL = 'https://cors.isomorphic-git.org';
 
 
-const ISSUE_SCHEDULER_WINDOW_OPTS = {
+const ISSUE_SCHEDULER_WINDOW_OPTS: WindowOpenerParams = {
   component: 'issueScheduler',
   title: 'OB schedule',
   frameless: true,
