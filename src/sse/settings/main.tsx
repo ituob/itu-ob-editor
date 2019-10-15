@@ -72,12 +72,10 @@ class SettingManager {
   public async deleteValue(id: string) {
     delete this.data[id];
     await this.commit();
-    console.debug("Deleted value", id);
   }
 
   private async commit() {
     await fs.remove(SETTINGS_PATH);
-    console.debug("Removed", SETTINGS_PATH);
     await this.yaml.store(SETTINGS_PATH, this.data);
   }
 
@@ -100,13 +98,11 @@ class SettingManager {
 
   public setUpAPIEndpoints() {
     ipcMain.on('set-setting', (evt: any, name: string, value: any) => {
-      console.debug('Got setting', name, value);
       return this.setValue(name, value);
     });
 
     ipcMain.on('get-setting', (evt: any, name: string) => {
       const value = this.getValue(name);
-      console.debug('Sending setting', name, `${value}`);
       evt.reply(value);
     });
 
