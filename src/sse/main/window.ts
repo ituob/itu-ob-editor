@@ -17,7 +17,7 @@ var windowsByTitle: { [title: string]: BrowserWindow } = {};
 
 
 // Open new window, or focus if one with the same title already exists
-interface WindowOpenerParams {
+export interface WindowOpenerParams {
   title: string,
   component: string,
   componentParams?: string,
