@@ -12,6 +12,18 @@ import { openWindow } from 'sse/main/window';
 import { GitAuthor, GitAuthentication } from '../git';
 
 
+settings.configurePane({
+  id: 'dataSync',
+  label: "Data synchronization",
+  icon: 'git-merge',
+});
+settings.register(new Setting<string>(
+  'gitRepoUrl',
+  "Git repository URL",
+  'dataSync',
+));
+
+
 export class GitController {
   private auth: GitAuthentication = {};
 
@@ -195,20 +207,6 @@ export async function initRepo(
 
   return gitCtrl;
 }
-
-
-settings.configurePane({
-  id: 'dataSync',
-  label: "Data synchronization",
-  icon: 'git-merge',
-});
-
-
-settings.register(new Setting<string>(
-  'gitRepoUrl',
-  "Git repository URL",
-  'dataSync',
-));
 
 
 /* Promises to return a string containing configured repository URL.
