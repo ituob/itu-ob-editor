@@ -35,7 +35,7 @@ If the app errors out, a fix could be to manually delete the cloned data reposit
 
 ### File layout under `src/`
 
-* `sse/` directory contains static site editor framework foundation.
+* `sse/` directory contains static site editor framework foundation (see below for more details on SSE).
 
   This is the only directory not specific to ITU OB.
 
@@ -126,6 +126,23 @@ For example:
   }
 }
 ```
+
+## SSE
+
+SSE (Static Site Editor) framework aims to simplify the creation of cross-platform
+user-friendly GUIs for editing static websites.
+
+At its current (fairly early) stage it consists of following components:
+
+* `settings`: Manipulate application settings exposed to the user in some way
+* `localizer`: Work with data that is translatable in multiple languages
+* `storage`: Manipulate structured data, e.g. Jekyll posts or such, and synchronize it with upstream using VCS.
+  Currently supports YAML and Git
+* `preflight`: Check data for problems, which may help identify issues that would break site build
+* `spotlight`: Look up objects in the database
+* `api`: Offers tools for communication between Electron main and renderer processes through API endpoints
+* `main/window`: Offers tools for Electron window manipulation
+* `renderer/widgets`: Offers a set of Blueprint 3-based widgets
 
 ## Generic Electron Webpack docs
 
