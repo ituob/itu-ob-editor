@@ -3,40 +3,64 @@
   overflow: hidden;
 }
 
-.card {
-  @include card;
-}
-
-.resultCard {
-  @include card;
-}
-
 .dataSyncBase {
   display: flex;
+  flex-flow: column nowrap;
+  height: 100%;
+}
+
+.dataSyncRow {
+  display: flex;
   flex-flow: row nowrap;
+  align-items: stretch;
+}
+
+.repoUrlRow {
+  @include card;
+  @extend .dataSyncRow;
+
+  > :first-child {
+    flex: 1;
+  }
+}
+
+.repoAuthRow, .committerInfoRow {
+  @include card;
+  @extend .dataSyncRow;
 
   > * {
     flex: 1;
   }
 }
 
-.committerAndAuth {
-  min-width: 50%;
-  max-width: 50%;
+.repoUrlRow, .repoAuthRow, .committerInfoRow {
+  > :first-child {
+    margin-right: 1rem;
+  }
 }
 
-.commitInfo {
-  min-width: 50%;
-  max-width: 50%;
+.commitRow {
+  @include card;
+
+  flex: 1;
   display: flex;
   flex-flow: column nowrap;
+  justify-content: flex-start;
+  align-items: flex-end;
+
+  > :first-child {
+    align-self: stretch;
+    flex: 1;
+
+    :global .bp3-form-content {
+      flex: 1;
+      textarea {
+        height: 100%;
+      }
+    }
+  }
 }
 
-.commitMsgCard {
+.resultRow {
   @include card;
-}
-
-.commitButtonCard {
-  @include card;
-  flex: 1;
 }

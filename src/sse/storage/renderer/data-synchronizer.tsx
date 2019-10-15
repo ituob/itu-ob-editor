@@ -1,4 +1,4 @@
-import { ipcRenderer } from 'electron';
+import { remote, ipcRenderer } from 'electron';
 import React, { useState } from 'react';
 import { Card, Label, InputGroup, FormGroup, TextArea, Callout, UL, Button } from '@blueprintjs/core';
 
@@ -22,10 +22,10 @@ export const DataSynchronizer: React.FC<DataSynchronizerProps> = function () {
   const [authorName, setAuthorName] = useState('');
   const [authorEmail, setAuthorEmail] = useState('');
 
-  const cfgAuthor = useWorkspaceRO<GitAuthor>('git-author-info', {});
+  const repoCfg = useWorkspaceRO<{ author: GitAuthor, originURL: string | undefined }>('git-config', { originURL: undefined, author: {} });
 
-  if (authorName === '' && cfgAuthor.name !== undefined) { setAuthorName(cfgAuthor.name); }
-  if (authorEmail === '' && cfgAuthor.email !== undefined) { setAuthorEmail(cfgAuthor.email); }
+  if (authorName === '' && repoCfg.author.name !== undefined) { setAuthorName(repoCfg.author.name); }
+  if (authorEmail === '' && repoCfg.author.email !== undefined) { setAuthorEmail(repoCfg.author.email); }
 
   const [errors, setErrors] = useState([] as string[]);
   const [finished, setFinished] = useState(false);
@@ -59,6 +59,12 @@ export const DataSynchronizer: React.FC<DataSynchronizerProps> = function () {
     setStarted(true);
   }
 
+  function handleResetURL() {
+    ipcRenderer.sendSync('clear-setting', 'gitRepoUrl');
+    remote.app.relaunch();
+    remote.app.quit();
+  }
+
   const complete = (
     authorName != '' &&
     authorEmail != '' &&
@@ -69,88 +75,99 @@ export const DataSynchronizer: React.FC<DataSynchronizerProps> = function () {
   return (
     <>
       <div className={styles.dataSyncBase}>
-        <div className={styles.committerAndAuth}>
-          <Card key="gitAuth" className={styles.card}>
-            <Label>
-              Git username
-              <InputGroup
-                value={username}
-                key="username"
-                type="text"
-                onChange={(evt: React.FormEvent<HTMLElement>) => {
-                  setUsername((evt.target as HTMLInputElement).value as string);
-                }}
-              />
-            </Label>
-            <Label>
-              Password
-              <InputGroup
-                value={password}
-                key="password"
-                type="password"
-                onChange={(evt: React.FormEvent<HTMLElement>) => {
-                  setPassword((evt.target as HTMLInputElement).value as string);
-                }}
-              />
-            </Label>
-          </Card>
+        <Card key="repoUrl" className={styles.repoUrlRow}>
+          <Label>
+            Git repository URL
+            <InputGroup
+              defaultValue={repoCfg.originURL}
+              disabled={true}
+              type="text"
+              rightElement={
+                <Button
+                    intent="warning"
+                    minimal={true}
+                    title="Reset repository URL. Note: you will lose any unsubmitted changes."
+                    onClick={handleResetURL}>
+                  Reset URL
+                </Button>
+              }
+            />
+          </Label>
+        </Card>
 
-          <Card key="committerInfo" className={styles.card}>
-            <Label>
-              Author name
-              <InputGroup
-                value={authorName}
-                key="authorName"
-                type="text"
-                onChange={(evt: React.FormEvent<HTMLElement>) => {
-                  setAuthorName((evt.target as HTMLInputElement).value as string);
-                }}
-              />
-            </Label>
-            <Label>
-              Author email
-              <InputGroup
-                value={authorEmail}
-                key="authorEmail"
-                type="email"
-                onChange={(evt: React.FormEvent<HTMLElement>) => {
-                  setAuthorEmail((evt.target as HTMLInputElement).value as string);
-                }}
-              />
-            </Label>
-          </Card>
-        </div>
+        <Card key="repoAuth" className={styles.repoAuthRow}>
+          <Label key="username">
+            Git username
+            <InputGroup
+              value={username}
+              type="text"
+              onChange={(evt: React.FormEvent<HTMLElement>) => {
+                setUsername((evt.target as HTMLInputElement).value as string);
+              }}
+            />
+          </Label>
+          <Label key="password">
+            Password
+            <InputGroup
+              value={password}
+              type="password"
+              onChange={(evt: React.FormEvent<HTMLElement>) => {
+                setPassword((evt.target as HTMLInputElement).value as string);
+              }}
+            />
+          </Label>
+        </Card>
 
-        <div className={styles.commitInfo}>
-          <Card key="commitMsg" className={styles.commitMsgCard}>
-            <FormGroup
-                key="commitMsg"
-                label="Change notice"
-                intent="primary">
-              <TextArea
-                value={commitMsg}
-                fill={true}
-                large={true}
-                onChange={(evt: React.FormEvent<HTMLElement>) => {
-                  setCommitMsg((evt.target as HTMLInputElement).value as string);
-                }}
-              />
-            </FormGroup>
-          </Card>
+        <Card key="committerInfo" className={styles.committerInfoRow}>
+          <Label key="authorName">
+            Author name
+            <InputGroup
+              value={authorName}
+              type="text"
+              onChange={(evt: React.FormEvent<HTMLElement>) => {
+                setAuthorName((evt.target as HTMLInputElement).value as string);
+              }}
+            />
+          </Label>
+          <Label key="authorEmail">
+            Author email
+            <InputGroup
+              value={authorEmail}
+              type="email"
+              onChange={(evt: React.FormEvent<HTMLElement>) => {
+                setAuthorEmail((evt.target as HTMLInputElement).value as string);
+              }}
+            />
+          </Label>
+        </Card>
 
-          <Card key="commitButton" className={styles.commitButtonCard}>
-            <Button
-              icon="git-merge"
-              intent="primary"
-              disabled={complete === false || started === true}
-              title="Fetch other site editors’ changes, and submit yours"
-              onClick={handleSyncAction}>Sync</Button>
-          </Card>
-        </div>
+        <Card key="commitRow" className={styles.commitRow}>
+          <FormGroup
+              key="commitMsg"
+              label="Change notice"
+              intent="primary">
+            <TextArea
+              value={commitMsg}
+              fill={true}
+              large={true}
+              onChange={(evt: React.FormEvent<HTMLElement>) => {
+                setCommitMsg((evt.target as HTMLInputElement).value as string);
+              }}
+            />
+          </FormGroup>
+
+          <Button
+            icon="git-merge"
+            intent="primary"
+            large={true}
+            disabled={complete === false || started === true}
+            title="Fetch other site editors’ changes, and submit yours"
+            onClick={handleSyncAction}>Sync</Button>
+        </Card>
       </div>
 
       {finished === true
-        ? <Card key="resultMessage" className={styles.resultCard}>
+        ? <Card key="resultMessage" className={styles.resultRow}>
             <Callout
               intent={errors.length > 0 ? "warning" : "success"}
               title={errors.length > 0 ? "Errors encountered during sync" : "Sync completed"}>
