@@ -1,6 +1,6 @@
 @import "~@blueprintjs/core/lib/scss/variables";
 
-.paneHeader {
+:local .paneHeader {
   padding: 0 20px;
   height: $pt-navbar-height;
   display: flex;
@@ -17,15 +17,15 @@
   -webkit-app-region: drag;
 }
 
-.paneHeaderLoud {
+:local .paneHeaderLoud {
   color: $pt-text-color-muted;
   text-transform: unset;
 }
 
-.paneHeaderAlignedLeft {
+:local .paneHeaderAlignedLeft {
   justify-content: flex-start;
 }
 
-.paneHeaderAlignedRight {
+:local .paneHeaderAlignedRight {
   justify-content: flex-end;
 }

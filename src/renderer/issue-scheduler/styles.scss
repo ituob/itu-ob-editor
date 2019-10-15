@@ -8,7 +8,7 @@ $cutColorLight: #FFB366;
 $cutColorDark: #D9822B;
 
 
-.issueScheduler {
+:local .issueScheduler {
   height: 100vh;
   display: flex;
   flex-flow: row nowrap;
@@ -66,7 +66,7 @@ $cutColorDark: #D9822B;
 }
 
 
-.scheduleForm {
+:local .scheduleForm {
   align-self: stretch;
   display: flex;
   flex-flow: column nowrap;
@@ -92,37 +92,37 @@ $cutColorDark: #D9822B;
 }
 
 
-.editDateButton {
+:local .editDateButton {
   &:focus {
     outline: none !important;
   }
 }
 
 
-:global .DayPicker-Day--isPublicationDate {
+.DayPicker-Day--isPublicationDate {
   @include dayWithDot(before, $pubColorDark);
 }
-:global .DayPicker-Day--isCutoffDate {
+.DayPicker-Day--isCutoffDate {
   @include dayWithDot(after, $cutColorDark);
 }
-:global .DayPicker-Day--isNewPublicationDate {
+.DayPicker-Day--isNewPublicationDate {
   background: $pubColorLight !important;
 }
-:global .DayPicker-Day--isNewCutoffDate {
+.DayPicker-Day--isNewCutoffDate {
   background: $cutColorLight !important;
 }
 
 
 /* Upcoming issues list */
 
-.upcomingIssues {
+:local .upcomingIssues {
   display: flex;
   flex-flow: column nowrap;
   padding-bottom: 7.5em;
 }
 
 
-.issueScheduleCard {
+:local .issueScheduleCard {
   border-radius: 0 !important;
   cursor: pointer;
 
@@ -154,7 +154,7 @@ $cutColorDark: #D9822B;
 }
 
 
-.pastIssueCard {
+:local .pastIssueCard {
   .headerLabel::after {
     content: "published" !important;
     color: $pubColorDark;
@@ -162,7 +162,7 @@ $cutColorDark: #D9822B;
 }
 
 
-.scheduleInfo {
+:local .scheduleInfo {
   display: flex;
   flex-flow: row nowrap;
   white-space: nowrap;
@@ -192,10 +192,10 @@ $cutColorDark: #D9822B;
   }
 }
 
-.pubDateLabel {
+:local .pubDateLabel {
   color: $pubColorDark;
 }
 
-.cutDateLabel {
+:local .cutDateLabel {
   color: $cutColorDark;
 }

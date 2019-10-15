@@ -9,6 +9,7 @@
     "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
   },
   "electronWebpack": {
+    "staticSourceDirectory": "src/static",
     "main": {
       "webpackConfig": "main.webpack.js"
     },
@@ -46,13 +47,13 @@
     "@types/js-yaml": "^3.12.1",
     "@types/node": "^12.0.10",
     "electron": "5.0.4",
-    "electron-builder": "^20.44.4",
+    "electron-builder": "^21.2.0",
     "electron-react-devtools": "^0.5.3",
-    "electron-webpack": "^2.7.1",
+    "electron-webpack": "^2.7.4",
     "electron-webpack-ts": "^3.2.0",
     "node-sass": "^4.12.0",
     "sass-loader": "^7.1.0",
-    "typescript": "^3.5.2",
-    "webpack": "~4.35.0"
+    "typescript": "^3.6.4",
+    "webpack": "~4.35.2"
   }
 }

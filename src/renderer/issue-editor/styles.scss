@@ -1,7 +1,7 @@
 @import "~@blueprintjs/core/lib/scss/variables";
 @import "renderer/mixins.scss";
 
-.spinner {
+:local .spinner {
   position: absolute;
   display: block;
   top: 50%;
@@ -9,16 +9,16 @@
   transform: translateY(-50%) translateX(-50%);
 }
 
-.paneHeader {
+:local .paneHeader {
   flex-grow: 0;
   z-index: 5;
 }
 
-.twoPaneEditor {
+:local .twoPaneEditor {
   @include twoPaneWindowLayout(20em);
 }
 
-.messageListPane {
+:local .messageListPane {
   overflow-y: hidden;
 
   background: $pt-app-background-color;
@@ -31,14 +31,14 @@
   -webkit-app-region: drag;
 }
 
-.selectedMessagePane {
+:local .selectedMessagePane {
   box-shadow: $pt-elevation-shadow-3;
   position: relative;
   z-index: 2;
   overflow-y: auto;
 }
 
-.newMessageMenu {
+:local .newMessageMenu {
   max-width: 18em;
 }
 
@@ -46,20 +46,20 @@
   border-radius: 0 !important;
 }
 
-.addCommTrigger {
+:local .addCommTrigger {
   @include tsAddItemTrigger();
 }
 
-.addCountryTrigger {
+:local .addCountryTrigger {
   @include tsAddItemTrigger();
   width: 100%;
 }
 
-.tsCountryCommunicationSet {
+:local .tsCountryCommunicationSet {
   border-radius: 0 !important;
 }
 
-.tsCountryCommunicationEditor {
+:local .tsCountryCommunicationEditor {
   display: flex;
   flex-flow: row nowrap;
 
@@ -68,7 +68,7 @@
   }
 }
 
-.tsCommunication {
+:local .tsCommunication {
   color: red;
   border-radius: 0 !important;
   overflow: hidden;
@@ -78,23 +78,20 @@
   justify-content: space-between;
 }
 
-.tsCountryButtons {
+:local .tsCountryButtons {
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
 }
 
-.tsCommunicationList {
-}
-
-.messageEditorDialog {
+:local .messageEditorDialog {
   :global .bp3-label:last-child,
   :global .bp3-form-group:last-child {
     margin-bottom: 0;
   }
 }
 
-.messageEditorTabs {
+:local .messageEditorTabs {
   :global .bp3-tab-list {
     margin: 0 1rem;
     transform: translateY(.5rem);

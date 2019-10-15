@@ -1,6 +1,6 @@
 @import "~@blueprintjs/core/lib/scss/variables";
 
-.base {
+:local .base {
   height: 100%;
   display: flex;
   padding: 1rem;
@@ -9,7 +9,7 @@
   justify-content: space-between;
 }
 
-.intro {
+:local .intro {
   align-self: center;
   -webkit-app-region: drag;
 
@@ -36,11 +36,11 @@
 .repoUrlInstructions {
 }
 
-.welcomeMessage {
+:local .welcomeMessage {
   color: $pt-text-color-disabled !important;
 }
 
-.repoConfig {
+:local .repoConfig {
   align-self: stretch;
   margin: 1rem;
   display: flex;

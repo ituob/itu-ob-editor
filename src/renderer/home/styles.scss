@@ -2,7 +2,7 @@ body {
   font-family: sans-serif;
 }
 
-.homeMenuContainer {
+:local .homeMenuContainer {
   $draggableRegionHeight: 3em;
 
   height: 100%;
@@ -21,7 +21,7 @@ body {
   }
 }
 
-.mainButtonGroup {
+:local .mainButtonGroup {
   :global .bp3-button {
     justify-content: flex-start;
     padding-left: 2rem !important;

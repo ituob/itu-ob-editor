@@ -1,6 +1,6 @@
 @import "~@blueprintjs/core/lib/scss/variables";
 
-.addCardTriggerContainer {
+:local .addCardTriggerContainer {
   position: absolute;
   left: 50%;
   transform: translateX(-50%) translateY(-50%);
@@ -27,7 +27,7 @@
   }
 }
 
-.editableCard {
+:local .editableCard {
   -webkit-app-region: no-drag;
 
   border-radius: 0 !important;
@@ -45,13 +45,13 @@
   text-overflow: ellipsis;
 }
 
-.editableCardSelectable {
+:local .editableCardSelectable {
   &:hover {
     cursor: pointer;
   }
 }
 
-.editableCardDeletable {
+:local .editableCardDeletable {
   $deleteButtonW: 4em;
 
   padding-right: $deleteButtonW + .5em !important;
@@ -69,12 +69,12 @@
   }
 }
 
-.editableCardExtended {
+:local .editableCardExtended {
   height: unset;
   padding-top: 1rem !important;
   padding-bottom: 1rem !important;
 }
 
-.editableCardSelected {
+:local .editableCardSelected {
   background: $light-gray2 !important;
 }

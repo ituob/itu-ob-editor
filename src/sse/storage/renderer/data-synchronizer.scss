@@ -5,13 +5,13 @@
   overflow: hidden;
 }
 
-.dataSyncBase {
+:local .dataSyncBase {
   display: flex;
   flex-flow: column nowrap;
   height: 100%;
 }
 
-.dataSyncRow {
+:local .dataSyncRow {
   display: flex;
   flex-flow: row nowrap;
   align-items: stretch;
@@ -24,7 +24,7 @@
   }
 }
 
-.repoUrlCard {
+:local .repoUrlCard {
   @include card;
 
   > :first-child {
@@ -32,23 +32,23 @@
   }
 }
 
-.repoConfigCollapsible {
+:local .repoConfigCollapsible {
   :global .bp3-collapse-body > * {
     background: $pt-app-background-color;
   }
 }
 
-.repoAuthCard, .committerInfoCard {
+:local .repoAuthCard, :local .committerInfoCard {
   @include card;
 }
 
-.committerInfoCard, .commitCard {
+:local .committerInfoCard, :local .commitCard {
   > :first-child {
     color: $pt-text-color-muted;
   }
 }
 
-.commitCard {
+:local .commitCard {
   @include card;
   overflow: unset;
 
@@ -77,7 +77,7 @@
   }
 }
 
-.resultCard {
+:local .resultCard {
   @include card;
   background: $pt-app-background-color !important;
 }
