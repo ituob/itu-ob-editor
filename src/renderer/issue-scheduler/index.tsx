@@ -29,7 +29,7 @@ export const IssueScheduler: React.FC<{}> = function () {
   const [maxDate, setMaxDate] = useState(undefined as Date | undefined);
   const [userIsEditing, setUserIsEditing] = useState(true);
 
-  async function fetchSchedule(month: Date | null) {
+  async function fetchSchedule(month: Date) {
     const scheduledIssues = await apiRequest<Index<ScheduledIssue>>(
       'ob-schedule',
       JSON.stringify({ month }));
@@ -80,7 +80,7 @@ export const IssueScheduler: React.FC<{}> = function () {
       const draft = newIssueDraft as ScheduledIssue;
       await apiRequest<void>('ob-schedule-add', JSON.stringify(draft));
       updateNewIssueDraft(null);
-      await fetchSchedule(month || null);
+      await fetchSchedule(month);
     }
   }
 
