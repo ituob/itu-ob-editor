@@ -27,6 +27,7 @@ export const IssueScheduler: React.FC<{}> = function () {
   const [daySchedule, updateDaySchedule] = useState(null as ScheduledIssue | null);
   const [minDate, setMinDate] = useState(undefined as Date | undefined);
   const [maxDate, setMaxDate] = useState(undefined as Date | undefined);
+  const [userIsEditing, setUserIsEditing] = useState(true);
 
   async function fetchSchedule(month: Date | null) {
     const scheduledIssues = await apiRequest<Index<ScheduledIssue>>(
@@ -34,6 +35,7 @@ export const IssueScheduler: React.FC<{}> = function () {
       JSON.stringify({ month }));
     updateSchedule(Object.values(scheduledIssues));
     updateIssueIndex(scheduledIssues);
+    setTimeout(() => { setUserIsEditing(true) }, 1000);
   }
 
   function startOrUpdateDraft(withDate: Date) {
@@ -51,7 +53,10 @@ export const IssueScheduler: React.FC<{}> = function () {
     }
   }
 
-  useEffect(() => { fetchSchedule(month) }, [month]);
+  useEffect(() => {
+    setUserIsEditing(false);
+    fetchSchedule(month);
+  }, [month]);
 
   useEffect(() => {
     if (newIssueDraft !== null) {
@@ -178,7 +183,7 @@ export const IssueScheduler: React.FC<{}> = function () {
             <PaneHeader align="left">Editions</PaneHeader>
 
             <div className={styles.paneBody}>
-              <UpcomingIssues issues={issueIndex} />
+              <UpcomingIssues issues={issueIndex} userIsEditing={userIsEditing} />
             </div>
           </div>
       }

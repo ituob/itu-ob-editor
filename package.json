@@ -34,6 +34,7 @@
     "moment": "^2.24.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
+    "react-transition-group": "^4.3.0",
     "source-map-support": "^0.5.12"
   },
   "resolutions": {
@@ -47,6 +48,7 @@
     "@types/fs-extra": "^8.0.0",
     "@types/js-yaml": "^3.12.1",
     "@types/node": "^12.0.10",
+    "@types/react-transition-group": "^4.2.3",
     "electron": "5.0.4",
     "electron-builder": "^21.2.0",
     "electron-react-devtools": "^0.5.3",

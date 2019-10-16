@@ -122,6 +122,28 @@ $cutColorDark: #D9822B;
 }
 
 
+:global .issueScheduleCardTransition {
+  // NOTE: Must match ITEM_ENTRY_EXIT_TRANSITION_DURATION_MS in issue-scheduler/upcoming component
+  // TODO: Pass that value here, DRY
+  $duration: 500ms;
+
+  &-enter {
+    opacity: 0;
+  }
+  &-enter-active {
+    opacity: 1;
+    transition: opacity $duration ease-in !important;
+  }
+  &-exit {
+    opacity: 1;
+  }
+  &-exit-active {
+    opacity: 0;
+    transition: opacity $duration ease-in !important;
+  }
+}
+
+
 :local .issueScheduleCard {
   border-radius: 0 !important;
   cursor: pointer;
