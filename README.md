@@ -33,6 +33,8 @@ If the app errors out, a fix could be to manually delete the cloned data reposit
 
 ## Implementation Guide
 
+Note: Publications of OB are interchangeably called “edition” and “issue” within source code.
+
 ### File layout under `src/`
 
 * `sse/` directory contains static site editor framework foundation (see below for more details on SSE).
