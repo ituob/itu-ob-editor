@@ -19,6 +19,9 @@ import { UpcomingIssues } from './upcoming';
 import * as styles from './styles.scss';
 
 
+const DEFAULT_MAX_DATE: Date = moment().add(1, 'years').toDate();
+
+
 export const IssueScheduler: React.FC<{}> = function () {
   const [schedule, updateSchedule] = useState([] as ScheduledIssue[]);
   const [issueIndex, updateIssueIndex] = useState({} as Index<ScheduledIssue>);
@@ -28,7 +31,7 @@ export const IssueScheduler: React.FC<{}> = function () {
   const [newIssueDraft, updateNewIssueDraft] = useState(null as IssueDraft | null);
   const [daySchedule, updateDaySchedule] = useState(null as ScheduledIssue | null);
   const [minDate, setMinDate] = useState(undefined as Date | undefined);
-  const [maxDate, setMaxDate] = useState(undefined as Date | undefined);
+  const [maxDate, setMaxDate] = useState(DEFAULT_MAX_DATE);
   const [userIsEditing, setUserIsEditing] = useState(true);
 
   async function fetchSchedule(month: Date) {
@@ -66,7 +69,7 @@ export const IssueScheduler: React.FC<{}> = function () {
       setMaxDate(draft.publication_date);
       setMinDate(draft.cutoff_date);
     } else {
-      setMaxDate(undefined);
+      setMaxDate(DEFAULT_MAX_DATE);
       setMinDate(undefined);
     }
   }, [newIssueDraft]);
