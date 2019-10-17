@@ -81,7 +81,8 @@ export abstract class StoreManager<O extends IndexableObject> {
 
     await storage.fs.ensureDir(objPath);
     for (const key of Object.keys(storeable)) {
-      await storage.yaml.store(path.join(objPath, `${key}.yaml`), storeable[key]);
+      const data = storeable[key];
+      await storage.yaml.store(path.join(objPath, `${key}.yaml`), data);
     }
 
     idx[obj.id] = obj;
