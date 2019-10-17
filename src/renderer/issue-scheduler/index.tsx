@@ -1,5 +1,7 @@
 import * as moment from 'moment';
 
+import { ipcRenderer } from 'electron';
+
 import React, { useEffect, useState } from 'react';
 import { Icon } from '@blueprintjs/core';
 import { DatePicker } from '@blueprintjs/datetime';
@@ -82,6 +84,7 @@ export const IssueScheduler: React.FC<{}> = function () {
         JSON.stringify({ issueId: `${draft.id}` }),
         JSON.stringify({ newData: draft }));
       updateNewIssueDraft(null);
+      await ipcRenderer.send('scheduled-new-issue', {});
       await fetchSchedule(month);
     }
   }

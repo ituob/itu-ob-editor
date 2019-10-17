@@ -10,11 +10,17 @@ interface HomeScreenProps {}
 export const HomeScreen: React.FC<HomeScreenProps> = function () {
   const [currentIssue, setCurrentIssue] = useState({ id: null } as { id: number | null });
 
+  async function reloadCurrentIssue() {
+    const currentIssue = await apiRequest<{ id: number | null }>('current-issue-id');
+    setCurrentIssue(currentIssue);
+  }
+
   useEffect(() => {
-    (async () => {
-      const currentIssue = await apiRequest<{ id: number | null }>('current-issue-id');
-      setCurrentIssue(currentIssue);
-    })();
+    reloadCurrentIssue();
+    ipcRenderer.on('update-current-issue', reloadCurrentIssue);
+    return function cleanup() {
+      ipcRenderer.removeListener('update-current-issue', reloadCurrentIssue);
+    };
   }, []);
 
   return (

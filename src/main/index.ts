@@ -198,6 +198,7 @@ then(gitCtrl => {
       if (homeWindow !== undefined) {
         homeWindow.webContents.send('update-current-issue');
       }
+      event.reply('ok');
     });
 
     makeWindowEndpoint('spotlight', () => ({
