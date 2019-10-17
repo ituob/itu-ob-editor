@@ -66,7 +66,7 @@ export const IssueScheduler: React.FC<{}> = function () {
   useEffect(() => {
     if (newIssueDraft !== null) {
       const draft = newIssueDraft as IssueDraft;
-      setMaxDate(draft.publication_date);
+      setMaxDate(draft.publication_date || DEFAULT_MAX_DATE);
       setMinDate(draft.cutoff_date);
     } else {
       setMaxDate(DEFAULT_MAX_DATE);
