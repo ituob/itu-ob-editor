@@ -78,7 +78,9 @@ export const IssueScheduler: React.FC<{}> = function () {
   async function saveNewSchedule() {
     if (newIssueDraft && newIssueDraft.publication_date && newIssueDraft.cutoff_date) {
       const draft = newIssueDraft as ScheduledIssue;
-      await apiRequest<void>('ob-schedule-add', JSON.stringify(draft));
+      await apiRequest<void>('ob-schedule-add',
+        JSON.stringify({ issueId: `${draft.id}` }),
+        JSON.stringify({ newData: draft }));
       updateNewIssueDraft(null);
       await fetchSchedule(month);
     }

@@ -140,10 +140,12 @@ then(gitCtrl => {
       });
     });
 
-    makeEndpoint<{ success: boolean }>('ob-schedule-add', async (issue: ScheduledIssue) => {
-      storage.workspace.issues[issue.id] = issue as OBIssue;
+    makeEndpoint<ScheduledIssue>('ob-schedule-add', async ({ issueId }: { issueId: string }) => {
+      return storage.workspace.issues[issueId];
+    }, async ({ newData }) => {
+      const existingIssue = storage.workspace.issues[newData.id];
+      storage.workspace.issues[newData.id] = Object.assign(existingIssue || {}, newData);
       await storage.storeWorkspace();
-      return { success: true };
     });
 
 
