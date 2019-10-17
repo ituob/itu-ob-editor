@@ -27,8 +27,8 @@ yarn dev
 If the app errors out, a fix could be to manually delete the cloned data repository.
 
 1. Close the app
-2. Locate and delete itu-ob-data repository
-   (on macOS, it’s in `~/Library/Application Support/itu-ob-editor/`)
+2. Locate and delete itu-ob-data directory and itu-ob-settings.yaml file
+   (on macOS, they’re in `~/Library/Application Support/itu-ob-editor/`)
 3. Start the app again
 
 ## Implementation Guide
