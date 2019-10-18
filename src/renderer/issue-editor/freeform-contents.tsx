@@ -12,11 +12,7 @@ class ProseMirrorAdapter extends Editor {
     this.loadNewDoc(props);
   }
   componentWillReceiveProps(props: any) {
-    // This can be uncommented to re-render the editor
-    // when document passed in props changes.
-    // However, this causes cursor position to reset on each change,
-    // making editing infeasible.
-    // this.loadNewDoc(props);
+    this.loadNewDoc(props);
   }
   loadNewDoc(props: any) {
     this.view.updateState(EditorState.create(props.options));

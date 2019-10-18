@@ -105,8 +105,6 @@ const NewAmendmentMenuRenderer: ItemListRenderer<AmendablePublication> =
     find(i => i.id.toLowerCase() === props.query.trim().toLowerCase()) !== undefined;
   const filteredItems = props.filteredItems.slice(0, MAX_MENU_ITEMS_TO_SHOW);
 
-  console.debug(props);
-
   return (
     <Menu ulRef={props.itemsParentRef} className={styles.newMessageMenu}>
       {renderFilteredItems({

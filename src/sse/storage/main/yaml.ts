@@ -30,19 +30,26 @@ export class YAMLStorage {
   }
 
   public async store(filePath: string, data: any): Promise<any> {
-    if (data !== undefined) {
+    if (data !== undefined && data !== null) {
       // Merge new data into old data; this way if some YAML properties
       // are not supported we will not lose them after the update.
       const newData: any = Object.assign(await this.loadIfExists(filePath), data);
 
+      let newContents: string;
+
       // console.debug(`Dumping contents for ${filePath} from ${data}`);
       // console.debug(oldData);
 
-      const newContents: string = yaml.dump(newData, {
-        schema: SCHEMA,
-        noRefs: true,
-        noCompatMode: true,
-      });
+      try {
+        newContents = yaml.dump(newData, {
+          schema: SCHEMA,
+          noRefs: true,
+          noCompatMode: true,
+        });
+      } catch (e) {
+        console.error(`Failed to save ${filePath} with ${JSON.stringify(newData)}`);
+        return;
+      }
 
       // console.debug(`Writing to ${filePath}, file exists: ${fileExists}`);
 

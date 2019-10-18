@@ -12,8 +12,9 @@ import { MessageEditorProps } from '../message-editor';
 
 export const AmendmentEditor: React.FC<MessageEditorProps> = function ({ message, onChange }) {
   const lang = useContext(LangConfigContext);
+  const msg = message as AmendmentMessage;
 
-  var doc = Object.assign({}, (message as AmendmentMessage).contents[lang.default]);
+  var doc: any = (msg.contents || {})[lang.default] || {};
 
   return (
     <>
@@ -22,19 +23,11 @@ export const AmendmentEditor: React.FC<MessageEditorProps> = function ({ message
       <Card>
         <FreeformContents
           doc={doc}
-          onChange={(updatedDoc) => {
-            Object.keys(doc).forEach(function(key) {
-              delete doc[key];
-            });
-            Object.assign(doc, JSON.parse(JSON.stringify(updatedDoc, null, 2)));
-          }}
+          onChange={(updatedDoc) => { updateObjectInPlace(doc, updatedDoc); }}
         />
 
         <Button
           onClick={() => {
-            console.debug("updated", doc);
-            const msg = message as AmendmentMessage;
-            console.debug("updated", Object.assign({}, msg, { contents: { ...msg.contents, [lang.default]: doc } }));
             onChange(Object.assign({}, msg, { contents: { ...msg.contents, [lang.default]: doc } }));
           }}
           text="Save"
@@ -43,4 +36,10 @@ export const AmendmentEditor: React.FC<MessageEditorProps> = function ({ message
       </Card>
     </>
   );
+}
+
+
+function updateObjectInPlace(doc: any, newDoc: any) {
+  Object.keys(doc).forEach(function(key) { delete doc[key]; });
+  Object.assign(doc, JSON.parse(JSON.stringify(newDoc, null, 2)));
 }
