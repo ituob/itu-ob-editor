@@ -26,7 +26,7 @@ export class YAMLStorage {
       oldData = {};
     }
 
-    return oldData;
+    return oldData || {};
   }
 
   public async store(filePath: string, data: any): Promise<any> {
