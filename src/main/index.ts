@@ -8,7 +8,7 @@ import { makeEndpoint, makeWriteOnlyEndpoint, makeWindowEndpoint } from 'sse/api
 import { manager as settings } from 'sse/settings/main';
 import { QuerySet, sortIntegerAscending } from 'sse/storage/query';
 import { Index } from 'sse/storage/query';
-import { setRepoUrl, initRepo } from 'sse/storage/main/git-controller';
+import { GitController, setRepoUrl, initRepo } from 'sse/storage/main/git-controller';
 
 import { OBIssue, ScheduledIssue } from 'models/issues';
 
@@ -58,25 +58,32 @@ app.on('window-all-closed', () => {
 
 app.whenReady().
 then(() => setRepoUrl(WELCOME_SCREEN_WINDOW_OPTS)).
-then(repoUrl => initRepo(WORK_DIR, repoUrl || DEFAULT_REPO_URL, CORS_PROXY_URL)).
-then(gitCtrl => {
+then(repoUrl => {
+  return Promise.all([
+    (async () => {
+      await openHomeWindow();
+
+      // Reopen home window on app reactivation
+      app.on('activate', () => {
+        // On macOS it is common to re-create a window even after all windows have been closed
+        if (windows.length < 1) {
+          openHomeWindow();
+        }
+      });
+    })(),
+    initRepo(WORK_DIR, repoUrl || DEFAULT_REPO_URL, CORS_PROXY_URL),
+  ]);
+}).
+then(results => {
+  const gitCtrl: GitController = results[1];
+
   initStorage(WORK_DIR).then(storage => {
-
-    // Open home screen
-    openHomeScreen();
-
-    // Reopen home window on app reactivation
-    app.on('activate', () => {
-      // On macOS it is common to re-create a window even after all windows have been closed
-      if (windows.length < 1) {
-        openHomeScreen();
-      }
-    });
+    messageHome('app-loaded');
 
     // Set up app menu
     Menu.setApplicationMenu(getMenu({
       openIssueScheduler: async () => await openWindow(ISSUE_SCHEDULER_WINDOW_OPTS),
-      openHomeScreen,
+      openHomeWindow,
     }));
 
 
@@ -144,7 +151,7 @@ then(gitCtrl => {
       return storage.workspace.issues[issueId];
     }, async ({ newData }) => {
       const existingIssue = storage.workspace.issues[newData.id];
-      storage.workspace.issues[newData.id] = Object.assign(existingIssue || {}, newData);
+      storage.workspace.issues[newData.id] = Object.assign(existingIssue || {} as OBIssue, newData);
       await storage.storeWorkspace();
     });
 
@@ -194,10 +201,7 @@ then(gitCtrl => {
     }));
 
     ipcMain.on('scheduled-new-issue', (event: any) => {
-      const homeWindow = getWindowByTitle(APP_TITLE);
-      if (homeWindow !== undefined) {
-        homeWindow.webContents.send('update-current-issue');
-      }
+      messageHome('update-current-issue');
       event.reply('ok');
     });
 
@@ -223,7 +227,16 @@ then(gitCtrl => {
   });
 });
 
-async function openHomeScreen() {
+
+function messageHome(eventName: string) {
+  const homeWindow = getWindowByTitle(APP_TITLE);
+  if (homeWindow !== undefined) {
+    homeWindow.webContents.send(eventName);
+  }
+}
+
+
+async function openHomeWindow() {
   return await openWindow({
     component: 'home',
     title: APP_TITLE,

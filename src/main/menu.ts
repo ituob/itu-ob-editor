@@ -3,10 +3,10 @@ import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from 'electron';
 
 interface MenuActions {
   openIssueScheduler: () => Promise<BrowserWindow>,
-  openHomeScreen: () => Promise<BrowserWindow>,
+  openHomeWindow: () => Promise<BrowserWindow>,
 }
 
-export function getMenu ({ openIssueScheduler, openHomeScreen }: MenuActions) {
+export function getMenu ({ openIssueScheduler, openHomeWindow }: MenuActions) {
   const template = [
 
     // { role: 'appMenu' }
@@ -35,7 +35,7 @@ export function getMenu ({ openIssueScheduler, openHomeScreen }: MenuActions) {
         },
         {
           label: 'Open Home Screen',
-          click: () => { openHomeScreen() },
+          click: () => { openHomeWindow() },
         },
         process.platform === 'darwin' ? { role: 'close' } : { role: 'quit' },
       ],
