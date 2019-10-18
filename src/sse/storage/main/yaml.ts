@@ -33,9 +33,17 @@ export class YAMLStorage {
     if (data !== undefined && data !== null) {
       // Merge new data into old data; this way if some YAML properties
       // are not supported we will not lose them after the update.
-      const newData: any = Object.assign(await this.loadIfExists(filePath), data);
-
+      let newData: any;
+      let oldData: any;
       let newContents: string;
+
+      try {
+        oldData = await this.loadIfExists(filePath);
+        newData = Object.assign(oldData, data);
+      } catch (e) {
+        console.error("Bad input", filePath, oldData, data);
+        throw e;
+      }
 
       // console.debug(`Dumping contents for ${filePath} from ${data}`);
       // console.debug(oldData);
