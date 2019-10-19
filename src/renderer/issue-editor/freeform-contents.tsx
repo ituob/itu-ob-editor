@@ -1,6 +1,6 @@
 import React from 'react';
 import { EditorState } from 'prosemirror-state';
-import { Editor, Floater, MenuBar } from '@aeaton/react-prosemirror';
+import { Editor, MenuBar } from '@aeaton/react-prosemirror';
 import { options, menu } from '@aeaton/react-prosemirror-config-default';
 
 
@@ -23,11 +23,6 @@ class ProseMirrorAdapter extends Editor {
     return (
       <>
         <MenuBar menu={menu} view={this.view} />
-
-        <Floater view={this.view}>
-          <MenuBar menu={{ marks: menu.marks }} view={this.view} />
-        </Floater>
-
         {editor}
       </>
     );
