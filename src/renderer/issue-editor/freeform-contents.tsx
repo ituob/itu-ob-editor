@@ -4,6 +4,32 @@ import { Editor, MenuBar } from '@aeaton/react-prosemirror';
 import { options, menu } from '@aeaton/react-prosemirror-config-default';
 
 
+type NodePath = { type: { name: string } }[];
+type Range = { $to: { path: NodePath }, $from: { path: NodePath } };
+type Selection = { ranges: Range[] };
+
+
+function isInsideNode(withName: string, selection: Selection) {
+  var isInsideTable = true;
+  for (const range of selection.ranges) {
+    isInsideTable = range.$to.path[3].type.name === withName;
+    if (!isInsideTable) {
+      break;
+    }
+  }
+  return isInsideTable;
+}
+
+
+function adjustMenu(menu: any, selection: Selection) {
+  var _menu = Object.assign({}, menu);
+  if (!isInsideNode('table', selection)) {
+    delete _menu.table;
+  }
+  return _menu;
+}
+
+
 class ProseMirrorAdapter extends Editor {
   view: any;
 
@@ -19,10 +45,11 @@ class ProseMirrorAdapter extends Editor {
   }
   render() {
     const editor = super.render();
+    const _menu = adjustMenu(menu, this.view.state.selection);
 
     return (
       <>
-        <MenuBar menu={menu} view={this.view} />
+        <MenuBar menu={_menu} view={this.view} />
         {editor}
       </>
     );
