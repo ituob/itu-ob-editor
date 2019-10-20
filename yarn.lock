@@ -51,9 +51,9 @@
     prosemirror-schema-list "^1.0.0"
     prosemirror-tables "^0.6.1"
 
-"@aeaton/react-prosemirror@https://github.com/riboseinc/react-prosemirror#aeaton-react-prosemirror-v0.22.2-gitpkg":
-  version "0.22.2"
-  resolved "https://github.com/riboseinc/react-prosemirror#a4b996b8087571c8e89a92ed03ea7a659425232d"
+"@aeaton/react-prosemirror@https://github.com/riboseinc/react-prosemirror#aeaton-react-prosemirror-v0.22.4-gitpkg":
+  version "0.22.4"
+  resolved "https://github.com/riboseinc/react-prosemirror#b9a11f00362a7b7b8f2fdae3fccb981bb620c8a3"
   dependencies:
     classnames "^2.2.5"
     lodash "^4.17.4"

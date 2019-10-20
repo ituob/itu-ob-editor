@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Button, Card } from '@blueprintjs/core';
+import { Button } from '@blueprintjs/core';
 
 import { PaneHeader } from 'sse/renderer/widgets/pane-header';
 import { LangConfigContext } from 'sse/localizer/renderer';
@@ -20,20 +20,18 @@ export const AmendmentEditor: React.FC<MessageEditorProps> = function ({ message
     <>
       <PaneHeader align="left">Amendment</PaneHeader>
 
-      <Card>
-        <FreeformContents
-          doc={doc}
-          onChange={(updatedDoc) => { updateObjectInPlace(doc, updatedDoc); }}
-        />
+      <FreeformContents
+        doc={doc}
+        onChange={(updatedDoc) => { updateObjectInPlace(doc, updatedDoc); }}
+      />
 
-        <Button
-          onClick={() => {
-            onChange(Object.assign({}, msg, { contents: { ...msg.contents, [lang.default]: doc } }));
-          }}
-          text="Save"
-          intent="primary"
-        />
-      </Card>
+      <Button
+        onClick={() => {
+          onChange(Object.assign({}, msg, { contents: { ...msg.contents, [lang.default]: doc } }));
+        }}
+        text="Save"
+        intent="primary"
+      />
     </>
   );
 }
