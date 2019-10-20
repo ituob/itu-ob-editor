@@ -18,8 +18,8 @@
     }
   },
   "dependencies": {
-    "@aeaton/react-prosemirror-config-default": "https://github.com/riboseinc/react-prosemirror#aeaton-react-prosemirror-config-default-v0.12.3-gitpkg",
     "@aeaton/react-prosemirror": "https://github.com/riboseinc/react-prosemirror#aeaton-react-prosemirror-v0.22.2-gitpkg",
+    "@aeaton/react-prosemirror-config-default": "https://github.com/riboseinc/react-prosemirror#aeaton-react-prosemirror-config-default-v0.12.7-gitpkg",
     "@blueprintjs/core": "^3.16.2",
     "@blueprintjs/datetime": "^3.11.0",
     "@blueprintjs/icons": "^3.9.1",
