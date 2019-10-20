@@ -157,7 +157,7 @@ export function IssueEditor(props: IssueEditorProps) {
         </div>
 
       </div>
-      <div className={styles.selectedMessagePane}>
+      <div className={`${styles.selectedMessagePane} editor-pane-message-${selectedMessage !== undefined ? issue[selectedSection].messages[selectedMessage].type : ''}`}>
         {selectedMessage !== undefined
           ? <MessageEditor
               workspace={ws}

@@ -37,11 +37,12 @@ class ProseMirrorAdapter extends Editor {
 
 interface FreeformContentsProps {
   onChange: (doc: any) => void,
+  className?: string,
 
   // Hopefully, a well-formed document structure
   doc: any,
 }
-export const FreeformContents: React.FC<FreeformContentsProps> = function ({ onChange, doc }) {
+export const FreeformContents: React.FC<FreeformContentsProps> = function ({ onChange, doc, className }) {
   let initialDoc: any;
   if (Object.keys(doc).length > 0) {
     initialDoc = options.schema.nodeFromJSON(Object.assign({}, doc));
@@ -55,6 +56,7 @@ export const FreeformContents: React.FC<FreeformContentsProps> = function ({ onC
       options={opts}
       autofocus
       onChange={onChange}
+      className={className}
     />
   );
 };

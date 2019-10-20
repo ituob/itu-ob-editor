@@ -9,6 +9,8 @@ import { AmendmentMessage } from 'models/messages/amendment';
 import { FreeformContents } from '../freeform-contents';
 import { MessageEditorProps } from '../message-editor';
 
+import * as styles from '../styles.scss';
+
 
 export const AmendmentEditor: React.FC<MessageEditorProps> = function ({ message, onChange }) {
   const lang = useContext(LangConfigContext);
@@ -18,17 +20,20 @@ export const AmendmentEditor: React.FC<MessageEditorProps> = function ({ message
 
   return (
     <>
-      <PaneHeader align="left">Amendment</PaneHeader>
+      <PaneHeader align="left" className={styles.inflexibleEditorPaneHeader}>Amendment</PaneHeader>
 
       <FreeformContents
+        className={styles.freeformEditor}
         doc={doc}
         onChange={(updatedDoc) => { updateObjectInPlace(doc, updatedDoc); }}
       />
 
       <Button
+        className={styles.freeformEditorSaveButton}
         onClick={() => {
           onChange(Object.assign({}, msg, { contents: { ...msg.contents, [lang.default]: doc } }));
         }}
+        large={true}
         text="Save"
         intent="primary"
       />

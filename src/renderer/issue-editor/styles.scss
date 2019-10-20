@@ -42,6 +42,32 @@
   max-width: 18em;
 }
 
+
+/* Specific message editors */
+
+
+/* Amendment */
+
+:global .editor-pane-message-amendment {
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+:local .inflexibleEditorPaneHeader {
+  flex-shrink: 0;
+}
+
+:local .freeformEditorSaveButton {
+  margin: 1rem;
+  align-self: flex-end;
+  flex-shrink: 0;
+}
+
+:local .freeformEditor {
+  overflow-y: auto;
+}
+
+
 @mixin tsAddItemTrigger() {
   border-radius: 0 !important;
 }
