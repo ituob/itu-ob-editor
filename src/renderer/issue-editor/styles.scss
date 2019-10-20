@@ -42,6 +42,20 @@
   max-width: 18em;
 }
 
+:local .messageEditorDialog {
+  :global .bp3-label:last-child,
+  :global .bp3-form-group:last-child {
+    margin-bottom: 0;
+  }
+}
+
+:local .messageEditorTabs {
+  :global .bp3-tab-list {
+    margin: 0 1rem;
+    transform: translateY(.5rem);
+  }
+}
+
 
 /* Specific message editors */
 
@@ -67,6 +81,8 @@
   overflow-y: auto;
 }
 
+
+/* Telephone service */
 
 @mixin tsAddItemTrigger() {
   border-radius: 0 !important;
@@ -108,18 +124,4 @@
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
-}
-
-:local .messageEditorDialog {
-  :global .bp3-label:last-child,
-  :global .bp3-form-group:last-child {
-    margin-bottom: 0;
-  }
-}
-
-:local .messageEditorTabs {
-  :global .bp3-tab-list {
-    margin: 0 1rem;
-    transform: translateY(.5rem);
-  }
 }
