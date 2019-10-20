@@ -1,6 +1,6 @@
 import React from 'react';
 import { EditorState } from 'prosemirror-state';
-import { Editor, MenuBar } from '@aeaton/react-prosemirror';
+import { Editor as BaseEditor, MenuBar } from '@aeaton/react-prosemirror';
 import { options, menu } from '@aeaton/react-prosemirror-config-default';
 
 
@@ -9,7 +9,7 @@ type Range = { $to: { path: NodePath }, $from: { path: NodePath } };
 type Selection = { ranges: Range[] };
 
 
-class ProseMirrorAdapter extends Editor {
+class Editor extends BaseEditor {
   view: any;
 
   constructor(props: any) {
@@ -35,6 +35,7 @@ class ProseMirrorAdapter extends Editor {
   }
 }
 
+
 interface FreeformContentsProps {
   onChange: (doc: any) => void,
   className?: string,
@@ -52,7 +53,7 @@ export const FreeformContents: React.FC<FreeformContentsProps> = function ({ onC
   const opts = Object.assign({}, options, { doc: initialDoc });
 
   return (
-    <ProseMirrorAdapter
+    <Editor
       options={opts}
       autofocus
       onChange={onChange}
