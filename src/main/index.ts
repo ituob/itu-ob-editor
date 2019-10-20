@@ -40,6 +40,9 @@ const ISSUE_SCHEDULER_WINDOW_OPTS: WindowOpenerParams = {
 };
 
 
+app.disableHardwareAcceleration();
+
+
 // Ensure only one instance of the app can run at a time on given user’s machine
 if (!app.requestSingleInstanceLock()) { app.exit(0); }
 
