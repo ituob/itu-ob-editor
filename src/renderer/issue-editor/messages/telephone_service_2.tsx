@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useMemo, useState, useEffect, useContext } from 'react';
 import { H4, Label, Button, FormGroup, InputGroup, TextArea } from '@blueprintjs/core';
 import { DatePicker } from '@blueprintjs/datetime';
 
@@ -449,6 +449,20 @@ const TSCountryCommunicationDetailsEditor: React.FC<TSCountryCommunicationDetail
     onChange(newDate, newContents);
   }, [newDate, newContents]);
 
+  const contentsEditor = useMemo(() => (
+    <FreeformContents
+      doc={newContents}
+      onChange={(updatedDoc: any) => {
+        setContents((previousDoc: any) => {
+          return {
+            ...previousDoc,
+            ...JSON.parse(JSON.stringify(updatedDoc, null, 2)),
+          };
+        });
+      }}
+    />
+  ), [1]);
+
   return (
     <div className={styles.tsCountryCommunicationEditor}>
       <FormGroup
@@ -465,17 +479,7 @@ const TSCountryCommunicationDetailsEditor: React.FC<TSCountryCommunicationDetail
       <FormGroup
           label="Communication contents"
           intent="primary">
-        <FreeformContents
-          doc={newContents}
-          onChange={(updatedDoc: any) => {
-            setContents((previousDoc: any) => {
-              return {
-                ...previousDoc,
-                ...JSON.parse(JSON.stringify(updatedDoc, null, 2)),
-              };
-            });
-          }}
-        />
+        {contentsEditor}
       </FormGroup>
     </div>
   );
