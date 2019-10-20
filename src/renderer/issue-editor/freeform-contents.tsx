@@ -63,8 +63,13 @@ export const FreeformContents: React.FC<FreeformContentsProps> = function ({ onC
 function isInsideNode(withName: string, selection: Selection) {
   var isInsideTable = true;
   for (const range of selection.ranges) {
-    isInsideTable = range.$to.path[3].type.name === withName;
-    if (!isInsideTable) {
+    const pathComponent = range.$to.path[3];
+    if (pathComponent) {
+      isInsideTable = range.$to.path[3].type.name === withName;
+      if (!isInsideTable) {
+        break;
+      }
+    } else {
       break;
     }
   }
