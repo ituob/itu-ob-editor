@@ -1,5 +1,4 @@
-import React, { useContext } from 'react';
-import { Button } from '@blueprintjs/core';
+import React, { useMemo, useContext } from 'react';
 
 import { PaneHeader } from 'sse/renderer/widgets/pane-header';
 import { LangConfigContext } from 'sse/localizer/renderer';
@@ -18,25 +17,24 @@ export const AmendmentEditor: React.FC<MessageEditorProps> = function ({ message
 
   var doc: any = (msg.contents || {})[lang.default] || {};
 
+  // Memoization ensures that updating upstream message in onChange() on every keystroke
+  // doesn’t cause the editor to re-render, which loses cursor position and undo history.
+  // Only re-render if amendment target changes, meaning a switch to another amendment message.
+  const editor = useMemo(() => (
+    <FreeformContents
+      className={styles.freeformEditor}
+      doc={doc}
+      onChange={(updatedDoc) => {
+        updateObjectInPlace(doc, updatedDoc);
+        onChange(Object.assign({}, msg, { contents: { ...msg.contents, [lang.default]: doc } }));
+      }}
+    />
+  ), [msg.target.publication]);
+
   return (
     <>
       <PaneHeader align="left" className={styles.inflexibleEditorPaneHeader}>Amendment</PaneHeader>
-
-      <FreeformContents
-        className={styles.freeformEditor}
-        doc={doc}
-        onChange={(updatedDoc) => { updateObjectInPlace(doc, updatedDoc); }}
-      />
-
-      <Button
-        className={styles.freeformEditorSaveButton}
-        onClick={() => {
-          onChange(Object.assign({}, msg, { contents: { ...msg.contents, [lang.default]: doc } }));
-        }}
-        large={true}
-        text="Save"
-        intent="primary"
-      />
+      {editor}
     </>
   );
 }
