@@ -9,27 +9,6 @@ type Range = { $to: { path: NodePath }, $from: { path: NodePath } };
 type Selection = { ranges: Range[] };
 
 
-function isInsideNode(withName: string, selection: Selection) {
-  var isInsideTable = true;
-  for (const range of selection.ranges) {
-    isInsideTable = range.$to.path[3].type.name === withName;
-    if (!isInsideTable) {
-      break;
-    }
-  }
-  return isInsideTable;
-}
-
-
-function adjustMenu(menu: any, selection: Selection) {
-  var _menu = Object.assign({}, menu);
-  if (!isInsideNode('table', selection)) {
-    delete _menu.table;
-  }
-  return _menu;
-}
-
-
 class ProseMirrorAdapter extends Editor {
   view: any;
 
@@ -79,3 +58,24 @@ export const FreeformContents: React.FC<FreeformContentsProps> = function ({ onC
     />
   );
 };
+
+
+function isInsideNode(withName: string, selection: Selection) {
+  var isInsideTable = true;
+  for (const range of selection.ranges) {
+    isInsideTable = range.$to.path[3].type.name === withName;
+    if (!isInsideTable) {
+      break;
+    }
+  }
+  return isInsideTable;
+}
+
+
+function adjustMenu(menu: any, selection: Selection) {
+  var _menu = Object.assign({}, menu);
+  if (!isInsideNode('table', selection)) {
+    delete _menu.table;
+  }
+  return _menu;
+}
