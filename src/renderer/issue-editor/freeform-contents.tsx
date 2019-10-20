@@ -3,6 +3,8 @@ import { EditorState } from 'prosemirror-state';
 import { Editor as BaseEditor, MenuBar } from '@aeaton/react-prosemirror';
 import { options, menu } from '@aeaton/react-prosemirror-config-default';
 
+import * as styles from './styles.scss';
+
 
 type NodePath = { type: { name: string } }[];
 type Range = { $to: { path: NodePath }, $from: { path: NodePath } };
@@ -28,7 +30,7 @@ class Editor extends BaseEditor {
 
     return (
       <>
-        <MenuBar menu={_menu} view={this.view} />
+        <MenuBar menu={_menu} view={this.view} className={styles.freeformEditorToolbar} />
         {editor}
       </>
     );
@@ -57,7 +59,7 @@ export const FreeformContents: React.FC<FreeformContentsProps> = function ({ onC
       options={opts}
       autofocus
       onChange={onChange}
-      className={className}
+      className={`${styles.freeformEditor} ${className || ''}`}
     />
   );
 };

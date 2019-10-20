@@ -57,8 +57,18 @@
 }
 
 
-/* Specific message editors */
+/* Freeform text editor */
 
+:local .freeformEditor {
+  overflow-y: auto;
+}
+
+:local .freeformEditorToolbar {
+  background: $pt-app-background-color;
+}
+
+
+/* Message type specific editors */
 
 /* Amendment */
 
@@ -75,10 +85,6 @@
   margin: 1rem;
   align-self: flex-end;
   flex-shrink: 0;
-}
-
-:local .freeformEditor {
-  overflow-y: auto;
 }
 
 

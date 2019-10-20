@@ -22,7 +22,6 @@ export const AmendmentEditor: React.FC<MessageEditorProps> = function ({ message
   // Only re-render if amendment target changes, meaning a switch to another amendment message.
   const editor = useMemo(() => (
     <FreeformContents
-      className={styles.freeformEditor}
       doc={doc}
       onChange={(updatedDoc) => {
         updateObjectInPlace(doc, updatedDoc);
