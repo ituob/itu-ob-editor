@@ -66,7 +66,26 @@ export const FreeformContents: React.FC<FreeformContentsProps> = function ({ onC
 /* Utility functions */
 
 
-function isInsideNodeWithName(withName: string, selection: Selection) {
+/* Given base ProseMirror editor menu definition,
+   adds or removes groups based on given selection
+   and returns a copy. */
+
+function adjustMenu(menu: any, selection: Selection) {
+  var _menu = Object.assign({}, menu);
+
+  // Hide Table button group unless selection is inside table cell
+  if (!isInsideNodeWithName('table_cell', selection)) {
+    delete _menu.table;
+  }
+
+  return _menu;
+}
+
+
+/* Returns true if all ranges in given ProseMirror selection
+   terminate within nodes matching given node type name. */
+
+function isInsideNodeWithName(withName: string, selection: Selection): boolean {
   var isInsideCell = true;
 
   rangeLoop:
@@ -75,23 +94,15 @@ function isInsideNodeWithName(withName: string, selection: Selection) {
     for (const rangeEdge of [range.$to, range.$from]) {
       for (const pathComponent of rangeEdge.path) {
         if (pathComponent.type && pathComponent.type.name === withName) {
+          // Continue with the other side of selection range
           continue rangeEdgeLoop;
         }
       }
-      // This range boundary is not terminating inside given node,
-      // cancel everything, we’re out
+      // Getting to this point means this range boundary
+      // is not terminating inside given node. Cancel everything, we’re out
       isInsideCell = false;
       break rangeLoop;
     }
   }
   return isInsideCell;
-}
-
-
-function adjustMenu(menu: any, selection: Selection) {
-  var _menu = Object.assign({}, menu);
-  if (!isInsideNodeWithName('table_cell', selection)) {
-    delete _menu.table;
-  }
-  return _menu;
 }
