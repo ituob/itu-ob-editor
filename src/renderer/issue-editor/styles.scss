@@ -43,9 +43,16 @@
 }
 
 :local .messageEditorDialog {
+  max-height: 95vh;
+
   :global .bp3-label:last-child,
   :global .bp3-form-group:last-child {
     margin-bottom: 0;
+  }
+
+  :global .bp3-dialog-body {
+    display: flex;
+    flex-flow: column nowrap;
   }
 }
 
@@ -110,6 +117,7 @@
 :local .tsCountryCommunicationEditor {
   display: flex;
   flex-flow: row nowrap;
+  overflow: hidden;
 
   > :first-child {
     margin-right: 1rem;
@@ -130,4 +138,10 @@
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
+}
+
+:local .tsCommunicationFormContents {
+  display: flex;
+  flex-flow: column nowrap;
+  overflow: hidden;
 }

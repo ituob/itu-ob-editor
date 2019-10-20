@@ -478,6 +478,7 @@ const TSCountryCommunicationDetailsEditor: React.FC<TSCountryCommunicationDetail
 
       <FormGroup
           label="Communication contents"
+          contentClassName={styles.tsCommunicationFormContents}
           intent="primary">
         {contentsEditor}
       </FormGroup>
