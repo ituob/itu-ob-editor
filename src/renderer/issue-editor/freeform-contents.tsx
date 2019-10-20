@@ -62,26 +62,34 @@ export const FreeformContents: React.FC<FreeformContentsProps> = function ({ onC
 };
 
 
-function isInsideNode(withName: string, selection: Selection) {
-  var isInsideTable = true;
+/* Utility functions */
+
+
+function isInsideNodeWithName(withName: string, selection: Selection) {
+  var isInsideCell = true;
+
+  rangeLoop:
   for (const range of selection.ranges) {
-    const pathComponent = range.$to.path[3];
-    if (pathComponent) {
-      isInsideTable = range.$to.path[3].type.name === withName;
-      if (!isInsideTable) {
-        break;
+    rangeEdgeLoop:
+    for (const rangeEdge of [range.$to, range.$from]) {
+      for (const pathComponent of rangeEdge.path) {
+        if (pathComponent.type && pathComponent.type.name === withName) {
+          continue rangeEdgeLoop;
+        }
       }
-    } else {
-      break;
+      // This range boundary is not terminating inside given node,
+      // cancel everything, we’re out
+      isInsideCell = false;
+      break rangeLoop;
     }
   }
-  return isInsideTable;
+  return isInsideCell;
 }
 
 
 function adjustMenu(menu: any, selection: Selection) {
   var _menu = Object.assign({}, menu);
-  if (!isInsideNode('table', selection)) {
+  if (!isInsideNodeWithName('table_cell', selection)) {
     delete _menu.table;
   }
   return _menu;
