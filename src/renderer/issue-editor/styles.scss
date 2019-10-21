@@ -67,7 +67,17 @@
 /* Freeform text editor */
 
 :local .freeformEditor {
-  overflow-y: auto;
+  display: flex;
+  flex-flow: column nowrap;
+
+  :global .ProseMirror {
+    flex: 1;
+    overflow-y: auto;
+    p.empty-node::before {
+      content: "¶" !important;
+      color: $pt-text-color-disabled;
+    }
+  }
 }
 
 :local .freeformEditorToolbar {
@@ -82,16 +92,18 @@
 :global .editor-pane-message-amendment {
   display: flex;
   flex-flow: column nowrap;
-}
 
-:local .inflexibleEditorPaneHeader {
-  flex-shrink: 0;
-}
+  :local .inflexibleEditorPaneHeader {
+    flex-shrink: 0;
+  }
 
-:local .freeformEditorSaveButton {
-  margin: 1rem;
-  align-self: flex-end;
-  flex-shrink: 0;
+  :local .freeformEditor {
+    flex: 1;
+    overflow-y: auto;
+    padding: .5rem;
+    margin: .5rem;
+    font-size: 110%;
+  }
 }
 
 
