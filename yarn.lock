@@ -31,9 +31,9 @@
     prosemirror-state "^1.1.0"
     prosemirror-view "^1.1.1"
 
-"@aeaton/react-prosemirror-config-default@https://github.com/riboseinc/react-prosemirror#aeaton-react-prosemirror-config-default-v0.12.7-gitpkg":
-  version "0.12.7"
-  resolved "https://github.com/riboseinc/react-prosemirror#02b9387a3e06ae9fca594b7c13f9c2e70850ee15"
+"@aeaton/react-prosemirror-config-default@https://github.com/riboseinc/react-prosemirror#aeaton-react-prosemirror-config-default-v0.12.10-gitpkg":
+  version "0.12.10"
+  resolved "https://github.com/riboseinc/react-prosemirror#92f827bf9d6158ef8da1658472fd2a877a9d6cc7"
   dependencies:
     "@aeaton/prosemirror-footnotes" "^0.1.0"
     "@aeaton/prosemirror-placeholder" "^0.1.0"
