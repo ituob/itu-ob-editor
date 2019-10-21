@@ -80,6 +80,11 @@ function adjustMenu(menu: any, selection: Selection) {
     delete _menu.table;
   }
 
+  delete _menu.marks.link;
+  delete _menu.marks.code;
+  delete _menu.insert.image;
+  delete _menu.blocks.code_block;
+
   return _menu;
 }
 
