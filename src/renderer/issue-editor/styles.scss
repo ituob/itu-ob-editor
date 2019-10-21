@@ -85,6 +85,10 @@
       margin-bottom: 0;
     }
 
+    ul li {
+      margin-bottom: 10px;
+    }
+
     p.empty-node {
       &::before {
         content: "¶" !important;
