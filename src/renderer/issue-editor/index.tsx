@@ -50,12 +50,12 @@ export function IssueEditor(props: IssueEditorProps) {
     };
   }, []);
 
-  var initialMessage: number | undefined = undefined;
+  var initialMessageIdx: number | undefined = undefined;
   var initialSection: "amendments" | "general" = "general";
 
   if (Object.keys(maybeIssue).length < 1) {
     // Silence React hooks :(
-    useState(initialMessage);
+    useState(initialMessageIdx);
     useState(initialSection);
 
     return <Spinner className={styles.spinner} />;
@@ -64,14 +64,14 @@ export function IssueEditor(props: IssueEditorProps) {
   const issue = maybeIssue as OBIssue;
 
   if (issue.general.messages.length > 0) {
-    initialMessage = 0;
+    initialMessageIdx = 0;
     initialSection = "general";
   } else if (issue.amendments.messages.length > 0) {
-    initialMessage = 0;
+    initialMessageIdx = 0;
     initialSection = "amendments";
   }
 
-  const [ selectedMessage, selectMessage ] = useState(initialMessage);
+  const [ selectedMessage, selectMessage ] = useState(initialMessageIdx);
   const [ selectedSection, selectSection ] = useState(initialSection);
 
   function handleNewGeneralMessage(msg: Message, atIndex: number) {
