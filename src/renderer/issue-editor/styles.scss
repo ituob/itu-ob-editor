@@ -73,9 +73,28 @@
   :global .ProseMirror {
     flex: 1;
     overflow-y: auto;
-    p.empty-node::before {
-      content: "¶" !important;
-      color: $pt-text-color-disabled;
+
+    table {
+      margin-bottom: 10px;
+      td {
+        padding: .5rem;
+      }
+    }
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+
+    p.empty-node {
+      &::before {
+        content: "¶" !important;
+        font-style: normal;
+        opacity: 0.5;
+      }
+      &:hover::before {
+        content: "¶ — empty block" !important;
+        opacity: 1;
+      }
     }
   }
 }
