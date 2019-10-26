@@ -76,6 +76,12 @@ export class GitController {
     })).find(r => r.remote === 'origin') || { url: null }).url;
   }
 
+  async getUpstreamUrl(): Promise<string | null> {
+    return ((await git.listRemotes({
+      dir: this.workDir,
+    })).find(r => r.remote === 'upstream') || { url: null }).url;
+  }
+
   async addAllChanges() {
     await git.add({
       dir: this.workDir,
