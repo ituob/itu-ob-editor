@@ -12,11 +12,15 @@ import { GitController, setRepoUrl, initRepo } from 'sse/storage/main/git-contro
 
 import { OBIssue, ScheduledIssue } from 'models/issues';
 
-import { getMenu } from './menu';
+import { buildAppMenu } from './menu';
 import { initStorage, Workspace } from './storage';
 
 
+const isMacOS = process.platform === 'darwin';
+
+
 const APP_TITLE = "ITU OB editor";
+const APP_HELP_ROOT = "https://www.ituob.org/_app_help/";
 
 
 const WORK_DIR = path.join(app.getPath('userData'), 'itu-ob-data');
@@ -53,7 +57,7 @@ settings.setUpAPIEndpoints();
 // Quit application when all windows are closed
 app.on('window-all-closed', () => {
   // On macOS it is common for applications to stay open until the user explicitly quits
-  if (process.platform !== 'darwin') {
+  if (!isMacOS) {
     app.quit();
   }
 });
@@ -83,11 +87,29 @@ then(results => {
   initStorage(WORK_DIR).then(storage => {
     messageHome('app-loaded');
 
-    // Set up app menu
-    Menu.setApplicationMenu(getMenu({
-      openIssueScheduler: async () => await openWindow(ISSUE_SCHEDULER_WINDOW_OPTS),
-      openHomeWindow,
-    }));
+    if (isMacOS) {
+      // Set up app menu
+      Menu.setApplicationMenu(buildAppMenu({
+        getFileMenuItems: () => ([
+          {
+            label: "Open Calendar",
+            click: async () => await openWindow(ISSUE_SCHEDULER_WINDOW_OPTS),
+          },
+          {
+            label: "Open Home Screen",
+            click: openHomeWindow,
+          },
+        ]),
+        getHelpMenuItems: () => ([
+          {
+            label: "Help",
+            click: async () => { await openWindow({ title: `${APP_TITLE} Help`, url: APP_HELP_ROOT }); },
+          },
+        ]),
+      }));
+    } else {
+      Menu.setApplicationMenu(null);
+    }
 
 
     /* Set up endpoints */

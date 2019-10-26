@@ -1,12 +1,12 @@
-import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from 'electron';
+import { app, Menu, MenuItemConstructorOptions } from 'electron';
 
 
 interface MenuActions {
-  openIssueScheduler: () => Promise<BrowserWindow>,
-  openHomeWindow: () => Promise<BrowserWindow>,
+  getFileMenuItems: () => MenuItemConstructorOptions[],
+  getHelpMenuItems: () => MenuItemConstructorOptions[],
 }
 
-export function getMenu ({ openIssueScheduler, openHomeWindow }: MenuActions) {
+export function buildAppMenu ({ getFileMenuItems, getHelpMenuItems }: MenuActions) {
   const template = [
 
     // { role: 'appMenu' }
@@ -29,14 +29,7 @@ export function getMenu ({ openIssueScheduler, openHomeWindow }: MenuActions) {
     {
       label: 'File',
       submenu: [
-        {
-          label: 'Open Issue Scheduler',
-          click: () => { openIssueScheduler() },
-        },
-        {
-          label: 'Open Home Screen',
-          click: () => { openHomeWindow() },
-        },
+        ...getFileMenuItems(),
         process.platform === 'darwin' ? { role: 'close' } : { role: 'quit' },
       ],
     },
@@ -45,9 +38,9 @@ export function getMenu ({ openIssueScheduler, openHomeWindow }: MenuActions) {
     {
       label: 'Edit',
       submenu: [
-        { role: 'undo' },
-        { role: 'redo' },
-        { type: 'separator' },
+        // { role: 'undo' },
+        // { role: 'redo' },
+        // { type: 'separator' },
         { role: 'cut' },
         { role: 'copy' },
         { role: 'paste' },
@@ -87,29 +80,12 @@ export function getMenu ({ openIssueScheduler, openHomeWindow }: MenuActions) {
       ],
     },
 
-    // { role: 'windowMenu' }
-    {
-      label: 'Window',
-      submenu: [
-        { role: 'minimize' },
-        { role: 'zoom' },
-        ...(process.platform === 'darwin' ? [
-          { type: 'separator' },
-          { role: 'front' },
-          { type: 'separator' },
-          { role: 'window' },
-        ] : [
-          { role: 'close' },
-        ])
-      ],
-    },
+    { role: 'windowMenu' },
+
     {
       role: 'help',
       submenu: [
-        {
-          label: 'Learn More',
-          click: () => { require('electron').shell.openExternalSync('https://electronjs.org') },
-        },
+        ...getHelpMenuItems(),
       ],
     },
   ];
