@@ -1,6 +1,6 @@
 import * as path from 'path'
 import { format as formatUrl } from 'url';
-import { BrowserWindow } from 'electron';
+import { BrowserWindow, Menu, MenuItemConstructorOptions } from 'electron';
 
 
 /* Window-related helpers
@@ -8,6 +8,7 @@ import { BrowserWindow } from 'electron';
 
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
+const isMacOS = process.platform === 'darwin';
 
 // Keeps track of windows and ensures (?) they do not get garbage collected
 export var windows: BrowserWindow[] = [];
@@ -19,18 +20,24 @@ var windowsByTitle: { [title: string]: BrowserWindow } = {};
 // Open new window, or focus if one with the same title already exists
 export interface WindowOpenerParams {
   title: string,
-  component: string,
+  url?: string,
+  component?: string,
   componentParams?: string,
   dimensions?: { minHeight?: number, minWidth?: number, width?: number, height?: number },
   frameless?: boolean,
   winParams?: any,
+  menuTemplate?: MenuItemConstructorOptions[],
 }
 export type WindowOpener = (props: WindowOpenerParams) => Promise<BrowserWindow>;
 export const openWindow: WindowOpener = async ({
     title,
-    component, componentParams,
+    url, component, componentParams,
     dimensions, frameless,
-    winParams}) => {
+    winParams, menuTemplate }) => {
+
+  if ((component || '').trim() === '' && (url || '').trim() === '') {
+    throw new Error("openWindow() requires either `component` or `url`");
+  }
 
   const _existingWindow = getWindowByTitle(title);
   if (_existingWindow !== undefined) {
@@ -39,8 +46,8 @@ export const openWindow: WindowOpener = async ({
   }
 
   const _framelessOpts = {
-    frame: process.platform === 'darwin' ? true : false,
-    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
+    frame: isMacOS ? true : false,
+    titleBarStyle: isMacOS ? 'hiddenInset' : undefined,
   };
 
   const _winParams = {
@@ -52,8 +59,20 @@ export const openWindow: WindowOpener = async ({
     ...winParams,
   };
 
-  const params = `c=${component}&${componentParams ? componentParams : ''}`;
-  const window = await createWindow(title, params, _winParams);
+  let window: BrowserWindow;
+
+  if (component) {
+    const params = `c=${component}&${componentParams ? componentParams : ''}`;
+    window = await createWindowForLocalComponent(title, params, _winParams);
+  } else if (url) {
+    window = await createWindow(title, url, _winParams);
+  } else {
+    throw new Error("Either component or url must be given to openWindow()");
+  }
+
+  if (menuTemplate && !isMacOS) {
+    window.setMenu(Menu.buildFromTemplate(menuTemplate));
+  }
 
   windows.push(window);
   windowsByTitle[title] = window;
@@ -93,7 +112,25 @@ function cleanUpWindows() {
 }
 
 
-function createWindow(title: string, params: string, winParams: any): Promise<BrowserWindow> {
+function createWindowForLocalComponent(title: string, params: string, winParams: any): Promise<BrowserWindow> {
+  let url: string;
+
+  if (isDevelopment) {
+    url = `http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}?${params}`;
+  }
+  else {
+    url = `${formatUrl({
+      pathname: path.join(__dirname, 'index.html'),
+      protocol: 'file',
+      slashes: true,
+    })}?${params}`;
+  }
+
+  return createWindow(title, url, winParams);
+}
+
+
+function createWindow(title: string, url: string, winParams: any): Promise<BrowserWindow> {
   const window = new BrowserWindow({
     webPreferences: {nodeIntegration: true},
     title: title,
@@ -111,16 +148,8 @@ function createWindow(title: string, params: string, winParams: any): Promise<Br
   if (isDevelopment) {
     window.webContents.openDevTools();
   }
-  if (isDevelopment) {
-    window.loadURL(`http://localhost:${process.env.ELECTRON_WEBPACK_WDS_PORT}?${params}`);
-  }
-  else {
-    window.loadURL(`${formatUrl({
-      pathname: path.join(__dirname, 'index.html'),
-      protocol: 'file',
-      slashes: true,
-    })}?${params}`);
-  }
+
+  window.loadURL(url);
 
   window.webContents.on('devtools-opened', () => {
     window.focus();
