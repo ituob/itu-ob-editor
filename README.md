@@ -94,7 +94,7 @@ and values are the actual corresponding post-compilation hashes after compilatio
 The convention is as follows:
 
 ```
-import * as styles from './styles.scss';
+import styles from './styles.scss';
 
 function MyComponent() {
   return <p className={styles.myParagraphClassName}>Paragraph text…</p>
