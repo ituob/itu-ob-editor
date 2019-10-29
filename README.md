@@ -35,21 +35,13 @@ If the app errors out, a fix could be to manually delete the cloned data reposit
 
 Note: Publications of OB are interchangeably called “edition” and “issue” within source code.
 
+### SSE library
+
+This app is using [the SSE elements library](https://github.com/riboseinc/sse-elements).
+In addition to using the tools it provides, the app also follows its underlying philosophy,
+e.g. using “API endpoints” for communicating between main and renderer threads.
+
 ### File layout under `src/`
-
-* `sse/` directory contains static site editor framework foundation (see below for more details on SSE).
-
-  This is the only directory not specific to ITU OB.
-
-  Within it, modules are organized by functionality.
-  Each module may contain `renderer` and/or `main` submodules;
-  those contain units usable in Electron’s renderer (e.g., React components)
-  or main (e.g., storage-related code) threads respectively.
-  Anything not under those two modules is (must be) importable anywhere regardless
-  of thread.
-
-  For example, `storage` contains code for handling Git repository interaction (main-only),
-  and also offers a “data synchronizer” UI component (renderer-only).
 
 * `main/`: Electron’s main thread code.
 
@@ -62,20 +54,13 @@ Note: Publications of OB are interchangeably called “edition” and “issue�
 
 * `static/`: Application icons.
 
-### Interaction between main and renderer threads
-
-The app is organized in a way where a lot of the functionality involves API calls
-between main and renderer threads. E.g., when a window needs to be opened,
-renderer code (browser window) would call a main API endpoint, and main thread
-will launch the window as required.
-
 ### Renderer
 
 #### Window initialization
 
-When opening a new window, the framework supplies GET query parameter `c`
+When opening a new window, SSE supplies GET query parameter `c`
 which specifies the component to be loaded at top level in the window.
-(See: `src/sse/main/window.ts`.)
+(See: `main/window.ts` in `sse-elements`.)
 
 Based on that value, renderer initialization picks
 the appropriate React component class.
@@ -128,23 +113,6 @@ For example:
   }
 }
 ```
-
-## SSE
-
-SSE (Static Site Editor) framework aims to simplify the creation of cross-platform
-user-friendly GUIs for editing static websites.
-
-At its current (fairly early) stage it consists of following components:
-
-* `settings`: Manipulate application settings exposed to the user in some way
-* `localizer`: Work with data that is translatable in multiple languages
-* `storage`: Manipulate structured data, e.g. Jekyll posts or such, and synchronize it with upstream using VCS.
-  Currently supports YAML and Git
-* `preflight`: Check data for problems, which may help identify issues that would break site build
-* `spotlight`: Look up objects in the database
-* `api`: Offers tools for communication between Electron main and renderer processes through API endpoints
-* `main/window`: Offers tools for Electron window manipulation
-* `renderer/widgets`: Offers a set of Blueprint 3-based widgets
 
 ## Generic Electron Webpack docs
 
