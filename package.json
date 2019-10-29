@@ -20,9 +20,9 @@
   "dependencies": {
     "@aeaton/react-prosemirror": "https://github.com/riboseinc/react-prosemirror#aeaton-react-prosemirror-v0.22.10-gitpkg",
     "@aeaton/react-prosemirror-config-default": "https://github.com/riboseinc/react-prosemirror#aeaton-react-prosemirror-config-default-v0.12.10-gitpkg",
-    "@blueprintjs/core": "^3.16.2",
+    "@blueprintjs/core": "^3.19.1",
     "@blueprintjs/datetime": "^3.11.0",
-    "@blueprintjs/icons": "^3.9.1",
+    "@blueprintjs/icons": "^3.11.0",
     "@blueprintjs/select": "^3.10.0",
     "@isomorphic-git/lightning-fs": "^3.3.0",
     "@types/react": "^16.8.22",
@@ -32,8 +32,8 @@
     "isomorphic-git": "^0.55.4",
     "js-yaml": "^3.13.1",
     "moment": "^2.24.0",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0",
     "react-transition-group": "^4.3.0",
     "source-map-support": "^0.5.12"
   },
