@@ -80,34 +80,43 @@ This project uses Blueprint 3 as main UI framework.
 The convention is to use functional components.
 Styling is kept in `styles.scss` files next to each component.
 
+```
+interface MyWidgetProps {
+  someProp: SomeType,
+  // ...
+}
+export const MyWidget: React.FC<MyWidgetProps> = function ({ someProp }) {
+  return <p>{someProp.toLowerCase()}</p>;
+};
+```
+
 #### Assigning SCSS classes in React components
 
-Local scoping is set by default for SCSS modules.
-[See more in Webpack CSS loader docs.](https://github.com/webpack-contrib/css-loader#scope)
-
-This means that during build, Webpack SCSS loader replaces class names
-with random unique hashes.
-When an SCSS file is imported in component module, it offers an object
-where keys are the human-readable classes,
-and values are the actual corresponding post-compilation hashes after compilation.
-
-The convention is as follows:
+For example, in `renderer/my_component/index.tsx`:
 
 ```
 import styles from './styles.scss';
 
-function MyComponent() {
+export const MyComponent: React.FC<{}> = function () {
   return <p className={styles.myParagraphClassName}>Paragraph text…</p>
-}
+};
 ```
 
-To access CSS selectors provided by Blueprint, use `:global` notation inside SCSS.
-For example:
+…and in `renderer/my_component/styles.scss`:
 
 ```
 @import "~@blueprintjs/core/lib/scss/variables";
 
-.myParagraphClassName {
+:local .myParagraphClassName {
+  color: $pt-text-color;
+}
+```
+
+To access CSS selectors provided by Blueprint within your local selectors,
+use `:global` notation. For example:
+
+```
+:local .myParagraphClassName {
   :global .bp3-active {
     // …
   }
