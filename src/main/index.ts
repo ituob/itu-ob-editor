@@ -5,7 +5,7 @@ import { app, Menu, ipcMain } from 'electron';
 
 import { WindowOpenerParams, openWindow, getWindowByTitle, getWindow, windows } from 'sse/main/window';
 import { makeEndpoint, makeWriteOnlyEndpoint, makeWindowEndpoint } from 'sse/api/main';
-import { manager as settings } from 'sse/settings/main';
+import { SettingManager } from 'sse/settings/main';
 import { QuerySet, sortIntegerAscending } from 'sse/storage/query';
 import { Index } from 'sse/storage/query';
 import { GitController, setRepoUrl, initRepo } from 'sse/storage/main/git-controller';
@@ -51,6 +51,8 @@ app.disableHardwareAcceleration();
 if (!app.requestSingleInstanceLock()) { app.exit(0); }
 
 
+const SETTINGS_PATH = path.join(WORK_DIR, 'itu-ob-settings.yaml');
+const settings = new SettingManager(SETTINGS_PATH);
 settings.setUpAPIEndpoints();
 
 
@@ -64,7 +66,7 @@ app.on('window-all-closed', () => {
 
 
 app.whenReady().
-then(() => setRepoUrl(WELCOME_SCREEN_WINDOW_OPTS)).
+then(() => setRepoUrl(WELCOME_SCREEN_WINDOW_OPTS, settings)).
 then(repoUrl => {
   return Promise.all([
     (async () => {
