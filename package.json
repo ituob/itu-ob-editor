@@ -38,7 +38,7 @@
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
     "react-transition-group": "^4.3.0",
-    "sse": "https://github.com/riboseinc/sse-elements#sse-elements-v0.0.7-gitpkg",
+    "sse": "https://github.com/riboseinc/sse-elements#sse-elements-v0.0.17-gitpkg",
     "source-map-support": "^0.5.12"
   },
   "resolutions": {
