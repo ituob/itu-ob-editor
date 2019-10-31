@@ -841,16 +841,6 @@
   dependencies:
     humps "^2.0.1"
 
-"@isomorphic-git/lightning-fs@^3.3.0":
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/@isomorphic-git/lightning-fs/-/lightning-fs-3.3.0.tgz#496d919a594f9dfc41a9c5a73e62e90a4872bc7b"
-  integrity sha512-LQKXtiY2MSYY/aqaOH01DObXswuW3xbl5nr6iH8AfRfyUUWYx4O47WRwVZybFkAGjFZW5vlj6I/ry+NJINq4lg==
-  dependencies:
-    "@wmhilton/idb-keyval" "^3.3.0"
-    isomorphic-textencoder "1.0.1"
-    just-debounce-it "1.1.0"
-    just-once "1.1.0"
-
 "@isomorphic-git/lightning-fs@^3.3.3":
   version "3.3.3"
   resolved "https://registry.yarnpkg.com/@isomorphic-git/lightning-fs/-/lightning-fs-3.3.3.tgz#c84130d1c0ef6c37ea9558531c41a6188c08402a"
@@ -908,11 +898,6 @@
     "@types/events" "*"
     "@types/minimatch" "*"
     "@types/node" "*"
-
-"@types/js-yaml@^3.12.1":
-  version "3.12.1"
-  resolved "https://registry.yarnpkg.com/@types/js-yaml/-/js-yaml-3.12.1.tgz#5c6f4a1eabca84792fbd916f0cb40847f123c656"
-  integrity sha512-SGGAhXLHDx+PK4YLNcNGa6goPf9XRWQNAUUbffkwVGGXIxmDKWyGGL4inzq2sPmExu431Ekb9aEMn9BkPqEYFA==
 
 "@types/minimatch@*":
   version "3.0.3"
@@ -3040,10 +3025,10 @@ electron-webpack@^2.7.4:
     webpack-merge "^4.2.1"
     yargs "^13.2.4"
 
-electron@5.0.4:
-  version "5.0.4"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-5.0.4.tgz#2e0d09055363e983f4a73317cde4821c39617b02"
-  integrity sha512-7QaKorvANvP+azMT7wElx33oLlqw8QxmLs7/outfH7LC5amErk4EUtWDesQ6Zgr+s5pYFbykl8ZtJ4ZGXER05g==
+electron@^6.0.0:
+  version "6.1.2"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-6.1.2.tgz#87ad84d9560a58c434140c70f459e97bc2dd25f5"
+  integrity sha512-zVste1obJC645RrU4PP+CqU8Yq33h8fzS7zx3tWbiNnyRzp6m7O2bpgKLJBRZ/4BPRsNCqSSXm4vimyGPUXVaw==
   dependencies:
     "@types/node" "^10.12.18"
     electron-download "^4.1.0"
@@ -4163,12 +4148,7 @@ ignore-walk@^3.0.1:
   dependencies:
     minimatch "^3.0.4"
 
-ignore@^5.0.4:
-  version "5.1.2"
-  resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.1.2.tgz#e28e584d43ad7e92f96995019cc43b9e1ac49558"
-  integrity sha512-vdqWBp7MyzdmHkkRWV5nY+PfGRbYbahfuvsBCh277tq+w9zyNi7h5CYJCK0kmzti9kU+O/cB7sE8HvKv6aXAKQ==
-
-ignore@^5.1.4:
+ignore@^5.0.4, ignore@^5.1.4:
   version "5.1.4"
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.1.4.tgz#84b7b3dbe64552b6ef0eca99f6743dbec6d97adf"
   integrity sha512-MzbUSahkTW1u7JpKKjY7LCARd1fU5W2rLdxlM4kdkayuCwZImjkpluF9CM1aLewYJguPDqewLam18Y6AU69A8A==
@@ -4581,9 +4561,9 @@ isomorphic-fetch@^2.1.1:
     whatwg-fetch ">=0.10.0"
 
 isomorphic-git@^0.55.4:
-  version "0.55.4"
-  resolved "https://registry.yarnpkg.com/isomorphic-git/-/isomorphic-git-0.55.4.tgz#6a7c30de1c4af0d73e0c3b5e8579750a114f2eb6"
-  integrity sha512-lvaiDfmsX1UR3k6CIAya2xVSdFZttIxaCq3MteJ0BVs3jFODKIO6J5Su6rPKEq2uXQ6dHcNtD0fKH80xqD5xfA==
+  version "0.55.6"
+  resolved "https://registry.yarnpkg.com/isomorphic-git/-/isomorphic-git-0.55.6.tgz#690f80ab5b7e52d81ac8bd123e41f29c114e8be7"
+  integrity sha512-A4ygiDCsMIuWknMgviK73IzdPW7HjOC57IBVY/QyC1bwMrXG+clfdBjqA3SpzxBRIxkRA9GvbkrjAjFX6n6ZbQ==
   dependencies:
     async-lock "^1.1.0"
     clean-git-ref "1.0.3"
