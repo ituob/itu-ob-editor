@@ -71,57 +71,10 @@ Only string prop values can be expected by top-level components.
 (For example, issue editor expects OB edition ID to be passed.)
 (See: `src/renderer/index.tsx`.)
 
-#### UI framework
-
-This project uses Blueprint 3 as main UI framework.
-
 #### Authoring React components
 
-The convention is to use functional components.
-Styling is kept in `styles.scss` files next to each component.
-
-```
-interface MyWidgetProps {
-  someProp: SomeType,
-  // ...
-}
-export const MyWidget: React.FC<MyWidgetProps> = function ({ someProp }) {
-  return <p>{someProp.toLowerCase()}</p>;
-};
-```
-
-#### Assigning SCSS classes in React components
-
-For example, in `renderer/my_component/index.tsx`:
-
-```
-import styles from './styles.scss';
-
-export const MyComponent: React.FC<{}> = function () {
-  return <p className={styles.myParagraphClassName}>Paragraph text…</p>
-};
-```
-
-…and in `renderer/my_component/styles.scss`:
-
-```
-@import "~@blueprintjs/core/lib/scss/variables";
-
-:local .myParagraphClassName {
-  color: $pt-text-color;
-}
-```
-
-To access CSS selectors provided by Blueprint within your local selectors,
-use `:global` notation. For example:
-
-```
-:local .myParagraphClassName {
-  :global .bp3-active {
-    // …
-  }
-}
-```
+Refer to documentation for [SSE elements](https://github.com/riboseinc/sse-elements/)
+for conventions.
 
 ## Generic Electron Webpack docs
 
