@@ -104,7 +104,7 @@ then(results => {
         ]),
         getHelpMenuItems: () => ([
           {
-            label: "Help",
+            label: "How to use ITU OB editor?",
             click: async () => { await openWindow({ title: `${APP_TITLE} Help`, url: APP_HELP_ROOT }); },
           },
         ]),
