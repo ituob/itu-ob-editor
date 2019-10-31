@@ -1,10 +1,5 @@
 /// <reference types="node" />
 
-declare module '@isomorphic-git/lightning-fs' {
-  export default class LightningFS {
-    constructor(name: string, opts: any);
-  }
-}
 
 interface OptOutProps { [key: string]: any }
 interface OptOutState { [key: string]: any }
