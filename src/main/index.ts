@@ -17,10 +17,17 @@ import { initStorage, Workspace } from './storage';
 
 
 const isMacOS = process.platform === 'darwin';
+const isDevelopment = process.env.NODE_ENV !== 'production';
 
 
 const APP_TITLE = "ITU OB editor";
-const APP_HELP_ROOT = "https://www.ituob.org/_app_help/";
+
+let APP_HELP_ROOT: string;
+if (!isDevelopment) {
+  APP_HELP_ROOT = "https://www.ituob.org/_app_help/";
+} else {
+  APP_HELP_ROOT = "http://ituob.org:5001/_app_help/";
+}
 
 
 const WORK_DIR = path.join(app.getPath('userData'), 'itu-ob-data');
