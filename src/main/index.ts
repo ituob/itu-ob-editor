@@ -104,8 +104,20 @@ then(results => {
         ]),
         getHelpMenuItems: () => ([
           {
-            label: "How to use ITU OB editor?",
-            click: async () => { await openWindow({ title: `${APP_TITLE} Help`, url: APP_HELP_ROOT }); },
+            label: "How to use ITU OB Editor?",
+            click: async () => { await openWindow({
+              title: `${APP_TITLE} Help`,
+              url: APP_HELP_ROOT,
+              dimensions: { width: 1100, height: 650, minWidth: 550, minHeight: 450 },
+            }); },
+          },
+          {
+            label: "Data migration guide",
+            click: async () => { await openWindow({
+              title: `Data migration guide`,
+              url: `${APP_HELP_ROOT}migration/`,
+              dimensions: { width: 1100, height: 650, minWidth: 550, minHeight: 450 },
+            }); },
           },
         ]),
       }));
