@@ -36,6 +36,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
           fill={true}>
 
         <Button
+            minimal={true}
+            intent="primary"
             title="Edit current edition"
             disabled={currentIssue.id === null}
             icon="edit"
@@ -46,6 +48,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
         </Button>
 
         <Button
+          minimal={true}
           text="Schedule"
           title="Schedule future editions"
           disabled={loading}
@@ -54,6 +57,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
         />
 
         <Button
+          minimal={true}
           text="Spotlight"
           title="Find things"
           disabled={loading}
@@ -61,6 +65,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
           onClick={() => ipcRenderer.sendSync('open-spotlight')}
         />
         <Button
+          minimal={true}
           text="Preflight"
           title="Check for issues"
           disabled={loading}
@@ -68,6 +73,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
           onClick={() => ipcRenderer.sendSync('open-preflight')}
         />
         <Button
+          minimal={true}
+          intent="success"
           text="Merge"
           title="Fetch latest changes & submit yours"
           disabled={loading}
