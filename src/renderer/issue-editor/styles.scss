@@ -60,6 +60,21 @@
   :global .bp3-tab-list {
     margin: 0 1rem;
     transform: translateY(.5rem);
+
+    .bp3-tab-indicator {
+      background-color: $pt-text-color;
+    }
+    .bp3-tab {
+      &:focus {
+        outline: none;
+      }
+      &[aria-selected=false] {
+        color: $pt-link-color;
+      }
+      &[aria-selected=true] {
+        color: $pt-text-color;
+      }
+    }
   }
 }
 
