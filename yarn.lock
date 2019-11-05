@@ -6363,9 +6363,9 @@ prosemirror-keymap@^1.0.0:
     prosemirror-state "^1.0.0"
     w3c-keyname "^2.0.0"
 
-prosemirror-model@^1.0.0, prosemirror-model@^1.1.0, prosemirror-model@^1.2.0, "prosemirror-model@git+ssh://git@github.com:strogonoff/prosemirror-model.git#fd65a92":
+prosemirror-model@^1.0.0, prosemirror-model@^1.1.0, prosemirror-model@^1.2.0, "prosemirror-model@https://github.com/strogonoff/prosemirror-model.git#fd65a92":
   version "1.7.4"
-  resolved "git+ssh://git@github.com:strogonoff/prosemirror-model.git#fd65a92d49e4f6b0c2ce8c15e9f8a0f1372940d8"
+  resolved "https://github.com/strogonoff/prosemirror-model.git#fd65a92d49e4f6b0c2ce8c15e9f8a0f1372940d8"
   dependencies:
     orderedmap "^1.0.0"
 
