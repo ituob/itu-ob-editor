@@ -125,7 +125,7 @@ export function IssueEditor(props: IssueEditorProps) {
             </>
           ))}
 
-          <PaneHeader align="left">Amendments</PaneHeader>
+          <PaneHeader align="left" className={styles.amendmentsHeader}>Amendments</PaneHeader>
           <NewAmendmentPrompt
             idx={0}
             issue={issue}
