@@ -26,6 +26,7 @@ import * as styles from './styles.scss';
 const appRoot = document.getElementById('app') as HTMLElement;
 
 appRoot.classList.add(styles.app);
+appRoot.classList.add(`platform--${process.platform}`);
 
 const searchParams = new URLSearchParams(window.location.search);
 
