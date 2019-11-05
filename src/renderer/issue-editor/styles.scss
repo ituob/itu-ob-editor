@@ -129,6 +129,12 @@
 
 /* Message type specific editors */
 
+/* Running Annexes */
+
+:local .emptyExtraAnnexedPublicationsPane {
+  padding-top: 1rem;
+}
+
 /* Amendment */
 
 :global .editor-pane-message-amendment {
