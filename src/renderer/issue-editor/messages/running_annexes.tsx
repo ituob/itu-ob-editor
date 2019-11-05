@@ -73,11 +73,16 @@ const ExtraPublications: React.FC<{ pubIds: string[], updateIds: (newIds: string
   const [activeItemIndex, setActiveItemIndex] = useState(0);
 
   return (
-    <>
-      <AddCardTrigger key="addFirst" onClick={() => {
-        setActiveItemIndex(0);
-        toggleExtraItemDialogState(true)
-      }} />
+    <div className={pubIds.length < 1 ? styles.emptyExtraAnnexedPublicationsPane : undefined}>
+      <AddCardTrigger
+        key="addFirst"
+        label="Add annexed publication"
+        highlight={pubIds.length < 1}
+        onClick={() => {
+          setActiveItemIndex(0);
+          toggleExtraItemDialogState(true)
+        }}
+      />
 
       {pubIds.map((pubId: string, idx: number) => (
         <>
@@ -89,7 +94,7 @@ const ExtraPublications: React.FC<{ pubIds: string[], updateIds: (newIds: string
             <strong>{pubId}</strong>
           </SimpleEditableCard>
 
-          <AddCardTrigger key="addNewAfter" onClick={() => {
+          <AddCardTrigger key="addNewAfter" label="Add annexed publication" onClick={() => {
             setActiveItemIndex(idx + 1);
             toggleExtraItemDialogState(true)
           }} />
@@ -109,7 +114,7 @@ const ExtraPublications: React.FC<{ pubIds: string[], updateIds: (newIds: string
             }}
           />
         : ''}
-    </>
+    </div>
   );
 };
 

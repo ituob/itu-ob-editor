@@ -29,6 +29,8 @@ export const MessageEditor: React.FC<MessageEditorProps> = function ({ message, 
       <>
         <AddCardTrigger
           key="addFirstItem"
+          highlight={items.length < 1}
+          label="Add a service restrictions item"
           onClick={() => {
             setActiveItemIdx(0);
             toggleNewItemDialogState(true);
@@ -49,6 +51,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = function ({ message, 
 
             <AddCardTrigger
               key="addItem"
+              label="Add a service restrictions item"
               onClick={() => {
                 setActiveItemIdx(idx + 1);
                 toggleNewItemDialogState(true);

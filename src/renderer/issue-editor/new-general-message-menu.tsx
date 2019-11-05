@@ -24,7 +24,7 @@ export const NewGeneralMessagePrompt: React.FC<NewMessagePromptProps> = function
           onCreate={(msg: Message) => props.handleNewMessage(msg, props.idx)}
         />
       }
-    ><AddCardTriggerButton /></Popover>
+    ><AddCardTriggerButton highlight={props.highlight} label="Add a general message" /></Popover>
   );
 };
 

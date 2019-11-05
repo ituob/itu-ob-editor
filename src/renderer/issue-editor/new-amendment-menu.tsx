@@ -79,7 +79,7 @@ export const NewAmendmentPrompt: React.FC<NewAmendmentPromptProps> = function (p
       }}
       onItemSelect={(pub: AmendablePublication) =>
         props.handleNewMessage(createAmendmentMessage(pub), props.idx)}
-    ><AddCardTriggerButton /></NewAmendmentSelector>
+    ><AddCardTriggerButton highlight={props.highlight} label="Add an amendment" /></NewAmendmentSelector>
   );
 };
 

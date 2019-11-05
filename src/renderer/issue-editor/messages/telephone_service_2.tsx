@@ -75,6 +75,8 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
 
       <AddCardTrigger
         key="addFirstCountry"
+        label="Add a country"
+        highlight={countryCommSets.length < 1}
         onClick={() => {
           setActiveCountryIdx(0);
           toggleNewCountryDialogState(true);
@@ -160,6 +162,7 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
 
             <AddCardTrigger
               key="addAnother"
+              label="Add a country"
               onClick={() => {
                 setActiveCountryIdx(countryIdx + 1);
                 toggleNewCountryDialogState(true);
