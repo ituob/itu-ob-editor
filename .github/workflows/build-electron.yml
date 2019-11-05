@@ -10,8 +10,6 @@ jobs:
     runs-on: windows-2016
     steps:
     - uses: actions/checkout@master
-      with:
-        ref: feature/github-actions        
     - uses: actions/setup-node@master
       with:
         node-version: 11
