@@ -8,6 +8,10 @@ body {
   height: 100%;
   padding-top: $draggableRegionHeight;
 
+  .platform--win32 & {
+    padding-top: 0;
+  }
+
   &:before {
     content: " ";
     display: block;
