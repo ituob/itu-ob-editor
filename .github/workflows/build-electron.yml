@@ -23,8 +23,10 @@ jobs:
       run: npm config set msvs_version 2015
     - name: Install dependencies
       run: yarn install
-    - name: Build Electron
-      run: yarn compile && electron-builder -w
+    - name: Compile
+      run: yarn compile
+    - name: Build
+      run: electron-builder -w
     - uses: actions/upload-artifact@master
       with:
         name: dist
