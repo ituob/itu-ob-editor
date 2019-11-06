@@ -8,6 +8,7 @@ import { Spotlight } from 'sse/spotlight/renderer';
 import { Preflight } from 'sse/preflight/renderer';
 
 import { HomeScreen } from './home';
+import { Settings } from './settings';
 import { IssueEditor } from './issue-editor';
 import { IssueScheduler } from './issue-scheduler';
 import { PublicationEditor } from './publication-editor';
@@ -56,6 +57,9 @@ const App: React.FC<{}> = function () {
 
   } else if (searchParams.get('c') === 'welcomeConfig') {
     component = <WelcomeConfigScreen defaultRepoUrl={searchParams.get('defaultRepoUrl') || ''} />;
+
+  } else if (searchParams.get('c') === 'settings') {
+    component = <Settings />;
 
   } else {
     component = <NonIdealState

@@ -80,6 +80,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
           icon="git-merge"
           onClick={() => ipcRenderer.sendSync('open-data-synchronizer')}
         />
+        <Button
+          minimal={true}
+          text="Settings"
+          icon="settings"
+          className={styles.secondaryButton}
+          onClick={() => ipcRenderer.sendSync('open-settings')}
+        />
       </ButtonGroup>
     </div>
   );
