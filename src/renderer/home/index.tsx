@@ -60,7 +60,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
           minimal={true}
           text="Spotlight"
           title="Find things"
-          disabled={loading}
+          disabled={true}
           icon="search"
           onClick={() => ipcRenderer.sendSync('open-spotlight')}
         />
@@ -68,7 +68,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
           minimal={true}
           text="Preflight"
           title="Check for issues"
-          disabled={loading}
+          disabled={true}
           icon="form"
           onClick={() => ipcRenderer.sendSync('open-preflight')}
         />
