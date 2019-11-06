@@ -30,7 +30,12 @@ if (!isDevelopment) {
 }
 
 
-const WORK_DIR = path.join(app.getPath('userData'), 'itu-ob-data');
+// All app-specific data
+const APP_DATA = app.getPath('userData');
+
+// Git repository contents—our database
+const WORK_DIR = path.join(APP_DATA, 'itu-ob-data');
+
 const DEFAULT_REPO_URL = 'https://github.com/ituob/itu-ob-data';
 const CORS_PROXY_URL = 'https://cors.isomorphic-git.org';
 
@@ -58,7 +63,7 @@ app.disableHardwareAcceleration();
 if (!app.requestSingleInstanceLock()) { app.exit(0); }
 
 
-const SETTINGS_PATH = path.join(WORK_DIR, 'itu-ob-settings.yaml');
+const SETTINGS_PATH = path.join(APP_DATA, 'itu-ob-settings.yaml');
 const settings = new SettingManager(SETTINGS_PATH);
 settings.setUpAPIEndpoints();
 
