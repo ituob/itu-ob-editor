@@ -79,7 +79,20 @@ app.on('window-all-closed', () => {
 
 
 app.whenReady().
-then(() => setRepoUrl(WELCOME_SCREEN_WINDOW_OPTS, settings)).
+then(() => {
+  ipcMain.on('clear-app-data', async (event: any) => {
+    await fs.remove(APP_DATA);
+    event.reply('ok');
+  });
+
+  makeWindowEndpoint('settings', () => ({
+    component: 'settings',
+    title: 'Settings',
+    dimensions: { width: 500, minWidth: 500, height: 640, minHeight: 640 },
+  }));
+
+  return setRepoUrl(WELCOME_SCREEN_WINDOW_OPTS, settings);
+}).
 then(repoUrl => {
   return Promise.all([
     (async () => {
@@ -164,11 +177,6 @@ then(results => {
 
     makeEndpoint<Workspace>('all', async () => {
       return storage.workspace;
-    });
-
-    ipcMain.on('clear-app-data', async (event: any) => {
-      await fs.remove(APP_DATA);
-      event.reply('ok');
     });
 
 
@@ -279,12 +287,6 @@ then(results => {
       component: 'dataSynchronizer',
       title: 'Merge Changes',
       dimensions: { width: 800, minWidth: 600, height: 640, minHeight: 640 },
-    }));
-
-    makeWindowEndpoint('settings', () => ({
-      component: 'settings',
-      title: 'Settings',
-      dimensions: { width: 500, minWidth: 500, height: 640, minHeight: 640 },
     }));
 
   });
