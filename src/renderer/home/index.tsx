@@ -55,7 +55,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
           icon="timeline-events"
           onClick={() => ipcRenderer.sendSync('open-issue-scheduler')}
         />
-
         <Button
           minimal={true}
           text="Spotlight"
@@ -81,7 +80,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
           icon="git-merge"
           onClick={() => ipcRenderer.sendSync('open-data-synchronizer')}
         />
-
       </ButtonGroup>
     </div>
   );
