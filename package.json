@@ -5,8 +5,10 @@
   "scripts": {
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",
-    "dist": "yarn compile && electron-builder -mwl",
-    "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
+    "dist:win": "electron-builder -w",
+    "dist:mac": "electron-builder -m",
+    "cdist": "yarn compile && electron-builder -mlw",
+    "cdist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
   },
   "electronWebpack": {
     "staticSourceDirectory": "src/static",
