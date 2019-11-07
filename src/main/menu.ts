@@ -11,7 +11,7 @@ export function buildAppMenu ({ getFileMenuItems, getHelpMenuItems }: MenuAction
 
     // { role: 'appMenu' }
     ...(process.platform === 'darwin' ? [{
-      label: app.getName(),
+      label: app.name,
       submenu: [
         { role: 'about' },
         { type: 'separator' },
