@@ -28,7 +28,7 @@ jobs:
     - name: Compile
       run: yarn compile
     - name: Build
-      run: electron-builder -w
+      run: yarn dist:win
     - uses: actions/upload-artifact@master
       with:
         name: dist
