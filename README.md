@@ -2,15 +2,30 @@
 
 Standalone application for editing [ITU OB website](https://ituob.org) data at https://github.com/ituob/itu-ob-data/.
 
-The website and OB deliverables are statically generated using Jekyll ([site source](https://github.com/ituob/ituob.org/)).
-
-The app is based on Electron and is intended to be run on any OS supported by Electron.
+More documentation for the app is available at [ITU OB Editor section](https://ituob.org/docs/) of the site.
 
 ## Get the app
 
-Download (unsigned) binaries from [Releases](https://github.com/ituob/itu-ob-editor/releases/).
+Download the application from the [Releases page](https://github.com/ituob/itu-ob-editor/releases/).
 
-## Setting up
+Note: binaries are unsigned, which means your computer will warn you about launching an untrusted application.
+
+## Use the app
+
+* Access application help at https://www.ituob.org/docs/.
+  (You can also do that using Help menu in the app, but that is macOS-only for now.)
+
+* If you have encountered an error or other possible malfunction while using the application,
+  please [report it here](https://github.com/ituob/itu-ob-editor/issues/new/choose).
+
+## Develop the app
+
+The app is based on Electron and is intended to be run on any OS supported by Electron.
+
+The website and OB deliverables are statically generated using Jekyll
+(see [site source](https://github.com/ituob/ituob.org/) for more information).
+
+### Setting up
 
 You’ll need Node & Yarn.
 
@@ -22,7 +37,7 @@ yarn
 yarn dev
 ```
 
-## Troubleshooting
+### Troubleshooting
 
 If the app errors out, a fix could be to manually delete the cloned data repository.
 
@@ -31,17 +46,17 @@ If the app errors out, a fix could be to manually delete the cloned data reposit
    (on macOS, they’re in `~/Library/Application Support/itu-ob-editor/`)
 3. Start the app again
 
-## Implementation Guide
+### Implementation Guide
 
 Note: Publications of OB are interchangeably called “edition” and “issue” within source code.
 
-### SSE library
+#### SSE library
 
 This app is using [the SSE elements library](https://github.com/riboseinc/sse-elements).
 In addition to using the tools it provides, the app also follows its underlying philosophy,
 e.g. using “API endpoints” for communicating between main and renderer threads.
 
-### File layout under `src/`
+#### File layout under `src/`
 
 * `main/`: Electron’s main thread code.
 
@@ -54,9 +69,9 @@ e.g. using “API endpoints” for communicating between main and renderer threa
 
 * `static/`: Application icons.
 
-### Renderer
+#### Renderer
 
-#### Window initialization
+##### Window initialization
 
 When opening a new window, SSE supplies GET query parameter `c`
 which specifies the component to be loaded at top level in the window.
@@ -71,12 +86,14 @@ Only string prop values can be expected by top-level components.
 (For example, issue editor expects OB edition ID to be passed.)
 (See: `src/renderer/index.tsx`.)
 
-#### Authoring React components
+##### Authoring React components
 
 Refer to documentation for [SSE elements](https://github.com/riboseinc/sse-elements/)
 for conventions.
 
 ## Generic Electron Webpack docs
+
+Note: These are kept for reference and may be obsolete.
 
 Based on `electron-webpack`, this project comes with...
 
