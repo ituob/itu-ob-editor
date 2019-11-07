@@ -20,7 +20,10 @@
     }
   },
   "build": {
-    "productName": "ITU OB Editor"
+    "productName": "ITU OB Editor",
+    "mac": {
+      "target": "dmg"
+    }
   },
   "dependencies": {
     "@aeaton/react-prosemirror": "https://github.com/riboseinc/react-prosemirror#aeaton-react-prosemirror-v0.22.10-gitpkg",
