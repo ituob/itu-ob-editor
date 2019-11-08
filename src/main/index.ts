@@ -82,7 +82,8 @@ app.whenReady().
 then(() => {
   ipcMain.on('clear-app-data', async (event: any) => {
     await fs.remove(APP_DATA);
-    event.reply('ok');
+    app.relaunch();
+    app.exit(0);
   });
 
   makeWindowEndpoint('settings', () => ({
