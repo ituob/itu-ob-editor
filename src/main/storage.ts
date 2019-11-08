@@ -21,16 +21,20 @@ export class IssueManager extends StoreManager<OBIssue> {
   }
 
   public toStoreableObject(obj: OBIssue): any {
-    return {
+    var storeable = {
       meta: {
         id: obj.id,
         publication_date: new Date(obj.publication_date),
         cutoff_date: new Date(obj.cutoff_date),
+        ...(obj.issn ? { issn: obj.issn } : {}),
+        ...(obj.languages ? { languages: obj.languages } : {}),
+        ...(obj.authors ? { authors: obj.authors } : {}),
       },
       general: obj.general,
       amendments: obj.amendments,
       annexes: obj.annexes,
     };
+    return storeable;
   }
 
   public postLoad(obj: any): OBIssue {
