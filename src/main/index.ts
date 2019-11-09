@@ -64,18 +64,37 @@ app.disableHardwareAcceleration();
 if (!app.requestSingleInstanceLock()) { app.exit(0); }
 
 
-const SETTINGS_PATH = path.join(APP_DATA, 'itu-ob-settings.yaml');
-const settings = new SettingManager(SETTINGS_PATH);
-settings.setUpAPIEndpoints();
+/* On macOS, it is common to not quit when all windows are closed,
+   and recreate main window after app is activated. */
 
+function maybeOpenHome() {
+  if (app.isReady()) {
+    if (windows.length < 1) {
+      openHomeWindow();
+    }
+  }
+}
 
-// Quit application when all windows are closed
-app.on('window-all-closed', () => {
-  // On macOS it is common for applications to stay open until the user explicitly quits
+function maybeQuit() {
   if (!isMacOS) {
     app.quit();
   }
-});
+}
+
+function cleanUpListeners() {
+  app.removeListener('activate', maybeOpenHome);
+  app.removeListener('window-all-closed', maybeQuit);
+  app.removeListener('quit', cleanUpListeners);
+}
+
+app.on('activate', maybeOpenHome);
+app.on('window-all-closed', maybeQuit);
+app.on('quit', cleanUpListeners);
+
+
+const SETTINGS_PATH = path.join(APP_DATA, 'itu-ob-settings.yaml');
+const settings = new SettingManager(SETTINGS_PATH);
+settings.setUpAPIEndpoints();
 
 
 app.whenReady().
@@ -83,7 +102,7 @@ then(() => {
   ipcMain.on('clear-app-data', async (event: any) => {
     await fs.remove(APP_DATA);
     app.relaunch();
-    app.exit(0);
+    app.quit();
   });
 
   makeWindowEndpoint('settings', () => ({
@@ -95,23 +114,10 @@ then(() => {
   return setRepoUrl(WELCOME_SCREEN_WINDOW_OPTS, settings);
 }).
 then(repoUrl => {
-  return Promise.all([
-    (async () => {
-      await openHomeWindow();
-
-      // Reopen home window on app reactivation
-      app.on('activate', () => {
-        // On macOS it is common to re-create a window even after all windows have been closed
-        if (windows.length < 1) {
-          openHomeWindow();
-        }
-      });
-    })(),
-    initRepo(WORK_DIR, repoUrl || DEFAULT_REPO_URL, CORS_PROXY_URL),
-  ]);
+  openHomeWindow();
+  return initRepo(WORK_DIR, repoUrl || DEFAULT_REPO_URL, CORS_PROXY_URL);
 }).
-then(results => {
-  const gitCtrl: GitController = results[1];
+then((gitCtrl: GitController) => {
 
   initStorage(WORK_DIR).then(storage => {
     messageHome('app-loaded');
