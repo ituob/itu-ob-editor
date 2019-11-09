@@ -119,6 +119,10 @@ then(repoUrl => {
 }).
 then((gitCtrl: GitController) => {
 
+  if (windows.length < 1) {
+    openHomeWindow();
+  }
+
   initStorage(WORK_DIR).then(storage => {
     messageHome('app-loaded');
 
