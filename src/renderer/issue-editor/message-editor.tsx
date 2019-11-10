@@ -11,6 +11,7 @@ import {
   isRunningAnnexes,
   isAmendment,
   isTelephoneServiceV2,
+  isCallbackProcedures,
 } from 'models/messages';
 
 import { ApprovedRecommendationsEditor } from './messages/approved_recommendations';
@@ -18,6 +19,7 @@ import { MessageEditor as RunningAnnexesEditor } from './messages/running_annexe
 import { TelephoneServiceMessageEditorV2 } from './messages/telephone_service_2';
 import { AmendmentEditor } from './messages/amendment';
 import { MessageEditor as ServiceRestrictionsMessageEditor } from './messages/service_restrictions';
+import { MessageEditor as CBProceduresEditor } from './messages/callback_procedures';
 import * as styles from './styles.scss';
 
 
@@ -57,6 +59,8 @@ export function getMessageEditor(msg: Message): React.FC<MessageEditorProps> {
     return ServiceRestrictionsMessageEditor;
   } else if (isAmendment(msg)) {
     return AmendmentEditor;
+  } else if (isCallbackProcedures(msg)) {
+    return CBProceduresEditor;
   } else {
     return () => <p>Messages of type {msg.type} aren’t supported.</p>
     //throw new Error("Unknown message type");
