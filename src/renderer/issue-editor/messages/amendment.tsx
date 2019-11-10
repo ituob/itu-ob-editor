@@ -24,7 +24,7 @@ export const AmendmentEditor: React.FC<MessageEditorProps> = function ({ message
     <FreeformContents
       doc={doc}
       onChange={(updatedDoc) => {
-        updateObjectInPlace(doc, updatedDoc);
+        updateObject(doc, updatedDoc);
         onChange(Object.assign({}, msg, { contents: { ...msg.contents, [lang.default]: doc } }));
       }}
     />
@@ -39,7 +39,8 @@ export const AmendmentEditor: React.FC<MessageEditorProps> = function ({ message
 }
 
 
-function updateObjectInPlace(doc: any, newDoc: any) {
-  Object.keys(doc).forEach(function(key) { delete doc[key]; });
-  Object.assign(doc, JSON.parse(JSON.stringify(newDoc, null, 2)));
+function updateObject(doc: any, updatedDoc: any) {
+  var newDoc = { ...doc };
+  Object.keys(newDoc).forEach(function(key) { delete newDoc[key]; });
+  Object.assign(newDoc, JSON.parse(JSON.stringify(updatedDoc, null, 2)));
 }
