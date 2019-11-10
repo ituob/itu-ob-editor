@@ -1,8 +1,6 @@
 # ITU OB editor
 
-Standalone application for editing [ITU OB website](https://ituob.org) data at https://github.com/ituob/itu-ob-data/.
-
-More documentation for the app is available at [ITU OB Editor section](https://ituob.org/docs/) of the site.
+Standalone application for editing [ITU OB website](https://ituob.org) data.
 
 ## Get the app
 
@@ -10,20 +8,40 @@ Download the application from the [Releases page](https://github.com/ituob/itu-o
 
 Note: binaries are unsigned, which means your computer will warn you about launching an untrusted application.
 
-## Use the app
+* On macOS, copy the application into your Applications folder.
 
-* Access application help at https://www.ituob.org/docs/.
-  (You can also do that using Help menu in the app, but that is macOS-only for now.)
+* On Windows, run the one-click installer. App’s shortcut should appear on your desktop.
+
+### Updating to latest version
+
+Simply download the latest release and go through the same copy/install process.
+
+If you have trouble using the app after upgrade, try resetting application data
+as described in the troubleshooting section below.
+
+## Using the app
+
+Access application help at https://www.ituob.org/docs/.
+(You can also do that using Help menu in the app, but that feature is macOS-only for now.)
+
+### Troubleshooting problems
+
+ITU OB Editor is under active development, so please mind that sometimes the app may misbehave.
 
 * If you have encountered an error or other possible malfunction while using the application,
   please [report it here](https://github.com/ituob/itu-ob-editor/issues/new/choose).
 
-## Develop the app
+* As a troubleshooting measure, you can try accessing Settings -> Reset application data.
+  You will lose any local changes you may have made to ITU OB.
+
+## Developer’s documentation
 
 The app is based on Electron and is intended to be run on any OS supported by Electron.
 
-The website and OB deliverables are statically generated using Jekyll
-(see [site source](https://github.com/ituob/ituob.org/) for more information).
+App’s upstream data repository is located at https://github.com/ituob/itu-ob-data/.
+
+The website and OB deliverables are statically generated from that repository using Jekyll.
+Site source is located at https://github.com/ituob/ituob.org/.
 
 ### Setting up
 
