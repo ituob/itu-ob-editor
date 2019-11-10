@@ -67,7 +67,11 @@ export const MessageEditor: React.FC<MessageEditorProps> = function ({ message, 
             isOpen={true}
             onClose={() => toggleNewItemDialogState(false)}
             onSave={(item: SRItem) => {
-              updateItems(items => { items.splice(activeItemIdx, 0, item); return items });
+              updateItems(items => {
+                const newItems = [...items];
+                newItems.splice(activeItemIdx, 0, item);
+                return newItems;
+              });
               _onChange();
               toggleNewItemDialogState(false);
             }}
