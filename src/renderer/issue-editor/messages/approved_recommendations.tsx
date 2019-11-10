@@ -24,9 +24,14 @@ export const ApprovedRecommendationsEditor: React.FC<MessageEditorProps> = funct
     <>
       <PaneHeader align="left">Approved Recommendations</PaneHeader>
 
-      <AddCardTrigger key="addNew" onClick={() => {
-        toggleNewRecDialogStatus(true);
-      }} />
+      <AddCardTrigger
+        label="Add an approved recommendation"
+        highlight={Object.entries(recs).length < 1}
+        key="addNew"
+        onClick={() => {
+          toggleNewRecDialogStatus(true);
+        }}
+      />
 
       <>
         {Object.entries(recs).map(([code, version]: [string, string]) => {
