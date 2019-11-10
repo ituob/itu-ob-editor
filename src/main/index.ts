@@ -114,17 +114,20 @@ then(() => {
   return setRepoUrl(WELCOME_SCREEN_WINDOW_OPTS, settings);
 }).
 then(repoUrl => {
-  openHomeWindow();
-  return initRepo(WORK_DIR, repoUrl || DEFAULT_REPO_URL, CORS_PROXY_URL);
+  return Promise.all([
+    openHomeWindow(),
+    initRepo(WORK_DIR, repoUrl || DEFAULT_REPO_URL, CORS_PROXY_URL),
+  ]);
 }).
-then((gitCtrl: GitController) => {
-
-  if (windows.length < 1) {
-    openHomeWindow();
-  }
+then(results => {
+  const gitCtrl: GitController = results[1];
 
   initStorage(WORK_DIR).then(storage => {
     messageHome('app-loaded');
+
+    if (windows.length < 1) {
+      maybeQuit();
+    }
 
     if (isMacOS) {
       // Set up app menu
