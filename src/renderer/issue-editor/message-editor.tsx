@@ -1,5 +1,5 @@
 import React from 'react';
-import { Classes, Dialog } from '@blueprintjs/core';
+import { NonIdealState, Classes, Dialog } from '@blueprintjs/core';
 
 import { Workspace } from 'main/storage';
 
@@ -62,7 +62,10 @@ export function getMessageEditor(msg: Message): React.FC<MessageEditorProps> {
   } else if (isCallbackProcedures(msg)) {
     return CBProceduresEditor;
   } else {
-    return () => <p>Messages of type {msg.type} aren’t supported.</p>
+    return () => <NonIdealState
+      icon="heart-broken"
+      title={`“${msg.type}” messages aren’t supported yet`}
+      description="Sorry about that." />
     //throw new Error("Unknown message type");
   }
 }
