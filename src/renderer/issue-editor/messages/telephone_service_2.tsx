@@ -50,22 +50,26 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
   const [newCommDialogState, toggleNewCommDialogState] = useState(false);
   const [editCommDialogState, toggleEditCommDialogState] = useState(false);
 
-  function _onChange() {
-    onChange(Object.assign({}, (message as TelephoneServiceMessageV2), { contents: countryCommSets }));
+  function _onChange(newContents: TSCountryCommunicationSet[]) {
+    onChange(Object.assign({}, (message as TelephoneServiceMessageV2), { contents: newContents }));
   }
 
   function updateCommunication(countryIdx: number, commIdx: number, updatedComm: TSCommunication) {
-    countryCommSets = countryCommSets.map((countryCommSet: TSCountryCommunicationSet, _idx: number) => {
+    return countryCommSets.map((countryCommSet: TSCountryCommunicationSet, _idx: number) => {
       if (countryIdx === _idx) {
-        countryCommSet.communications = countryCommSet.communications.map((comm: TSCommunication, _idx: number) => {
-          if (_idx === commIdx) {
-            return updatedComm;
-          } else {
-            return comm;
-          }
-        });
+        return {
+          ...countryCommSet,
+          communications: countryCommSet.communications.map((comm: TSCommunication, _idx: number) => {
+            if (_idx === commIdx) {
+              return updatedComm;
+            } else {
+              return comm;
+            }
+          }),
+        };
+      } else {
+        return countryCommSet;
       }
-      return countryCommSet;
     });
   }
 
@@ -87,8 +91,9 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
         ? countryCommSets.map((countryCommSet: TSCountryCommunicationSet, countryIdx: number) => (
           <>
             <SimpleEditableCard extended={true} key={countryIdx} onDelete={() => {
-              countryCommSets.splice(countryIdx, 1);
-              _onChange();
+              var newContents = [...countryCommSets];
+              newContents.splice(countryIdx, 1);
+              _onChange(newContents);
             }}>
               <H4>
                 {countryCommSet.country_name[lang.default]}
@@ -141,8 +146,16 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
                           intent="danger"
                           title="Delete communication"
                           onClick={() => {
-                            countryCommSet.communications.splice(commIdx, 1);
-                            _onChange();
+                            var newComms = [...countryCommSets[countryIdx].communications];
+                            newComms.splice(commIdx, 1);
+
+                            var newContents = [...countryCommSets];
+                            newContents[countryIdx] = {
+                              ...newContents[countryIdx],
+                              communications: newComms,
+                            };
+
+                            _onChange(newContents);
                           }}>Delete</Button>
 
                         <AddCommunicationPrompt
@@ -180,8 +193,9 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
             isOpen={true}
             onClose={() => toggleNewCountryDialogState(false)}
             onSave={(countryCommSet: TSCountryCommunicationSet) => {
-              countryCommSets.splice(activeCountryIdx, 0, countryCommSet);
-              _onChange();
+              var newContents = [...countryCommSets];
+              newContents.splice(activeCountryIdx, 0, countryCommSet);
+              _onChange(newContents);
               toggleNewCountryDialogState(false);
             }}
           />
@@ -195,10 +209,14 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
             isOpen={true}
             onClose={() => toggleEditCountryDialogState(false)}
             onSave={(countryCommSet) => {
-              countryCommSets[activeCountryIdx].phone_code = countryCommSet.phone_code;
-              countryCommSets[activeCountryIdx].country_name = countryCommSet.country_name;
-              countryCommSets[activeCountryIdx].contact = countryCommSet.contact;
-              _onChange();
+              var newContents = [...countryCommSets];
+              newContents[activeCountryIdx] = {
+                communications: countryCommSet.communications,
+                phone_code: countryCommSet.phone_code,
+                country_name: countryCommSet.country_name,
+                contact: countryCommSet.contact,
+              };
+              _onChange(newContents);
               toggleEditCountryDialogState(false);
             }}
           />
@@ -212,8 +230,14 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
             isOpen={true}
             onClose={() => toggleNewCommDialogState(false)}
             onSave={(comm) => {
-              countryCommSets[activeCountryIdx].communications.splice(activeCommIdx, 0, comm);
-              _onChange();
+              var newContents = [...countryCommSets];
+              var newComms = [...newContents[activeCountryIdx].communications];
+              newComms.splice(activeCommIdx, 0, comm);
+              newContents[activeCountryIdx] = {
+                ...newContents[activeCountryIdx],
+                communications: newComms,
+              };
+              _onChange(newContents);
               toggleNewCommDialogState(false);
             }}
           />
@@ -227,8 +251,8 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
             isOpen={true}
             onClose={() => toggleEditCommDialogState(false)}
             onSave={(comm) => {
-              updateCommunication(activeCountryIdx, activeCommIdx, comm);
-              _onChange();
+              const newContents = updateCommunication(activeCountryIdx, activeCommIdx, comm);
+              _onChange(newContents);
               toggleEditCommDialogState(false);
             }}
           />

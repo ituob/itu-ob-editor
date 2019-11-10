@@ -51,7 +51,11 @@ export const ApprovedRecommendationsEditor: React.FC<MessageEditorProps> = funct
             isOpen={true}
             onClose={() => toggleNewRecDialogStatus(false)}
             onSave={(code, version) => {
-              updateRecs(recs => { recs[code] = version; return recs; });
+              updateRecs(recs => {
+                var newRecs = { ...recs };
+                newRecs[code] = version;
+                return newRecs;
+              });
               toggleNewRecDialogStatus(false);
             }}
           />
