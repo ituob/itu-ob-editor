@@ -114,8 +114,15 @@ then(() => {
   log.verbose("App launch: stage 1");
 
   ipcMain.on('clear-app-data', async (event: any) => {
+    log.warn("App: Clearing app data!");
+
+    log.debug(`App: Deleting ${APP_DATA}`);
     await fs.remove(APP_DATA);
+
+    log.debug("App: Setting relaunch flag");
     app.relaunch();
+
+    log.debug("App: Quitting");
     app.quit();
   });
 
