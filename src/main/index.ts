@@ -126,6 +126,16 @@ then(() => {
     app.quit();
   });
 
+  ipcMain.on('launch-devtools', async (event: any) => {
+    log.info("App: received launch-devtools request");
+
+    for (const window of windows) {
+      if (window !== null) {
+        window.webContents.openDevTools();
+      }
+    }
+  });
+
   makeWindowEndpoint('settings', () => ({
     component: 'settings',
     title: 'Settings',
