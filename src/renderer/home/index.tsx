@@ -57,22 +57,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
         />
         <Button
           minimal={true}
-          text="Spotlight"
-          title="Find things"
-          disabled={true}
-          icon="search"
-          onClick={() => ipcRenderer.sendSync('open-spotlight')}
-        />
-        <Button
-          minimal={true}
-          text="Preflight"
-          title="Check for issues"
-          disabled={true}
-          icon="form"
-          onClick={() => ipcRenderer.sendSync('open-preflight')}
-        />
-        <Button
-          minimal={true}
           intent="success"
           text="Merge"
           title="Fetch latest changes & submit yours"
