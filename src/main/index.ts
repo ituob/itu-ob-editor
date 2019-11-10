@@ -145,13 +145,13 @@ then(() => {
   return setRepoUrl(WELCOME_SCREEN_WINDOW_OPTS, settings);
 }).
 
-then(repoUrl => {
+then(({ url, hasChanged }) => {
   // Stage 2: Open home window and initialize data repository (in parallel)
 
   log.verbose("App launch: stage 2");
   return Promise.all([
     openHomeWindow(),
-    initRepo(WORK_DIR, repoUrl || DEFAULT_REPO_URL, CORS_PROXY_URL),
+    initRepo(WORK_DIR, url || DEFAULT_REPO_URL, CORS_PROXY_URL, hasChanged),
   ]);
 }).
 
