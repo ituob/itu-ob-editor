@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as moment from 'moment';
 
 import { app, Menu, ipcMain } from 'electron';
+import * as log from 'electron-log';
 
 import { WindowOpenerParams, openWindow, getWindowByTitle, getWindow, windows } from 'sse/main/window';
 import { makeEndpoint, makeWriteOnlyEndpoint, makeWindowEndpoint } from 'sse/api/main';
@@ -16,6 +17,18 @@ import { OBIssue, ScheduledIssue } from 'models/issues';
 import { buildAppMenu } from './menu';
 import { initStorage, Storage, Workspace } from './storage';
 
+
+// Ensure only one instance of the app can run at a time on given user’s machine
+if (!app.requestSingleInstanceLock()) { app.exit(0); }
+
+// Disable GPU (?)
+app.disableHardwareAcceleration();
+
+// Catch unhandled errors in electron-log
+log.catchErrors({ showDialog: true });
+
+
+// Proceed with app launch sequence
 
 const isMacOS = process.platform === 'darwin';
 const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -57,19 +70,13 @@ const ISSUE_SCHEDULER_WINDOW_OPTS: WindowOpenerParams = {
 };
 
 
-app.disableHardwareAcceleration();
-
-
-// Ensure only one instance of the app can run at a time on given user’s machine
-if (!app.requestSingleInstanceLock()) { app.exit(0); }
-
-
 /* On macOS, it is common to not quit when all windows are closed,
    and recreate main window after app is activated. */
 
 function maybeOpenHome() {
   if (app.isReady()) {
     if (windows.length < 1) {
+      log.verbose("Opening home screen (no windows open yet)");
       openHomeWindow();
     }
   }
@@ -77,11 +84,13 @@ function maybeOpenHome() {
 
 function maybeQuit() {
   if (!isMacOS) {
+    log.verbose("Quitting (not macOS)");
     app.quit();
   }
 }
 
 function cleanUpListeners() {
+  log.verbose("Cleaning up app event listeners");
   app.removeListener('activate', maybeOpenHome);
   app.removeListener('window-all-closed', maybeQuit);
   app.removeListener('quit', cleanUpListeners);
@@ -102,6 +111,7 @@ app.whenReady().
 then(() => {
   // Stage 1: Set up main settings screen,
   // and request from the user to configure repository URL if needed
+  log.verbose("App launch: stage 1");
 
   ipcMain.on('clear-app-data', async (event: any) => {
     await fs.remove(APP_DATA);
@@ -121,6 +131,7 @@ then(() => {
 then(repoUrl => {
   // Stage 2: Open home window and initialize data repository (in parallel)
 
+  log.verbose("App launch: stage 2");
   return Promise.all([
     openHomeWindow(),
     initRepo(WORK_DIR, repoUrl || DEFAULT_REPO_URL, CORS_PROXY_URL),
@@ -129,6 +140,7 @@ then(repoUrl => {
 
 then(results => {
   // Stage 3: Initialize storage (read data repository data)
+  log.verbose("App launch: stage 3");
 
   const gitCtrl: GitController = results[1];
 
@@ -140,6 +152,7 @@ then(results => {
 
 then(results => {
   // Stage 4: Set up API endpoints and notify main app screen that launch was successful
+  log.verbose("App launch: stage 4");
 
   const gitCtrl: GitController = results[0];
   const storage: Storage = results[1];
@@ -319,9 +332,11 @@ then(results => {
   }));
 
   if (windows.length < 1) {
+    log.verbose("No windows loaded at app launch, maybe will quit");
     maybeQuit();
   }
 
+  log.verbose("Message home screen that app has loaded");
   messageHome('app-loaded');
 
 });

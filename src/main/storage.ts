@@ -1,4 +1,5 @@
 import * as fs from 'fs-extra';
+import * as log from 'electron-log';
 
 import { StoreManager, Storage as BaseStorage } from 'sse/storage/main/storage';
 import { Workspace as BaseWorkspace } from 'sse/storage/workspace';
@@ -104,7 +105,9 @@ export async function initStorage(workDir: string): Promise<Storage> {
     recommendations: new RecommendationManager(),
   });
 
+  log.verbose("Storage: Loading workspace");
   await storage.loadWorkspace();
+  log.verbose("Storage: Loading workspace: Done");
 
   return storage;
 }
