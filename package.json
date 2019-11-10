@@ -40,7 +40,7 @@
     "react-dom": "^16.11.0",
     "react-transition-group": "^4.3.0",
     "source-map-support": "^0.5.16",
-    "sse": "https://github.com/riboseinc/sse-elements#sse-elements-v0.0.20-gitpkg"
+    "sse": "https://github.com/riboseinc/sse-elements#sse-elements-v0.0.21-gitpkg"
   },
   "resolutions": {
     "*/**/prosemirror-model": "https://github.com/strogonoff/prosemirror-model.git#prosemirror-model-v1.7.5-gitpkg",
