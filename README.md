@@ -60,9 +60,9 @@ yarn dev
 Text logs are written in default locations as set
 by [electron-log](https://github.com/megahertz/electron-log/tree/v3.0.9):
 
-* on macOS: ~/Library/Logs/<app name>/log.log
-* on Windows: %USERPROFILE%\AppData\Roaming\<app name>\log.log
-* on Linux: ~/.config/<app name>/log.log
+* on macOS: `~/Library/Logs/<app name>/log.log`
+* on Windows: `%USERPROFILE%\AppData\Roaming\<app name>\log.log`
+* on Linux: `~/.config/<app name>/log.log`
 
 ### Resetting app data manually during development
 
