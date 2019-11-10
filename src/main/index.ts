@@ -137,6 +137,7 @@ then(results => {
     initStorage(WORK_DIR),
   ]);
 }).
+
 then(results => {
   // Stage 4: Set up API endpoints and notify main app screen that launch was successful
 
