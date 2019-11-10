@@ -98,7 +98,11 @@ settings.setUpAPIEndpoints();
 
 
 app.whenReady().
+
 then(() => {
+  // Stage 1: Set up main settings screen,
+  // and request from the user to configure repository URL if needed
+
   ipcMain.on('clear-app-data', async (event: any) => {
     await fs.remove(APP_DATA);
     app.relaunch();
@@ -113,13 +117,19 @@ then(() => {
 
   return setRepoUrl(WELCOME_SCREEN_WINDOW_OPTS, settings);
 }).
+
 then(repoUrl => {
+  // Stage 2: Open home window and initialize data repository (in parallel)
+
   return Promise.all([
     openHomeWindow(),
     initRepo(WORK_DIR, repoUrl || DEFAULT_REPO_URL, CORS_PROXY_URL),
   ]);
 }).
+
 then(results => {
+  // Stage 3: Initialize storage (read data repository data)
+
   const gitCtrl: GitController = results[1];
 
   return Promise.all([
@@ -128,6 +138,8 @@ then(results => {
   ]);
 }).
 then(results => {
+  // Stage 4: Set up API endpoints and notify main app screen that launch was successful
+
   const gitCtrl: GitController = results[0];
   const storage: Storage = results[1];
 
