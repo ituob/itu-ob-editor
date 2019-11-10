@@ -19,8 +19,8 @@ export const MessageEditor: React.FC<MessageEditorProps> = function ({ message, 
   const [activeItemIdx, setActiveItemIdx] = useState(0);
   const [newItemDialogState, toggleNewItemDialogState] = useState(false);
 
-  function _onChange() {
-    onChange(Object.assign({}, (message as ServiceRestrictionsMessage), { items: items }));
+  function _onChange(newItems: SRItem[]) {
+    onChange(Object.assign({}, (message as ServiceRestrictionsMessage), { items: newItems }));
   }
 
   return (
@@ -40,8 +40,10 @@ export const MessageEditor: React.FC<MessageEditorProps> = function ({ message, 
             <SimpleEditableCard
                 key="item"
                 onDelete={() => {
-                  updateItems(items => { items.splice(idx, 1); return items; })
-                  _onChange();
+                  const newItems = [...items]
+                  newItems.splice(idx, 1);
+                  updateItems(newItems);
+                  _onChange(newItems);
                 }}>
               <strong>{item.country[lang.default]}</strong>
               &emsp;
@@ -67,12 +69,10 @@ export const MessageEditor: React.FC<MessageEditorProps> = function ({ message, 
             isOpen={true}
             onClose={() => toggleNewItemDialogState(false)}
             onSave={(item: SRItem) => {
-              updateItems(items => {
-                const newItems = [...items];
-                newItems.splice(activeItemIdx, 0, item);
-                return newItems;
-              });
-              _onChange();
+              var newItems = [...items];
+              newItems.splice(activeItemIdx, 0, item);
+              updateItems(newItems);
+              _onChange(newItems);
               toggleNewItemDialogState(false);
             }}
           />
