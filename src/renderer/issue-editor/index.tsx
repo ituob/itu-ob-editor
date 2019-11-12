@@ -64,7 +64,7 @@ export function IssueEditor(props: IssueEditorProps) {
     // Silence React hooks :(
     useState(initialMessageIdx);
     useState(initialSection);
-    useMemo(() => {}, [null, null]);
+    useMemo(() => {}, [null, null, 0]);
 
     return <Spinner className={styles.spinner} />;
   }
