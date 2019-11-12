@@ -27,6 +27,8 @@ app.disableHardwareAcceleration();
 // Catch unhandled errors in electron-log
 log.catchErrors({ showDialog: true });
 
+Menu.setApplicationMenu(null);
+
 
 // Proceed with app launch sequence
 
