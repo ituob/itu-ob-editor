@@ -39,6 +39,7 @@ export const AmendmentEditor: React.FC<MessageEditorProps> = function ({ message
 };
 
 
+// TODO: Why?
 function updateObject(doc: any, updatedDoc: any) {
   var newDoc = { ...doc };
   Object.keys(newDoc).forEach(function(key) { delete newDoc[key]; });
