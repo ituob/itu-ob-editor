@@ -1,3 +1,7 @@
+/* A freeform text editor widget, building on top of ProseMirror and react-prosemirror.
+   Expects to be used in an uncontrolled way: give `defaultValue` and `onChange` props
+   and don’t use state with the value. It will NOT rerender gracefully preserving cursor position. */
+
 import React from 'react';
 import { EditorState } from 'prosemirror-state';
 import { Editor as BaseEditor, MenuBar } from '@aeaton/react-prosemirror';
@@ -43,12 +47,12 @@ interface FreeformContentsProps {
   className?: string,
 
   // Hopefully, a well-formed document structure
-  doc: any,
+  defaultValue: any,
 }
-export const FreeformContents: React.FC<FreeformContentsProps> = function ({ onChange, doc, className }) {
+export const FreeformContents: React.FC<FreeformContentsProps> = function ({ onChange, defaultValue, className }) {
   let initialDoc: any;
-  if (Object.keys(doc).length > 0) {
-    initialDoc = options.schema.nodeFromJSON(Object.assign({}, doc));
+  if (Object.keys(defaultValue).length > 0) {
+    initialDoc = options.schema.nodeFromJSON(Object.assign({}, defaultValue));
   } else {
     initialDoc = options.schema.topNodeType.createAndFill();
   }

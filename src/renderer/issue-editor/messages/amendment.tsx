@@ -14,7 +14,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = function ({ message, 
 
   return (
     <FreeformContents
-      doc={(msg.contents || {})[lang.default] || {}}
+      defaultValue={(msg.contents || {})[lang.default] || {}}
       onChange={(updatedDoc) => {
         onChange({ ...msg, contents: { ...msg.contents, [lang.default]: updatedDoc } });
       }}
