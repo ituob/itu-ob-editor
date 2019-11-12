@@ -1,7 +1,7 @@
 import { throttle } from 'throttle-debounce';
 import { ipcRenderer } from 'electron';
 
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Spinner, NonIdealState } from '@blueprintjs/core';
 
 import { request } from 'sse/api/renderer';
@@ -63,6 +63,7 @@ export function IssueEditor(props: IssueEditorProps) {
     // Silence React hooks :(
     useState(initialMessageIdx);
     useState(initialSection);
+    useMemo(() => {}, [null, null]);
 
     return <Spinner className={styles.spinner} />;
   }
@@ -79,6 +80,24 @@ export function IssueEditor(props: IssueEditorProps) {
 
   const [ selectedMessage, selectMessage ] = useState(initialMessageIdx);
   const [ selectedSection, selectSection ] = useState(initialSection);
+
+  // Memoization ensures that updating message on every keystroke
+  // doesn’t cause the editor to re-render, which loses cursor position and undo history.
+  // Only re-render if message index or section, meaning a switch to another message.
+  const editor = useMemo(() => (
+    selectedMessage !== undefined
+      ? <MessageEditor
+          workspace={ws}
+          message={issue[selectedSection].messages[selectedMessage]}
+          issue={issue}
+          onChange={handleMessageEdit}
+        />
+      : <NonIdealState
+          icon="info-sign"
+          title="No message selected"
+          description="Add or select a message on the left to start."
+        />
+  ), [selectedMessage, selectedSection, (issue.amendments.messages.length + issue.general.messages.length)]);
 
   function handleMessageSelection(inSection: OBMessageSection, atIndex: number) {
     selectMessage(atIndex);
@@ -202,18 +221,7 @@ export function IssueEditor(props: IssueEditorProps) {
       <div className={`
           ${styles.selectedMessagePane}
           editor-pane-message-${selectedMessage !== undefined ? (issue[selectedSection].messages[selectedMessage] || {}).type : ''}`}>
-        {selectedMessage !== undefined
-          ? <MessageEditor
-              workspace={ws}
-              message={issue[selectedSection].messages[selectedMessage]}
-              issue={issue}
-              onChange={handleMessageEdit}
-            />
-          : <NonIdealState
-              icon="info-sign"
-              title="No message selected"
-              description="Add or select a message on the left to start."
-            />}
+        {editor}
       </div>
     </div>
   )

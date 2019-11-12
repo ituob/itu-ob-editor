@@ -39,7 +39,7 @@ function getNewCountryStub(lang: string): TSCountryCommunicationSet {
 
 
 export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = function ({ message, onChange }) {
-  var countryCommSets = (message as TelephoneServiceMessageV2).contents;
+  const [countryCommSets, updateCountryCommSets] = useState((message as TelephoneServiceMessageV2).contents as TSCountryCommunicationSet[])
 
   const lang = useContext(LangConfigContext);
 
@@ -51,7 +51,8 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
   const [editCommDialogState, toggleEditCommDialogState] = useState(false);
 
   function _onChange(newContents: TSCountryCommunicationSet[]) {
-    onChange(Object.assign({}, (message as TelephoneServiceMessageV2), { contents: newContents }));
+    updateCountryCommSets(newContents);
+    onChange({ contents: newContents });
   }
 
   function updateCommunication(countryIdx: number, commIdx: number, updatedComm: TSCommunication) {
