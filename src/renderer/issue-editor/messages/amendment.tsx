@@ -36,7 +36,7 @@ export const AmendmentEditor: React.FC<MessageEditorProps> = function ({ message
       {editor}
     </>
   );
-}
+};
 
 
 function updateObject(doc: any, updatedDoc: any) {
