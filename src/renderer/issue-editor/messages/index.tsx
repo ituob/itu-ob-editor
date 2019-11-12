@@ -18,7 +18,7 @@ export function getMessageTypeTitle(type: MessageType): string {
   } else if (type === 'callback_procedures') {
     return "Call-back and Alternative Calling Procedures";
   } else if (type === 'custom') {
-    return "Custom";
+    return "Custom message";
   } else if (type === 'amendment') {
     return  "Amendment";
   } else if (type === 'service_restrictions') {

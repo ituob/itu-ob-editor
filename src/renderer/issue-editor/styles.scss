@@ -139,7 +139,8 @@
 
 /* Amendment */
 
-:global .editor-pane-message-amendment {
+:global .editor-pane-message-amendment,
+:global .editor-pane-message-custom {
   display: flex;
   flex-flow: column nowrap;
 

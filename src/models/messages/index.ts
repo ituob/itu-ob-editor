@@ -56,6 +56,9 @@ export function isTelephoneServiceV2(msg: Message): msg is TelephoneServiceMessa
 export function isCallbackProcedures(msg: Message): msg is AmendmentMessage {
   return msg.type === 'callback_procedures';
 }
+export function isCustom(msg: Message): msg is CustomMessage {
+  return msg.type === 'custom';
+}
 export function isAmendment(msg: Message): msg is AmendmentMessage {
   return msg.type === 'amendment';
 }

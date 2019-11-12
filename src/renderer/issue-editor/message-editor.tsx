@@ -12,6 +12,7 @@ import {
   isAmendment,
   isTelephoneServiceV2,
   isCallbackProcedures,
+  isCustom,
 } from 'models/messages';
 
 import { ApprovedRecommendationsEditor } from './messages/approved_recommendations';
@@ -20,6 +21,7 @@ import { TelephoneServiceMessageEditorV2 } from './messages/telephone_service_2'
 import { MessageEditor as AmendmentEditor } from './messages/amendment';
 import { MessageEditor as ServiceRestrictionsMessageEditor } from './messages/service_restrictions';
 import { MessageEditor as CBProceduresEditor } from './messages/callback_procedures';
+import { MessageEditor as CustomMessageEditor } from './messages/custom';
 import * as styles from './styles.scss';
 
 
@@ -61,6 +63,8 @@ export function getMessageEditor(msg: Message): React.FC<MessageEditorProps> {
     return AmendmentEditor;
   } else if (isCallbackProcedures(msg)) {
     return CBProceduresEditor;
+  } else if (isCustom(msg)) {
+    return CustomMessageEditor;
   } else {
     return () => <NonIdealState
       icon="heart-broken"
