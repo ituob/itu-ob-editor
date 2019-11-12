@@ -234,7 +234,7 @@ const MessageEditor: React.FC<MessageEditorProps> = function (props) {
         workspace={props.workspace}
         message={props.message}
         issue={props.issue}
-        onChange={props.onChange}
+        onChange={(updatedMessage: any) => props.onChange({ ...updatedMessage, type: props.message.type })}
       />
     );
   } else {
