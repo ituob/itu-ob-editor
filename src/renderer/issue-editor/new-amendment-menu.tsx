@@ -1,10 +1,9 @@
-import { ipcRenderer } from 'electron';
-
 import React from 'react';
 import { Menu } from '@blueprintjs/core';
 import { Select, ItemPredicate, ItemRenderer, ItemListRenderer, renderFilteredItems } from '@blueprintjs/select';
 
 import { Index, QuerySet } from 'sse/storage/query';
+import { openWindow } from 'sse/api/renderer';
 import { AddCardTriggerButton } from 'sse/renderer/widgets/editable-card-list';
 import * as editableCardListStyles from 'sse/renderer/widgets/editable-card-list/styles.scss';
 
@@ -161,7 +160,7 @@ const renderLaunchPublicationCreator = function (query: string) {
 }
 
 function launchPublicationEditor(forPublicationWithId: string) {
-  ipcRenderer.sendSync('open-publication-editor', forPublicationWithId);
+  openWindow('publication-editor', { pubId: forPublicationWithId });
 }
 
 const NewAmendmentSelector = Select.ofType<AmendablePublication>();

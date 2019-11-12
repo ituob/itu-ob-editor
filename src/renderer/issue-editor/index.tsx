@@ -1,20 +1,20 @@
+import { throttle } from 'throttle-debounce';
 import { ipcRenderer } from 'electron';
 
 import React, { useState, useEffect } from 'react';
 import { Spinner, NonIdealState } from '@blueprintjs/core';
 
-import { useWorkspace, apiRequest } from 'sse/api/renderer';
+import { request } from 'sse/api/renderer';
 import { PaneHeader } from 'sse/renderer/widgets/pane-header';
 import { Index } from 'sse/storage/query';
 
-import { OBIssue } from 'models/issues';
+import { OBIssue, OBMessageSection, issueFactories } from 'models/issues';
 import { Publication } from 'models/publications';
 import { ITURecommendation } from 'models/recommendations';
 import { Message } from 'models/messages';
 
 import { Workspace } from 'main/storage';
 
-import { reducer } from './reducer';
 import { getMessageEditor } from './message-editor';
 import { NewGeneralMessagePrompt } from './new-general-message-menu';
 import { NewAmendmentPrompt } from './new-amendment-menu';
@@ -29,31 +29,37 @@ interface IssueEditorProps {
 export function IssueEditor(props: IssueEditorProps) {
   // This rendering logic can (should) be refactored.
 
-  const wsIssue = useWorkspace<OBIssue | {}>('issue', reducer, {}, { issueId: props.issueId });
-  const maybeIssue = wsIssue.state;
-
+  const [maybeIssue, updateIssue] = useState(null as OBIssue | null);
   const [ws, updateWs] = useState({ issues: {}, publications: {}, recommendations: {} } as Workspace);
 
   async function fetchWorkspace() {
     updateWs({
-      issues: await apiRequest<Index<OBIssue>>('storage-issues-all'),
-      publications: await apiRequest<Index<Publication>>('storage-publications-all'),
-      recommendations: await apiRequest<Index<ITURecommendation>>('storage-recommendations-all'),
+      issues: await request<Index<OBIssue>>('storage-get-all-issues'),
+      publications: await request<Index<Publication>>('storage-get-all-publications'),
+      recommendations: await request<Index<ITURecommendation>>('storage-get-all-recommendations'),
     });
+  }
+
+  async function fetchIssue() {
+    const issue = await request<OBIssue>('issue', { issueId: props.issueId });
+    updateIssue(issue);
   }
 
   useEffect(() => {
     fetchWorkspace();
+    fetchIssue();
     ipcRenderer.on('publications-changed', fetchWorkspace);
     return function cleanup() {
       ipcRenderer.removeListener('publications-changed', fetchWorkspace);
     };
   }, []);
 
-  var initialMessageIdx: number | undefined = undefined;
-  var initialSection: "amendments" | "general" = "general";
 
-  if (Object.keys(maybeIssue).length < 1) {
+
+  var initialMessageIdx: number | undefined = undefined;
+  var initialSection: OBMessageSection = 'general';
+
+  if (maybeIssue === null) {
     // Silence React hooks :(
     useState(initialMessageIdx);
     useState(initialSection);
@@ -74,28 +80,71 @@ export function IssueEditor(props: IssueEditorProps) {
   const [ selectedMessage, selectMessage ] = useState(initialMessageIdx);
   const [ selectedSection, selectSection ] = useState(initialSection);
 
-  function handleNewGeneralMessage(msg: Message, atIndex: number) {
-    wsIssue.dispatch({
-      type: 'ADD_GENERAL_MESSAGE',
-      message: msg,
-      newMessageIndex: atIndex,
-    });
-    setTimeout(() => {
-      selectMessage(atIndex);
-      selectSection("general");
-    }, 100);
+  function handleMessageSelection(inSection: OBMessageSection, atIndex: number) {
+    selectMessage(atIndex);
+    selectSection(inSection); 
   }
 
-  function handleNewAmendment(msg: Message, atIndex: number) {
-    wsIssue.dispatch({
-      type: 'ADD_AMENDMENT_MESSAGE',
-      message: msg,
-      newMessageIndex: atIndex,
-    });
-    setTimeout(() => {
-      selectMessage(atIndex);
-      selectSection("amendments");
-    }, 100);
+  function handleNewMessage(msg: Message, inSection: OBMessageSection, atIndex: number) {
+    if (issue) {
+      updateIssue(issueFactories.withAddedMessage(issue, inSection, atIndex, msg));
+
+      request<{ success: boolean }>('add-ob-message', {
+        issueId: props.issueId,
+        section: inSection,
+        msgIdx: atIndex,
+        msg: msg,
+      });
+
+      setTimeout(() => {
+        selectMessage(atIndex);
+        selectSection(inSection);
+      }, 100);
+    }
+  }
+
+  function handleNewGeneralMessage(msg: Message, idx: number) {
+    return handleNewMessage(msg, 'general', idx);
+  }
+
+  function handleNewAmendment(msg: Message, idx: number) {
+    return handleNewMessage(msg, 'amendments', idx);
+  }
+
+  function handleMessageRemoval(inSection: OBMessageSection, atIndex: number) {
+    if (issue) {
+      updateIssue(issueFactories.withRemovedMessage(issue, inSection, atIndex));
+
+      request<{ success: boolean }>('remove-ob-message', {
+        issueId: props.issueId,
+        section: inSection,
+        msgIdx: atIndex,
+      });
+
+      selectMessage(undefined);
+    }
+  }
+
+  async function _requestMessageUpdate(inSection: OBMessageSection, atIdx: number, withNewMessage: any) {
+    await request<{ success: boolean }>('edit-ob-message', {
+      issueId: props.issueId,
+      section: inSection,
+      msgIdx: atIdx,
+      updatedMsg: withNewMessage,
+    })
+  }
+
+  // Slow down updates to reduce the chance of race condition when user makes many edits in rapids succession
+  // TODO: A lock would be better
+  const requestMessageUpdate = throttle(500, _requestMessageUpdate);
+
+  function handleMessageEdit(updatedMessage: any) {
+    if (selectedMessage !== undefined) {
+      if (issue !== null) {
+        requestMessageUpdate(selectedSection, selectedMessage, updatedMessage);
+        updateIssue(issueFactories.withEditedMessage(issue, selectedSection, selectedMessage, updatedMessage));
+      }
+    }
   }
 
   return (
@@ -114,16 +163,10 @@ export function IssueEditor(props: IssueEditorProps) {
           {[...issue.general.messages.entries()].map(([idx, msg]: [number, Message]) => (
             <>
               <MessageItem
-                selected={idx == selectedMessage && selectedSection === 'general'}
                 message={msg}
-                onSelect={() => { selectMessage(idx); selectSection("general"); }}
-                onDelete={() => {
-                  wsIssue.dispatch({
-                    type: 'REMOVE_GENERAL_MESSAGE',
-                    messageIndex: idx,
-                  });
-                  selectMessage(undefined);
-                }}
+                selected={idx == selectedMessage && selectedSection === 'general'}
+                onSelect={() => handleMessageSelection('general', idx)}
+                onDelete={() => handleMessageRemoval('general', idx)}
               />
               <NewGeneralMessagePrompt idx={idx + 1} issue={issue} handleNewMessage={handleNewGeneralMessage} />
             </>
@@ -140,16 +183,10 @@ export function IssueEditor(props: IssueEditorProps) {
           {[...issue.amendments.messages.entries()].map(([idx, msg]: [number, Message]) => (
             <>
               <MessageItem
-                selected={idx == selectedMessage && selectedSection === 'amendments'}
                 message={msg}
-                onSelect={() => { selectMessage(idx); selectSection("amendments"); }}
-                onDelete={() => {
-                  wsIssue.dispatch({
-                    type: 'REMOVE_AMENDMENT_MESSAGE',
-                    messageIndex: idx,
-                  });
-                  selectMessage(undefined);
-                }}
+                selected={idx == selectedMessage && selectedSection === 'amendments'}
+                onSelect={() => handleMessageSelection('amendments', idx)}
+                onDelete={() => handleMessageRemoval('amendments', idx)}
               />
               <NewAmendmentPrompt
                 idx={idx + 1}
@@ -170,21 +207,7 @@ export function IssueEditor(props: IssueEditorProps) {
               workspace={ws}
               message={issue[selectedSection].messages[selectedMessage]}
               issue={issue}
-              onChange={(updatedMessage: any) => {
-                if (selectedSection === "general") {
-                  wsIssue.dispatch({
-                    type: 'EDIT_GENERAL_MESSAGE',
-                    messageIndex: selectedMessage,
-                    messageData: updatedMessage,
-                  });
-                } else if (selectedSection === "amendments") {
-                  wsIssue.dispatch({
-                    type: 'EDIT_AMENDMENT_MESSAGE',
-                    messageIndex: selectedMessage,
-                    messageData: updatedMessage,
-                  });
-                }
-              }}
+              onChange={handleMessageEdit}
             />
           : <NonIdealState
               icon="info-sign"

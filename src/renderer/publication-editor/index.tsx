@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Button, FormGroup, InputGroup } from '@blueprintjs/core';
 
-import { apiRequest } from 'sse/api/renderer';
+import { request } from 'sse/api/renderer';
 import { PaneHeader } from 'sse/renderer/widgets/pane-header';
 import { LangConfigContext } from 'sse/localizer/renderer';
 
@@ -75,10 +75,10 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
   }
 
   async function save() {
-    await apiRequest<Publication>(
-      'storage-publications',
-      JSON.stringify({ objectId: publication.id }),
-      JSON.stringify({ newData: publication }));
+    await request<Publication>('storage-store-one-in-publications', {
+      objectId: publication.id,
+      newData: publication,
+    });
     await load();
   }
 
@@ -178,5 +178,5 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
 
 
 async function get(id: string) {
-  return await apiRequest<Publication>('storage-publications', JSON.stringify({ objectId: id }));
+  return await request<Publication>('storage-get-one-in-publications', { objectId: id });
 }

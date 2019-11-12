@@ -2,7 +2,7 @@ import { ipcRenderer } from 'electron';
 import React, { useState, useEffect } from 'react';
 import { ButtonGroup, Button, Classes } from '@blueprintjs/core';
 
-import { apiRequest } from 'sse/api/renderer';
+import { request, openWindow } from 'sse/api/renderer';
 import * as styles from './styles.scss';
 
 
@@ -12,7 +12,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
   const [loading, setLoading] = useState(true);
 
   async function reloadCurrentIssue() {
-    const currentIssue = await apiRequest<{ id: number | null }>('current-issue-id');
+    const currentIssue = await request<{ id: number | null }>('current-issue-id');
     setLoading(false);
     setCurrentIssue(currentIssue);
   }
@@ -41,7 +41,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
             title="Edit current edition"
             disabled={currentIssue.id === null}
             icon="edit"
-            onClick={() => currentIssue.id ? ipcRenderer.sendSync('open-issue-editor', `${currentIssue.id}`) : void 0}>
+            onClick={() => currentIssue.id ? openWindow('issue-editor', { issueId: currentIssue.id }) : void 0}>
           <span className={loading ? Classes.SKELETON : undefined}>
             {currentIssue.id !== null ? `Open no. ${currentIssue.id}` : "Open current"}
           </span>
@@ -53,7 +53,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
           title="Schedule future editions"
           disabled={loading}
           icon="timeline-events"
-          onClick={() => ipcRenderer.sendSync('open-issue-scheduler')}
+          onClick={() => openWindow('issue-scheduler')}
         />
         <Button
           minimal={true}
@@ -62,14 +62,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
           title="Fetch latest changes & submit yours"
           disabled={loading}
           icon="git-merge"
-          onClick={() => ipcRenderer.sendSync('open-data-synchronizer')}
+          onClick={() => openWindow('data-synchronizer')}
         />
         <Button
           minimal={true}
           text="Settings"
           icon="settings"
           className={styles.secondaryButton}
-          onClick={() => ipcRenderer.sendSync('open-settings')}
+          onClick={() => openWindow('settings')}
         />
       </ButtonGroup>
     </div>

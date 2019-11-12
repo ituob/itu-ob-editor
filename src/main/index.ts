@@ -6,16 +6,16 @@ import { app, Menu, ipcMain } from 'electron';
 import * as log from 'electron-log';
 
 import { WindowOpenerParams, openWindow, getWindowByTitle, getWindow, windows } from 'sse/main/window';
-import { makeEndpoint, makeWriteOnlyEndpoint, makeWindowEndpoint } from 'sse/api/main';
+import { listen, makeWindowEndpoint } from 'sse/api/main';
 import { SettingManager } from 'sse/settings/main';
 import { QuerySet, sortIntegerAscending } from 'sse/storage/query';
-import { Index } from 'sse/storage/query';
 import { GitController, setRepoUrl, initRepo } from 'sse/storage/main/git-controller';
 
-import { OBIssue, ScheduledIssue } from 'models/issues';
+import { OBIssue, ScheduledIssue, OBMessageSection, issueFactories } from 'models/issues';
+import { Message } from 'models/messages';
 
 import { buildAppMenu } from './menu';
-import { initStorage, Storage, Workspace } from './storage';
+import { initStorage, Storage } from './storage';
 
 
 // Ensure only one instance of the app can run at a time on given user’s machine
@@ -230,18 +230,10 @@ then(results => {
 
   gitCtrl.setUpAPIEndpoints();
 
-  makeEndpoint<Index<any>>('storage-search', async ({ query }: { query?: string }) => {
-    return await storage.findObjects(query);
-  });
-
-  makeEndpoint<Workspace>('all', async () => {
-    return storage.workspace;
-  });
-
 
   /* Home screen */
 
-  makeEndpoint<{ id: number | null }>('current-issue-id', async () => {
+  listen<{}, { id: number | null }>('current-issue-id', async () => {
     const issues = new QuerySet<OBIssue>(storage.workspace.issues);
     const currentIssue: OBIssue | null = issues.filter(item => {
       return new Date(item[1].publication_date).getTime() >= new Date().getTime();
@@ -252,7 +244,8 @@ then(results => {
 
   /* Issue scheduler */
 
-  makeEndpoint<ScheduledIssue[]>('ob-schedule', async ({ month }: { month: Date | null}) => {
+  listen<{ month: Date | null }, ScheduledIssue[]>
+  ('ob-schedule', async ({ month }) => {
     const issues = new QuerySet<OBIssue>(storage.workspace.issues);
     return issues.orderBy(sortIntegerAscending).filter(item => {
       if (month) {
@@ -271,24 +264,25 @@ then(results => {
     });
   });
 
-  makeEndpoint<ScheduledIssue>('ob-schedule-add', async ({ issueId }: { issueId: string }) => {
-    return storage.workspace.issues[issueId];
-  }, async ({ newData }) => {
+  listen<{ issueId: string, newData: ScheduledIssue }, { success: boolean }>
+  ('ob-schedule-add', async ({ issueId, newData }) => {
     const existingIssue = storage.workspace.issues[newData.id];
     storage.workspace.issues[newData.id] = Object.assign(existingIssue || {} as OBIssue, newData);
     await storage.storeWorkspace();
+    await messageHome('update-current-issue');
+    return { success: true };
   });
 
 
   /* Issue editor */
 
-  makeEndpoint<OBIssue>('issue', async ({ issueId }: { issueId: string }) => {
-    const issues = new QuerySet<OBIssue>(storage.workspace.issues);
-    const issue = issues.get(issueId);
-
+  listen<{ issueId: string }, OBIssue>
+  ('issue', async ({ issueId }) => {
+    const issue: OBIssue = storage.workspace.issues[issueId];
     if (!issue) {
-      throw new Error(`Issue ${issueId} not found`);
+      throw new Error(`Requested issue ${issueId} could not be found`);
     }
+
     if (!(issue.general || {}).messages) {
       issue.general = { messages: [] };
     }
@@ -298,25 +292,79 @@ then(results => {
     return issue;
   });
 
-  makeWriteOnlyEndpoint('issue', ({ issueId }: { issueId: string }, issue: OBIssue) => {
-    storage.workspace.issues[issue.id] = issue;
-    storage.storeWorkspace();
+  listen<{ issueId: string, section: OBMessageSection, msgIdx: number }, Message>
+  ('get-ob-message', async ({ issueId, section, msgIdx }) => {
+    const msg: Message = (storage.workspace.issues[issueId] || {})[section].messages[msgIdx];
+    if (!msg) {
+      throw new Error(`Requested message ${issueId}/${section}#${msgIdx} could not be found`);
+    }
+
+    return msg;
+  });
+
+  listen<{ issueId: string, section: OBMessageSection, msgIdx: number }, { success: boolean }>
+  ('remove-ob-message', async ({ issueId, section, msgIdx }) => {
+    const issue: OBIssue = storage.workspace.issues[issueId];
+    if (!issue) {
+      throw new Error(`Requested issue ${issueId} could not be found`);
+    }
+    const msg: Message = issue[section].messages[msgIdx];
+    if (!msg) {
+      throw new Error(`Requested message ${issueId}/${section}#${msgIdx} could not be found`);
+    }
+
+    const newIssue = issueFactories.withRemovedMessage(issue, section, msgIdx);
+    await storage.storeManagers.issues.store(newIssue, storage);
+
+    return { success: true };
+  });
+
+  listen<{ issueId: string, section: OBMessageSection, msgIdx: number, msg: Message }, { success: boolean }>
+  ('add-ob-message', async ({ issueId, section, msgIdx, msg }) => {
+    const issue: OBIssue = storage.workspace.issues[issueId];
+    if (!issue) {
+      throw new Error(`Requested issue ${issueId} could not be found`);
+    }
+
+    const newIssue = issueFactories.withAddedMessage(issue, section, msgIdx, msg);
+    await storage.storeManagers.issues.store(newIssue, storage);
+
+    return { success: true };
+  });
+
+  listen<{ issueId: string, section: OBMessageSection, msgIdx: number, updatedMsg: Message }, { success: boolean }>
+  ('edit-ob-message', async ({ issueId, section, msgIdx, updatedMsg }) => {
+    // TODO: We need our storage to lock here (#59)
+
+    const issue: OBIssue = storage.workspace.issues[issueId];
+    if (!issue) {
+      throw new Error(`Requested issue ${issueId} could not be found`);
+    }
+    const msg: Message = issue[section].messages[msgIdx];
+    if (!msg) {
+      throw new Error(`Requested message ${issueId}/${section}#${msgIdx} could not be found`);
+    }
+
+    const newIssue = issueFactories.withEditedMessage(issue, section, msgIdx, updatedMsg);
+    await storage.storeManagers.issues.store(newIssue, storage);
+
+    return { success: true };
   });
 
 
   /* Set up window-opening endpoints */
 
-  makeWindowEndpoint('publication-editor', (id: string) => ({
+  makeWindowEndpoint('publication-editor', ({ pubId } : { pubId: string }) => ({
     component: 'publicationEditor',
-    title: `Publication ${id}`,
-    componentParams: `pubId=${id}`,
+    title: `Publication ${pubId}`,
+    componentParams: `pubId=${pubId}`,
     frameless: true,
     dimensions: { width: 800, height: 600, },
   }));
 
   makeWindowEndpoint('issue-scheduler', () => ISSUE_SCHEDULER_WINDOW_OPTS);
 
-  makeWindowEndpoint('issue-editor', (issueId: string) => ({
+  makeWindowEndpoint('issue-editor', ({ issueId }: { issueId: number }) => ({
     component: 'issueEditor',
     title: `Issue ${issueId}`,
     componentParams: `issueId=${issueId}`,
@@ -325,7 +373,6 @@ then(results => {
   }));
 
   ipcMain.on('scheduled-new-issue', (event: any) => {
-    messageHome('update-current-issue');
     event.reply('ok');
   });
 
@@ -359,10 +406,10 @@ then(results => {
 });
 
 
-function messageHome(eventName: string) {
+async function messageHome(eventName: string) {
   const homeWindow = getWindowByTitle(APP_TITLE);
   if (homeWindow !== undefined) {
-    homeWindow.webContents.send(eventName);
+    await homeWindow.webContents.send(eventName);
   }
 }
 

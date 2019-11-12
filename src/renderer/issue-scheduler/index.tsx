@@ -8,7 +8,7 @@ import { DatePicker } from '@blueprintjs/datetime';
 
 import { Index } from 'sse/storage/query';
 import { PaneHeader } from 'sse/renderer/widgets';
-import { apiRequest } from 'sse/api/renderer';
+import { request } from 'sse/api/renderer';
 
 import { DateStamp } from 'renderer/widgets/dates';
 import { ScheduledIssue } from 'models/issues';
@@ -35,9 +35,7 @@ export const IssueScheduler: React.FC<{}> = function () {
   const [userIsEditing, setUserIsEditing] = useState(true);
 
   async function fetchSchedule(month: Date) {
-    const scheduledIssues = await apiRequest<Index<ScheduledIssue>>(
-      'ob-schedule',
-      JSON.stringify({ month }));
+    const scheduledIssues = await request<Index<ScheduledIssue>>('ob-schedule', { month });
     updateSchedule(Object.values(scheduledIssues));
     updateIssueIndex(scheduledIssues);
     setTimeout(() => { setUserIsEditing(true) }, 1000);
@@ -83,9 +81,7 @@ export const IssueScheduler: React.FC<{}> = function () {
   async function saveNewSchedule() {
     if (newIssueDraft && newIssueDraft.publication_date && newIssueDraft.cutoff_date) {
       const draft = newIssueDraft as ScheduledIssue;
-      await apiRequest<void>('ob-schedule-add',
-        JSON.stringify({ issueId: `${draft.id}` }),
-        JSON.stringify({ newData: draft }));
+      await request<{ success: boolean }>('ob-schedule-add', { issueId: `${draft.id}`, newData: draft });
       updateNewIssueDraft(null);
       await ipcRenderer.send('scheduled-new-issue', {});
       await fetchSchedule(month);

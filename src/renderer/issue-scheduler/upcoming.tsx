@@ -1,10 +1,10 @@
 import * as moment from 'moment';
-import { ipcRenderer } from 'electron';
 
 import React from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { NonIdealState, Card, H3, Icon, Tooltip, Position } from '@blueprintjs/core';
 import { Index, QuerySet } from 'sse/storage/query';
+import { openWindow } from 'sse/api/renderer';
 import { DateStamp } from 'renderer/widgets/dates';
 import { ScheduledIssue } from 'models/issues';
 import * as styles from './styles.scss';
@@ -35,7 +35,7 @@ export const UpcomingIssues: React.FC<UpcomingIssuesProps> = function({ issues, 
                   classNames="issueScheduleCardTransition">
                 <IssueScheduleCard
                   issue={issue}
-                  onEditClick={() => ipcRenderer.sendSync('open-issue-editor', `${issue.id}`)}
+                  onEditClick={() => openWindow('issue-editor', { issueId: issue.id })}
                 />
               </CSSTransition>)}
           </TransitionGroup>
