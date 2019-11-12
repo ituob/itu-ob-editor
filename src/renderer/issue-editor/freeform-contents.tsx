@@ -58,7 +58,7 @@ export const FreeformContents: React.FC<FreeformContentsProps> = function ({ onC
     <Editor
       options={opts}
       autofocus
-      onChange={onChange}
+      onChange={(doc: any) => onChange(JSON.parse(JSON.stringify(doc, null, 2)))}
       className={`${styles.freeformEditor} ${className || ''}`}
     />
   );
