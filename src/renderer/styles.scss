@@ -18,3 +18,14 @@ html.platform--win32::before {
   z-index: 40;
   background-color: silver;
 }
+
+.bp3-button {
+  cursor: default !important;
+}
+
+.bp3-menu-item {
+  cursor: default;
+  &, .bp3-menu &.bp3-disabled {
+    cursor: default !important;
+  }
+}
