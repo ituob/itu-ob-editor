@@ -131,7 +131,7 @@ export function IssueEditor(props: IssueEditorProps) {
       section: inSection,
       msgIdx: atIdx,
       updatedMsg: withNewMessage,
-    })
+    });
   }
 
   // Slow down updates to reduce the chance of race condition when user makes many edits in rapids succession
