@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Tabs, Tab, Button, Label, InputGroup } from '@blueprintjs/core';
 
 import { AddCardTrigger, SimpleEditableCard } from 'sse/renderer/widgets/editable-card-list';
-import { PaneHeader } from 'sse/renderer/widgets/pane-header';
 
 import { RunningAnnex, getRunningAnnexesForIssue } from 'models/running-annexes';
 import { RunningAnnexesMessage } from 'models/messages/running_annexes';
@@ -27,25 +26,21 @@ export const MessageEditor: React.FC<MessageEditorProps> = function (props) {
     props.workspace.publications);
 
   return (
-    <>
-      <PaneHeader align="left">Lists Annexed</PaneHeader>
-
-      <Tabs className={`${styles.messageEditorTabs} ${styles.paneBody}`}>
-        <Tab
-          id="autoAnnexes"
-          title="Running annexes"
-          panel={<RunningAnnexes annexes={runningAnnexes} />} />
-        <Tab
-          id="extraPublications"
-          title="Extra publications"
-          panel={
-            <ExtraPublications
-              pubIds={extraPubIds}
-              updateIds={(newIds: string[]) => updateExtraPubIds(newIds)}
-            />
-          } />
-      </Tabs>
-    </>
+    <Tabs className={`${styles.messageEditorTabs} ${styles.paneBody}`}>
+      <Tab
+        id="autoAnnexes"
+        title="Running annexes"
+        panel={<RunningAnnexes annexes={runningAnnexes} />} />
+      <Tab
+        id="extraPublications"
+        title="Extra publications"
+        panel={
+          <ExtraPublications
+            pubIds={extraPubIds}
+            updateIds={(newIds: string[]) => updateExtraPubIds(newIds)}
+          />
+        } />
+    </Tabs>
   );
 };
 

@@ -3,7 +3,6 @@ import { H4, Label, Button, FormGroup, InputGroup, TextArea } from '@blueprintjs
 import { DatePicker } from '@blueprintjs/datetime';
 
 import { AddCardTrigger, SimpleEditableCard } from 'sse/renderer/widgets/editable-card-list';
-import { PaneHeader } from 'sse/renderer/widgets/pane-header';
 import { LangConfigContext } from 'sse/localizer/renderer';
 
 import {
@@ -76,8 +75,6 @@ export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = fun
 
   return (
     <>
-      <PaneHeader align="left">Telephone Service</PaneHeader>
-
       <AddCardTrigger
         key="addFirstCountry"
         label="Add a country"

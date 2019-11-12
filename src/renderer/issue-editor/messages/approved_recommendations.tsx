@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 
 import { Button, Label, InputGroup } from '@blueprintjs/core';
 import { AddCardTrigger, SimpleEditableCard } from 'sse/renderer/widgets/editable-card-list';
-import { PaneHeader } from 'sse/renderer/widgets/pane-header';
 
 import { ITURecCode, ITURecVersion } from 'models/recommendations';
 import { ApprovedRecommendationsMessage } from 'models/messages/approved_recommendations';
@@ -22,8 +21,6 @@ export const ApprovedRecommendationsEditor: React.FC<MessageEditorProps> = funct
 
   return (
     <>
-      <PaneHeader align="left">Approved Recommendations</PaneHeader>
-
       <AddCardTrigger
         label="Add an approved recommendation"
         highlight={Object.entries(recs).length < 1}

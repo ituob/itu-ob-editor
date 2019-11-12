@@ -15,6 +15,7 @@ import { Message } from 'models/messages';
 
 import { Workspace } from 'main/storage';
 
+import { getMessageTypeTitle } from './messages';
 import { getMessageEditor } from './message-editor';
 import { NewGeneralMessagePrompt } from './new-general-message-menu';
 import { NewAmendmentPrompt } from './new-amendment-menu';
@@ -238,12 +239,17 @@ const MessageEditor: React.FC<MessageEditorProps> = function (props) {
   if (props.message) {
     const EditorCls = getMessageEditor(props.message);
     return (
-      <EditorCls
-        workspace={props.workspace}
-        message={props.message}
-        issue={props.issue}
-        onChange={(updatedMessage: any) => props.onChange({ ...updatedMessage, type: props.message.type })}
-      />
+      <>
+        <PaneHeader align="left" className={styles.inflexibleEditorPaneHeader}>
+          {getMessageTypeTitle(props.message.type)}
+        </PaneHeader>
+        <EditorCls
+          workspace={props.workspace}
+          message={props.message}
+          issue={props.issue}
+          onChange={(updatedMessage: any) => props.onChange({ ...updatedMessage, type: props.message.type })}
+        />
+      </>
     );
   } else {
     return (
