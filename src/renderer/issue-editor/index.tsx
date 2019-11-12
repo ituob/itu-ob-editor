@@ -138,7 +138,7 @@ export function IssueEditor(props: IssueEditorProps) {
   // TODO: A lock would be better
   const requestMessageUpdate = throttle(500, _requestMessageUpdate);
 
-  function handleMessageEdit(updatedMessage: any) {
+  function handleMessageEdit(updatedMessage: Message) {
     if (selectedMessage !== undefined) {
       if (issue !== null) {
         requestMessageUpdate(selectedSection, selectedMessage, updatedMessage);
