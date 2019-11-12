@@ -476,7 +476,7 @@ const TSCountryCommunicationDetailsEditor: React.FC<TSCountryCommunicationDetail
 
   const contentsEditor = useMemo(() => (
     <FreeformContents
-      doc={newContents}
+      defaultValue={newContents}
       onChange={(updatedDoc: any) => {
         setContents((previousDoc: any) => {
           return {
