@@ -203,5 +203,5 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
       </div>
 
     </div>
-  )
+  );
 };
