@@ -1,9 +1,7 @@
 import React, { useContext } from 'react';
-
 import { LangConfigContext } from 'sse/localizer/renderer';
 
 import { AmendmentMessage } from 'models/messages/amendment';
-
 import { FreeformContents } from '../freeform-contents';
 import { MessageFormProps } from '../message-editor';
 
