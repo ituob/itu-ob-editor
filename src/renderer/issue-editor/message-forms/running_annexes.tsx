@@ -21,7 +21,7 @@ export const MessageForm: React.FC<MessageFormProps> = function (props) {
   }, [JSON.stringify(extraPubIds)]);
 
   const runningAnnexes = getRunningAnnexesForIssue(
-    props.issue,
+    props.issue.id,
     props.workspace.issues,
     props.workspace.publications);
 
