@@ -165,7 +165,7 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
           <NewGeneralMessagePrompt
             highlight={issue.general.messages.length < 1}
             idx={0}
-            issue={issue}
+            existingMessages={issue.general.messages}
             handleNewMessage={handleNewGeneralMessage} />
           {[...issue.general.messages.entries()].map(([idx, msg]: [number, Message]) => (
             <>
@@ -175,7 +175,10 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
                 onSelect={() => handleMessageSelection('general', idx)}
                 onDelete={() => handleMessageRemoval('general', idx)}
               />
-              <NewGeneralMessagePrompt idx={idx + 1} issue={issue} handleNewMessage={handleNewGeneralMessage} />
+              <NewGeneralMessagePrompt
+                idx={idx + 1}
+                existingMessages={issue.general.messages}
+                handleNewMessage={handleNewGeneralMessage} />
             </>
           ))}
 
@@ -183,7 +186,7 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
           <NewAmendmentPrompt
             idx={0}
             highlight={issue.amendments.messages.length < 1}
-            issue={issue}
+            issueId={issue.id}
             issueIndex={ws.issues}
             publicationIndex={ws.publications}
             handleNewMessage={handleNewAmendment} />
@@ -197,7 +200,7 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
               />
               <NewAmendmentPrompt
                 idx={idx + 1}
-                issue={issue}
+                issueId={issue.id}
                 issueIndex={ws.issues}
                 publicationIndex={ws.publications}
                 handleNewMessage={handleNewAmendment} />

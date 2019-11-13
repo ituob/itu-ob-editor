@@ -4,14 +4,16 @@ import { Popover, Menu } from '@blueprintjs/core';
 import { AddCardTriggerButton } from 'sse/renderer/widgets/editable-card-list';
 import * as editableCardListStyles from 'sse/renderer/widgets/editable-card-list/styles.scss';
 
-import { OBIssue } from 'models/issues';
 import { Message, MessageType, getMessageTypeTitle } from 'models/messages';
 
 import { NewMessagePromptProps } from './message-editor';
 import * as styles from './styles.scss';
 
 
-export const NewGeneralMessagePrompt: React.FC<NewMessagePromptProps> = function (props) {
+type NewGeneralMessagePromptProps = NewMessagePromptProps & {
+  existingMessages: Message[],
+}
+export const NewGeneralMessagePrompt: React.FC<NewGeneralMessagePromptProps> = function (props) {
   return (
     <Popover
       wrapperTagName={'div'}
@@ -19,7 +21,7 @@ export const NewGeneralMessagePrompt: React.FC<NewMessagePromptProps> = function
       className={editableCardListStyles.addCardTriggerContainer}
       content={
         <NewGeneralMessageMenu
-          issue={props.issue}
+          existing={props.existingMessages}
           onCreate={(msg: Message) => props.handleNewMessage(msg, props.idx)}
         />
       }
@@ -29,14 +31,12 @@ export const NewGeneralMessagePrompt: React.FC<NewMessagePromptProps> = function
 
 
 interface NewGeneralMessageMenuProps {
-  issue: OBIssue,
+  existing: Message[],
   onCreate: (message: Message) => void,
 }
 const NewGeneralMessageMenu: React.FC<NewGeneralMessageMenuProps> = function (props) {
-  const existing: Message[] = props.issue.general.messages;
-
   function alreadyExists(type: MessageType) {
-    return existing.filter(msg => msg.type === type).length > 0;
+    return props.existing.filter(msg => msg.type === type).length > 0;
   }
 
   return (
@@ -93,7 +93,7 @@ const NewGeneralMessageMenu: React.FC<NewGeneralMessageMenuProps> = function (pr
       <Menu.Item
         key="running_annexes"
         text={getMessageTypeTitle('running_annexes')}
-        disabled={existing.filter(msg => msg.type === 'running_annexes').length > 0}
+        disabled={props.existing.filter(msg => msg.type === 'running_annexes').length > 0}
         onClick={() => props.onCreate({
           type: 'running_annexes',
           extra_links: [],

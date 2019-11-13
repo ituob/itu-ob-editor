@@ -14,13 +14,13 @@ export interface RunningAnnex {
 // Runs through past issues (relative to given issue) and builds a list
 // of annexed publications.
 export function getRunningAnnexesForIssue(
-    issue: OBIssue,
+    issueId: number,
     issueIndex: Index<OBIssue>,
     publicationIndex: Index<Publication>): RunningAnnex[] {
 
   const pastIssues = new QuerySet<OBIssue>(issueIndex).
     orderBy(sortIntegerAscending).
-    filter((item: [string, OBIssue]) => item[1].id < issue.id).all();
+    filter((item: [string, OBIssue]) => item[1].id < issueId).all();
 
   var runningAnnexes: RunningAnnex[] = [];
 

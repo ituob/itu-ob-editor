@@ -20,12 +20,13 @@ const MAX_MENU_ITEMS_TO_SHOW = 7;
 
 
 type NewAmendmentPromptProps = NewMessagePromptProps & {
+  issueId: number,
   issueIndex: Index<OBIssue>,
   publicationIndex: Index<Publication>,
 }
 export const NewAmendmentPrompt: React.FC<NewAmendmentPromptProps> = function (props) {
   const runningAnnexes = getRunningAnnexesForIssue(
-    props.issue,
+    props.issueId,
     props.issueIndex,
     props.publicationIndex);
 

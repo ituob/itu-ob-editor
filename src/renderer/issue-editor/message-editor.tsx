@@ -3,7 +3,6 @@ import { NonIdealState, Classes, Dialog } from '@blueprintjs/core';
 import { PaneHeader } from 'sse/renderer/widgets/pane-header';
 
 import { Workspace } from 'main/storage';
-
 import { OBIssue } from 'models/issues';
 import {
   Message,
@@ -36,7 +35,6 @@ import * as styles from './styles.scss';
 export interface NewMessagePromptProps {
   idx: number,
   highlight?: boolean,
-  issue: OBIssue,
   handleNewMessage: (msg: Message, atIndex: number) => void,
 }
 
