@@ -6,7 +6,7 @@ import { Workspace } from 'main/storage';
 import { OBIssue } from 'models/issues';
 import {
   Message,
-  getMessageTypeTitle,
+  getMessageTitle,
 
   isApprovedRecommendations,
   isServiceRestrictions,
@@ -53,8 +53,10 @@ export const MessageEditor: React.FC<MessageEditorProps> = function (props) {
     const EditorCls = getMessageEditor(props.message);
     return (
       <>
-        <PaneHeader align="left" className={styles.inflexibleEditorPaneHeader}>
-          {getMessageTypeTitle(props.message.type)}
+        <PaneHeader align="left" className={styles.messageEditorPaneHeader}>
+          <div className="title">
+            {getMessageTitle(props.message)}
+          </div>
         </PaneHeader>
         <EditorCls
           workspace={props.workspace}

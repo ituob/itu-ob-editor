@@ -61,37 +61,27 @@ export function isAmendment(msg: Message): msg is AmendmentMessage {
 }
 
 
-export function getMessageTypeTitle(type: MessageType): string {
-  if (type === 'approved_recommendations') {
-    return  "Approved Recommendations";
-  } else if (type === 'running_annexes') {
+export function getMessageTitle(msg: Message): string {
+  if (isApprovedRecommendations(msg)) {
+    return "Approved Recommendations";
+  } else if (isRunningAnnexes(msg)) {
     return "Lists Annexed";
-  } else if (type === 'telephone_service_2') {
+  } else if (isTelephoneServiceV2(msg)) {
     return "Telephone Service";
-  } else if (type === 'telephone_service') {
-    return "Telephone Service";
-  } else if (type === 'callback_procedures') {
+  } else if (isTelephoneService(msg)) {
+    return "Telephone Service (old)";
+  } else if (isCallbackProcedures(msg)) {
     return "Call-back and Alternative Calling Procedures";
-  } else if (type === 'custom') {
+  } else if (isCustom(msg)) {
     return "Custom message";
-  } else if (type === 'amendment') {
-    // TODO: Amendment title should be the publication?
-    return  "Amendment";
-  } else if (type === 'service_restrictions') {
+  } else if (isAmendment(msg)) {
+    return `Amd. to ${((msg as AmendmentMessage).target || {}).publication}`;
+  } else if (isServiceRestrictions(msg)) {
     return "Service Restrictions";
   } else {
-    return type;
+    return msg.type;
     //throw new Error(`Unknown message type: ${msg.type}`);
   }
-}
-
-export function getMessageSubtitle(msg: Message): string | undefined {
-  if (msg.type === 'amendment') {
-    return `to ${((msg as AmendmentMessage).target || {}).publication}`;
-  } else if (msg.type === 'telephone_service') {
-    return "(old)";
-  }
-  return undefined;
 }
 
 

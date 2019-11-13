@@ -4,7 +4,7 @@ import { Popover, Menu } from '@blueprintjs/core';
 import { AddCardTriggerButton } from 'sse/renderer/widgets/editable-card-list';
 import * as editableCardListStyles from 'sse/renderer/widgets/editable-card-list/styles.scss';
 
-import { Message, MessageType, getMessageTypeTitle } from 'models/messages';
+import { Message, MessageType } from 'models/messages';
 
 import { NewMessagePromptProps } from './message-editor';
 import * as styles from './styles.scss';
@@ -41,11 +41,11 @@ const NewGeneralMessageMenu: React.FC<NewGeneralMessageMenuProps> = function (pr
 
   return (
     <Menu className={styles.newMessageMenu}>
-      <Menu.Divider title="Insert message here" />
+      <Menu.Divider title="Insert message" />
 
       <Menu.Item
         key="telephone_service"
-        text={getMessageTypeTitle('telephone_service_2')}
+        text="Telephone Service"
         disabled={alreadyExists('telephone_service') || alreadyExists('telephone_service_2')}
         onClick={() => props.onCreate({
           type: 'telephone_service_2',
@@ -53,18 +53,8 @@ const NewGeneralMessageMenu: React.FC<NewGeneralMessageMenuProps> = function (pr
         })}
       />
       <Menu.Item
-        key="custom"
-        text={getMessageTypeTitle('custom')}
-        onClick={() => props.onCreate({
-          type: 'custom',
-          contents: {},
-        })}
-      />
-
-      <Menu.Divider />
-      <Menu.Item
         key="service_restrictions"
-        text={getMessageTypeTitle('service_restrictions')}
+        text="Service restrictions"
         disabled={alreadyExists('service_restrictions')}
         onClick={() => props.onCreate({
           type: 'service_restrictions',
@@ -73,17 +63,15 @@ const NewGeneralMessageMenu: React.FC<NewGeneralMessageMenuProps> = function (pr
       />
       <Menu.Item
         key="callback_procedures"
-        text={getMessageTypeTitle('callback_procedures')}
+        text="Callback Procedures"
         disabled={alreadyExists('callback_procedures')}
         onClick={() => props.onCreate({
           type: 'callback_procedures',
         })}
       />
-
-      <Menu.Divider />
       <Menu.Item
         key="approved_recommendations"
-        text={getMessageTypeTitle('approved_recommendations')}
+        text="Approved Recommendations"
         disabled={alreadyExists('approved_recommendations')}
         onClick={() => props.onCreate({
           type: 'approved_recommendations',
@@ -92,11 +80,22 @@ const NewGeneralMessageMenu: React.FC<NewGeneralMessageMenuProps> = function (pr
       />
       <Menu.Item
         key="running_annexes"
-        text={getMessageTypeTitle('running_annexes')}
-        disabled={props.existing.filter(msg => msg.type === 'running_annexes').length > 0}
+        text="Running Annexes"
+        disabled={alreadyExists('running_annexes')}
         onClick={() => props.onCreate({
           type: 'running_annexes',
           extra_links: [],
+        })}
+      />
+
+      <Menu.Divider />
+
+      <Menu.Item
+        key="custom"
+        text="Custom message…"
+        onClick={() => props.onCreate({
+          type: 'custom',
+          contents: { en: {} },
         })}
       />
     </Menu>
