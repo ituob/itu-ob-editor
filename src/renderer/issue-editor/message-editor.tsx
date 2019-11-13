@@ -35,7 +35,7 @@ import * as styles from './styles.scss';
 export interface NewMessagePromptProps {
   idx: number,
   highlight?: boolean,
-  handleNewMessage: (msg: Message, atIndex: number) => void,
+  onCreate: (msg: Message, atIndex: number) => void,
 }
 
 

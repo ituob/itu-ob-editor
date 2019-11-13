@@ -166,7 +166,7 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
             highlight={issue.general.messages.length < 1}
             idx={0}
             existingMessages={issue.general.messages}
-            handleNewMessage={handleNewGeneralMessage} />
+            onCreate={handleNewGeneralMessage} />
           {[...issue.general.messages.entries()].map(([idx, msg]: [number, Message]) => (
             <>
               <MessageItem
@@ -178,7 +178,7 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
               <NewGeneralMessagePrompt
                 idx={idx + 1}
                 existingMessages={issue.general.messages}
-                handleNewMessage={handleNewGeneralMessage} />
+                onCreate={handleNewGeneralMessage} />
             </>
           ))}
 
@@ -189,7 +189,7 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
             issueId={issue.id}
             issueIndex={ws.issues}
             publicationIndex={ws.publications}
-            handleNewMessage={handleNewAmendment} />
+            onCreate={handleNewAmendment} />
           {[...issue.amendments.messages.entries()].map(([idx, msg]: [number, Message]) => (
             <>
               <MessageItem
@@ -203,7 +203,7 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
                 issueId={issue.id}
                 issueIndex={ws.issues}
                 publicationIndex={ws.publications}
-                handleNewMessage={handleNewAmendment} />
+                onCreate={handleNewAmendment} />
             </>
           ))}
 
