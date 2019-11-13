@@ -15,10 +15,10 @@ import { Message, AmendmentMessage } from 'models/messages';
 
 import { Workspace } from 'main/storage';
 
-import { MessageEditor } from './message-editor';
+import { MessageList } from './message-list';
 import { NewGeneralMessagePrompt } from './new-general-message-menu';
 import { NewAmendmentPrompt } from './new-amendment-menu';
-import { MessageItem } from './message-list-item';
+import { MessageEditor } from './message-editor';
 
 import * as styles from './styles.scss';
 
@@ -132,8 +132,6 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
       }, 100);
     }
   }
-  const handleNewGeneralMessage = (msg: Message, idx: number) => handleNewMessage(msg, 'general', idx);
-  const handleNewAmendment = (msg: Message, idx: number) => handleNewMessage(msg, 'amendments', idx);
 
   function handleMessageEdit(updatedMessage: Message) {
     if (issue !== null && selectedMessage !== undefined) {
@@ -161,53 +159,39 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
 
         <div className={styles.paneBody}>
 
-          <PaneHeader align="left">General messages</PaneHeader>
-          <NewGeneralMessagePrompt
-            highlight={issue.general.messages.length < 1}
-            idx={0}
-            existingMessages={issue.general.messages}
-            onCreate={handleNewGeneralMessage} />
-          {[...issue.general.messages.entries()].map(([idx, msg]: [number, Message]) => (
-            <>
-              <MessageItem
-                message={msg}
-                selected={idx == selectedMessage && selectedSection === 'general'}
-                onSelect={() => handleMessageSelection('general', idx)}
-                onDelete={() => handleMessageRemoval('general', idx)}
-              />
-              <NewGeneralMessagePrompt
-                idx={idx + 1}
-                existingMessages={issue.general.messages}
-                onCreate={handleNewGeneralMessage} />
-            </>
-          ))}
-
-          <PaneHeader align="left" className={styles.amendmentsHeader}>Amendments</PaneHeader>
-          <NewAmendmentPrompt
-            idx={0}
-            highlight={issue.amendments.messages.length < 1}
-            existingAmendments={issue.amendments.messages.map((msg: Message) => msg as AmendmentMessage)}
+          <MessageList
+            title="General Messages"
             issueId={issue.id}
-            issueIndex={ws.issues}
-            publicationIndex={ws.publications}
-            onCreate={handleNewAmendment} />
-          {[...issue.amendments.messages.entries()].map(([idx, msg]: [number, Message]) => (
-            <>
-              <MessageItem
-                message={msg}
-                selected={idx == selectedMessage && selectedSection === 'amendments'}
-                onSelect={() => handleMessageSelection('amendments', idx)}
-                onDelete={() => handleMessageRemoval('amendments', idx)}
-              />
+            items={issue.general.messages}
+            selectedIdx={selectedSection === 'general' ? selectedMessage : undefined}
+            onSelect={(idx) => handleMessageSelection('general', idx)}
+            onDelete={(idx) => handleMessageRemoval('general', idx)}
+            prompt={(idx, highlight) =>
+              <NewGeneralMessagePrompt
+                highlight={highlight}
+                idx={idx}
+                existingMessages={issue.general.messages}
+                onCreate={(msg, idx) => handleNewMessage(msg, 'general', idx)} />}
+          />
+
+          <MessageList
+            title="Amendments"
+            issueId={issue.id}
+            items={issue.amendments.messages}
+            selectedIdx={selectedSection === 'amendments' ? selectedMessage : undefined}
+            onSelect={(idx) => handleMessageSelection('amendments', idx)}
+            onDelete={(idx) => handleMessageRemoval('amendments', idx)}
+            className={styles.amendmentsList}
+            prompt={(idx, highlight) =>
               <NewAmendmentPrompt
-                idx={idx + 1}
-                existingAmendments={issue.amendments.messages.map((msg: Message) => msg as AmendmentMessage)}
+                highlight={highlight}
+                idx={idx}
                 issueId={issue.id}
                 issueIndex={ws.issues}
                 publicationIndex={ws.publications}
-                onCreate={handleNewAmendment} />
-            </>
-          ))}
+                existingAmendments={issue.amendments.messages.map((msg: Message) => msg as AmendmentMessage)}
+                onCreate={(msg, idx) => handleNewMessage(msg, 'amendments', idx)} />}
+          />
 
         </div>
       </div>
