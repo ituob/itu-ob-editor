@@ -1,16 +1,15 @@
 import { throttle } from 'throttle-debounce';
 import { ipcRenderer } from 'electron';
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useContext } from 'react';
 import { Spinner, NonIdealState } from '@blueprintjs/core';
+
+import { WorkspaceContext } from 'renderer/workspace-context';
 
 import { request } from 'sse/api/renderer';
 import { PaneHeader } from 'sse/renderer/widgets/pane-header';
-import { Index } from 'sse/storage/query';
 
 import { OBIssue, OBMessageSection, issueFactories } from 'models/issues';
-import { Publication } from 'models/publications';
-import { ITURecommendation } from 'models/recommendations';
 import { Message, AmendmentMessage } from 'models/messages';
 
 import { Workspace } from 'main/storage';
@@ -24,6 +23,9 @@ import * as styles from './styles.scss';
 
 
 export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
+
+  const workspace = useContext(WorkspaceContext);
+  const ws = workspace.current as Workspace;
 
   /* On first render only: fetch data from storage, set up re-fetching where needed */
 
@@ -45,7 +47,6 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
   var initialSection: OBMessageSection = 'general';
 
   const [maybeIssue, updateIssue] = useState(null as OBIssue | null);
-  const [ws, updateWs] = useState({ issues: {}, publications: {}, recommendations: {} } as Workspace);
 
   // If issue hasn’t loaded yet, silence React hooks and bail out of rendering early:
   if (maybeIssue === null) {
@@ -94,11 +95,7 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
   /* Storage API utilities */
 
   async function storageGetWorkspace() {
-    updateWs({
-      issues: await request<Index<OBIssue>>('storage-get-all-issues'),
-      publications: await request<Index<Publication>>('storage-get-all-publications'),
-      recommendations: await request<Index<ITURecommendation>>('storage-get-all-recommendations'),
-    });
+    workspace.refresh();
   }
 
   async function storageGetIssue() {

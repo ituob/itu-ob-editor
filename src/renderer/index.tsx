@@ -14,6 +14,13 @@ import { IssueScheduler } from './issue-scheduler';
 import { PublicationEditor } from './publication-editor';
 import { WelcomeConfigScreen } from './welcome';
 
+import { WorkspaceContext } from './workspace-context';
+import { request } from 'sse/api/renderer';
+import { Index } from 'sse/storage/query';
+import { OBIssue } from 'models/issues';
+import { Publication } from 'models/publications';
+import { ITURecommendation } from 'models/recommendations';
+
 import '!style-loader!css-loader!@blueprintjs/datetime/lib/css/blueprint-datetime.css';
 import '!style-loader!css-loader!@blueprintjs/core/lib/css/blueprint.css';
 import '!style-loader!css-loader!./normalize.css';
@@ -70,6 +77,22 @@ const App: React.FC<{}> = function () {
       title="Unknown component requested" />;
   }
 
+  const [workspace, updateWorkspace] = useState({
+    current: {
+      issues: {},
+      publications: {},
+      recommendations: {},
+    },
+    refresh: async () => {
+      const newCurrent = {
+        issues: await request<Index<OBIssue>>('storage-get-all-issues'),
+        publications: await request<Index<Publication>>('storage-get-all-publications'),
+        recommendations: await request<Index<ITURecommendation>>('storage-get-all-recommendations'),
+      };
+      updateWorkspace(workspace => ({ ...workspace, current: newCurrent }));
+    },
+  });
+
   const [langConfig, setLangConfig] = useState({
     available: { en: 'English', zh: 'Chinese', ru: 'Russian' },
     default: 'en',
@@ -81,7 +104,9 @@ const App: React.FC<{}> = function () {
 
   return (
     <LangConfigContext.Provider value={langConfig}>
-      {component}
+      <WorkspaceContext.Provider value={workspace}>
+        {component}
+      </WorkspaceContext.Provider>
     </LangConfigContext.Provider>
   );
 };
