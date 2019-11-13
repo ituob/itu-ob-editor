@@ -160,13 +160,13 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
         <PaneHeader align="right" loud={true} className={styles.paneHeader}>No. {issue.id}</PaneHeader>
 
         <div className={styles.paneBody}>
+
           <PaneHeader align="left">General messages</PaneHeader>
           <NewGeneralMessagePrompt
             highlight={issue.general.messages.length < 1}
             idx={0}
             issue={issue}
             handleNewMessage={handleNewGeneralMessage} />
-
           {[...issue.general.messages.entries()].map(([idx, msg]: [number, Message]) => (
             <>
               <MessageItem
@@ -203,14 +203,16 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
                 handleNewMessage={handleNewAmendment} />
             </>
           ))}
-        </div>
 
+        </div>
       </div>
+
       <div className={`
           ${styles.selectedMessagePane}
           editor-pane-message-${selectedMessage !== undefined ? (issue[selectedSection].messages[selectedMessage] || {}).type : ''}`}>
         {editor}
       </div>
+
     </div>
   )
 };

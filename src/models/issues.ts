@@ -6,21 +6,11 @@ export interface MessageBlock {
   messages: Message[],
 }
 
-
 export interface AnnexesBlock {
   [pubId: string]: { position_on: Date },
 }
 
-
-export interface ScheduledIssue extends IndexableObject {
-  id: number,
-  publication_date: Date,
-  cutoff_date: Date,
-}
-
-
-export type OBMessageSection = 'amendments' | 'general'
-
+export type OBMessageSection = 'amendments' | 'general';
 
 export interface OBIssue extends IndexableObject {
   // Stored data
@@ -32,11 +22,17 @@ export interface OBIssue extends IndexableObject {
   annexes: AnnexesBlock,
 }
 
+export interface ScheduledIssue extends IndexableObject {
+  // Trimmed down OBIssue, schedule only
+  id: number,
+  publication_date: Date,
+  cutoff_date: Date,
+}
+
 
 interface Factories<M> {
   [factoryName: string]: (obj: M, ...params: any) => M,
 }
-
 
 export const issueFactories: Factories<OBIssue> = {
 
