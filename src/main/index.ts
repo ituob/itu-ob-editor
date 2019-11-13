@@ -71,6 +71,12 @@ const ISSUE_SCHEDULER_WINDOW_OPTS: WindowOpenerParams = {
   dimensions: { width: 600, height: 500, minWidth: 600, minHeight: 400 },
 };
 
+const HELP_WINDOW_OPTS: WindowOpenerParams = {
+  title: `${APP_TITLE} Help`,
+  url: APP_HELP_ROOT,
+  dimensions: { width: 1100, height: 850, minWidth: 550, minHeight: 450 },
+}
+
 
 /* On macOS, it is common to not quit when all windows are closed,
    and recreate main window after app is activated. */
@@ -192,19 +198,11 @@ then(results => {
       getHelpMenuItems: () => ([
         {
           label: "How to use ITU OB Editor?",
-          click: async () => { await openWindow({
-            title: `${APP_TITLE} Help`,
-            url: APP_HELP_ROOT,
-            dimensions: { width: 1100, height: 650, minWidth: 550, minHeight: 450 },
-          }); },
+          click: async () => { await openHelpWindow() },
         },
         {
           label: "Data migration guide",
-          click: async () => { await openWindow({
-            title: `Data migration guide`,
-            url: `${APP_HELP_ROOT}migration/`,
-            dimensions: { width: 1100, height: 650, minWidth: 550, minHeight: 450 },
-          }); },
+          click: async () => { await openHelpWindow('migration/', { title: "Data migration guide" }) },
         },
       ]),
     }));
@@ -391,6 +389,12 @@ then(results => {
     dimensions: { width: 800, minWidth: 600, height: 650, minHeight: 650 },
   }));
 
+  makeWindowEndpoint('help', ({ path, title }: { path?: string, title?: string }) => ({
+    ...HELP_WINDOW_OPTS,
+    ...(title ? { title } : {}),
+    url: `${APP_HELP_ROOT}${path || ''}`,
+  }));
+
   makeWindowEndpoint('data-synchronizer', () => ({
     component: 'dataSynchronizer',
     title: 'Merge Changes',
@@ -422,5 +426,14 @@ async function openHomeWindow() {
     title: APP_TITLE,
     dimensions: { width: 300, height: 400, minWidth: 300, minHeight: 300 },
     frameless: true,
+  });
+}
+
+
+async function openHelpWindow(path?: string, opts?: any) {
+  return await openWindow({
+    ...HELP_WINDOW_OPTS,
+    ...(opts ? opts : {}),
+    ...(path ? { url: `${APP_HELP_ROOT}${path || ''}` } : {}),
   });
 }
