@@ -9,7 +9,7 @@ import { ServiceRestrictionsMessage, SRItem } from 'models/messages/service_rest
 import { MessageEditorProps, MessageEditorDialog } from '../message-editor';
 
 
-export const MessageEditor: React.FC<MessageEditorProps> = function ({ message, onChange }) {
+export const MessageForm: React.FC<MessageEditorProps> = function ({ message, onChange }) {
   const initialItems = (message as ServiceRestrictionsMessage).items;
 
   const lang = useContext(LangConfigContext);

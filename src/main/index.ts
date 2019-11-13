@@ -294,35 +294,8 @@ then(results => {
     return issue;
   });
 
-  listen<{ issueId: string, section: OBMessageSection, msgIdx: number }, Message>
-  ('get-ob-message', async ({ issueId, section, msgIdx }) => {
-    const msg: Message = (storage.workspace.issues[issueId] || {})[section].messages[msgIdx];
-    if (!msg) {
-      throw new Error(`Requested message ${issueId}/${section}#${msgIdx} could not be found`);
-    }
-
-    return msg;
-  });
-
-  listen<{ issueId: string, section: OBMessageSection, msgIdx: number }, { success: boolean }>
-  ('remove-ob-message', async ({ issueId, section, msgIdx }) => {
-    const issue: OBIssue = storage.workspace.issues[issueId];
-    if (!issue) {
-      throw new Error(`Requested issue ${issueId} could not be found`);
-    }
-    const msg: Message = issue[section].messages[msgIdx];
-    if (!msg) {
-      throw new Error(`Requested message ${issueId}/${section}#${msgIdx} could not be found`);
-    }
-
-    const newIssue = issueFactories.withRemovedMessage(issue, section, msgIdx);
-    await storage.storeManagers.issues.store(newIssue, storage);
-
-    return { success: true };
-  });
-
   listen<{ issueId: string, section: OBMessageSection, msgIdx: number, msg: Message }, { success: boolean }>
-  ('add-ob-message', async ({ issueId, section, msgIdx, msg }) => {
+  ('issue-create-message', async ({ issueId, section, msgIdx, msg }) => {
     const issue: OBIssue = storage.workspace.issues[issueId];
     if (!issue) {
       throw new Error(`Requested issue ${issueId} could not be found`);
@@ -334,8 +307,18 @@ then(results => {
     return { success: true };
   });
 
+  listen<{ issueId: string, section: OBMessageSection, msgIdx: number }, Message>
+  ('issue-read-message', async ({ issueId, section, msgIdx }) => {
+    const msg: Message = (storage.workspace.issues[issueId] || {})[section].messages[msgIdx];
+    if (!msg) {
+      throw new Error(`Requested message ${issueId}/${section}#${msgIdx} could not be found`);
+    }
+
+    return msg;
+  });
+
   listen<{ issueId: string, section: OBMessageSection, msgIdx: number, updatedMsg: Message }, { success: boolean }>
-  ('edit-ob-message', async ({ issueId, section, msgIdx, updatedMsg }) => {
+  ('issue-update-message', async ({ issueId, section, msgIdx, updatedMsg }) => {
     // TODO: We need our storage to lock here (#59)
 
     const issue: OBIssue = storage.workspace.issues[issueId];
@@ -348,6 +331,23 @@ then(results => {
     }
 
     const newIssue = issueFactories.withEditedMessage(issue, section, msgIdx, updatedMsg);
+    await storage.storeManagers.issues.store(newIssue, storage);
+
+    return { success: true };
+  });
+
+  listen<{ issueId: string, section: OBMessageSection, msgIdx: number }, { success: boolean }>
+  ('issue-delete-message', async ({ issueId, section, msgIdx }) => {
+    const issue: OBIssue = storage.workspace.issues[issueId];
+    if (!issue) {
+      throw new Error(`Requested issue ${issueId} could not be found`);
+    }
+    const msg: Message = issue[section].messages[msgIdx];
+    if (!msg) {
+      throw new Error(`Requested message ${issueId}/${section}#${msgIdx} could not be found`);
+    }
+
+    const newIssue = issueFactories.withRemovedMessage(issue, section, msgIdx);
     await storage.storeManagers.issues.store(newIssue, storage);
 
     return { success: true };

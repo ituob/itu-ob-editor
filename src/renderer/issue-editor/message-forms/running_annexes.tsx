@@ -12,7 +12,7 @@ import { MessageEditorProps, MessageEditorDialog } from '../message-editor';
 import * as styles from '../styles.scss';
 
 
-export const MessageEditor: React.FC<MessageEditorProps> = function (props) {
+export const MessageForm: React.FC<MessageEditorProps> = function (props) {
   const [extraPubIds, updateExtraPubIds] = useState(
     (props.message as RunningAnnexesMessage).extra_links);
 

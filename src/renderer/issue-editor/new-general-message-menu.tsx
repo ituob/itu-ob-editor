@@ -5,10 +5,9 @@ import { AddCardTriggerButton } from 'sse/renderer/widgets/editable-card-list';
 import * as editableCardListStyles from 'sse/renderer/widgets/editable-card-list/styles.scss';
 
 import { OBIssue } from 'models/issues';
-import { Message, MessageType } from 'models/messages';
+import { Message, MessageType, getMessageTypeTitle } from 'models/messages';
 
 import { NewMessagePromptProps } from './message-editor';
-import { getMessageTypeTitle } from './messages';
 import * as styles from './styles.scss';
 
 

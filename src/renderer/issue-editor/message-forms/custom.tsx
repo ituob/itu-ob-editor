@@ -8,7 +8,7 @@ import { FreeformContents } from '../freeform-contents';
 import { MessageEditorProps } from '../message-editor';
 
 
-export const MessageEditor: React.FC<MessageEditorProps> = function ({ message, onChange }) {
+export const MessageForm: React.FC<MessageEditorProps> = function ({ message, onChange }) {
   const lang = useContext(LangConfigContext);
   const msg = message as CustomMessage;
 

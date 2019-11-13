@@ -61,6 +61,9 @@ const App: React.FC<{}> = function () {
   } else if (searchParams.get('c') === 'settings') {
     component = <Settings />;
 
+  // } else if (searchParams.get('c') === 'migrationAssistant') {
+  //   component = <MigrationAssistant />;
+
   } else {
     component = <NonIdealState
       icon="error"

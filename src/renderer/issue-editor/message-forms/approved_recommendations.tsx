@@ -10,7 +10,7 @@ import { ApprovedRecommendationsMessage } from 'models/messages/approved_recomme
 import { MessageEditorProps, MessageEditorDialog } from '../message-editor';
 
 
-export const ApprovedRecommendationsEditor: React.FC<MessageEditorProps> = function (props) {
+export const MessageForm: React.FC<MessageEditorProps> = function (props) {
   const [newRecDialogStatus, toggleNewRecDialogStatus] = useState(false);
   const [recs, updateRecs] = useState(
     (props.message as ApprovedRecommendationsMessage).items);

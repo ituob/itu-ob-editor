@@ -37,7 +37,7 @@ function getNewCountryStub(lang: string): TSCountryCommunicationSet {
 }
 
 
-export const TelephoneServiceMessageEditorV2: React.FC<MessageEditorProps> = function ({ message, onChange }) {
+export const MessageForm: React.FC<MessageEditorProps> = function ({ message, onChange }) {
   const [countryCommSets, updateCountryCommSets] = useState((message as TelephoneServiceMessageV2).contents as TSCountryCommunicationSet[])
 
   const lang = useContext(LangConfigContext);

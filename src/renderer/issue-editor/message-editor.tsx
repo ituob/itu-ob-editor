@@ -15,13 +15,16 @@ import {
   isCustom,
 } from 'models/messages';
 
-import { ApprovedRecommendationsEditor } from './messages/approved_recommendations';
-import { MessageEditor as RunningAnnexesEditor } from './messages/running_annexes';
-import { TelephoneServiceMessageEditorV2 } from './messages/telephone_service_2';
-import { MessageEditor as AmendmentEditor } from './messages/amendment';
-import { MessageEditor as ServiceRestrictionsMessageEditor } from './messages/service_restrictions';
-import { MessageEditor as CBProceduresEditor } from './messages/callback_procedures';
-import { MessageEditor as CustomMessageEditor } from './messages/custom';
+import {
+  ApprovedRecommendationsForm,
+  RunningAnnexesForm,
+  TelephoneServiceV2Form,
+  AmendmentForm,
+  ServiceRestrictionsForm,
+  CBProceduresForm,
+  CustomMessageForm,
+} from './message-forms';
+
 import * as styles from './styles.scss';
 
 
@@ -52,24 +55,27 @@ export interface MessageEditorProps {
 
 export function getMessageEditor(msg: Message): React.FC<MessageEditorProps> {
   if (isApprovedRecommendations(msg)) {
-    return ApprovedRecommendationsEditor;
+    return ApprovedRecommendationsForm;
   } else if (isRunningAnnexes(msg)) {
-    return RunningAnnexesEditor;
+    return RunningAnnexesForm;
   } else if (isTelephoneServiceV2(msg)) {
-    return TelephoneServiceMessageEditorV2;
+    return TelephoneServiceV2Form;
   } else if (isServiceRestrictions(msg)) {
-    return ServiceRestrictionsMessageEditor;
+    return ServiceRestrictionsForm;
   } else if (isAmendment(msg)) {
-    return AmendmentEditor;
+    return AmendmentForm;
   } else if (isCallbackProcedures(msg)) {
-    return CBProceduresEditor;
+    return CBProceduresForm;
   } else if (isCustom(msg)) {
-    return CustomMessageEditor;
+    return CustomMessageForm;
   } else {
-    return () => <NonIdealState
-      icon="heart-broken"
-      title={`“${msg.type}” messages aren’t supported yet`}
-      description="Sorry about that." />
+    return () => (
+      <NonIdealState
+        icon="heart-broken"
+        title={`“${msg.type}” messages aren’t supported yet`}
+        description="Sorry about that."
+      />
+    );
     //throw new Error("Unknown message type");
   }
 }

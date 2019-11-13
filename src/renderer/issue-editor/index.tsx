@@ -11,11 +11,10 @@ import { Index } from 'sse/storage/query';
 import { OBIssue, OBMessageSection, issueFactories } from 'models/issues';
 import { Publication } from 'models/publications';
 import { ITURecommendation } from 'models/recommendations';
-import { Message } from 'models/messages';
+import { Message, getMessageTypeTitle  } from 'models/messages';
 
 import { Workspace } from 'main/storage';
 
-import { getMessageTypeTitle } from './messages';
 import { getMessageEditor } from './message-editor';
 import { NewGeneralMessagePrompt } from './new-general-message-menu';
 import { NewAmendmentPrompt } from './new-amendment-menu';
@@ -24,51 +23,39 @@ import { MessageItem } from './message-list-item';
 import * as styles from './styles.scss';
 
 
-interface IssueEditorProps {
-  issueId: string,
-}
-export function IssueEditor(props: IssueEditorProps) {
-  // This rendering logic can (should) be refactored.
+export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
 
-  const [maybeIssue, updateIssue] = useState(null as OBIssue | null);
-  const [ws, updateWs] = useState({ issues: {}, publications: {}, recommendations: {} } as Workspace);
-
-  async function fetchWorkspace() {
-    updateWs({
-      issues: await request<Index<OBIssue>>('storage-get-all-issues'),
-      publications: await request<Index<Publication>>('storage-get-all-publications'),
-      recommendations: await request<Index<ITURecommendation>>('storage-get-all-recommendations'),
-    });
-  }
-
-  async function fetchIssue() {
-    const issue = await request<OBIssue>('issue', { issueId: props.issueId });
-    updateIssue(issue);
-  }
+  /* On first render only: fetch data from storage, set up re-fetching where needed */
 
   useEffect(() => {
-    fetchWorkspace();
-    fetchIssue();
-    ipcRenderer.on('publications-changed', fetchWorkspace);
+    storageGetIssue();
+
+    storageGetWorkspace();
+    ipcRenderer.on('publications-changed', storageGetWorkspace);
+
     return function cleanup() {
-      ipcRenderer.removeListener('publications-changed', fetchWorkspace);
+      ipcRenderer.removeListener('publications-changed', storageGetWorkspace);
     };
   }, []);
 
 
+  /* Prepare initial state */
 
   var initialMessageIdx: number | undefined = undefined;
   var initialSection: OBMessageSection = 'general';
 
+  const [maybeIssue, updateIssue] = useState(null as OBIssue | null);
+  const [ws, updateWs] = useState({ issues: {}, publications: {}, recommendations: {} } as Workspace);
+
+  // If issue hasn’t loaded yet, silence React hooks and bail out of rendering early:
   if (maybeIssue === null) {
-    // Silence React hooks :(
     useState(initialMessageIdx);
     useState(initialSection);
     useMemo(() => {}, [null, null, 0]);
 
     return <Spinner className={styles.spinner} />;
   }
-
+  // Since we didn’t bail, we have a proper issue:
   const issue = maybeIssue as OBIssue;
 
   if (issue.general.messages.length > 0) {
@@ -79,8 +66,11 @@ export function IssueEditor(props: IssueEditorProps) {
     initialSection = "amendments";
   }
 
-  const [ selectedMessage, selectMessage ] = useState(initialMessageIdx);
-  const [ selectedSection, selectSection ] = useState(initialSection);
+  const [selectedMessage, selectMessage] = useState(initialMessageIdx);
+  const [selectedSection, selectSection] = useState(initialSection);
+
+
+  /* Message editor */
 
   // Memoization ensures that updating message on every keystroke
   // doesn’t cause the editor to re-render, which loses cursor position and undo history.
@@ -100,6 +90,33 @@ export function IssueEditor(props: IssueEditorProps) {
         />
   ), [selectedMessage, selectedSection, (issue.amendments.messages.length + issue.general.messages.length)]);
 
+
+  /* Storage API utilities */
+
+  async function storageGetWorkspace() {
+    updateWs({
+      issues: await request<Index<OBIssue>>('storage-get-all-issues'),
+      publications: await request<Index<Publication>>('storage-get-all-publications'),
+      recommendations: await request<Index<ITURecommendation>>('storage-get-all-recommendations'),
+    });
+  }
+
+  async function storageGetIssue() {
+    const issue = await request<OBIssue>('issue', { issueId });
+    updateIssue(issue);
+  }
+
+  async function _storageUpdateIssue(action: string, params: any) {
+    // TODO: Handle API failure
+    return await request<{ success: boolean }>(`issue-${action}`, { issueId, ...params });
+  }
+  // Slow down updates to reduce the chance of race condition when user makes many edits in rapids succession
+  // TODO: A lock would be better
+  const storageUpdateIssue = throttle(500, _storageUpdateIssue);
+
+
+  /* Event handling utilities */
+
   function handleMessageSelection(inSection: OBMessageSection, atIndex: number) {
     selectMessage(atIndex);
     selectSection(inSection); 
@@ -108,62 +125,32 @@ export function IssueEditor(props: IssueEditorProps) {
   function handleNewMessage(msg: Message, inSection: OBMessageSection, atIndex: number) {
     if (issue) {
       updateIssue(issueFactories.withAddedMessage(issue, inSection, atIndex, msg));
-
-      request<{ success: boolean }>('add-ob-message', {
-        issueId: props.issueId,
-        section: inSection,
-        msgIdx: atIndex,
-        msg: msg,
-      });
-
+      storageUpdateIssue('create-message', { section: inSection, msgIdx: atIndex, msg: msg });
       setTimeout(() => {
         selectMessage(atIndex);
         selectSection(inSection);
       }, 100);
     }
   }
+  const handleNewGeneralMessage = (msg: Message, idx: number) => handleNewMessage(msg, 'general', idx);
+  const handleNewAmendment = (msg: Message, idx: number) => handleNewMessage(msg, 'amendments', idx);
 
-  function handleNewGeneralMessage(msg: Message, idx: number) {
-    return handleNewMessage(msg, 'general', idx);
-  }
-
-  function handleNewAmendment(msg: Message, idx: number) {
-    return handleNewMessage(msg, 'amendments', idx);
+  function handleMessageEdit(updatedMessage: Message) {
+    if (issue !== null && selectedMessage !== undefined) {
+      updateIssue(issueFactories.withEditedMessage(issue, selectedSection, selectedMessage, updatedMessage));
+      storageUpdateIssue('update-message', {
+        section: selectedSection,
+        msgIdx: selectedMessage,
+        updatedMsg: updatedMessage,
+      });
+    }
   }
 
   function handleMessageRemoval(inSection: OBMessageSection, atIndex: number) {
     if (issue) {
       updateIssue(issueFactories.withRemovedMessage(issue, inSection, atIndex));
-
-      request<{ success: boolean }>('remove-ob-message', {
-        issueId: props.issueId,
-        section: inSection,
-        msgIdx: atIndex,
-      });
-
+      storageUpdateIssue('remove-message', { section: inSection, msgIdx: atIndex });
       selectMessage(undefined);
-    }
-  }
-
-  async function _requestMessageUpdate(inSection: OBMessageSection, atIdx: number, withNewMessage: any) {
-    await request<{ success: boolean }>('edit-ob-message', {
-      issueId: props.issueId,
-      section: inSection,
-      msgIdx: atIdx,
-      updatedMsg: withNewMessage,
-    });
-  }
-
-  // Slow down updates to reduce the chance of race condition when user makes many edits in rapids succession
-  // TODO: A lock would be better
-  const requestMessageUpdate = throttle(500, _requestMessageUpdate);
-
-  function handleMessageEdit(updatedMessage: Message) {
-    if (selectedMessage !== undefined) {
-      if (issue !== null) {
-        requestMessageUpdate(selectedSection, selectedMessage, updatedMessage);
-        updateIssue(issueFactories.withEditedMessage(issue, selectedSection, selectedMessage, updatedMessage));
-      }
     }
   }
 
