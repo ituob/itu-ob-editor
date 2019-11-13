@@ -7,10 +7,10 @@ import { AddCardTrigger, SimpleEditableCard } from 'sse/renderer/widgets/editabl
 import { ITURecCode, ITURecVersion } from 'models/recommendations';
 import { ApprovedRecommendationsMessage } from 'models/messages/approved_recommendations';
 
-import { MessageEditorProps, MessageEditorDialog } from '../message-editor';
+import { MessageFormProps, MessageEditorDialog } from '../message-editor';
 
 
-export const MessageForm: React.FC<MessageEditorProps> = function (props) {
+export const MessageForm: React.FC<MessageFormProps> = function (props) {
   const [newRecDialogStatus, toggleNewRecDialogStatus] = useState(false);
   const [recs, updateRecs] = useState(
     (props.message as ApprovedRecommendationsMessage).items);

@@ -8,11 +8,11 @@ import { RunningAnnexesMessage } from 'models/messages/running_annexes';
 
 import { DateStamp } from 'renderer/widgets/dates';
 
-import { MessageEditorProps, MessageEditorDialog } from '../message-editor';
+import { MessageFormProps, MessageEditorDialog } from '../message-editor';
 import * as styles from '../styles.scss';
 
 
-export const MessageForm: React.FC<MessageEditorProps> = function (props) {
+export const MessageForm: React.FC<MessageFormProps> = function (props) {
   const [extraPubIds, updateExtraPubIds] = useState(
     (props.message as RunningAnnexesMessage).extra_links);
 

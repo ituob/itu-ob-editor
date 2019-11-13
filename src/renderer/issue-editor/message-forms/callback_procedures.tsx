@@ -1,9 +1,9 @@
 import React from 'react';
 import { NonIdealState } from '@blueprintjs/core';
-import { MessageEditorProps } from '../message-editor';
+import { MessageFormProps } from '../message-editor';
 
 
-export const MessageForm: React.FC<MessageEditorProps> = function () {
+export const MessageForm: React.FC<MessageFormProps> = function () {
   return (
     <NonIdealState
       icon="tick"

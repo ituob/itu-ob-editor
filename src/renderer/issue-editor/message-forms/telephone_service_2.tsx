@@ -14,7 +14,7 @@ import {
 import { DateStamp } from 'renderer/widgets/dates';
 
 import { FreeformContents } from '../freeform-contents';
-import { MessageEditorProps, MessageEditorDialog } from '../message-editor';
+import { MessageFormProps, MessageEditorDialog } from '../message-editor';
 
 import * as styles from '../styles.scss';
 
@@ -37,7 +37,7 @@ function getNewCountryStub(lang: string): TSCountryCommunicationSet {
 }
 
 
-export const MessageForm: React.FC<MessageEditorProps> = function ({ message, onChange }) {
+export const MessageForm: React.FC<MessageFormProps> = function ({ message, onChange }) {
   const [countryCommSets, updateCountryCommSets] = useState((message as TelephoneServiceMessageV2).contents as TSCountryCommunicationSet[])
 
   const lang = useContext(LangConfigContext);

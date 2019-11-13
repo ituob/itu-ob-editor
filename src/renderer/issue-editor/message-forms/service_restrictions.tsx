@@ -6,10 +6,10 @@ import { LangConfigContext } from 'sse/localizer/renderer';
 
 import { ServiceRestrictionsMessage, SRItem } from 'models/messages/service_restrictions';
 
-import { MessageEditorProps, MessageEditorDialog } from '../message-editor';
+import { MessageFormProps, MessageEditorDialog } from '../message-editor';
 
 
-export const MessageForm: React.FC<MessageEditorProps> = function ({ message, onChange }) {
+export const MessageForm: React.FC<MessageFormProps> = function ({ message, onChange }) {
   const initialItems = (message as ServiceRestrictionsMessage).items;
 
   const lang = useContext(LangConfigContext);

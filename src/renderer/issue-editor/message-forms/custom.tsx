@@ -5,10 +5,10 @@ import { LangConfigContext } from 'sse/localizer/renderer';
 
 import { CustomMessage } from 'models/messages/custom';
 import { FreeformContents } from '../freeform-contents';
-import { MessageEditorProps } from '../message-editor';
+import { MessageFormProps } from '../message-editor';
 
 
-export const MessageForm: React.FC<MessageEditorProps> = function ({ message, onChange }) {
+export const MessageForm: React.FC<MessageFormProps> = function ({ message, onChange }) {
   const lang = useContext(LangConfigContext);
   const msg = message as CustomMessage;
 

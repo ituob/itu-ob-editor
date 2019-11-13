@@ -11,11 +11,11 @@ import { Index } from 'sse/storage/query';
 import { OBIssue, OBMessageSection, issueFactories } from 'models/issues';
 import { Publication } from 'models/publications';
 import { ITURecommendation } from 'models/recommendations';
-import { Message, getMessageTypeTitle  } from 'models/messages';
+import { Message } from 'models/messages';
 
 import { Workspace } from 'main/storage';
 
-import { getMessageEditor } from './message-editor';
+import { MessageEditor } from './message-editor';
 import { NewGeneralMessagePrompt } from './new-general-message-menu';
 import { NewAmendmentPrompt } from './new-amendment-menu';
 import { MessageItem } from './message-list-item';
@@ -149,7 +149,7 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
   function handleMessageRemoval(inSection: OBMessageSection, atIndex: number) {
     if (issue) {
       updateIssue(issueFactories.withRemovedMessage(issue, inSection, atIndex));
-      storageUpdateIssue('remove-message', { section: inSection, msgIdx: atIndex });
+      storageUpdateIssue('delete-message', { section: inSection, msgIdx: atIndex });
       selectMessage(undefined);
     }
   }
@@ -213,37 +213,4 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
       </div>
     </div>
   )
-}
-
-
-interface MessageEditorProps {
-  workspace: Workspace,
-  message: Message,
-  issue: OBIssue,
-  onChange: (updatedMessage: Message) => void,
-}
-const MessageEditor: React.FC<MessageEditorProps> = function (props) {
-  if (props.message) {
-    const EditorCls = getMessageEditor(props.message);
-    return (
-      <>
-        <PaneHeader align="left" className={styles.inflexibleEditorPaneHeader}>
-          {getMessageTypeTitle(props.message.type)}
-        </PaneHeader>
-        <EditorCls
-          workspace={props.workspace}
-          message={props.message}
-          issue={props.issue}
-          onChange={(updatedMessage: any) => props.onChange({ ...updatedMessage, type: props.message.type })}
-        />
-      </>
-    );
-  } else {
-    return (
-      <NonIdealState
-        icon="error"
-        title="Error loading message"
-      />
-    );
-  }
 };
