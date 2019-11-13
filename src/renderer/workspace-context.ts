@@ -1,3 +1,7 @@
+/* This context aims to provide OB data throughout the app.
+   The data is intended to be read only, no changes will get synced back to storage.
+   Refresh method is provided to fetch new data from storage. */
+
 import React from 'react';
 
 import { Index } from 'sse/storage/query';
