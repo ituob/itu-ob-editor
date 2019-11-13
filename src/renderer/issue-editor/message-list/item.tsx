@@ -1,6 +1,7 @@
 import React from 'react';
 import { SimpleEditableCard } from 'sse/renderer/widgets/editable-card-list';
-import { Message, getMessageTitle } from 'models/messages';
+import { Message } from 'models/messages';
+import { MessageTitle } from '../message-editor';
 
 
 interface MessageItemProps {
@@ -15,7 +16,7 @@ export function MessageItem(props: MessageItemProps) {
         selected={props.selected}
         onSelect={props.onSelect}
         onDelete={props.onDelete}>
-      {getMessageTitle(props.message)}
+      <MessageTitle message={props.message} />
     </SimpleEditableCard>
   );
 };

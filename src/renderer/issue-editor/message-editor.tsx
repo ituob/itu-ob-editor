@@ -1,17 +1,20 @@
-import React from 'react';
-import { NonIdealState, Classes, Dialog } from '@blueprintjs/core';
+import React, { useContext } from 'react';
+
+import { LangConfigContext } from 'sse/localizer/renderer';
+import { NonIdealState, Classes, Dialog, Icon } from '@blueprintjs/core';
 import { PaneHeader } from 'sse/renderer/widgets/pane-header';
 
 import { Workspace } from 'main/storage';
 import { OBIssue } from 'models/issues';
 import {
   Message,
-  getMessageTitle,
+  AmendmentMessage,
 
   isApprovedRecommendations,
   isServiceRestrictions,
   isRunningAnnexes,
   isAmendment,
+  isTelephoneService,
   isTelephoneServiceV2,
   isCallbackProcedures,
   isCustom,
@@ -26,6 +29,8 @@ import {
   CBProceduresForm,
   CustomMessageForm,
 } from './message-forms';
+
+import { WorkspaceContext } from 'renderer/workspace-context';
 
 import * as styles from './styles.scss';
 
@@ -55,7 +60,10 @@ export const MessageEditor: React.FC<MessageEditorProps> = function (props) {
       <>
         <PaneHeader align="left" className={styles.messageEditorPaneHeader}>
           <div className="title">
-            {getMessageTitle(props.message)}
+            <MessageTitle message={props.message} />
+          </div>
+          <div className="actions">
+            <Icon icon="help" />
           </div>
         </PaneHeader>
 
@@ -134,6 +142,42 @@ export const MessageEditorDialog: React.FC<MessageEditorDialogProps> = function 
 
 
 /* Utility functions */
+
+export const MessageTitle: React.FC<{ message: Message }> = ({ message }) => {
+  const workspace = useContext(WorkspaceContext);
+  const lang = useContext(LangConfigContext);
+
+  if (isApprovedRecommendations(message)) {
+    return <>Approved Recommendations</>;
+  } else if (isRunningAnnexes(message)) {
+    return <>Lists Annexed</>;
+  } else if (isTelephoneServiceV2(message)) {
+    return <>Telephone Service</>;
+  } else if (isTelephoneService(message)) {
+    return <>Telephone Service (old)</>;
+  } else if (isCallbackProcedures(message)) {
+    return <>Call-back and Alternative Calling Procedures</>;
+  } else if (isCustom(message)) {
+    const title = (message.title || {})[lang.default] || '';
+    if (title) {
+      return <><small title="Custom message">Cust.</small>&ensp;{title}</>;
+    } else {
+      return <>Custom message</>;
+    }
+  } else if (isAmendment(message)) {
+    const pubId = ((message as AmendmentMessage).target || {}).publication;
+    const pub = workspace.current.publications[pubId];
+    if (pub) {
+      return <><small title="Amendment to publication">Amd.&nbsp;to</small>&ensp;{pub.title[lang.default]}</>;
+    } else {
+      return <>Amendment</>;
+    }
+  } else if (isServiceRestrictions(message)) {
+    return <>Service Restrictions</>;
+  } else {
+    return <em>unknown message {message.type}</em>;
+  }
+}
 
 function getMessageEditor(msg: Message): React.FC<MessageEditorProps> {
   if (isApprovedRecommendations(msg)) {

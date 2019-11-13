@@ -28,8 +28,7 @@ export type Message =
 export type MessageType = Message["type"]
 
 
-// TODO: Below is ripe of duplication, could use some generics magic
-
+// TODO: Ripe of duplication, could use some generics magic
 
 export function isApprovedRecommendations(msg: Message): msg is ApprovedRecommendationsMessage {
   return msg.type === 'approved_recommendations';
@@ -57,34 +56,11 @@ export function isAmendment(msg: Message): msg is AmendmentMessage {
 }
 
 
-export function getMessageTitle(msg: Message): string {
-  if (isApprovedRecommendations(msg)) {
-    return "Approved Recommendations";
-  } else if (isRunningAnnexes(msg)) {
-    return "Lists Annexed";
-  } else if (isTelephoneServiceV2(msg)) {
-    return "Telephone Service";
-  } else if (isTelephoneService(msg)) {
-    return "Telephone Service (old)";
-  } else if (isCallbackProcedures(msg)) {
-    return "Call-back and Alternative Calling Procedures";
-  } else if (isCustom(msg)) {
-    return "Custom message";
-  } else if (isAmendment(msg)) {
-    return `Amd. to ${((msg as AmendmentMessage).target || {}).publication}`;
-  } else if (isServiceRestrictions(msg)) {
-    return "Service Restrictions";
-  } else {
-    return msg.type;
-    //throw new Error(`Unknown message type: ${msg.type}`);
-  }
-}
-
-
 export {
   ApprovedRecommendationsMessage,
   TelephoneServiceMessage,
   TelephoneServiceMessageV2,
   AmendmentMessage,
   RunningAnnexesMessage,
+  CustomMessage,
 }
