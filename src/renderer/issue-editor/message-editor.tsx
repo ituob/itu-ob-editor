@@ -1,8 +1,9 @@
 import React, { useContext } from 'react';
 
 import { LangConfigContext } from 'sse/localizer/renderer';
-import { NonIdealState, Classes, Dialog, Icon } from '@blueprintjs/core';
+import { NonIdealState, Classes, Text, Dialog, Button } from '@blueprintjs/core';
 import { PaneHeader } from 'sse/renderer/widgets/pane-header';
+import { openWindow } from 'sse/api/renderer';
 
 import { Workspace } from 'main/storage';
 import { OBIssue } from 'models/issues';
@@ -56,14 +57,25 @@ interface MessageEditorProps {
 export const MessageEditor: React.FC<MessageEditorProps> = function (props) {
   if (props.message) {
     const EditorCls = getMessageEditor(props.message);
+
+    function showMessageHelp() {
+      let helpPath: string;
+      if (isAmendment(props.message)) {
+        helpPath = "amend-publication/";
+      } else {
+        helpPath = `messages/${props.message.type}/`;
+      }
+      openWindow('help', { path: helpPath, title: "Message editing help" });
+    }
+
     return (
       <>
         <PaneHeader align="left" className={styles.messageEditorPaneHeader}>
-          <div className="title">
+          <Text className="title" ellipsize={true}>
             <MessageTitle message={props.message} />
-          </div>
+          </Text>
           <div className="actions">
-            <Icon icon="help" />
+            <Button minimal={true} icon="help" onClick={showMessageHelp} />
           </div>
         </PaneHeader>
 

@@ -36,6 +36,27 @@
   position: relative;
   z-index: 2;
   overflow-y: auto;
+
+  :local .messageEditorPaneHeader {
+    display: flex;
+    flex-flow: row nowrap;
+    padding-right: 0;
+
+    :global .title {
+      flex: 1;
+      margin-right: 1rem;
+    }
+    :global .actions {
+      > * {
+        height: $pt-navbar-height;
+        width: 4em;
+        border-radius: 0;
+        &:focus {
+          outline: none;
+        }
+      }
+    }
+  }
 }
 
 :local .newMessageMenu {
