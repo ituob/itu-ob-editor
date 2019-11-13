@@ -6,11 +6,7 @@ import { ApprovedRecommendationsMessage } from './approved_recommendations';
 import { RunningAnnexesMessage } from './running_annexes';
 import { TelephoneServiceMessage } from './telephone_service';
 import { TelephoneServiceMessageV2 } from './telephone_service_2';
-
-export interface CustomMessage {
-  type: "custom",
-  contents: any,
-}
+import { CustomMessage } from './custom';
 
 export interface CallbackProceduresMessage {
   type: "callback_procedures",

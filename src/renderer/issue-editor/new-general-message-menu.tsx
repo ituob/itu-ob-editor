@@ -95,6 +95,8 @@ const NewGeneralMessageMenu: React.FC<NewGeneralMessageMenuProps> = function (pr
         text="Custom message…"
         onClick={() => props.onCreate({
           type: 'custom',
+          title: { en: '' },
+          recommendation: null,
           contents: { en: {} },
         })}
       />
