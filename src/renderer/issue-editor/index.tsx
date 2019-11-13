@@ -11,7 +11,7 @@ import { Index } from 'sse/storage/query';
 import { OBIssue, OBMessageSection, issueFactories } from 'models/issues';
 import { Publication } from 'models/publications';
 import { ITURecommendation } from 'models/recommendations';
-import { Message } from 'models/messages';
+import { Message, AmendmentMessage } from 'models/messages';
 
 import { Workspace } from 'main/storage';
 
@@ -186,6 +186,7 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
           <NewAmendmentPrompt
             idx={0}
             highlight={issue.amendments.messages.length < 1}
+            existingAmendments={issue.amendments.messages.map((msg: Message) => msg as AmendmentMessage)}
             issueId={issue.id}
             issueIndex={ws.issues}
             publicationIndex={ws.publications}
@@ -200,6 +201,7 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
               />
               <NewAmendmentPrompt
                 idx={idx + 1}
+                existingAmendments={issue.amendments.messages.map((msg: Message) => msg as AmendmentMessage)}
                 issueId={issue.id}
                 issueIndex={ws.issues}
                 publicationIndex={ws.publications}

@@ -22,6 +22,7 @@ const MAX_MENU_ITEMS_TO_SHOW = 7;
 type NewAmendmentPromptProps = NewMessagePromptProps & {
   issueId: number,
   issueIndex: Index<OBIssue>,
+  existingAmendments: AmendmentMessage[],
   publicationIndex: Index<Publication>,
 }
 export const NewAmendmentPrompt: React.FC<NewAmendmentPromptProps> = function (props) {
@@ -73,8 +74,8 @@ export const NewAmendmentPrompt: React.FC<NewAmendmentPromptProps> = function (p
       itemListRenderer={NewAmendmentMenuRenderer}
       itemPredicate={NewAmendmentMenuItemFilter}
       itemDisabled={(item) => {
-        return props.issue.amendments.messages.map((amd: Message) => {
-          return (amd as AmendmentMessage).target.publication;
+        return props.existingAmendments.map((amd) => {
+          return amd.target.publication;
         }).indexOf(item.id) >= 0;
       }}
       onItemSelect={(pub: AmendablePublication) =>
