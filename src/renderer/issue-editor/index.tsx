@@ -70,7 +70,7 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
   const [selectedSection, selectSection] = useState(initialSection);
 
 
-  /* Message editor */
+  /* Message editor JSX */
 
   // Memoization ensures that updating message on every keystroke
   // doesn’t cause the editor to re-render, which loses cursor position and undo history.
@@ -152,11 +152,14 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
     }
   }
 
+
+  /* Main JSX */
+
   return (
     <div className={styles.twoPaneEditor}>
       <div className={styles.messageListPane}>
-        <PaneHeader align="right" loud={true} className={styles.paneHeader}>No. {issue.id}</PaneHeader>
 
+        <PaneHeader align="right" loud={true} className={styles.paneHeader}>No. {issue.id}</PaneHeader>
         <div className={styles.paneBody}>
 
           <MessageList

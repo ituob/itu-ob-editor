@@ -137,10 +137,10 @@
   padding-top: 1rem;
 }
 
-/* Amendment */
+/* Amendment & custom messages */
 
-:global .editor-pane-message-amendment,
-:global .editor-pane-message-custom {
+.editor-pane-message-amendment,
+.editor-pane-message-custom {
   display: flex;
   flex-flow: column nowrap;
 

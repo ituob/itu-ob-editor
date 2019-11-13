@@ -58,6 +58,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = function (props) {
             {getMessageTitle(props.message)}
           </div>
         </PaneHeader>
+
         <EditorCls
           workspace={props.workspace}
           message={props.message}
@@ -66,6 +67,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = function (props) {
         />
       </>
     );
+
   } else {
     return (
       <NonIdealState
