@@ -170,10 +170,9 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
 
       <footer className={styles.actionButtons}>
         <Button
-          large={true}
           disabled={canSave !== true}
-          intent="success"
-          onClick={save}>Save</Button>
+          intent="primary"
+          onClick={save}>Save and Close</Button>
       </footer>
     </div>
   );

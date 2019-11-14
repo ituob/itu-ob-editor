@@ -14,10 +14,7 @@
   .actionButtons {
     display: flex;
     flex-flow: row nowrap;
+    justify-content: flex-start;
     padding-bottom: 1rem;
-
-    > * {
-      flex: 1;
-    }
   }
 }
