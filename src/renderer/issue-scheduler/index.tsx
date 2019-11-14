@@ -156,7 +156,13 @@ export const IssueScheduler: React.FC<{}> = function () {
                     </p>
                   : ''}
               </div>
-            : ''}
+            : <div className={styles.daySchedule}>
+                <p>
+                  <Icon icon="info-sign" />
+                  &nbsp;
+                  Select a&nbsp;month to&nbsp;view&nbsp;OB&nbsp;schedule for&nbsp;that&nbsp;time&nbsp;period.
+                </p>
+              </div>}
 
             {!hoveredDate && newIssueDraft && newIssueDraft.publication_date && newIssueDraft.cutoff_date
               ? <div className={styles.daySchedule}>
