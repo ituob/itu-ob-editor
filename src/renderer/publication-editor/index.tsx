@@ -6,6 +6,7 @@ import { PaneHeader } from 'sse/renderer/widgets/pane-header';
 import { LangConfigContext } from 'sse/localizer/renderer';
 
 import { Publication } from 'models/publications';
+import { HelpButton } from 'renderer/widgets/help-button';
 
 import * as styles from './styles.scss';
 
@@ -92,7 +93,9 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
 
   return (
     <div className={styles.pubEditorWindow}>
-      <PaneHeader align="right">{isNew ? "Create" : "Edit"} publication</PaneHeader>
+      <PaneHeader major={true} actions={<HelpButton path="amend-publication/" />}>
+        {isNew ? "Create" : "Edit"} publication
+      </PaneHeader>
 
       <main className={styles.windowBody}>
         <FormGroup
