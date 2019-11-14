@@ -13,9 +13,11 @@ interface MessageItemProps {
 export function MessageItem(props: MessageItemProps) {
   return (
     <SimpleEditableCard
+        minimal={true}
         selected={props.selected}
-        onSelect={props.onSelect}
-        onDelete={props.onDelete}>
+        icon="clipboard"
+        onDelete={props.onDelete}
+        onSelect={props.onSelect}>
       <MessageTitle message={props.message} />
     </SimpleEditableCard>
   );

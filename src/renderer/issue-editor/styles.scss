@@ -15,7 +15,7 @@
 }
 
 :local .twoPaneEditor {
-  @include twoPaneWindowLayout(20em);
+  @include twoPaneWindowLayout(17em);
 }
 
 :local .messageListPane {
@@ -32,7 +32,7 @@
 }
 
 :local .selectedMessagePane {
-  box-shadow: $pt-elevation-shadow-3;
+  box-shadow: $pt-elevation-shadow-1;
   position: relative;
   z-index: 2;
   overflow-y: auto;
@@ -49,7 +49,7 @@
     :global .actions {
       > * {
         height: $pt-navbar-height;
-        width: 4em;
+        width: $pt-navbar-height;
         border-radius: 0;
         &:focus {
           outline: none;

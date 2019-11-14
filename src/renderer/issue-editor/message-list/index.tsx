@@ -19,7 +19,8 @@ interface MessageListProps {
 export const MessageList: React.FC<MessageListProps> = function(props) {
   return (
     <div className={props.className}>
-      <PaneHeader align="left">{props.title}</PaneHeader>
+      <PaneHeader minor={true} align="left">{props.title}</PaneHeader>
+
       {props.promptPosition && ['all', 'start'].indexOf(props.promptPosition) >= 0
         ? props.prompt(0, props.items.length < 1)
         : null}
