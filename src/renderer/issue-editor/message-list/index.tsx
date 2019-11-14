@@ -13,13 +13,16 @@ interface MessageListProps {
   onDelete: (idx: number) => void,
   onSelect: (idx: number) => void,
   prompt: (idx: number, highlight?: boolean) => JSX.Element,
+  promptPosition?: 'all' | 'start' | 'end',
   className?: string,
 }
 export const MessageList: React.FC<MessageListProps> = function(props) {
   return (
     <div className={props.className}>
       <PaneHeader align="left">{props.title}</PaneHeader>
-      {props.prompt(0, props.items.length < 1)}
+      {props.promptPosition && ['all', 'start'].indexOf(props.promptPosition) >= 0
+        ? props.prompt(0, props.items.length < 1)
+        : null}
 
       {[...props.items.entries()].map(([idx, msg]: [number, Message]) => (
         <>
@@ -29,9 +32,17 @@ export const MessageList: React.FC<MessageListProps> = function(props) {
             onSelect={() => props.onSelect(idx)}
             onDelete={() => props.onDelete(idx)}
           />
-          {props.prompt(idx + 1)}
+
+          {props.promptPosition === 'all'
+            ? props.prompt(idx + 1, props.items.length < 1)
+            : null}
         </>
       ))}
+
+      {props.promptPosition === 'end'
+        ? props.prompt(props.items.length, true)
+        : null}
+
     </div>
   );
 };

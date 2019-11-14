@@ -166,6 +166,7 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
             selectedIdx={selectedSection === 'general' ? selectedMessage : undefined}
             onSelect={(idx) => handleMessageSelection('general', idx)}
             onDelete={(idx) => handleMessageRemoval('general', idx)}
+            promptPosition="end"
             prompt={(idx, highlight) =>
               <NewGeneralMessagePrompt
                 highlight={highlight}
@@ -182,6 +183,7 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
             onSelect={(idx) => handleMessageSelection('amendments', idx)}
             onDelete={(idx) => handleMessageRemoval('amendments', idx)}
             className={styles.amendmentsList}
+            promptPosition="end"
             prompt={(idx, highlight) =>
               <NewAmendmentPrompt
                 highlight={highlight}
