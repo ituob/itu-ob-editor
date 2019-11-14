@@ -11,6 +11,7 @@ import { PaneHeader } from 'sse/renderer/widgets';
 import { request } from 'sse/api/renderer';
 
 import { DateStamp } from 'renderer/widgets/dates';
+import { HelpButton } from 'renderer/widgets/help-button';
 import { ScheduledIssue } from 'models/issues';
 
 import { IssueDraft, ScheduleForm } from './schedule-form';
@@ -25,6 +26,7 @@ const DEFAULT_MAX_DATE: Date = moment().add(1, 'years').toDate();
 export const IssueScheduler: React.FC<{}> = function () {
   const [schedule, updateSchedule] = useState([] as ScheduledIssue[]);
   const [issueIndex, updateIssueIndex] = useState({} as Index<ScheduledIssue>);
+  const [currentIssue, setCurrentIssue] = useState({ id: null } as { id: number | null });
   const [date, selectDate] = useState(new Date());
   const [month, selectMonth] = useState(new Date());
   const [hoveredDate, hoverDate] = useState(null as Date | null);
@@ -33,13 +35,6 @@ export const IssueScheduler: React.FC<{}> = function () {
   const [minDate, setMinDate] = useState(undefined as Date | undefined);
   const [maxDate, setMaxDate] = useState(DEFAULT_MAX_DATE);
   const [userIsEditing, setUserIsEditing] = useState(true);
-
-  async function fetchSchedule(month: Date) {
-    const scheduledIssues = await request<Index<ScheduledIssue>>('ob-schedule', { month });
-    updateSchedule(Object.values(scheduledIssues));
-    updateIssueIndex(scheduledIssues);
-    setTimeout(() => { setUserIsEditing(true) }, 1000);
-  }
 
   function startOrUpdateDraft(withDate: Date) {
     if (newIssueDraft !== null) {
@@ -57,8 +52,21 @@ export const IssueScheduler: React.FC<{}> = function () {
   }
 
   useEffect(() => {
+    fetchCurrentIssue();
+    fetchSchedule();
+    ipcRenderer.once('app-loaded', fetchCurrentIssue);
+    ipcRenderer.once('app-loaded', fetchSchedule);
+    ipcRenderer.on('update-current-issue', fetchCurrentIssue);
+    return function cleanup() {
+      ipcRenderer.removeListener('app-loaded', fetchSchedule);
+      ipcRenderer.removeListener('update-current-issue', fetchCurrentIssue);
+      ipcRenderer.removeListener('app-loaded', fetchCurrentIssue);
+    };
+  }, []);
+
+  useEffect(() => {
     setUserIsEditing(false);
-    fetchSchedule(month);
+    fetchSchedule();
   }, [month]);
 
   useEffect(() => {
@@ -78,20 +86,38 @@ export const IssueScheduler: React.FC<{}> = function () {
     }
   }, [hoveredDate]);
 
+
+  /* Storage API utilities */
+
+  async function fetchSchedule() {
+    const scheduledIssues = await request<Index<ScheduledIssue>>('ob-schedule', { month });
+    updateSchedule(Object.values(scheduledIssues));
+    updateIssueIndex(scheduledIssues);
+    setTimeout(() => { setUserIsEditing(true) }, 1000);
+  }
+
+  async function fetchCurrentIssue() {
+    console.debug('oi', 'fetching');
+    const currentIssue = await request<{ id: number | null }>('current-issue-id');
+    //setLoading(false);
+    setCurrentIssue(currentIssue);
+  }
+
   async function saveNewSchedule() {
     if (newIssueDraft && newIssueDraft.publication_date && newIssueDraft.cutoff_date) {
       const draft = newIssueDraft as ScheduledIssue;
       await request<{ success: boolean }>('ob-schedule-add', { issueId: `${draft.id}`, newData: draft });
       updateNewIssueDraft(null);
       await ipcRenderer.send('scheduled-new-issue', {});
-      await fetchSchedule(month);
+      await fetchSchedule();
     }
   }
 
   return (
     <div className={styles.issueScheduler}>
       <div className={styles.calendarPane}>
-        <PaneHeader align="right">OB calendar</PaneHeader>
+        <PaneHeader align="right" major={true} actions={<HelpButton path="schedule/" />} />
+
         <div className={styles.paneBody}>
           <DatePicker
             modifiers={{
@@ -129,7 +155,7 @@ export const IssueScheduler: React.FC<{}> = function () {
                         ? <>Click to&nbsp;schedule the</>
                         : <>Click to&nbsp;schedule an&nbsp;edition with</>}&nbsp;<strong className={styles.cutDateLabel}>cutoff&nbsp;date</strong> on&nbsp;<DateStamp date={hoveredDate as Date} />.
                     </p>
-                  : ''}
+                  : null}
 
                 {newIssueDraft && !newIssueDraft.publication_date && moment(hoveredDate).isAfter(minDate)
                   ? <p>
@@ -138,7 +164,7 @@ export const IssueScheduler: React.FC<{}> = function () {
                       Click to&nbsp;schedule
                       the&nbsp;<strong className={styles.pubDateLabel}>publication&nbsp;date</strong> on&nbsp;<DateStamp date={hoveredDate as Date} />.
                     </p>
-                  : ''}
+                  : null}
 
                 {newIssueDraft && newIssueDraft.publication_date && newIssueDraft.cutoff_date
                   ? <p>
@@ -146,7 +172,7 @@ export const IssueScheduler: React.FC<{}> = function () {
                       &nbsp;
                       Fill&nbsp; edition details and&nbsp;save the&nbsp;new&nbsp;schedule.
                     </p>
-                  : ''}
+                  : null}
 
                 {daySchedule && !newIssueDraft
                   ? <p>
@@ -154,15 +180,19 @@ export const IssueScheduler: React.FC<{}> = function () {
                       &nbsp;
                       Something is already scheduled on this day.
                     </p>
-                  : ''}
+                  : null}
               </div>
-            : <div className={styles.daySchedule}>
-                <p>
-                  <Icon icon="info-sign" />
-                  &nbsp;
-                  Select a&nbsp;month to&nbsp;view&nbsp;OB&nbsp;schedule for&nbsp;that&nbsp;time&nbsp;period.
-                </p>
-              </div>}
+            : null}
+
+            {!hoveredDate && !newIssueDraft
+              ? <div className={styles.daySchedule}>
+                  <p>
+                    <Icon icon="info-sign" />
+                    &nbsp;
+                    Select a&nbsp;month to&nbsp;view&nbsp;OB&nbsp;schedule for&nbsp;that&nbsp;time&nbsp;period.
+                  </p>
+                </div>
+              : null}
 
             {!hoveredDate && newIssueDraft && newIssueDraft.publication_date && newIssueDraft.cutoff_date
               ? <div className={styles.daySchedule}>
@@ -172,13 +202,13 @@ export const IssueScheduler: React.FC<{}> = function () {
                     Fill&nbsp; edition details and&nbsp;save the&nbsp;new&nbsp;schedule.
                   </p>
                 </div>
-              : ''}
+              : null}
         </div>
       </div>
 
       {newIssueDraft
         ? <div className={styles.selectedDayPane}>
-            <PaneHeader align="left">Schedule edition</PaneHeader>
+            <PaneHeader align="left" major={true}>Schedule edition</PaneHeader>
 
             <div className={styles.paneBody}>
               <ScheduleForm
@@ -190,10 +220,13 @@ export const IssueScheduler: React.FC<{}> = function () {
             </div>
           </div>
         : <div className={styles.upcomingIssuesPane}>
-            <PaneHeader align="left">Editions</PaneHeader>
+            <PaneHeader align="left" major={true}>Editions</PaneHeader>
 
             <div className={styles.paneBody}>
-              <UpcomingIssues issues={issueIndex} userIsEditing={userIsEditing} />
+              <UpcomingIssues
+                issues={issueIndex}
+                userIsEditing={userIsEditing}
+                currentIssueId={currentIssue.id || undefined} />
             </div>
           </div>
       }

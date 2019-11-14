@@ -18,15 +18,24 @@ $cutColorDark: #D9822B;
     @include pane;
 
     width: 280px;
+    z-index: 1;
     background: $pt-app-background-color;
+    box-shadow: $pt-elevation-shadow-1;
     flex: 0;
 
     .paneBody {
       display: flex;
       flex-flow: column nowrap;
-      justify-content: space-between;
       align-items: center;
-      padding: 0 2rem 2rem 2rem;
+      padding: 0 .5rem;
+    }
+
+    :global .bp3-datepicker {
+      background: none;
+
+      .DayPicker-Day, .DayPicker-Day--disabled {
+        cursor: default !important;
+      }
     }
 
     .daySchedule {
@@ -34,8 +43,16 @@ $cutColorDark: #D9822B;
       display: flex;
       flex-flow: column nowrap;
       align-items: stretch;
+      color: $pt-text-color-muted;
+      padding: 0 1rem;
 
       .dayScheduleHeader {
+        margin-bottom: 1rem;
+      }
+
+      margin-top: 1rem;
+
+      &:last-child {
         margin-bottom: 1rem;
       }
     }
@@ -176,25 +193,38 @@ $cutColorDark: #D9822B;
 }
 
 
-:local .pastIssueCard {
-  .headerLabel::after {
-    content: "published" !important;
-    color: $pubColorDark;
+:local .currentIssueCard {
+  .headerLabel {
+    :last-child {
+      // Icon
+      margin-left: 5px;
+      vertical-align: top;
+    }
   }
 }
 
 
-:local .scheduleInfo {
+:local .issueCardContents {
   display: flex;
   flex-flow: row nowrap;
-  white-space: nowrap;
   justify-content: space-between;
 
   > * {
-    flex: 0;
+    display: flex;
+    flex-flow: column nowrap;
+
+    > * {
+      white-space: nowrap;
+    }
   }
 
-  .cutoffDate, .publicationDate {
+  .scheduleInfo {
+    > :first-child {
+      flex: 1;
+    }
+  }
+
+  .publicationStatus, .cutoffDate, .publicationDate {
     > :first-child {
       margin-right: .5rem;
       transform: scale(.8);
