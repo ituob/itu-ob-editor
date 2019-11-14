@@ -1,5 +1,5 @@
 import React from 'react';
-import { Popover, Menu } from '@blueprintjs/core';
+import { Position, Popover, Menu } from '@blueprintjs/core';
 
 import { AddCardTriggerButton } from 'sse/renderer/widgets/editable-card-list';
 import * as editableCardListStyles from 'sse/renderer/widgets/editable-card-list/styles.scss';
@@ -19,6 +19,9 @@ export const NewGeneralMessagePrompt: React.FC<NewGeneralMessagePromptProps> = f
       wrapperTagName={'div'}
       targetTagName={'div'}
       className={editableCardListStyles.addCardTriggerContainer}
+      position={Position.RIGHT}
+      boundary="viewport"
+      minimal={true}
       content={
         <NewGeneralMessageMenu
           existing={props.existingMessages}

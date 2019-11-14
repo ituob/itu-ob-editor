@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu } from '@blueprintjs/core';
+import { Position, Menu } from '@blueprintjs/core';
 import { Select, ItemPredicate, ItemRenderer, ItemListRenderer, renderFilteredItems } from '@blueprintjs/select';
 
 import { Index, QuerySet } from 'sse/storage/query';
@@ -66,6 +66,9 @@ export const NewAmendmentPrompt: React.FC<NewAmendmentPromptProps> = function (p
       popoverProps={{
         wrapperTagName: 'div',
         targetTagName: 'div',
+        position: Position.LEFT,
+        minimal: true,
+        boundary: "viewport",
       }}
       className={editableCardListStyles.addCardTriggerContainer}
       initialContent={filterUsageTip}
