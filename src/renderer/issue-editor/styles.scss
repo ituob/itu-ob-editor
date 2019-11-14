@@ -143,6 +143,10 @@
 
 :local .freeformEditorToolbar {
   background: $pt-app-background-color;
+
+  button, button[disabled] {
+    cursor: default;
+  }
 }
 
 :local .amendmentsList {

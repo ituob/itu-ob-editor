@@ -21,6 +21,17 @@ html.platform--win32::before {
 
 .bp3-button {
   cursor: default !important;
+
+  &.bp3-minimal:hover:not(:active) {
+    background: none !important;
+  }
+  &:focus {
+    outline: none;
+  }
+}
+
+.bp3-tab {
+  cursor: default !important;
 }
 
 .bp3-menu-item {
