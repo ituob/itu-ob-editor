@@ -856,12 +856,17 @@
   dependencies:
     humps "^2.0.1"
 
+"@isomorphic-git/idb-keyval@^3.3.1":
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/@isomorphic-git/idb-keyval/-/idb-keyval-3.3.1.tgz#e7129c89e8657ef1eba9022c1020c518437d8a98"
+  integrity sha512-1KoEHIlzNKzX1I5c6wKTB9hjf4pGfcAKRha2ct32v4hsqYcKGy5e8escHbdjhwcKU1Xzm9vcblwP1yeWb0O+lw==
+
 "@isomorphic-git/lightning-fs@^3.3.3":
-  version "3.3.3"
-  resolved "https://registry.yarnpkg.com/@isomorphic-git/lightning-fs/-/lightning-fs-3.3.3.tgz#c84130d1c0ef6c37ea9558531c41a6188c08402a"
-  integrity sha512-eEX0ktAseNNMOd6kthKkyY6a6pltk/lZPYsJDHtEP0I7fZlT6++8MrffMiTeesL6Q4zZGg2c7vdwT5WR70z13Q==
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@isomorphic-git/lightning-fs/-/lightning-fs-3.4.0.tgz#38e2657420550b9a952b0223e1982ce7d040a3ef"
+  integrity sha512-umxLfSJ8eY20UXaydfqyuX3kj8txh93PyJQKsVjXVYRruNBg0U2Xq3Bmz+2sKNE9KJUFZRWw4p2IZo9cM0wsGQ==
   dependencies:
-    "@wmhilton/idb-keyval" "^3.3.0"
+    "@isomorphic-git/idb-keyval" "^3.3.1"
     isomorphic-textencoder "1.0.1"
     just-debounce-it "1.1.0"
     just-once "1.1.0"
@@ -1116,11 +1121,6 @@
     "@webassemblyjs/ast" "1.8.5"
     "@webassemblyjs/wast-parser" "1.8.5"
     "@xtuc/long" "4.2.2"
-
-"@wmhilton/idb-keyval@^3.3.0":
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/@wmhilton/idb-keyval/-/idb-keyval-3.3.0.tgz#2e59745147ac578e0a320e84dd7ca6ad5e75e6a9"
-  integrity sha512-c/7VCDR7R8gdIsLPcfXkqfvwU8k1KY+OrImA1bpMk9cWJAXeDOfW4FrmS745RcbfqkaJ3XHxrXweHVmd9aLlZQ==
 
 "@xtuc/ieee754@^1.2.0":
   version "1.2.0"
@@ -4210,9 +4210,9 @@ ignore@^5.0.4, ignore@^5.1.4:
   integrity sha512-MzbUSahkTW1u7JpKKjY7LCARd1fU5W2rLdxlM4kdkayuCwZImjkpluF9CM1aLewYJguPDqewLam18Y6AU69A8A==
 
 immer@^3.1.3:
-  version "3.1.3"
-  resolved "https://registry.yarnpkg.com/immer/-/immer-3.1.3.tgz#59bc742b2aab6e2c676445edb653e588a23c70fc"
-  integrity sha512-HG5SXTXTTVy9lGNwS075cNhQoV375jHsIJO3UtMjuUWJOuwlMr0u42FlsKTJcppt5AzsFAsmj9r4kHvsSHh3hQ==
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/immer/-/immer-3.3.0.tgz#ee7cf3a248d5dd2d4eedfbe7dfc1e9be8c72041d"
+  integrity sha512-vlWRjnZqoTHuEjadquVHK3GxsXe1gNoATffLEA8Qbrdd++Xb+wHEFiWtwAKTscMBoi1AsvEMXhYRzAXA8Ex9FQ==
 
 immer@^5.0.0:
   version "5.0.0"
@@ -4638,9 +4638,9 @@ isomorphic-git@^0.55.4:
     simple-get "^3.0.2"
 
 isomorphic-git@^0.70.2:
-  version "0.70.2"
-  resolved "https://registry.yarnpkg.com/isomorphic-git/-/isomorphic-git-0.70.2.tgz#c1b643ed52f7889977caef18a18140946a80aac3"
-  integrity sha512-B4QDZ6duGTPELjhCZc2aKOmJVIWY5fXCET87ilf8A+6pOPnm1eXljDqpLQJJ5e9tOYLeY53WYX373zAYEe+L0Q==
+  version "0.70.6"
+  resolved "https://registry.yarnpkg.com/isomorphic-git/-/isomorphic-git-0.70.6.tgz#d00239ab6fd6679b04143283b1c737c8b80c8e3c"
+  integrity sha512-hznbxOsMDU3gCd/F8zF8uJy3I75TUF61iKTLapFMVoRlR3t0H+erpjwzRyFkG1SXJJ/gNaecq19vXhajp4bwXA==
   dependencies:
     async-lock "^1.1.0"
     clean-git-ref "^2.0.1"
