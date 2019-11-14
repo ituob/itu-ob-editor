@@ -112,6 +112,7 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
                 </span>
 
                 <AddCommunicationPrompt
+                  highlight={countryCommSet.communications.length < 1}
                   key="addFirstComm"
                   title={<>Comm.</>}
                   onOpen={() => {
@@ -142,7 +143,7 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
                           small={true}
                           minimal={true}
                           intent="danger"
-                          title="Delete communication"
+                          title="Delete this communication"
                           onClick={() => {
                             var newComms = [...countryCommSets[countryIdx].communications];
                             newComms.splice(commIdx, 1);
@@ -154,7 +155,7 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
                             };
 
                             _onChange(newContents);
-                          }}>Delete</Button>
+                          }} />
 
                         <AddCommunicationPrompt
                           key="addCommAfter"
@@ -267,17 +268,28 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
 interface EditCountryPromptProps { onOpen: () => void, title?: JSX.Element }
 const EditCountryPrompt: React.FC<EditCountryPromptProps> = function ({ onOpen, title }) {
   return (
-    <Button icon="edit" minimal={true} onClick={onOpen} title="Edit country details">
+    <Button
+        icon="edit"
+        minimal={true}
+        small={true}
+        onClick={onOpen}
+        title="Edit country details">
       {title}
     </Button>
   );
 };
 
 
-interface AddCommunicationPromptProps { onOpen: () => void, title?: JSX.Element }
-const AddCommunicationPrompt: React.FC<AddCommunicationPromptProps> = function ({ onOpen, title }) {
+interface AddCommunicationPromptProps { onOpen: () => void, title?: JSX.Element, highlight?: boolean }
+const AddCommunicationPrompt: React.FC<AddCommunicationPromptProps> = function ({ onOpen, title, highlight }) {
   return (
-    <Button icon="plus" minimal={true} onClick={onOpen} title="Add communication" intent="primary">
+    <Button
+        icon="plus"
+        minimal={highlight !== true}
+        small={true}
+        onClick={onOpen}
+        title="Add communication"
+        intent="primary">
       {title}
     </Button>
   );
@@ -287,7 +299,12 @@ const AddCommunicationPrompt: React.FC<AddCommunicationPromptProps> = function (
 interface EditCommunicationPromptProps { onOpen: () => void, title?: JSX.Element }
 const EditCommunicationPrompt: React.FC<EditCommunicationPromptProps> = function ({ onOpen, title }) {
   return (
-    <Button icon="edit" minimal={true} onClick={onOpen} title="Edit communication">
+    <Button
+        icon="edit"
+        minimal={true}
+        onClick={onOpen}
+        small={true}
+        title="Edit communication">
       {title}
     </Button>
   );
