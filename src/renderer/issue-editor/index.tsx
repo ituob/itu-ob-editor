@@ -156,7 +156,7 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
     <div className={styles.twoPaneEditor}>
       <div className={styles.messageListPane}>
 
-        <PaneHeader align="right" loud={true} className={styles.paneHeader}>No. {issue.id}</PaneHeader>
+        <PaneHeader align="right" major={true} className={styles.paneHeader}>No. {issue.id}</PaneHeader>
         <div className={styles.paneBody}>
 
           <MessageList
@@ -172,7 +172,7 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
                 highlight={highlight}
                 idx={idx}
                 existingMessages={issue.general.messages}
-                onCreate={(msg, idx) => handleNewMessage(msg, 'general', idx)} />}
+                onCreate={msg => handleNewMessage(msg, 'general', idx)} />}
           />
 
           <MessageList
@@ -192,7 +192,7 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
                 issueIndex={ws.issues}
                 publicationIndex={ws.publications}
                 existingAmendments={issue.amendments.messages.map((msg: Message) => msg as AmendmentMessage)}
-                onCreate={(msg, idx) => handleNewMessage(msg, 'amendments', idx)} />}
+                onCreate={msg => handleNewMessage(msg, 'amendments', idx)} />}
           />
 
         </div>

@@ -25,7 +25,7 @@ export const NewGeneralMessagePrompt: React.FC<NewGeneralMessagePromptProps> = f
       content={
         <NewGeneralMessageMenu
           existing={props.existingMessages}
-          onCreate={(msg: Message) => props.onCreate(msg, props.idx)}
+          onCreate={(msg: Message) => props.onCreate(msg)}
         />
       }
     ><AddCardTriggerButton highlight={props.highlight} label="Add a general message" /></Popover>
