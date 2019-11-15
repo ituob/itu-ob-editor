@@ -220,3 +220,12 @@
   justify-content: flex-start !important;
   margin-right: 1rem;
 }
+
+:local .deleteCommButton {
+  filter: grayscale(100%);
+  opacity: 0.4;
+  &:hover {
+    filter: none;
+    opacity: 1;
+  }
+}

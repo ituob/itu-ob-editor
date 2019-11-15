@@ -1,16 +1,16 @@
 import * as React from 'react';
 
 
-interface DateStampProps { date: Date }
+interface DateStampProps { date: Date, className?: string }
 export const DateStamp: React.FC<DateStampProps> = function(props) {
   return (
-    <>
+    <span className={props.className}>
       <span className={'day'}>{props.date.getDate()}</span
         ><span className={'separator'}>.</span
         ><span className={'month'}>{monthAsRoman(props.date.getMonth() + 1)}</span
         ><span className={'separator'}>.</span
         ><span className={'year'}>{props.date.getFullYear()}</span>
-    </>
+    </span>
   );
 };
 

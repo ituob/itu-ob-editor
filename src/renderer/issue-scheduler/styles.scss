@@ -77,7 +77,7 @@ $cutColorDark: #D9822B;
       display: flex;
       flex-flow: column nowrap;
       align-items: stretch;
-      padding: 0;
+      padding: .5rem 1rem 1rem 20px;
     }
   }
 }
@@ -161,39 +161,10 @@ $cutColorDark: #D9822B;
 }
 
 
-:local .issueScheduleCard {
-  border-radius: 0 !important;
-  cursor: pointer;
-
-  .headerLabel {
-    position: relative;
-
-    &::after {
-      transition: content .2s linear, color .2s linear;
-      display: block;
-      position: absolute;
-      right: 0;
-      top: 0;
-      content: unset;
-      font-size: .7rem;
-      text-transform: uppercase;
-      font-weight: normal;
-    }
-  }
-
+:local .issueCard {
   &:hover {
-    .headerLabel {
-      color: $pt-link-color;
-      &::after {
-        content: "click to open" !important;
-        color: $pt-link-color;
-      }
-    }
+    z-index: 2;
   }
-}
-
-
-:local .currentIssueCard {
   .headerLabel {
     :last-child {
       // Icon
@@ -202,7 +173,6 @@ $cutColorDark: #D9822B;
     }
   }
 }
-
 
 :local .issueCardContents {
   display: flex;
@@ -224,11 +194,32 @@ $cutColorDark: #D9822B;
     }
   }
 
-  .publicationStatus, .cutoffDate, .publicationDate {
+  .cutoffDate, .publicationDate {
     > :first-child {
       margin-right: .5rem;
       transform: scale(.8);
     }
+  }
+
+  .publicationStatus > * {
+    margin-bottom: .25rem;
+    text-align: right;
+    white-space: nowrap;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+    > :first-child {
+      display: inline;
+    }
+    > :last-child {
+      margin-left: .5rem;
+    }
+  }
+
+  .publicationStatusPrimary {
+    color: $pt-intent-primary;
+    font-weight: bold;
   }
 
   .cutoffDate {
@@ -250,4 +241,19 @@ $cutColorDark: #D9822B;
 
 :local .cutDateLabel {
   color: $cutColorDark;
+}
+
+:local .pubDateBordered {
+  border-width: 0 0 2px 0;
+  border-style: solid;
+}
+
+:local .pubDateLabelBordered {
+  @extend .pubDateBordered;
+  border-color: $pubColorDark;
+}
+
+:local .cutDateLabelBordered {
+  @extend .pubDateBordered;
+  border-color: $cutColorDark;
 }

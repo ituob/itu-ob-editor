@@ -2,7 +2,7 @@ import * as moment from 'moment';
 
 import React from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import { NonIdealState, H3, Icon, Tooltip, Position } from '@blueprintjs/core';
+import { NonIdealState, H5, Icon, IconName, Text } from '@blueprintjs/core';
 import { Index, QuerySet } from 'sse/storage/query';
 import { openWindow } from 'sse/api/renderer';
 import { SimpleEditableCard } from 'sse/renderer/widgets/editable-card-list';
@@ -22,6 +22,7 @@ interface UpcomingIssuesProps {
 export const UpcomingIssues: React.FC<UpcomingIssuesProps> = function({ issues, userIsEditing, currentIssueId }) {
   const qs = new QuerySet<ScheduledIssue>(issues);
   const existingIssues = qs.all();
+  const nextIssueId = currentIssueId ? (currentIssueId + 1) : undefined;
 
   return (
     <div className={styles.upcomingIssues}>
@@ -38,6 +39,7 @@ export const UpcomingIssues: React.FC<UpcomingIssuesProps> = function({ issues, 
                 <IssueScheduleCard
                   issue={issue}
                   isCurrent={currentIssueId === issue.id}
+                  isNext={nextIssueId === issue.id}
                   onEditClick={() => openWindow('issue-editor', { issueId: issue.id })}
                 />
               </CSSTransition>)}
@@ -48,59 +50,113 @@ export const UpcomingIssues: React.FC<UpcomingIssuesProps> = function({ issues, 
 };
 
 
+interface DateStatusProps {
+  date: Date,
+  text: string,
+  icon: IconName,
+  dateClass?: string,
+  className?: string,
+}
+const DateStatus: React.FC<DateStatusProps> = function ({ icon, className, dateClass, date, text }) {
+  const ICON_SIZE = 16;
+  return <div className={className}>
+    <Text>{text}</Text> <DateStamp date={date} /><Icon iconSize={ICON_SIZE} icon={icon} className={dateClass} />
+  </div>;
+};
+
+
 interface IssueScheduleCardProps {
   issue: ScheduledIssue,
   isCurrent: boolean,
+  isNext: boolean,
   onEditClick: () => void,
 }
-const IssueScheduleCard: React.FC<IssueScheduleCardProps> = function ({ issue, onEditClick, isCurrent }) {
+const IssueScheduleCard: React.FC<IssueScheduleCardProps> = function ({ issue, onEditClick, isCurrent, isNext }) {
   const isPast = moment(issue.publication_date).isBefore(moment());
+
+  let bigIcon: JSX.Element | undefined;
+  if (isCurrent) {
+    bigIcon = <Icon icon="play" htmlTitle="Publication in progress" intent="primary" />;
+  } else if (isNext) {
+    bigIcon = <Icon icon="fast-forward" htmlTitle="Planned next" intent="primary" />;
+  }
 
   let status: JSX.Element;
   if (isPast) {
-    status = <><Icon icon="tick-circle" />Published</>;
+    status = <>
+      <DateStatus
+        dateClass={styles.cutDateLabel}
+        icon="tick-circle"
+        date={issue.cutoff_date}
+        text="Information received by" />
+      <DateStatus
+        dateClass={styles.pubDateLabel}
+        icon="tick-circle"
+        date={issue.publication_date}
+        text="Published on" />
+    </>;
   } else if (isCurrent) {
-    status = <><Icon icon="circle-arrow-right" />Planned next</>;
+    status = <>
+      <DateStatus
+        dateClass={styles.cutDateLabel}
+        icon="tick-circle"
+        date={issue.cutoff_date}
+        text="Information received by" />
+      <DateStatus
+        dateClass={styles.pubDateLabel}
+        className={styles.publicationStatusPrimary}
+        icon="take-action"
+        date={issue.publication_date}
+        text="Preparing to publish on" />
+    </>;
+  } else if (isNext) {
+    // const daysUntilFreeze = moment(issue.cutoff_date).diff(moment(), 'days');
+    // const isTomorrow = daysUntilFreeze < 1;
+    status = <>
+      <DateStatus
+        dateClass={styles.cutDateLabel}
+        className={styles.publicationStatusPrimary}
+        icon="inbox"
+        date={issue.cutoff_date}
+        text="Collecting information until" />
+      <DateStatus
+        dateClass={styles.pubDateLabel}
+        icon="calendar"
+        date={issue.publication_date}
+        text="Planned publication on" />
+    </>;
   } else {
-    status = <><Icon icon="calendar" />Planned</>;
+    // const daysUntilFreeze = moment(issue.cutoff_date).diff(moment(), 'days');
+    // const isTomorrow = daysUntilFreeze < 1;
+    status = <>
+      <DateStatus
+        dateClass={styles.cutDateLabel}
+        icon="calendar"
+        date={issue.cutoff_date}
+        text="Collecting information until" />
+      <DateStatus
+        dateClass={styles.pubDateLabel}
+        icon="calendar"
+        date={issue.publication_date}
+        text="Planned publication on" />
+    </>;
   }
 
   return (
     <SimpleEditableCard
         extended={true}
-        minimal={true}
         contentsClassName={styles.issueCardContents}
-        className={isCurrent ? styles.currentIssueCard : undefined}
+        className={styles.issueCard}
         onClick={onEditClick}>
 
       <header className={styles.issueInfo}>
-        <H3 className={styles.headerLabel}>
-          {issue.id}
-          {isCurrent
-            ? <Icon
-                icon="asterisk"
-                htmlTitle="This issue is published next"
-                intent="primary" />
-            : undefined}
-        </H3>
-        <div className={styles.publicationStatus}>
-          {status}
-        </div>
+        <H5 className={styles.headerLabel}>{issue.id} {bigIcon}</H5>
       </header>
 
       <div className={styles.scheduleInfo}>
-        <Tooltip content="Cutoff date" position={Position.RIGHT}>
-          <span className={styles.cutoffDate}>
-            <Icon icon="cut" />
-            <DateStamp date={issue.cutoff_date} />
-          </span>
-        </Tooltip>
-        <Tooltip content="Publication date" position={Position.LEFT}>
-          <span className={styles.publicationDate}>
-            <Icon icon="document-share" />
-            <DateStamp date={issue.publication_date} />
-          </span>
-        </Tooltip>
+        <div className={styles.publicationStatus}>
+          {status}
+        </div>
       </div>
 
     </SimpleEditableCard>

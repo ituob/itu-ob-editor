@@ -69,12 +69,11 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = function ({ draft, maxI
         <strong>Cutoff:</strong>
         <span>
           {draft.cutoff_date !== undefined
-            ? <DateStamp date={draft.cutoff_date} />
+            ? <strong><DateStamp date={draft.cutoff_date} /></strong>
             : <>Click on a day to set</>}
         </span>
         <Button
           small={true}
-          minimal={true}
           className={styles.editDateButton}
           onClick={() => onChange({ ...draft, cutoff_date: undefined })}
           disabled={draft.cutoff_date === undefined}
@@ -85,12 +84,11 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = function ({ draft, maxI
         <strong>Publication:</strong>
         <span>
           {draft.publication_date !== undefined
-            ? <DateStamp date={draft.publication_date} />
+            ? <strong><DateStamp date={draft.publication_date} /></strong>
             : <>Click on a day to set</>}
         </span>
         <Button
           small={true}
-          minimal={true}
           className={styles.editDateButton}
           onClick={() => onChange({ ...draft, publication_date: undefined })}
           disabled={draft.publication_date === undefined}

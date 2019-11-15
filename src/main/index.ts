@@ -68,7 +68,7 @@ const ISSUE_SCHEDULER_WINDOW_OPTS: WindowOpenerParams = {
   component: 'issueScheduler',
   title: 'OB schedule',
   frameless: true,
-  dimensions: { width: 600, height: 500, minWidth: 600, minHeight: 400 },
+  dimensions: { width: 700, height: 500, minWidth: 700, minHeight: 400 },
 };
 
 const HELP_WINDOW_OPTS: WindowOpenerParams = {
