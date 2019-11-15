@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect, useContext } from 'react';
-import { H4, Label, Button, FormGroup, InputGroup, TextArea } from '@blueprintjs/core';
+import { Tooltip, H4, Label, Button, FormGroup, InputGroup, TextArea } from '@blueprintjs/core';
 import { DatePicker } from '@blueprintjs/datetime';
 
 import { AddCardTrigger, SimpleEditableCard } from 'sse/renderer/widgets/editable-card-list';
@@ -77,7 +77,7 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
     <>
       <AddCardTrigger
         key="addFirstCountry"
-        label="Add a country"
+        label="Add country or area"
         highlight={countryCommSets.length < 1}
         onClick={() => {
           setActiveCountryIdx(0);
@@ -100,21 +100,18 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
               </H4>
 
               <div className={styles.tsCountryButtons}>
-                <span>
-                  <EditCountryPrompt
-                    key="editCountry"
-                    title={<>Country details & contact info</>}
-                    onOpen={() => {
-                      setActiveCountryIdx(countryIdx);
-                      toggleEditCountryDialogState(true);
-                    }}
-                  />
-                </span>
+                <EditCountryPrompt
+                  key="editCountry"
+                  title="Open area details"
+                  onOpen={() => {
+                    setActiveCountryIdx(countryIdx);
+                    toggleEditCountryDialogState(true);
+                  }}
+                />
 
                 <AddCommunicationPrompt
-                  highlight={countryCommSet.communications.length < 1}
+                  shorten={countryCommSet.communications.length > 0}
                   key="addFirstComm"
-                  title={<>Comm.</>}
                   onOpen={() => {
                     setActiveCountryIdx(countryIdx);
                     setActiveCommIdx(0);
@@ -130,7 +127,7 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
                       <article className={styles.tsCommunication} key={commIdx}>
                         <EditCommunicationPrompt
                           key="editComm"
-                          title={<>Communication of <DateStamp date={comm.date} /></>}
+                          commDate={comm.date}
                           onOpen={() => {
                             setActiveCountryIdx(countryIdx);
                             setActiveCommIdx(commIdx);
@@ -138,28 +135,29 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
                           }}
                         />
 
-                        <Button
-                          icon="delete"
-                          small={true}
-                          minimal={true}
-                          intent="danger"
-                          title="Delete this communication"
-                          onClick={() => {
-                            var newComms = [...countryCommSets[countryIdx].communications];
-                            newComms.splice(commIdx, 1);
+                        <Tooltip content="Delete this communication">
+                          <Button
+                            icon="delete"
+                            minimal={true}
+                            intent="danger"
+                            className={styles.deleteCommButton}
+                            onClick={() => {
+                              var newComms = [...countryCommSets[countryIdx].communications];
+                              newComms.splice(commIdx, 1);
 
-                            var newContents = [...countryCommSets];
-                            newContents[countryIdx] = {
-                              ...newContents[countryIdx],
-                              communications: newComms,
-                            };
+                              var newContents = [...countryCommSets];
+                              newContents[countryIdx] = {
+                                ...newContents[countryIdx],
+                                communications: newComms,
+                              };
 
-                            _onChange(newContents);
-                          }} />
+                              _onChange(newContents);
+                            }} />
+                        </Tooltip>
 
                         <AddCommunicationPrompt
                           key="addCommAfter"
-                          title={<>Comm.</>}
+                          shorten={countryCommSet.communications.length > 0}
                           onOpen={() => {
                             setActiveCountryIdx(countryIdx);
                             setActiveCommIdx(commIdx + 1);
@@ -203,7 +201,7 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
       {editCountryDialogState === true && countryCommSets[activeCountryIdx] !== undefined
         ? <EditCountryDialog
             key="editCountry"
-            title="Edit country"
+            title="Geographical area & contact information"
             countryCommSet={countryCommSets[activeCountryIdx]}
             isOpen={true}
             onClose={() => toggleEditCountryDialogState(false)}
@@ -245,7 +243,7 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
       {editCommDialogState === true && ((countryCommSets[activeCountryIdx] || {}).communications || [])[activeCommIdx] !== undefined
         ? <EditCommunicationDialog
             key="editCommunication"
-            title={`Edit communication ${activeCommIdx + 1}`}
+            title={`Communication no. ${activeCommIdx + 1}`}
             comm={countryCommSets[activeCountryIdx].communications[activeCommIdx]}
             isOpen={true}
             onClose={() => toggleEditCommDialogState(false)}
@@ -265,47 +263,48 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
 /* Prompts */
 
 
-interface EditCountryPromptProps { onOpen: () => void, title?: JSX.Element }
+interface EditCountryPromptProps { onOpen: () => void, title?: JSX.Element | string }
 const EditCountryPrompt: React.FC<EditCountryPromptProps> = function ({ onOpen, title }) {
   return (
     <Button
         icon="edit"
-        minimal={true}
-        small={true}
         onClick={onOpen}
-        title="Edit country details">
+        title="Open geographical area">
       {title}
     </Button>
   );
 };
 
 
-interface AddCommunicationPromptProps { onOpen: () => void, title?: JSX.Element, highlight?: boolean }
-const AddCommunicationPrompt: React.FC<AddCommunicationPromptProps> = function ({ onOpen, title, highlight }) {
-  return (
+interface AddCommunicationPromptProps { onOpen: () => void, title?: JSX.Element, shorten?: boolean }
+const AddCommunicationPrompt: React.FC<AddCommunicationPromptProps> = function ({ onOpen, shorten }) {
+  const title = "Add communication from this area";
+  const btn = (
     <Button
         icon="plus"
-        minimal={highlight !== true}
-        small={true}
         onClick={onOpen}
-        title="Add communication"
+        minimal={shorten}
         intent="primary">
-      {title}
+      {!shorten ? title : undefined}
     </Button>
   );
+  if (!shorten) {
+    return btn;
+  } else {
+    return <Tooltip content={title}>{btn}</Tooltip>;
+  }
 };
 
 
-interface EditCommunicationPromptProps { onOpen: () => void, title?: JSX.Element }
-const EditCommunicationPrompt: React.FC<EditCommunicationPromptProps> = function ({ onOpen, title }) {
+interface EditCommunicationPromptProps { onOpen: () => void, commDate: Date }
+const EditCommunicationPrompt: React.FC<EditCommunicationPromptProps> = function ({ onOpen, commDate }) {
   return (
     <Button
         icon="edit"
-        minimal={true}
+        className={styles.openCommButton}
         onClick={onOpen}
-        small={true}
-        title="Edit communication">
-      {title}
+        title="Open communication">
+      Open communication of <DateStamp date={commDate} />
     </Button>
   );
 };
@@ -420,7 +419,7 @@ const TSCountryDetailsEditor: React.FC<TSCountryDetailsEditorProps> = function (
   return (
     <>
       <Label>
-        Country name
+        Country or geographical area name
         <InputGroup
           value={newCountry.country_name[lang.default]}
           key="countryName"

@@ -214,3 +214,9 @@
   flex-flow: column nowrap;
   overflow: hidden;
 }
+
+:local .openCommButton {
+  flex: 1;
+  justify-content: flex-start !important;
+  margin-right: 1rem;
+}
