@@ -156,7 +156,7 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
     <div className={styles.twoPaneEditor}>
       <div className={styles.messageListPane}>
 
-        <PaneHeader align="right" major={true} className={styles.paneHeader}>No. {issue.id}</PaneHeader>
+        <PaneHeader align="right" major={true} className={styles.paneHeader}>Edition № <span className={styles.paneHeaderIssueId}>{issue.id}</span></PaneHeader>
         <div className={styles.paneBody}>
 
           <MessageList

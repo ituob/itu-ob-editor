@@ -12,6 +12,11 @@
 :local .paneHeader {
   flex-grow: 0;
   z-index: 5;
+  font-size: $pt-font-size-small;
+}
+:local .paneHeaderIssueId {
+  color: $pt-intent-primary;
+  font-size: $pt-font-size-large;
 }
 
 :local .twoPaneEditor {

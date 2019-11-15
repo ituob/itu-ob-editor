@@ -208,7 +208,7 @@ export const IssueScheduler: React.FC<{}> = function () {
 
       {newIssueDraft
         ? <div className={styles.selectedDayPane}>
-            <PaneHeader align="left" major={true}>Schedule edition</PaneHeader>
+            <PaneHeader align="left" major={true}>Schedule bulletin edition</PaneHeader>
 
             <div className={styles.paneBody}>
               <ScheduleForm
@@ -220,7 +220,7 @@ export const IssueScheduler: React.FC<{}> = function () {
             </div>
           </div>
         : <div className={styles.upcomingIssuesPane}>
-            <PaneHeader align="left" major={true}>Editions</PaneHeader>
+            <PaneHeader align="left" major={true}>Bulletin editions</PaneHeader>
 
             <div className={styles.paneBody}>
               <UpcomingIssues
