@@ -52,6 +52,24 @@ interface Factories<M> {
 
 export const issueFactories: Factories<OBIssue> = {
 
+  withAddedAnnex: (issue: OBIssue, pubId: string) => {
+    var newAnnexes = {...issue.annexes};
+    newAnnexes[pubId] = null;
+    return { ...issue, annexes: newAnnexes };
+  },
+
+  withDeletedAnnex: (issue: OBIssue, pubId: string) => {
+    var newAnnexes = {...issue.annexes};
+    delete newAnnexes[pubId];
+    return { ...issue, annexes: newAnnexes };
+  },
+
+  withUpdatedAnnexedPublicationPosition: (issue: OBIssue, pubId: string, position: Date) => {
+    var newAnnexes = {...issue.annexes};
+    newAnnexes[pubId] = { position_on: position };
+    return { ...issue, annexes: newAnnexes };
+  },
+
   withEditedMessage: (issue: OBIssue, section: OBMessageSection, msgIdx: number, updatedMessage: Message) => {
     var newMessages = [...issue[section].messages];
     newMessages[msgIdx] = updatedMessage;
