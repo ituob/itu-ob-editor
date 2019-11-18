@@ -12,6 +12,22 @@ export interface AnnexesBlock {
 
 export type OBMessageSection = 'amendments' | 'general';
 
+export type OBAnnexesSection = 'annexes';
+
+export type OBSection = OBMessageSection | OBAnnexesSection;
+
+export function isOBSection(val: string): val is OBSection {
+  return ['amendments', 'general', 'annexes'].indexOf(val) >= 0;
+}
+
+export function isOBMessageSection(val: string): val is OBMessageSection {
+  return ['amendments', 'general'].indexOf(val) >= 0;
+}
+
+export function isOBAnnexesSection(val: string): val is OBAnnexesSection {
+  return val === 'annexes';
+}
+
 export interface OBIssue extends IndexableObject {
   // Stored data
   id: number,
