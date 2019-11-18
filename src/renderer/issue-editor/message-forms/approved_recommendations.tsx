@@ -1,29 +1,54 @@
 import * as moment from 'moment';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
-import { Button, Label, InputGroup } from '@blueprintjs/core';
+import { Button, Callout, Label, FormGroup, InputGroup } from '@blueprintjs/core';
 import { AddCardTrigger, SimpleEditableCard } from 'sse/renderer/widgets/editable-card-list';
 
 import { ITURecCode, ITURecVersion } from 'models/recommendations';
 import { ApprovedRecommendationsMessage } from 'models/messages/approved_recommendations';
+import { useRecommendation } from 'renderer/workspace-context';
 
 import { MessageFormProps, MessageEditorDialog } from '../message-editor';
 
 
-export const MessageForm: React.FC<MessageFormProps> = function (props) {
-  const [newRecDialogStatus, toggleNewRecDialogStatus] = useState(false);
-  const [recs, updateRecs] = useState(
-    (props.message as ApprovedRecommendationsMessage).items);
+export const MessageForm: React.FC<MessageFormProps> = function ({ message, onChange }) {
+  const [msg, updateMsg] = useState(message as ApprovedRecommendationsMessage);
 
-  useEffect(() => {
-    props.onChange({ items: recs });
-  }, [JSON.stringify(recs)]);
+  const [newRecDialogStatus, toggleNewRecDialogStatus] = useState(false);
+
+  function _onChange(updatedMsg: { [K in keyof ApprovedRecommendationsMessage]?: ApprovedRecommendationsMessage[K] }) {
+    updateMsg({ ...msg, ...updatedMsg });
+    onChange({ ...msg, ...updatedMsg });
+  }
 
   return (
     <>
+      <Callout>
+        <FormGroup key="by" label="Approved by:">
+          <InputGroup
+            type="text"
+            placeholder="AAP-184"
+            value={msg.by || ''}
+            onChange={(event: React.FormEvent<HTMLElement>) => {
+              _onChange({ by: (event.target as HTMLInputElement).value });
+            }}
+          />
+        </FormGroup>
+        <FormGroup key="procedures" label="In accordance with procedures outlined in:">
+          <InputGroup
+            type="text"
+            placeholder="Resolution 42"
+            value={msg.procedures || ''}
+            onChange={(event: React.FormEvent<HTMLElement>) => {
+              _onChange({ procedures: (event.target as HTMLInputElement).value });
+            }}
+          />
+        </FormGroup>
+      </Callout>
+
       <AddCardTrigger
         label="Add an approved recommendation"
-        highlight={Object.entries(recs).length < 1}
+        highlight={true}
         key="addNew"
         onClick={() => {
           toggleNewRecDialogStatus(true);
@@ -31,16 +56,19 @@ export const MessageForm: React.FC<MessageFormProps> = function (props) {
       />
 
       <>
-        {Object.entries(recs).map(([code, version]: [string, string]) => {
-          const pub = props.workspace.recommendations[code];
-          const title = pub ? pub.title.en : '';
+        {Object.entries(msg.items).map(([code, version]: [string, string]) => {
+          const rec = useRecommendation(code);
+          const title = rec ? rec.title.en : '';
           return (
             <SimpleEditableCard
               key={code}
               onDelete={() => {
-                updateRecs((recs) => { const { [code]: _, ...newRecs } = recs; return newRecs; });
+                var newRecs = { ...msg.items };
+                delete newRecs[code];
+                _onChange({ items: newRecs });
               }}>
-              <strong>{`${code} (${moment(version).format('YYYY-MM')})`}</strong>
+              <strong>{code}</strong> ({moment(version).format('YYYY-MM')})
+              &ensp;
               <em>{title}</em>
             </SimpleEditableCard>
           );
@@ -53,11 +81,9 @@ export const MessageForm: React.FC<MessageFormProps> = function (props) {
             isOpen={true}
             onClose={() => toggleNewRecDialogStatus(false)}
             onSave={(code, version) => {
-              updateRecs(recs => {
-                var newRecs = { ...recs };
-                newRecs[code] = version;
-                return newRecs;
-              });
+              var newRecs = { ...msg.items };
+              newRecs[code] = version;
+              _onChange({ items: newRecs });
               toggleNewRecDialogStatus(false);
             }}
           />
