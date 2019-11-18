@@ -7,7 +7,7 @@ export interface MessageBlock {
 }
 
 export interface AnnexesBlock {
-  [pubId: string]: { position_on: Date },
+  [pubId: string]: { position_on: Date } | null,
 }
 
 export type OBMessageSection = 'amendments' | 'general';
