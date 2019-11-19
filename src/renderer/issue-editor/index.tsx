@@ -200,12 +200,14 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
       idx = issue[inSection].messages.length;
     }
     const newIssue = issueFactories.withAddedMessage(issue, inSection, idx, msg);
-    updateIssue(newIssue)
+    const actualIndex = newIssue[inSection].messages.indexOf(msg);
+
+    updateIssue(newIssue);
 
     //storageUpdateIssue('create-message', { section: inSection, msgIdx: idx, msg: msg });
 
     selectSection(inSection);
-    selectItem(`${idx}`);
+    selectItem(`${actualIndex}`);
   }
 
   function handleMessageEdit(updatedMessage: Message) {
