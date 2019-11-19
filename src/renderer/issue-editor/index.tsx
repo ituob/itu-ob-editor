@@ -89,9 +89,15 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
   const ws = useWorkspace();
   const [isDirty, setDirty] = useState(false);
 
+  const [isLoading, setLoading] = useState(true);
+
   useEffect(() => {
-    setDirty(true);
-    storageUpdateIssue(props.issue.id, issue);
+    if (isLoading) {
+      setLoading(false);
+    } else {
+      setDirty(true);
+      storageUpdateIssue(props.issue.id, issue);
+    }
   }, [issue]);
 
 
