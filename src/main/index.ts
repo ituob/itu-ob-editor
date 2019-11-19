@@ -292,6 +292,20 @@ then(results => {
     return issue;
   });
 
+  listen<{ issueId: string, data: OBIssue }, { success: boolean }>
+  ('issue-update', async ({ issueId, data }) => {
+    const issue: OBIssue = storage.workspace.issues[issueId];
+    if (!issue) {
+      throw new Error(`Requested issue ${issueId} could not be found`);
+    }
+
+    await storage.storeManagers.issues.store(data, storage);
+
+    return { success: true };
+  });
+
+  // Messages
+
   listen<{ issueId: string, section: OBMessageSection, msgIdx: number, msg: Message }, { success: boolean }>
   ('issue-create-message', async ({ issueId, section, msgIdx, msg }) => {
     const issue: OBIssue = storage.workspace.issues[issueId];
