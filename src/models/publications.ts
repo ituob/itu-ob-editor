@@ -10,6 +10,6 @@ export type PublicationID = string;
 export interface Publication extends IndexableObject {
   title: Translatable<string>,
   id: PublicationID,
-  url: string,
-  recommendation: Recommendation | null,
+  url?: string,
+  recommendation?: Recommendation | null,
 }
