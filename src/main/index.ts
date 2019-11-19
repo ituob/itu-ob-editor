@@ -1,6 +1,7 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as moment from 'moment';
+import * as dns from 'dns';
 
 import { app, Menu, ipcMain } from 'electron';
 import * as log from 'electron-log';
@@ -10,6 +11,8 @@ import { listen, makeWindowEndpoint } from 'sse/api/main';
 import { SettingManager } from 'sse/settings/main';
 import { QuerySet, sortIntegerAscending } from 'sse/storage/query';
 import { GitController, setRepoUrl, initRepo } from 'sse/storage/main/git-controller';
+
+import { PartialRemoteStorageStatus } from 'remote-storage';
 
 import { OBIssue, ScheduledIssue, OBMessageSection, issueFactories } from 'models/issues';
 import { Message } from 'models/messages';
@@ -52,16 +55,22 @@ const APP_DATA = app.getPath('userData');
 // Git repository contents—our database
 const WORK_DIR = path.join(APP_DATA, 'itu-ob-data');
 
-const DEFAULT_REPO_URL = 'https://github.com/ituob/itu-ob-data';
+const UPSTREAM_REPO_URL = 'https://github.com/ituob/itu-ob-data';
 const CORS_PROXY_URL = 'https://cors.isomorphic-git.org';
 
 
 const WELCOME_SCREEN_WINDOW_OPTS: WindowOpenerParams = {
   component: 'welcomeConfig',
   title: 'Welcome',
-  componentParams: `defaultRepoUrl=${DEFAULT_REPO_URL || ''}`,
+  componentParams: `defaultRepoUrl=${UPSTREAM_REPO_URL || ''}`,
   dimensions: { width: 800, height: 600, minWidth: 600, minHeight: 600 },
   frameless: true,
+};
+
+const CONFIG_WINDOW_OPTS: WindowOpenerParams = {
+  component: 'dataSynchronizer',
+  title: 'Merge Changes',
+  dimensions: { width: 800, minWidth: 600, height: 640, minHeight: 640 },
 };
 
 const ISSUE_SCHEDULER_WINDOW_OPTS: WindowOpenerParams = {
@@ -159,7 +168,7 @@ then(({ url, hasChanged }) => {
   log.verbose("App launch: stage 2");
   return Promise.all([
     openHomeWindow(),
-    initRepo(WORK_DIR, url || DEFAULT_REPO_URL, CORS_PROXY_URL, hasChanged),
+    initRepo(WORK_DIR, url || UPSTREAM_REPO_URL, UPSTREAM_REPO_URL, CORS_PROXY_URL, hasChanged),
   ]);
 }).
 
@@ -189,10 +198,6 @@ then(results => {
         {
           label: "Open Calendar",
           click: async () => await openWindow(ISSUE_SCHEDULER_WINDOW_OPTS),
-        },
-        {
-          label: "Open Home Screen",
-          click: openHomeWindow,
         },
       ]),
       getHelpMenuItems: () => ([
@@ -229,6 +234,44 @@ then(results => {
   });
 
   gitCtrl.setUpAPIEndpoints();
+
+  var lastPushSucceeded: boolean | undefined = undefined;
+
+  async function syncChanges() {
+    log.verbose("Syncing changes");
+
+    await sendRemoteStatus({ isPushing: true });
+
+    let isOffline: boolean;
+    try {
+      await dns.promises.lookup('github.com');
+      isOffline = false;
+    } catch (e) {
+      isOffline = true;
+    }
+    await sendRemoteStatus({ isOffline });
+
+    try {
+      await gitCtrl.syncToRemote();
+      lastPushSucceeded = true;
+    } catch (e) {
+      log.error("Failed to push", e);
+      lastPushSucceeded = false;
+    }
+    await sendRemoteStatus({ lastPushSucceeded, isPushing: false });
+
+    await gitCtrl.fetchUpstream();
+    await sendRemoteStatus({
+      isAheadOfUpstream: await gitCtrl.isAheadOfUpstream(),
+      upstreamIsAhead: await gitCtrl.upstreamIsAhead(),
+    });
+  }
+
+  //setInterval(syncChanges, 10000);
+
+  async function sendRemoteStatus(update: PartialRemoteStorageStatus) {
+    await messageHome('remote-storage-status', update);
+  }
 
 
   /* Home screen */
@@ -417,8 +460,6 @@ then(results => {
     dimensions: { width: 800, height: 600, },
   }));
 
-  makeWindowEndpoint('issue-scheduler', () => ISSUE_SCHEDULER_WINDOW_OPTS);
-
   makeWindowEndpoint('issue-editor', ({ issueId }: { issueId: number }) => ({
     component: 'issueEditor',
     title: `Issue ${issueId}`,
@@ -450,11 +491,7 @@ then(results => {
     url: `${APP_HELP_ROOT}${path || ''}`,
   }));
 
-  makeWindowEndpoint('data-synchronizer', () => ({
-    component: 'dataSynchronizer',
-    title: 'Merge Changes',
-    dimensions: { width: 800, minWidth: 600, height: 640, minHeight: 640 },
-  }));
+  makeWindowEndpoint('settings', () => CONFIG_WINDOW_OPTS);
 
   if (windows.length < 1) {
     log.verbose("No windows loaded at app launch, maybe will quit");
@@ -467,21 +504,16 @@ then(results => {
 });
 
 
-async function messageHome(eventName: string) {
-  const homeWindow = getWindowByTitle(APP_TITLE);
+async function messageHome(eventName: string, payload?: any) {
+  const homeWindow = getWindowByTitle(ISSUE_SCHEDULER_WINDOW_OPTS.title);
   if (homeWindow !== undefined) {
-    await homeWindow.webContents.send(eventName);
+    await homeWindow.webContents.send(eventName, payload);
   }
 }
 
 
 async function openHomeWindow() {
-  return await openWindow({
-    component: 'home',
-    title: APP_TITLE,
-    dimensions: { width: 300, height: 400, minWidth: 300, minHeight: 300 },
-    frameless: true,
-  });
+  return await openWindow(ISSUE_SCHEDULER_WINDOW_OPTS);
 }
 
 

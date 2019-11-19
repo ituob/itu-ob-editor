@@ -10,7 +10,7 @@ export interface AmendmentTarget {
 }
 
 
-export interface AmendmentMessage {
+export interface Message {
   type: "amendment",
   target: AmendmentTarget,
   contents: Translatable<any>,

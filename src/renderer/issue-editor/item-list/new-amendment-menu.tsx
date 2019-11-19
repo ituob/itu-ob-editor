@@ -9,20 +9,20 @@ import * as editableCardListStyles from 'sse/renderer/widgets/editable-card-list
 
 import { Publication } from 'models/publications';
 import { OBIssue } from 'models/issues';
-import { Message, AmendmentMessage } from 'models/messages';
+import { Message } from 'models/messages';
 import { getRunningAnnexesForIssue } from 'models/running-annexes';
 
-import { NewMessagePromptProps } from './message-editor';
-import * as styles from './styles.scss';
+import { NewItemPromptProps } from './new-item-menu';
+import * as styles from '../styles.scss';
 
 
 const MAX_MENU_ITEMS_TO_SHOW = 7;
 
 
-type NewAmendmentPromptProps = NewMessagePromptProps & {
+type NewAmendmentPromptProps = NewItemPromptProps & {
   issueId: number,
   issueIndex: Index<OBIssue>,
-  existingAmendments: AmendmentMessage[],
+  disabledPublicationIDs: string[],
   publicationIndex: Index<Publication>,
 }
 export const NewAmendmentPrompt: React.FC<NewAmendmentPromptProps> = function (props) {
@@ -77,13 +77,11 @@ export const NewAmendmentPrompt: React.FC<NewAmendmentPromptProps> = function (p
       itemListRenderer={NewAmendmentMenuRenderer}
       itemPredicate={NewAmendmentMenuItemFilter}
       itemDisabled={(item) => {
-        return props.existingAmendments.map((amd) => {
-          return amd.target.publication;
-        }).indexOf(item.id) >= 0;
+        return props.disabledPublicationIDs.indexOf(item.id) >= 0;
       }}
       onItemSelect={(pub: AmendablePublication) =>
         props.onCreate(createAmendmentMessage(pub))}
-    ><AddCardTriggerButton highlight={props.highlight} label="Add an amendment" /></NewAmendmentSelector>
+    ><AddCardTriggerButton highlight={props.highlight} label="Amend service publication" /></NewAmendmentSelector>
   );
 };
 
@@ -110,7 +108,7 @@ const NewAmendmentMenuRenderer: ItemListRenderer<AmendablePublication> =
   const filteredItems = props.filteredItems.slice(0, MAX_MENU_ITEMS_TO_SHOW);
 
   return (
-    <Menu ulRef={props.itemsParentRef} className={styles.newMessageMenu}>
+    <Menu ulRef={props.itemsParentRef} className={styles.newItemMenu}>
       {renderFilteredItems({
         ...props,
         filteredItems: filteredItems,
@@ -132,7 +130,7 @@ const NewAmendmentMenuItemRenderer: ItemRenderer<AmendablePublication> =
       text={pub.title}
       onClick={handleClick}
       active={modifiers.active}
-      title={modifiers.disabled ? `Publication ${pub.title} was already amended in this edition` : undefined}
+      title={modifiers.disabled ? `Publication was annexed to or amended in this edition` : undefined}
       disabled={modifiers.disabled} />
   );
 };

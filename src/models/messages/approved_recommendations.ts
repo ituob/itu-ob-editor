@@ -6,7 +6,7 @@ type ProceduresDocRef = string;
 type RecBlock = { [code: string]: ITURecVersion };
 
 
-export interface ApprovedRecommendationsMessage {
+export interface Message {
   type: "approved_recommendations",
   by?: ApprovalDocRef,
   procedures?: ProceduresDocRef,

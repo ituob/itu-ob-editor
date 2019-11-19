@@ -21,7 +21,7 @@ export class IssueManager extends StoreManager<OBIssue> {
     super('issues');
   }
 
-  public toStoreableObject(obj: OBIssue): any {
+  public toStoreableObject(obj: OBIssue) {
     var storeable = {
       meta: {
         id: obj.id,
@@ -38,7 +38,7 @@ export class IssueManager extends StoreManager<OBIssue> {
     return storeable;
   }
 
-  public postLoad(obj: any): OBIssue {
+  public postLoad(obj: any) {
     if (!(obj.general || {}).messages) {
       obj.general = { messages: [] };
     }
@@ -77,6 +77,11 @@ class RecommendationManager extends StoreManager<ITURecommendation> {
   constructor() {
     super(REC_ROOT);
   }
+
+  public postLoad(obj: any) {
+    obj.id = obj.code;
+    return obj;
+  }
 }
 
 
@@ -106,7 +111,9 @@ export async function initStorage(workDir: string): Promise<Storage> {
   });
 
   log.verbose("Storage: Loading workspace");
+
   await storage.loadWorkspace();
+
   log.verbose("Storage: Loading workspace: Done");
 
   return storage;

@@ -8,7 +8,7 @@ import { LangConfigContext } from 'sse/localizer/renderer';
 import {
   TSCommunication,
   TSCountryCommunicationSet,
-  TelephoneServiceMessageV2,
+  Message as TelephoneServiceMessageV2,
 } from 'models/messages/telephone_service_2';
 
 import { DateStamp } from 'renderer/widgets/dates';

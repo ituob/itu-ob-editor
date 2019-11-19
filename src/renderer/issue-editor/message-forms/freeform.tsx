@@ -1,14 +1,14 @@
 import React, { useContext } from 'react';
 import { LangConfigContext } from 'sse/localizer/renderer';
+import { FreeformMessage } from 'models/freeform-message';
 
-import { Message as AmendmentMessage } from 'models/messages/amendment';
 import { FreeformContents } from '../freeform-contents';
 import { MessageFormProps } from '../message-editor';
 
 
 export const MessageForm: React.FC<MessageFormProps> = function ({ message, onChange }) {
   const lang = useContext(LangConfigContext);
-  const msg = message as AmendmentMessage;
+  const msg = message as FreeformMessage;
 
   return (
     <FreeformContents

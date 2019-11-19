@@ -58,9 +58,9 @@ export const IssueScheduler: React.FC<{}> = function () {
     ipcRenderer.once('app-loaded', fetchSchedule);
     ipcRenderer.on('update-current-issue', fetchCurrentIssue);
     return function cleanup() {
+      ipcRenderer.removeListener('app-loaded', fetchCurrentIssue);
       ipcRenderer.removeListener('app-loaded', fetchSchedule);
       ipcRenderer.removeListener('update-current-issue', fetchCurrentIssue);
-      ipcRenderer.removeListener('app-loaded', fetchCurrentIssue);
     };
   }, []);
 
@@ -114,122 +114,124 @@ export const IssueScheduler: React.FC<{}> = function () {
   }
 
   return (
-    <div className={styles.issueScheduler}>
-      <div className={styles.calendarPane}>
-        <PaneHeader align="right" major={true} actions={<HelpButton path="schedule/" />} />
+    <div className={styles.issueSchedulerBase}>
+      <div className={styles.issueScheduler}>
+        <div className={styles.calendarPane}>
+          <PaneHeader align="right" major={true} actions={<HelpButton path="schedule/" />} />
 
-        <div className={styles.paneBody}>
-          <DatePicker
-            modifiers={{
-              isPublicationDate: (date) => getIssueWithPublication(date, schedule) !== null,
-              isCutoffDate: (date) => getIssueWithCutoff(date, schedule) !== null,
-              isNewPublicationDate: (date) => (
-                (newIssueDraft || {} as IssueDraft).publication_date
-                ? moment((newIssueDraft as IssueDraft).publication_date).isSame(date, 'day') : false),
-              isNewCutoffDate: (date) => (
-                (newIssueDraft || {} as IssueDraft).cutoff_date
-                ? moment((newIssueDraft as IssueDraft).cutoff_date).isSame(date, 'day') : false),
-            }}
-            dayPickerProps={{
-              onDayMouseEnter: (date) => hoverDate(date),
-              onDayMouseLeave: () => hoverDate(null),
-              showOutsideDays: false,
-            }}
-            minDate={minDate}
-            maxDate={maxDate}
-            value={date}
-            onChange={(newDate, isUserChange) => {
-              if (isUserChange) { startOrUpdateDraft(newDate || date); }
-              if (newDate !== null) { selectDate(newDate); }
-              if (!moment(newDate).isSame(date, 'month')) { selectMonth(newDate); }
-            }}
-          />
+          <div className={styles.paneBody}>
+            <DatePicker
+              modifiers={{
+                isPublicationDate: (date) => getIssueWithPublication(date, schedule) !== null,
+                isCutoffDate: (date) => getIssueWithCutoff(date, schedule) !== null,
+                isNewPublicationDate: (date) => (
+                  (newIssueDraft || {} as IssueDraft).publication_date
+                  ? moment((newIssueDraft as IssueDraft).publication_date).isSame(date, 'day') : false),
+                isNewCutoffDate: (date) => (
+                  (newIssueDraft || {} as IssueDraft).cutoff_date
+                  ? moment((newIssueDraft as IssueDraft).cutoff_date).isSame(date, 'day') : false),
+              }}
+              dayPickerProps={{
+                onDayMouseEnter: (date) => hoverDate(date),
+                onDayMouseLeave: () => hoverDate(null),
+                showOutsideDays: false,
+              }}
+              minDate={minDate}
+              maxDate={maxDate}
+              value={date}
+              onChange={(newDate, isUserChange) => {
+                if (isUserChange) { startOrUpdateDraft(newDate || date); }
+                if (newDate !== null) { selectDate(newDate); }
+                if (!moment(newDate).isSame(date, 'month')) { selectMonth(newDate); }
+              }}
+            />
 
-          {hoveredDate
-            ? <div className={styles.daySchedule}>
-                {!newIssueDraft || !newIssueDraft.cutoff_date
-                  ? <p>
-                      <Icon icon="edit" />
+            {hoveredDate
+              ? <div className={styles.daySchedule}>
+                  {!newIssueDraft || !newIssueDraft.cutoff_date
+                    ? <p>
+                        <Icon icon="edit" />
+                        &nbsp;
+                        {newIssueDraft
+                          ? <>Click to&nbsp;schedule the</>
+                          : <>Click to&nbsp;schedule an&nbsp;edition with</>}&nbsp;<strong className={styles.cutDateLabel}>cutoff&nbsp;date</strong> on&nbsp;<DateStamp date={hoveredDate as Date} />.
+                      </p>
+                    : null}
+
+                  {newIssueDraft && !newIssueDraft.publication_date && moment(hoveredDate).isAfter(minDate)
+                    ? <p>
+                        <Icon icon="edit" />
+                        &nbsp;
+                        Click to&nbsp;schedule
+                        the&nbsp;<strong className={styles.pubDateLabel}>publication&nbsp;date</strong> on&nbsp;<DateStamp date={hoveredDate as Date} />.
+                      </p>
+                    : null}
+
+                  {newIssueDraft && newIssueDraft.publication_date && newIssueDraft.cutoff_date
+                    ? <p>
+                        <Icon icon="arrow-right" />
+                        &nbsp;
+                        Fill&nbsp; edition details and&nbsp;save the&nbsp;new&nbsp;schedule.
+                      </p>
+                    : null}
+
+                  {daySchedule && !newIssueDraft
+                    ? <p>
+                        <Icon icon="info-sign" />
+                        &nbsp;
+                        Something is already scheduled on this day.
+                      </p>
+                    : null}
+                </div>
+              : null}
+
+              {!hoveredDate && !newIssueDraft
+                ? <div className={styles.daySchedule}>
+                    <p>
+                      <Icon icon="info-sign" />
                       &nbsp;
-                      {newIssueDraft
-                        ? <>Click to&nbsp;schedule the</>
-                        : <>Click to&nbsp;schedule an&nbsp;edition with</>}&nbsp;<strong className={styles.cutDateLabel}>cutoff&nbsp;date</strong> on&nbsp;<DateStamp date={hoveredDate as Date} />.
+                      Select a&nbsp;month to&nbsp;view&nbsp;OB&nbsp;schedule for&nbsp;that&nbsp;time&nbsp;period.
                     </p>
-                  : null}
+                  </div>
+                : null}
 
-                {newIssueDraft && !newIssueDraft.publication_date && moment(hoveredDate).isAfter(minDate)
-                  ? <p>
-                      <Icon icon="edit" />
-                      &nbsp;
-                      Click to&nbsp;schedule
-                      the&nbsp;<strong className={styles.pubDateLabel}>publication&nbsp;date</strong> on&nbsp;<DateStamp date={hoveredDate as Date} />.
-                    </p>
-                  : null}
-
-                {newIssueDraft && newIssueDraft.publication_date && newIssueDraft.cutoff_date
-                  ? <p>
+              {!hoveredDate && newIssueDraft && newIssueDraft.publication_date && newIssueDraft.cutoff_date
+                ? <div className={styles.daySchedule}>
+                    <p>
                       <Icon icon="arrow-right" />
                       &nbsp;
                       Fill&nbsp; edition details and&nbsp;save the&nbsp;new&nbsp;schedule.
                     </p>
-                  : null}
-
-                {daySchedule && !newIssueDraft
-                  ? <p>
-                      <Icon icon="info-sign" />
-                      &nbsp;
-                      Something is already scheduled on this day.
-                    </p>
-                  : null}
-              </div>
-            : null}
-
-            {!hoveredDate && !newIssueDraft
-              ? <div className={styles.daySchedule}>
-                  <p>
-                    <Icon icon="info-sign" />
-                    &nbsp;
-                    Select a&nbsp;month to&nbsp;view&nbsp;OB&nbsp;schedule for&nbsp;that&nbsp;time&nbsp;period.
-                  </p>
-                </div>
-              : null}
-
-            {!hoveredDate && newIssueDraft && newIssueDraft.publication_date && newIssueDraft.cutoff_date
-              ? <div className={styles.daySchedule}>
-                  <p>
-                    <Icon icon="arrow-right" />
-                    &nbsp;
-                    Fill&nbsp; edition details and&nbsp;save the&nbsp;new&nbsp;schedule.
-                  </p>
-                </div>
-              : null}
+                  </div>
+                : null}
+          </div>
         </div>
+
+        {newIssueDraft
+          ? <div className={styles.selectedDayPane}>
+              <PaneHeader align="left" major={true}>Schedule bulletin edition</PaneHeader>
+
+              <div className={styles.paneBody}>
+                <ScheduleForm
+                  draft={newIssueDraft as IssueDraft}
+                  onChange={updateNewIssueDraft}
+                  onSave={saveNewSchedule}
+                  onCancel={() => { updateNewIssueDraft(null) }}
+                />
+              </div>
+            </div>
+          : <div className={styles.upcomingIssuesPane}>
+              <PaneHeader align="left" major={true}>Bulletin editions</PaneHeader>
+
+              <div className={styles.paneBody}>
+                <UpcomingIssues
+                  issues={issueIndex}
+                  userIsEditing={userIsEditing}
+                  currentIssueId={currentIssue.id || undefined} />
+              </div>
+            </div>
+        }
       </div>
-
-      {newIssueDraft
-        ? <div className={styles.selectedDayPane}>
-            <PaneHeader align="left" major={true}>Schedule bulletin edition</PaneHeader>
-
-            <div className={styles.paneBody}>
-              <ScheduleForm
-                draft={newIssueDraft as IssueDraft}
-                onChange={updateNewIssueDraft}
-                onSave={saveNewSchedule}
-                onCancel={() => { updateNewIssueDraft(null) }}
-              />
-            </div>
-          </div>
-        : <div className={styles.upcomingIssuesPane}>
-            <PaneHeader align="left" major={true}>Bulletin editions</PaneHeader>
-
-            <div className={styles.paneBody}>
-              <UpcomingIssues
-                issues={issueIndex}
-                userIsEditing={userIsEditing}
-                currentIssueId={currentIssue.id || undefined} />
-            </div>
-          </div>
-      }
     </div>
   );
 };

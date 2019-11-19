@@ -1,5 +1,7 @@
+import { ipcRenderer } from 'electron';
+
 import * as ReactDOM from 'react-dom';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NonIdealState } from '@blueprintjs/core';
 
 import { LangConfigContext } from 'sse/localizer/renderer';
@@ -9,12 +11,12 @@ import { Preflight } from 'sse/preflight/renderer';
 
 import { HomeScreen } from './home';
 import { Settings } from './settings';
-import { IssueEditor } from './issue-editor';
+import { Window as IssueEditor } from './issue-editor';
 import { IssueScheduler } from './issue-scheduler';
 import { PublicationEditor } from './publication-editor';
-import { WelcomeConfigScreen } from './welcome';
 
-import { WorkspaceContext } from './workspace-context';
+import { WorkspaceContext, WorkspaceContextSpec } from './workspace-context';
+import { LocalStorageStatusContextProvider } from './sync-context';
 import { request } from 'sse/api/renderer';
 import { Index } from 'sse/storage/query';
 import { OBIssue } from 'models/issues';
@@ -54,16 +56,15 @@ const App: React.FC<{}> = function () {
     component = <PublicationEditor publicationId={searchParams.get('pubId') || ''} />;
 
   } else if (searchParams.get('c') === 'dataSynchronizer') {
-    component = <DataSynchronizer />;
+    component = <DataSynchronizer
+      upstreamURL={searchParams.get('upstreamURL') || ''}
+      inPreLaunchSetup={searchParams.get('inPreLaunchSetup') === '1'} />;
 
   } else if (searchParams.get('c') === 'spotlight') {
     component = <Spotlight />;
 
   } else if (searchParams.get('c') === 'preflight') {
     component = <Preflight />;
-
-  } else if (searchParams.get('c') === 'welcomeConfig') {
-    component = <WelcomeConfigScreen defaultRepoUrl={searchParams.get('defaultRepoUrl') || ''} />;
 
   } else if (searchParams.get('c') === 'settings') {
     component = <Settings />;
@@ -77,7 +78,7 @@ const App: React.FC<{}> = function () {
       title="Unknown component requested" />;
   }
 
-  const [workspace, updateWorkspace] = useState({
+  const initWorkspace: WorkspaceContextSpec = {
     current: {
       issues: {},
       publications: {},
@@ -91,7 +92,17 @@ const App: React.FC<{}> = function () {
       };
       updateWorkspace(workspace => ({ ...workspace, current: newCurrent }));
     },
-  });
+  };
+  const [workspace, updateWorkspace] = useState(initWorkspace);
+
+  useEffect(() => {
+    workspace.refresh();
+    ipcRenderer.on('publications-changed', workspace.refresh);
+
+    return function cleanup() {
+      ipcRenderer.removeListener('publications-changed', workspace.refresh);
+    };
+  }, []);
 
   const [langConfig, setLangConfig] = useState({
     available: { en: 'English', zh: 'Chinese', ru: 'Russian' },
@@ -105,7 +116,9 @@ const App: React.FC<{}> = function () {
   return (
     <LangConfigContext.Provider value={langConfig}>
       <WorkspaceContext.Provider value={workspace}>
-        {component}
+        <LocalStorageStatusContextProvider>
+          {component}
+        </LocalStorageStatusContextProvider>
       </WorkspaceContext.Provider>
     </LangConfigContext.Provider>
   );

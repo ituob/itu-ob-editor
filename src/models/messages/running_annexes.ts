@@ -1,6 +1,6 @@
 import { PublicationID } from 'models/publications';
 
-export interface RunningAnnexesMessage {
+export interface Message {
   type: "running_annexes",
   extra_links: PublicationID[],
 }

@@ -3,9 +3,11 @@ import { Tabs, Tab, Button, Label, InputGroup } from '@blueprintjs/core';
 
 import { AddCardTrigger, SimpleEditableCard } from 'sse/renderer/widgets/editable-card-list';
 
-import { RunningAnnex, getRunningAnnexesForIssue } from 'models/running-annexes';
-import { RunningAnnexesMessage } from 'models/messages/running_annexes';
+import { RunningAnnex } from 'models/running-annexes';
+import { Message as RunningAnnexesMessage } from 'models/messages/running_annexes';
+import { useRunningAnnexes } from 'renderer/workspace-context';
 
+import { PublicationTitle } from 'renderer/widgets/publication-title';
 import { DateStamp } from 'renderer/widgets/dates';
 
 import { MessageFormProps, MessageEditorDialog } from '../message-editor';
@@ -20,10 +22,7 @@ export const MessageForm: React.FC<MessageFormProps> = function (props) {
     props.onChange({ extra_links: extraPubIds });
   }, [JSON.stringify(extraPubIds)]);
 
-  const runningAnnexes = getRunningAnnexesForIssue(
-    props.issue.id,
-    props.workspace.issues,
-    props.workspace.publications);
+  const runningAnnexes = useRunningAnnexes(props.issue.id);
 
   return (
     <Tabs className={`${styles.messageEditorTabs} ${styles.paneBody}`}>
@@ -86,7 +85,7 @@ const ExtraPublications: React.FC<{ pubIds: string[], updateIds: (newIds: string
               onDelete={() => {
                 updateIds(pubIds.filter(id => id !== pubId));
               }}>
-            <strong>{pubId}</strong>
+            <PublicationTitle id={pubId} />
           </SimpleEditableCard>
 
           <AddCardTrigger key="addNewAfter" label="Add annexed publication" onClick={() => {

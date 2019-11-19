@@ -1,6 +1,8 @@
 @import "~@blueprintjs/core/lib/scss/variables";
 @import "renderer/mixins.scss";
 
+$sidebarWidth: 17em;
+
 :local .spinner {
   position: absolute;
   display: block;
@@ -13,14 +15,24 @@
   flex-grow: 0;
   z-index: 5;
   font-size: $pt-font-size-small;
-}
-:local .paneHeaderIssueId {
-  color: $pt-intent-primary;
-  font-size: $pt-font-size-large;
+
+  :global .bp3-text-overflow-ellipsis {
+    display: flex;
+    align-items: center;
+  }
+  :local .paneSpinner {
+    display: inline;
+    margin-right: .5rem;
+  }
+  :local .paneHeaderIssueId {
+    color: $pt-intent-primary;
+    margin-left: .1rem;
+    font-size: $pt-font-size-large;
+  }
 }
 
 :local .twoPaneEditor {
-  @include twoPaneWindowLayout(17em);
+  @include twoPaneWindowLayout($sidebarWidth);
 }
 
 :local .messageListPane {
@@ -43,8 +55,8 @@
   overflow-y: auto;
 }
 
-:local .newMessageMenu {
-  max-width: 18em;
+:local .newItemMenu {
+  max-width: calc(100vw - #{$sidebarWidth} - 10px);
 }
 
 :local .messageEditorDialog {
@@ -139,13 +151,98 @@
   margin-top: 1rem;
 }
 
+:local .editorMeta {
+  flex-shrink: 0;
+  padding-left: 20px;
+  padding-bottom: 1rem;
+
+  display: flex;
+  flex-flow: column nowrap;
+
+  font-size: $pt-font-size-small;
+  color: $pt-text-color-muted;
+
+  > * {
+    display: block;
+  }
+}
+
 
 /* Message type specific editors */
 
-/* Running Annexes */
 
-:local .emptyExtraAnnexedPublicationsPane {
-  padding-top: 1rem;
+.editor-pane-message-approved_recommendations,
+.editor-pane-annex {
+  :local .messageEditorPaneHeader {
+    box-shadow: $pt-elevation-shadow-1;
+    z-index: 1;
+  }
+}
+
+.editor-pane-annex,
+.editor-pane-message-amendment {
+  :local .editorMeta {
+    > :last-child {
+      margin-top: .5rem;
+      font-size: $pt-font-size;
+    }
+  }
+}
+
+/* Annex */
+
+.editor-pane-annex {
+  display: flex;
+  flex-flow: column nowrap;
+
+  :local .annexEditorPosition {
+    font-size: $pt-font-size-large;
+  }
+
+  .bp3-form-group {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    flex-flow: column nowrap;
+    padding: 1.5rem 0 0 20px;
+
+    .bp3-datepicker,
+    .bp3-form-helper-text {
+      margin-top: 1rem;
+    }
+
+    .bp3-datepicker {
+      padding: 1.5rem;
+      background: $pt-app-background-color;
+    }
+  }
+}
+
+/* Approved recommendations */
+
+:local .approvedRecsMeta {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: flex-start;
+
+  border-radius: 0 !important;
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+
+  > :first-child {
+    margin-right: 1rem;
+  }
+
+  :global .bp3-label {
+    white-space: nowrap;
+  }
+  :global .bp3-input {
+    border-radius: 0 !important;
+  }
+
+  > * {
+    flex: 1;
+  }
 }
 
 /* Amendment & custom messages */

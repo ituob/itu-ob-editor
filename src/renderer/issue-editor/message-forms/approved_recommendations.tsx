@@ -5,10 +5,12 @@ import { Button, Callout, Label, FormGroup, InputGroup } from '@blueprintjs/core
 import { AddCardTrigger, SimpleEditableCard } from 'sse/renderer/widgets/editable-card-list';
 
 import { ITURecCode, ITURecVersion } from 'models/recommendations';
-import { ApprovedRecommendationsMessage } from 'models/messages/approved_recommendations';
+import { Message as ApprovedRecommendationsMessage } from 'models/messages/approved_recommendations';
 import { useRecommendation } from 'renderer/workspace-context';
 
 import { MessageFormProps, MessageEditorDialog } from '../message-editor';
+
+import * as styles from '../styles.scss';
 
 
 export const MessageForm: React.FC<MessageFormProps> = function ({ message, onChange }) {
@@ -21,23 +23,38 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
     onChange({ ...msg, ...updatedMsg });
   }
 
+  const hasApprovalDoc = (msg.by || '') !== '';
+  const hasProceduresDoc = (msg.procedures || '') !== '';
+
   return (
     <>
-      <Callout>
-        <FormGroup key="by" label="Approved by:">
+      <Callout className={styles.approvedRecsMeta}>
+        <FormGroup
+            key="by"
+            intent={!onChange || hasApprovalDoc ? undefined : "warning"}
+            helperText={!onChange || hasApprovalDoc ? undefined : "Please specify the approving document reference."}
+            label="Approved by:"
+            labelInfo={onChange ? "(required)" : undefined}>
           <InputGroup
             type="text"
-            placeholder="AAP-184"
+            disabled={!onChange}
+            placeholder={onChange ? "e.g., AAP-184" : undefined}
             value={msg.by || ''}
             onChange={(event: React.FormEvent<HTMLElement>) => {
               _onChange({ by: (event.target as HTMLInputElement).value });
             }}
           />
         </FormGroup>
-        <FormGroup key="procedures" label="In accordance with procedures outlined in:">
+        <FormGroup
+            key="procedures"
+            intent={!onChange || hasProceduresDoc ? undefined : "warning"}
+            helperText={!onChange || hasProceduresDoc ? undefined : "Please specify the procedures document reference."}
+            label="In accordance with procedures outlined in:"
+            labelInfo={onChange ? "(required)" : undefined}>
           <InputGroup
             type="text"
-            placeholder="Resolution 42"
+            disabled={!onChange}
+            placeholder={onChange ? "e.g., Resolution 42" : undefined}
             value={msg.procedures || ''}
             onChange={(event: React.FormEvent<HTMLElement>) => {
               _onChange({ procedures: (event.target as HTMLInputElement).value });

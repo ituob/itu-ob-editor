@@ -1,11 +1,20 @@
+import { remote } from 'electron';
+
 import React, { useContext } from 'react';
+import { Icon, Text } from '@blueprintjs/core';
 
 import { LangConfigContext } from 'sse/localizer/renderer';
 import { NonIdealState, Classes, Dialog } from '@blueprintjs/core';
 import { PaneHeader } from 'sse/renderer/widgets/pane-header';
 
+import { DateStamp } from 'renderer/widgets/dates';
+import { RecommendationTitle, PublicationTitle } from 'renderer/widgets/publication-title';
+import { usePublication, useLatestAnnex } from 'renderer/workspace-context';
+import { HelpButton } from 'renderer/widgets/help-button';
+
 import { Workspace } from 'main/storage';
 import { OBIssue } from 'models/issues';
+
 import {
   Message,
   AmendmentMessage,
@@ -14,10 +23,11 @@ import {
   isServiceRestrictions,
   isRunningAnnexes,
   isAmendment,
-  isTelephoneService,
   isTelephoneServiceV2,
   isCallbackProcedures,
   isCustom,
+  isFreeform,
+  getMessageTypeTitle,
 } from 'models/messages';
 
 import {
@@ -28,21 +38,10 @@ import {
   ServiceRestrictionsForm,
   CBProceduresForm,
   CustomMessageForm,
+  FreeformForm,
 } from './message-forms';
 
-import { WorkspaceContext } from 'renderer/workspace-context';
-import { HelpButton } from 'renderer/widgets/help-button';
-
 import * as styles from './styles.scss';
-
-
-/* New message prompt props. */
-
-export interface NewMessagePromptProps {
-  idx: number,
-  highlight?: boolean,
-  onCreate: (msg: Message) => void,
-}
 
 
 /* Message editor. More or less wraps message form, for which it gets the appropriate
@@ -60,14 +59,42 @@ export const MessageEditor: React.FC<MessageEditorProps> = function (props) {
 
     const helpPath = isAmendment(props.message) ? "amend-publication/" : `messages/${props.message.type}/`;
 
+    let meta: JSX.Element | null;
+    if (isAmendment(props.message)) {
+      const amd = props.message as AmendmentMessage;
+      const pub = usePublication(amd.target.publication);
+      const latestAnnex = useLatestAnnex(props.issue.id, amd.target.publication);
+      const pubUrl = pub ? pub.url : undefined;
+
+      if (pub) {
+        meta = <div className={styles.editorMeta}>
+          {pub.recommendation
+            ? <Text ellipsize={true}>Per <RecommendationTitle rec={pub.recommendation} /></Text>
+            : null}
+          {pubUrl
+            ? <Text ellipsize={true}>SP resource: <a onClick={() => remote.shell.openExternal(pubUrl)}>{pubUrl}</a></Text>
+            : null}
+          {latestAnnex && latestAnnex.positionOn
+            ? <div>Amending position of <DateStamp date={latestAnnex.positionOn} /> annexed to OB {latestAnnex.annexedTo.id}:</div>
+            : <div><Icon icon="warning-sign" /> This publication doesn’t seem to have been annexed to OB</div>}
+        </div>;
+      } else {
+        meta = <div className={styles.editorMeta}>Publication amended is not found in the database</div>
+      }
+    } else {
+      meta = null;
+    }
+
     return (
       <>
-        <PaneHeader
-            align="left"
-            className={styles.messageEditorPaneHeader}
-            actions={<HelpButton className="big-icon-button" path={helpPath} />}>
-          <MessageTitle message={props.message} />
-        </PaneHeader>
+        <header className={styles.messageEditorPaneHeader}>
+          <PaneHeader
+              align="left"
+              actions={<HelpButton className="big-icon-button" path={helpPath} />}>
+            <MessageTitle message={props.message} />
+          </PaneHeader>
+          {meta}
+        </header>
 
         <EditorCls
           workspace={props.workspace}
@@ -137,7 +164,7 @@ export const MessageEditorDialog: React.FC<MessageEditorDialogProps> = function 
         ? <div className={Classes.DIALOG_FOOTER}>
             {props.saveButton}
           </div>
-        : ''}
+        : null}
     </Dialog>
   );
 };
@@ -146,19 +173,12 @@ export const MessageEditorDialog: React.FC<MessageEditorDialogProps> = function 
 /* Utility functions */
 
 export const MessageTitle: React.FC<{ message: Message }> = ({ message }) => {
-  const workspace = useContext(WorkspaceContext);
   const lang = useContext(LangConfigContext);
+  const isCustomOrAmendment = isCustom(message) || isAmendment(message);
 
-  if (isApprovedRecommendations(message)) {
-    return <>Approved Recommendations</>;
-  } else if (isRunningAnnexes(message)) {
-    return <>Lists Annexed</>;
-  } else if (isTelephoneServiceV2(message)) {
-    return <>Telephone Service</>;
-  } else if (isTelephoneService(message)) {
-    return <>Telephone Service (old)</>;
-  } else if (isCallbackProcedures(message)) {
-    return <>Call-back and Alternative Calling Procedures</>;
+  if (!isCustomOrAmendment) {
+    return <>{getMessageTypeTitle(message.type)}</>;
+
   } else if (isCustom(message)) {
     const title = (message.title || {})[lang.default] || '';
     if (title) {
@@ -166,16 +186,15 @@ export const MessageTitle: React.FC<{ message: Message }> = ({ message }) => {
     } else {
       return <>Custom message</>;
     }
+
   } else if (isAmendment(message)) {
     const pubId = ((message as AmendmentMessage).target || {}).publication;
-    const pub = workspace.current.publications[pubId];
-    if (pub) {
-      return <><small title="Amendment to publication">Amd.&nbsp;to</small>&ensp;{pub.title[lang.default]}</>;
-    } else {
-      return <>Amendment</>;
-    }
-  } else if (isServiceRestrictions(message)) {
-    return <>Service Restrictions</>;
+    return <>
+      <small title="Amendment to publication">Amd.&nbsp;to</small>
+      &ensp;
+      <PublicationTitle id={pubId} />
+    </>;
+
   } else {
     return <em>unknown message {message.type}</em>;
   }
@@ -196,6 +215,8 @@ function getMessageEditor(msg: Message): React.FC<MessageEditorProps> {
     return CBProceduresForm;
   } else if (isCustom(msg)) {
     return CustomMessageForm;
+  } else if (isFreeform(msg)) {
+    return FreeformForm;
   } else {
     return () => (
       <NonIdealState

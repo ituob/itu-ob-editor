@@ -18,7 +18,7 @@ export interface TSCountryCommunicationSet {
 }
 
 
-export interface TelephoneServiceMessageV2 {
-  type: "telephone_service_2",
+export interface Message {
+  type: 'telephone_service_2',
   contents: TSCountryCommunicationSet[],
 }

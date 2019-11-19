@@ -8,8 +8,23 @@ $cutColorLight: #FFB366;
 $cutColorDark: #D9822B;
 
 
-:local .issueScheduler {
+:local .issueSchedulerBase {
   height: 100vh;
+  display: flex;
+  flex-flow: column nowrap;
+
+  .storageStatus {
+    height: 2rem;
+    flex-shrink: 0;
+    flex-grow: 0;
+    box-shadow: $pt-elevation-shadow-1;
+    z-index: 2;
+    background: white;
+  }
+}
+
+:local .issueScheduler {
+  flex: 1;
   display: flex;
   flex-flow: row nowrap;
   align-items: stretch;

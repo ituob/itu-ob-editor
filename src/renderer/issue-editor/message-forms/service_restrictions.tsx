@@ -4,7 +4,7 @@ import { Label, Button, InputGroup } from '@blueprintjs/core';
 import { AddCardTrigger, SimpleEditableCard } from 'sse/renderer/widgets/editable-card-list';
 import { LangConfigContext } from 'sse/localizer/renderer';
 
-import { ServiceRestrictionsMessage, SRItem } from 'models/messages/service_restrictions';
+import { Message as ServiceRestrictionsMessage, SRItem } from 'models/messages/service_restrictions';
 
 import { MessageFormProps, MessageEditorDialog } from '../message-editor';
 

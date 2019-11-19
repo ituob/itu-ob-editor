@@ -13,7 +13,7 @@ export interface SRItem {
 }
 
 
-export interface ServiceRestrictionsMessage {
-  type: "service_restrictions",
+export interface Message {
+  type: 'service_restrictions',
   items: SRItem[],
 }

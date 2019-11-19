@@ -5,3 +5,4 @@ export { MessageForm as AmendmentForm } from './amendment';
 export { MessageForm as ServiceRestrictionsForm } from './service_restrictions';
 export { MessageForm as CBProceduresForm } from './callback_procedures';
 export { MessageForm as CustomMessageForm } from './custom';
+export { MessageForm as FreeformForm } from './freeform';

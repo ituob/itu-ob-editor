@@ -3,7 +3,7 @@ import React, { useContext } from 'react';
 import { Callout, FormGroup, InputGroup } from '@blueprintjs/core';
 import { LangConfigContext } from 'sse/localizer/renderer';
 
-import { CustomMessage } from 'models/messages/custom';
+import { Message as CustomMessage } from 'models/messages/custom';
 import { FreeformContents } from '../freeform-contents';
 import { MessageFormProps } from '../message-editor';
 

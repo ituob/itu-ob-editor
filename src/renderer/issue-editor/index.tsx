@@ -1,153 +1,267 @@
-import { throttle } from 'throttle-debounce';
-import { ipcRenderer } from 'electron';
+import { debounce } from 'throttle-debounce';
 
-import React, { useMemo, useState, useEffect, useContext } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Spinner, NonIdealState } from '@blueprintjs/core';
 
-import { WorkspaceContext } from 'renderer/workspace-context';
+import { useWorkspace } from 'renderer/workspace-context';
 
 import { request } from 'sse/api/renderer';
 import { PaneHeader } from 'sse/renderer/widgets/pane-header';
 
-import { OBIssue, OBMessageSection, issueFactories } from 'models/issues';
-import { Message, AmendmentMessage } from 'models/messages';
+import { PublicationTitle } from 'renderer/widgets/publication-title';
 
-import { Workspace } from 'main/storage';
+// import { useStorageOperation } from 'renderer/use-api';
 
-import { MessageList } from './message-list';
-import { NewGeneralMessagePrompt } from './new-general-message-menu';
-import { NewAmendmentPrompt } from './new-amendment-menu';
-import { MessageEditor } from './message-editor';
+import {
+  OBIssue,
+  OBSection, OBMessageSection,
+  isOBSection, isOBMessageSection, isOBAnnexesSection,
+  issueFactories,
+} from 'models/issues';
+
+import { Message, MessageType, AmendmentMessage } from 'models/messages';
+
+import { ItemList } from './item-list';
+import { NewGeneralMessagePrompt } from './item-list/new-general-message-menu';
+import { NewAmendmentPrompt } from './item-list/new-amendment-menu';
+import { NewAnnexPrompt } from './item-list/new-annex-menu';
+import { MessageTitle, MessageEditor } from './message-editor';
+import { AnnexEditor } from './annex-editor';
 
 import * as styles from './styles.scss';
 
 
-export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
+interface IssueEditorSelection {
+  section: OBSection,
+  item: string,
+}
 
-  const workspace = useContext(WorkspaceContext);
-  const ws = workspace.current as Workspace;
+const GENERAL_MESSAGE_ORDER: MessageType[] = [
+  'running_annexes',
+  'approved_recommendations',
+  'telephone_service',
+  'telephone_service_2',
+  'sanc',
+  'iptn',
+  'ipns',
+  'mid',
+  'org_changes',
+  'misc_communications',
+  'custom',
+  'service_restrictions',
+  'callback_procedures',
+];
 
-  /* On first render only: fetch data from storage, set up re-fetching where needed */
+
+interface IssueEditorWindowProps {
+  issueId: string,
+  selectedSection?: string,
+  selectedItem?: string,
+}
+export const Window: React.FC<IssueEditorWindowProps> = ({ issueId, selectedSection, selectedItem }) => {
+  const [maybeIssue, updateIssue] = useState(null as OBIssue | null);
 
   useEffect(() => {
     storageGetIssue();
-
-    storageGetWorkspace();
-    ipcRenderer.on('publications-changed', storageGetWorkspace);
-
-    return function cleanup() {
-      ipcRenderer.removeListener('publications-changed', storageGetWorkspace);
-    };
   }, []);
-
-
-  /* Prepare initial state */
-
-  var initialMessageIdx: number | undefined = undefined;
-  var initialSection: OBMessageSection = 'general';
-
-  const [maybeIssue, updateIssue] = useState(null as OBIssue | null);
-
-  // If issue hasn’t loaded yet, silence React hooks and bail out of rendering early:
-  if (maybeIssue === null) {
-    useState(initialMessageIdx);
-    useState(initialSection);
-    useMemo(() => {}, [null, null, 0]);
-
-    return <Spinner className={styles.spinner} />;
-  }
-  // Since we didn’t bail, we have a proper issue:
-  const issue = maybeIssue as OBIssue;
-
-  if (issue.general.messages.length > 0) {
-    initialMessageIdx = 0;
-    initialSection = "general";
-  } else if (issue.amendments.messages.length > 0) {
-    initialMessageIdx = 0;
-    initialSection = "amendments";
-  }
-
-  const [selectedMessage, selectMessage] = useState(initialMessageIdx);
-  const [selectedSection, selectSection] = useState(initialSection);
-
-
-  /* Message editor JSX */
-
-  // Memoization ensures that updating message on every keystroke
-  // doesn’t cause the editor to re-render, which loses cursor position and undo history.
-  // Only re-render if message index or section, meaning a switch to another message.
-  const editor = useMemo(() => (
-    selectedMessage !== undefined
-      ? <MessageEditor
-          workspace={ws}
-          message={issue[selectedSection].messages[selectedMessage]}
-          issue={issue}
-          onChange={handleMessageEdit}
-        />
-      : <NonIdealState
-          icon="info-sign"
-          title="No message selected"
-          description="Add or select a message on the left to start."
-        />
-  ), [selectedMessage, selectedSection, (issue.amendments.messages.length + issue.general.messages.length)]);
-
-
-  /* Storage API utilities */
-
-  async function storageGetWorkspace() {
-    workspace.refresh();
-  }
 
   async function storageGetIssue() {
     const issue = await request<OBIssue>('issue', { issueId });
     updateIssue(issue);
   }
 
-  async function _storageUpdateIssue(action: string, params: any) {
+  if (maybeIssue !== null) {
+    let selection: IssueEditorSelection | undefined;
+    if (selectedItem && selectedSection && isOBSection(selectedSection)) {
+      selection = { section: selectedSection, item: selectedItem };
+    } else {
+      selection = undefined;
+    }
+    return <IssueEditor issue={maybeIssue as OBIssue} selection={selection} />;
+  }
+
+  return <Spinner className={styles.spinner} />;
+};
+
+
+export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSelection }> = (props) => {
+  const [issue, updateIssue] = useState(props.issue);
+  const ws = useWorkspace();
+  const [isDirty, setDirty] = useState(false);
+
+  useEffect(() => {
+    setDirty(true);
+    storageUpdateIssue(props.issue.id, issue);
+  }, [issue]);
+
+
+  /* Prepare initial item selection status */
+
+  let initialItemIdx: string | undefined;
+  let initialSection: OBSection;
+
+  if (props.selection) {
+    initialItemIdx = props.selection.item;
+    initialSection = props.selection.section;
+  } else {
+    initialItemIdx = undefined;
+    initialSection = 'general';
+  }
+
+  const [selectedItem, selectItem] = useState(initialItemIdx);
+  const [selectedSection, selectSection] = useState(initialSection);
+
+  // Convenience shortcuts
+  const selectedMessageIdx: number | undefined = isOBMessageSection(selectedSection) && selectedItem !== undefined
+    ? parseInt(selectedItem, 10)
+    : undefined;
+
+  const selectedAnnex = isOBAnnexesSection(selectedSection) && selectedItem !== undefined
+    ? (issue.annexes || {})[selectedItem]
+    : undefined;
+
+
+  /* Storage API utilities */
+
+  async function _storageUpdateIssue(issueId: number, updatedIssue: OBIssue) {
     // TODO: Handle API failure
-    return await request<{ success: boolean }>(`issue-${action}`, { issueId, ...params });
+    await request<{ success: boolean }>('issue-update', { issueId, data: updatedIssue });
+    setDirty(false);
   }
   // Slow down updates to reduce the chance of race condition when user makes many edits in rapids succession
   // TODO: A lock would be better
-  const storageUpdateIssue = throttle(500, _storageUpdateIssue);
+  const storageUpdateIssue = debounce(1000, _storageUpdateIssue);
+
+
+  /* Issue update operations */
+
+  // const updateMessage = useStorageOperation<
+  //   { issueId: number },
+  //   { updatedMsg: Message, section: OBMessageSection, msgIdx: number },
+  //   { success: boolean }>(
+  //   "Edited message",
+  //   'issue-update-message', { issueId: issue.id }, {},
+  //   [selectedSection, selectedItem]);
+
+  /* Message editor JSX */
+
+  // Memoization ensures that updating items on every keystroke
+  // doesn’t cause the editor pane to re-render, which may lose cursor position and undo history.
+  // Only re-render if selected item index or section, meaning a switch to another item.
+  const editor = useMemo(() => {
+
+    if (isOBMessageSection(selectedSection) && selectedItem !== undefined) {
+      const message = issue[selectedSection].messages[parseInt(selectedItem, 10)];
+      if (message) {
+        return <MessageEditor
+            workspace={ws}
+            message={message}
+            issue={issue}
+            onChange={handleMessageEdit}
+          />;
+      }
+    } else if (selectedAnnex !== undefined && selectedItem !== undefined) {
+      return <AnnexEditor
+          pubId={selectedItem}
+          issueId={issue.id}
+          position={selectedAnnex ? selectedAnnex.position_on : undefined}
+          onChange={handleAnnexPositionEdit}
+        />;
+    }
+    return <NonIdealState
+        icon="info-sign"
+        title="Nothing is selected"
+        description="Add or select an item on the left to start."
+      />;
+
+  }, [
+    selectedItem,
+    selectedMessageIdx,
+    selectedSection,
+    selectedAnnex,
+    issue.amendments.messages.length,
+    issue.general.messages.length,
+    Object.keys(issue.annexes || {}).length,
+  ]);
 
 
   /* Event handling utilities */
 
-  function handleMessageSelection(inSection: OBMessageSection, atIndex: number) {
-    selectMessage(atIndex);
+  function handleItemSelection(inSection: OBSection, atIndex: string) {
+    selectItem(atIndex);
     selectSection(inSection); 
   }
 
-  function handleNewMessage(msg: Message, inSection: OBMessageSection, atIndex: number) {
-    if (issue) {
-      updateIssue(issueFactories.withAddedMessage(issue, inSection, atIndex, msg));
-      storageUpdateIssue('create-message', { section: inSection, msgIdx: atIndex, msg: msg });
-      setTimeout(() => {
-        selectMessage(atIndex);
-        selectSection(inSection);
-      }, 100);
+  function handleNewMessage(msg: Message, inSection: OBMessageSection) {
+    let idx: number;
+    if (inSection === 'general') {
+      idx = GENERAL_MESSAGE_ORDER.indexOf(msg.type);
+    } else {
+      idx = issue[inSection].messages.length;
     }
+    const newIssue = issueFactories.withAddedMessage(issue, inSection, idx, msg);
+    updateIssue(newIssue)
+
+    //storageUpdateIssue('create-message', { section: inSection, msgIdx: idx, msg: msg });
+
+    selectSection(inSection);
+    selectItem(`${idx}`);
   }
 
   function handleMessageEdit(updatedMessage: Message) {
-    if (issue !== null && selectedMessage !== undefined) {
-      updateIssue(issueFactories.withEditedMessage(issue, selectedSection, selectedMessage, updatedMessage));
-      storageUpdateIssue('update-message', {
-        section: selectedSection,
-        msgIdx: selectedMessage,
-        updatedMsg: updatedMessage,
-      });
+    if (selectedMessageIdx !== undefined && isOBMessageSection(selectedSection)) {
+      const newIssue = issueFactories.withEditedMessage(issue, selectedSection, selectedItem, updatedMessage);
+      updateIssue(newIssue);
+
+      // updateMessage(getMessageTypeTitle(updatedMessage.type), {
+      //   section: selectedSection,
+      //   msgIdx: selectedMessageIdx,
+      //   updatedMsg: updatedMessage,
+      // });
+
+      //storageUpdateIssue('update-message', {
+      //  section: selectedSection,
+      //  msgIdx: selectedMessage,
+      //  updatedMsg: updatedMessage,
+      //});
     }
   }
 
-  function handleMessageRemoval(inSection: OBMessageSection, atIndex: number) {
-    if (issue) {
-      updateIssue(issueFactories.withRemovedMessage(issue, inSection, atIndex));
-      storageUpdateIssue('delete-message', { section: inSection, msgIdx: atIndex });
-      selectMessage(undefined);
+  function handleMessageRemoval(inSection: OBMessageSection, atIndex: string) {
+    const idx = parseInt(atIndex, 10);
+    updateIssue(issueFactories.withRemovedMessage(issue, inSection, idx));
+
+    if (inSection === selectedSection && selectedItem === atIndex) {
+      selectItem(undefined);
     }
   }
+
+  function handleNewAnnex(pubId: string) {
+    updateIssue(issueFactories.withAddedAnnex(issue, pubId));
+    setTimeout(() => {
+      selectItem(pubId);
+      selectSection('annexes');
+    }, 100);
+  }
+
+  function handleAnnexPositionEdit(pubId: string, updatedPosition: Date | undefined) {
+    updateIssue(issueFactories.withUpdatedAnnexedPublicationPosition(issue, pubId, updatedPosition));
+  }
+
+  function handleAnnexRemoval(pubId: string) {
+    updateIssue(issueFactories.withDeletedAnnex(issue, pubId));
+
+    if (isOBAnnexesSection(selectedSection) && selectedItem === pubId) {
+      selectItem(undefined);
+    }
+  }
+
+
+  // IDs of publications that cannot be annexed or amended, because they already were.
+  const takenPublicationIDs = [
+    ...issue.amendments.messages.map(msg => (msg as AmendmentMessage)).map(amd => amd.target.publication),
+    ...Object.keys(issue.annexes || {}),
+  ];
 
 
   /* Main JSX */
@@ -156,43 +270,71 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
     <div className={styles.twoPaneEditor}>
       <div className={styles.messageListPane}>
 
-        <PaneHeader align="right" major={true} className={styles.paneHeader}>Edition № <span className={styles.paneHeaderIssueId}>{issue.id}</span></PaneHeader>
+        <PaneHeader align="right" major={true} className={styles.paneHeader}>
+          {isDirty ? <Spinner className={styles.paneSpinner} size={16} /> : null}
+          Edition № <span className={styles.paneHeaderIssueId}>{issue.id}</span>
+        </PaneHeader>
         <div className={styles.paneBody}>
 
-          <MessageList
+          <ItemList
             title="General Messages"
-            issueId={issue.id}
             items={issue.general.messages}
-            selectedIdx={selectedSection === 'general' ? selectedMessage : undefined}
-            onSelect={(idx) => handleMessageSelection('general', idx)}
+            selectedIdx={selectedSection === 'general' ? selectedItem : undefined}
+            onSelect={(idx) => handleItemSelection('general', idx)}
             onDelete={(idx) => handleMessageRemoval('general', idx)}
-            promptPosition="end"
-            prompt={(idx, highlight) =>
+
+            itemTitle={(item) => <MessageTitle message={item as Message} />}
+            itemIcon={() => "clipboard"}
+
+            prompt={(highlight) =>
               <NewGeneralMessagePrompt
                 highlight={highlight}
-                idx={idx}
                 existingMessages={issue.general.messages}
-                onCreate={msg => handleNewMessage(msg, 'general', idx)} />}
+                onCreate={item => handleNewMessage(item as Message, 'general')} />}
           />
 
-          <MessageList
+          <ItemList
             title="Amendments"
-            issueId={issue.id}
             items={issue.amendments.messages}
-            selectedIdx={selectedSection === 'amendments' ? selectedMessage : undefined}
-            onSelect={(idx) => handleMessageSelection('amendments', idx)}
+            selectedIdx={selectedSection === 'amendments' ? selectedItem : undefined}
+            onSelect={(idx) => handleItemSelection('amendments', idx)}
             onDelete={(idx) => handleMessageRemoval('amendments', idx)}
-            className={styles.amendmentsList}
-            promptPosition="end"
-            prompt={(idx, highlight) =>
+
+            itemTitle={(item) => <MessageTitle message={item as Message} />}
+            itemIcon={() => "edit"}
+
+            prompt={(highlight) =>
               <NewAmendmentPrompt
                 highlight={highlight}
-                idx={idx}
                 issueId={issue.id}
                 issueIndex={ws.issues}
                 publicationIndex={ws.publications}
-                existingAmendments={issue.amendments.messages.map((msg: Message) => msg as AmendmentMessage)}
-                onCreate={msg => handleNewMessage(msg, 'amendments', idx)} />}
+                disabledPublicationIDs={takenPublicationIDs}
+                onCreate={item => handleNewMessage(item as Message, 'amendments')} />}
+
+            className={styles.amendmentsList}
+          />
+
+          <ItemList
+            title="Annexes"
+            items={issue.annexes || {}}
+            selectedIdx={selectedSection === 'annexes' ? selectedItem : undefined}
+            onSelect={(idx) => handleItemSelection('annexes', idx)}
+            onDelete={(idx) => handleAnnexRemoval(idx)}
+
+            itemTitle={(item, idx) => <PublicationTitle id={idx} />}
+            itemIcon={() => "paperclip"}
+
+            prompt={(highlight) =>
+              <NewAnnexPrompt
+                highlight={highlight}
+                issueId={issue.id}
+                issueIndex={ws.issues}
+                publicationIndex={ws.publications}
+                disabledPublicationIDs={takenPublicationIDs}
+                onCreate={item => handleNewAnnex(item as string)} />}
+
+            className={styles.amendmentsList}
           />
 
         </div>
@@ -200,7 +342,11 @@ export const IssueEditor: React.FC<{ issueId: string }> = ({ issueId }) => {
 
       <div className={`
           ${styles.selectedMessagePane}
-          editor-pane-message-${selectedMessage !== undefined ? (issue[selectedSection].messages[selectedMessage] || {}).type : ''}`}>
+          ${isOBAnnexesSection(selectedSection) && selectedItem !== undefined ? 'editor-pane-annex' : ''}
+          editor-pane-message-${selectedMessageIdx !== undefined && isOBMessageSection(selectedSection)
+            ? (issue[selectedSection].messages[selectedMessageIdx] || {}).type
+            : ''}
+        `}>
         {editor}
       </div>
 
