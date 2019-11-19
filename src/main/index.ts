@@ -351,6 +351,47 @@ then(results => {
     return { success: true };
   });
 
+  // Annexes
+
+  listen<{ issueId: string, pubId: string }, { success: boolean }>
+  ('issue-create-annex', async ({ issueId, pubId }) => {
+    const issue: OBIssue = storage.workspace.issues[issueId];
+    if (!issue) {
+      throw new Error(`Requested issue ${issueId} could not be found`);
+    }
+
+    const newIssue = issueFactories.withAddedAnnex(issue, pubId);
+    await storage.storeManagers.issues.store(newIssue, storage);
+
+    return { success: true };
+  });
+
+  listen<{ issueId: string, pubId: string, updatedPosition: Date | null }, { success: boolean }>
+  ('issue-edit-annex', async ({ issueId, pubId, updatedPosition }) => {
+    const issue: OBIssue = storage.workspace.issues[issueId];
+    if (!issue) {
+      throw new Error(`Requested issue ${issueId} could not be found`);
+    }
+
+    const newIssue = issueFactories.withUpdatedAnnexedPublicationPosition(issue, pubId, updatedPosition);
+    await storage.storeManagers.issues.store(newIssue, storage);
+
+    return { success: true };
+  });
+
+  listen<{ issueId: string, pubId: string }, { success: boolean }>
+  ('issue-delete-annex', async ({ issueId, pubId }) => {
+    const issue: OBIssue = storage.workspace.issues[issueId];
+    if (!issue) {
+      throw new Error(`Requested issue ${issueId} could not be found`);
+    }
+
+    const newIssue = issueFactories.withDeletedAnnex(issue, pubId);
+    await storage.storeManagers.issues.store(newIssue, storage);
+
+    return { success: true };
+  });
+
 
   /* Set up window-opening endpoints */
 
