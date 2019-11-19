@@ -23,7 +23,9 @@ export function getRunningAnnexesForIssue(
 
      This is useful when determining the state of “Lists Annexed”
      at the beginning of an issue,
-     or to check the last annexed position of a publication. */
+     or to check the last annexed position of a publication.
+
+     Annexes are returned in order of newest to oldest issue. */
 
   const _pastIssues = new QuerySet<OBIssue>(issueIndex).
     orderBy(sortIntegerAscending).
@@ -36,18 +38,22 @@ export function getRunningAnnexesForIssue(
   for (const pastIssue of pastIssues) {
     const annexes = Object.entries(pastIssue.annexes || {});
     for (const [annexedPublicationId, annexedPublicationPosition] of annexes) {
+
+      if (onlyForPublicationID && annexedPublicationId !== onlyForPublicationID) {
+        continue;
+      }
+
       const pub = publicationIndex[annexedPublicationId];
+
       if (pub && runningAnnexes.find(ann => ann.publication.id == pub.id) === undefined) {
         const position = annexedPublicationPosition;
-        const annex: RunningAnnex = {
+        runningAnnexes.push({
           publication: pub as Publication,
           annexedTo: pastIssue,
           positionOn: position ? (position.position_on as Date) : null,
-        };
-        if (!onlyForPublicationID && pub.id === onlyForPublicationID) {
-          runningAnnexes.push(annex);
-        }
+        });
       }
+
     }
   }
 
