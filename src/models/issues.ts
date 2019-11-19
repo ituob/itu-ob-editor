@@ -62,9 +62,9 @@ export const issueFactories: Factories<OBIssue> = {
     return { ...issue, annexes: newAnnexes };
   },
 
-  withUpdatedAnnexedPublicationPosition: (issue: OBIssue, pubId: string, position: Date) => {
+  withUpdatedAnnexedPublicationPosition: (issue: OBIssue, pubId: string, position: Date | undefined) => {
     var newAnnexes = {...issue.annexes};
-    newAnnexes[pubId] = { position_on: position };
+    newAnnexes[pubId] = position ? { position_on: position } : null;
     return { ...issue, annexes: newAnnexes };
   },
 
