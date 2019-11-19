@@ -1,4 +1,4 @@
-import { Index, QuerySet, sortIntegerAscending } from 'sse/storage/query';
+import { Index, QuerySet, sortIntegerAscending, sortIntegerDescending } from 'sse/storage/query';
 
 import { Publication } from 'models/publications';
 import { OBIssue } from 'models/issues';
@@ -11,16 +11,25 @@ export interface RunningAnnex {
 }
 
 
-// Runs through past issues (relative to given issue) and builds a list
-// of annexed publications.
 export function getRunningAnnexesForIssue(
     issueId: number,
     issueIndex: Index<OBIssue>,
-    publicationIndex: Index<Publication>): RunningAnnex[] {
+    publicationIndex: Index<Publication>,
+    onlyForPublicationID?: string): RunningAnnex[] {
 
-  const pastIssues = new QuerySet<OBIssue>(issueIndex).
+  /* Given issue ID, runs through preceding issues and builds a list
+     of annexed publications up to that issue.
+     Optionally, selects only given publication ID.
+
+     This is useful when determining the state of “Lists Annexed”
+     at the beginning of an issue,
+     or to check the last annexed position of a publication. */
+
+  const _pastIssues = new QuerySet<OBIssue>(issueIndex).
     orderBy(sortIntegerAscending).
-    filter((item: [string, OBIssue]) => item[1].id < issueId).all();
+    filter((item: [string, OBIssue]) => item[1].id < issueId);
+
+  const pastIssues = _pastIssues.orderBy(sortIntegerDescending).all();
 
   var runningAnnexes: RunningAnnex[] = [];
 
@@ -30,11 +39,14 @@ export function getRunningAnnexesForIssue(
       const pub = publicationIndex[annexedPublicationId];
       if (pub && runningAnnexes.find(ann => ann.publication.id == pub.id) === undefined) {
         const position = annexedPublicationPosition;
-        runningAnnexes.push({
+        const annex: RunningAnnex = {
           publication: pub as Publication,
           annexedTo: pastIssue,
           positionOn: position ? (position.position_on as Date) : null,
-        });
+        };
+        if (!onlyForPublicationID && pub.id === onlyForPublicationID) {
+          runningAnnexes.push(annex);
+        }
       }
     }
   }
