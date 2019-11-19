@@ -1,5 +1,5 @@
 import { IndexableObject } from 'sse/storage/query';
-import { Message } from 'models/messages';
+import { Message, MessageType } from 'models/messages';
 
 
 export interface MessageBlock {
@@ -48,6 +48,22 @@ interface Factories<M> {
   [factoryName: string]: (obj: M, ...params: any) => M,
 }
 
+export const GENERAL_MESSAGE_ORDER: MessageType[] = [
+  'running_annexes',
+  'approved_recommendations',
+  'telephone_service',
+  'telephone_service_2',
+  'sanc',
+  'iptn',
+  'ipns',
+  'mid',
+  'org_changes',
+  'misc_communications',
+  'custom',
+  'service_restrictions',
+  'callback_procedures',
+];
+
 export const issueFactories: Factories<OBIssue> = {
 
   withAddedAnnex: (issue: OBIssue, pubId: string) => {
@@ -77,9 +93,16 @@ export const issueFactories: Factories<OBIssue> = {
     }};
   },
 
-  withAddedMessage: (issue: OBIssue, section: OBMessageSection, msgIdx: number, message: Message) => {
+  withAddedMessage: (issue: OBIssue, section: OBMessageSection, message: Message) => {
+    let idx: number;
+    if (section === 'general') {
+      idx = GENERAL_MESSAGE_ORDER.indexOf(message.type);
+    } else {
+      idx = issue[section].messages.length;
+    }
+
     var newMessages = [...issue[section].messages]; 
-    newMessages.splice(msgIdx, 0, message);
+    newMessages.splice(idx, 0, message);
     return { ...issue, [section]: {
       ...issue[section],
       messages: newMessages,

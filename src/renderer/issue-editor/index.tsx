@@ -19,7 +19,7 @@ import {
   issueFactories,
 } from 'models/issues';
 
-import { Message, MessageType, AmendmentMessage } from 'models/messages';
+import { Message, AmendmentMessage } from 'models/messages';
 
 import { ItemList } from './item-list';
 import { NewGeneralMessagePrompt } from './item-list/new-general-message-menu';
@@ -35,22 +35,6 @@ interface IssueEditorSelection {
   section: OBSection,
   item: string,
 }
-
-const GENERAL_MESSAGE_ORDER: MessageType[] = [
-  'running_annexes',
-  'approved_recommendations',
-  'telephone_service',
-  'telephone_service_2',
-  'sanc',
-  'iptn',
-  'ipns',
-  'mid',
-  'org_changes',
-  'misc_communications',
-  'custom',
-  'service_restrictions',
-  'callback_procedures',
-];
 
 
 interface IssueEditorWindowProps {
@@ -199,21 +183,15 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
   }
 
   function handleNewMessage(msg: Message, inSection: OBMessageSection) {
-    let idx: number;
-    if (inSection === 'general') {
-      idx = GENERAL_MESSAGE_ORDER.indexOf(msg.type);
-    } else {
-      idx = issue[inSection].messages.length;
-    }
-    const newIssue = issueFactories.withAddedMessage(issue, inSection, idx, msg);
-    const actualIndex = newIssue[inSection].messages.indexOf(msg);
+    const newIssue = issueFactories.withAddedMessage(issue, inSection, msg);
+    const idx = newIssue[inSection].messages.indexOf(msg);
 
     updateIssue(newIssue);
 
     //storageUpdateIssue('create-message', { section: inSection, msgIdx: idx, msg: msg });
 
     selectSection(inSection);
-    selectItem(`${actualIndex}`);
+    selectItem(`${idx}`);
   }
 
   function handleMessageEdit(updatedMessage: Message) {
