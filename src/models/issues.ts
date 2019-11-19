@@ -10,9 +10,9 @@ export interface PublicationPosition {
   [pubId: string]: { position_on: Date } | null,
 }
 
-export type OBMessageSection = 'amendments' | 'general';
 export type AnnexesBlock = PublicationPosition;
 
+export type OBMessageSection = 'amendments' | 'general';
 export type OBAnnexesSection = 'annexes';
 export type OBSection = OBMessageSection | OBAnnexesSection;
 
