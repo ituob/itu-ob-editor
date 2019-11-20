@@ -59,6 +59,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = function (props) {
 
     const helpPath = isAmendment(props.message) ? "amend-publication/" : `messages/${props.message.type}/`;
 
+    // Show publication info for amendments
     let meta: JSX.Element | null;
     if (isAmendment(props.message)) {
       const amd = props.message as AmendmentMessage;
