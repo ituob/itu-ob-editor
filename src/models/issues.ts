@@ -67,13 +67,13 @@ export const GENERAL_MESSAGE_ORDER: MessageType[] = [
 export const issueFactories: Factories<OBIssue> = {
 
   withAddedAnnex: (issue: OBIssue, pubId: string) => {
-    var newAnnexes = {...issue.annexes};
+    var newAnnexes = {...issue.annexes || {}};
     newAnnexes[pubId] = null;
     return { ...issue, annexes: newAnnexes };
   },
 
   withDeletedAnnex: (issue: OBIssue, pubId: string) => {
-    var newAnnexes = {...issue.annexes};
+    var newAnnexes = {...issue.annexes || {}};
     delete newAnnexes[pubId];
     return { ...issue, annexes: newAnnexes };
   },
