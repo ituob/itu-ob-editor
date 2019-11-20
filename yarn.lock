@@ -4543,10 +4543,10 @@ isomorphic-git@^0.55.4:
     sha.js "^2.4.9"
     simple-get "^3.0.2"
 
-isomorphic-git@^0.70.2:
-  version "0.70.6"
-  resolved "https://registry.yarnpkg.com/isomorphic-git/-/isomorphic-git-0.70.6.tgz#d00239ab6fd6679b04143283b1c737c8b80c8e3c"
-  integrity sha512-hznbxOsMDU3gCd/F8zF8uJy3I75TUF61iKTLapFMVoRlR3t0H+erpjwzRyFkG1SXJJ/gNaecq19vXhajp4bwXA==
+isomorphic-git@^0.70.7:
+  version "0.70.7"
+  resolved "https://registry.yarnpkg.com/isomorphic-git/-/isomorphic-git-0.70.7.tgz#4c9a31334c788c0d91a3a443a30da3e4f9b1b028"
+  integrity sha512-A4gh70wLYrCPpdCSmCzHmvw78Tt9+2AcNCDmgn/lvXEEOHtLJMPdn3NcIy+yznGBH4Rzh6CSTgQ318ewabVJAg==
   dependencies:
     async-lock "^1.1.0"
     clean-git-ref "^2.0.1"
@@ -7399,14 +7399,13 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw=
 
-"sse@https://github.com/riboseinc/sse-elements#sse-elements-v0.1.0-beta23-gitpkg":
-  version "0.1.0-beta23"
-  resolved "https://github.com/riboseinc/sse-elements#e47240bd9837578d58c3557e86a24f27fc5bcf46"
+"sse@file:../../SSE/sse-elements/dist":
+  version "0.1.0-beta33"
   dependencies:
     "@isomorphic-git/lightning-fs" "^3.3.3"
     fs-extra "^8.1.0"
     immer "^3.1.3"
-    isomorphic-git "^0.70.2"
+    isomorphic-git "^0.70.7"
     js-yaml "3.13.1"
     moment "^2.24.0"
 
