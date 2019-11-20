@@ -20,11 +20,11 @@ $sidebarWidth: 17em;
     display: flex;
     align-items: center;
   }
-  :local .paneSpinner {
+  .statusIcon {
     display: inline;
     margin-right: .5rem;
   }
-  :local .paneHeaderIssueId {
+  .paneHeaderIssueId {
     color: $pt-intent-primary;
     margin-left: .1rem;
     font-size: $pt-font-size-large;

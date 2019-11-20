@@ -1,7 +1,7 @@
-import { debounce } from 'throttle-debounce';
+import AsyncLock from 'async-lock';
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { Spinner, NonIdealState } from '@blueprintjs/core';
+import { Spinner, Icon, NonIdealState, Tooltip } from '@blueprintjs/core';
 
 import { useWorkspace } from 'renderer/workspace-context';
 
@@ -68,19 +68,22 @@ export const Window: React.FC<IssueEditorWindowProps> = ({ issueId, selectedSect
 };
 
 
+const operationLock = new AsyncLock();
+var issueUpdate: NodeJS.Timer;
+
+
 export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSelection }> = (props) => {
   const [issue, updateIssue] = useState(props.issue);
   const ws = useWorkspace();
-  const [isDirty, setDirty] = useState(false);
 
+  const [haveSaved, setSaved] = useState(undefined as boolean | undefined);
   const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
     if (isLoading) {
       setLoading(false);
     } else {
-      setDirty(true);
-      storageUpdateIssue(props.issue.id, issue);
+      issueStorageOperation('update', { data: issue });
     }
   }, [issue]);
 
@@ -113,14 +116,20 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
 
   /* Storage API utilities */
 
-  async function _storageUpdateIssue(issueId: number, updatedIssue: OBIssue) {
-    // TODO: Handle API failure
-    await request<{ success: boolean }>('issue-update', { issueId, data: updatedIssue });
-    setDirty(false);
+  function issueStorageOperation(action: string, data: any) {
+    setSaved(false);
+
+    operationLock.acquire('update-issue', async () => {
+      clearTimeout(issueUpdate);
+
+      // TODO: Handle API failure
+      await request<{ success: boolean }>(`issue-${action}`, { issueId: props.issue.id, ...data });
+
+      issueUpdate = setTimeout(() => {
+        setSaved(true);
+      }, 1000);
+    });
   }
-  // Slow down updates to reduce the chance of race condition when user makes many edits in rapids succession
-  // TODO: A lock would be better
-  const storageUpdateIssue = debounce(1000, _storageUpdateIssue);
 
 
   /* Issue update operations */
@@ -257,7 +266,16 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
       <div className={styles.messageListPane}>
 
         <PaneHeader align="right" major={true} className={styles.paneHeader}>
-          {isDirty ? <Spinner className={styles.paneSpinner} size={16} /> : null}
+          {haveSaved !== undefined
+            ? <Tooltip
+                  className={styles.statusIcon}
+                  content={haveSaved === true ? "Edits were saved locally." : "Saving edits…"}>
+                <Icon
+                  icon={haveSaved === false ? "asterisk" : "tick-circle"}
+                  intent={haveSaved === false ? "primary" : "success"}
+                />
+              </Tooltip>
+            : null}
           Edition № <span className={styles.paneHeaderIssueId}>{issue.id}</span>
         </PaneHeader>
         <div className={styles.paneBody}>
