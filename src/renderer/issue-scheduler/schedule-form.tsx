@@ -1,7 +1,9 @@
 import React from 'react';
 import { Button, ButtonGroup, InputGroup, FormGroup } from '@blueprintjs/core';
 
+import { openWindow } from 'sse/api/renderer';
 import { DateStamp } from 'renderer/widgets/dates';
+import { useWorkspace } from 'renderer/workspace-context';
 import * as styles from './styles.scss';
 
 
@@ -21,6 +23,8 @@ interface ScheduleFormProps {
   onCancel: () => void,
 }
 export const ScheduleForm: React.FC<ScheduleFormProps> = function ({ draft, maxId, minId, onChange, onSave, onCancel }) {
+  const ws = useWorkspace();
+
   function validateId(val: number | undefined): string[] {
     if (!val) {
       return ['a number'];
@@ -42,8 +46,12 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = function ({ draft, maxI
   const idRequirementsText = idRequirements.length > 0
     ? `Should be ${idRequirements.join(', ')}.`
     : undefined;
-  const rescheduleNote = draft.id
-    ? `Note: if edition ${draft.id} already exists, it will be rescheduled.`
+  const existingIssue = draft.id ? ws.issues[draft.id] : undefined;
+  const alreadyExistsError = existingIssue !== undefined
+    ? <>
+        Edition {draft.id} already exists.
+        Want to <a onClick={() => openWindow('issue-editor', { issueId: existingIssue.id })}>edit it</a>?
+      </>
     : undefined;
 
   return (
@@ -51,11 +59,12 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = function ({ draft, maxI
       <FormGroup
           label="New edition no.:"
           labelFor="issue-id"
-          intent={idRequirements.length > 0 ? 'danger' : undefined}
-          helperText={idRequirementsText || rescheduleNote}>
+          intent={idRequirements.length > 0 || existingIssue !== undefined ? 'danger' : undefined}
+          helperText={idRequirementsText || alreadyExistsError}>
         <InputGroup
           type="number"
           id="issue-id"
+          large={true}
           placeholder="E.g., 1234"
           value={draft.id ? draft.id.toString() : ''}
           intent={idRequirements.length > 0 ? 'danger' : undefined}
@@ -100,7 +109,12 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = function ({ draft, maxI
           <Button
             intent="primary"
             icon="add"
-            disabled={idRequirements.length > 0 || draft.publication_date === undefined || draft.cutoff_date === undefined}
+            disabled={
+              existingIssue !== undefined ||
+              idRequirements.length > 0 ||
+              draft.publication_date === undefined ||
+              draft.cutoff_date === undefined
+            }
             onClick={onSave}
             title="Save new issue schedule">Save</Button>
           <Button icon="undo" onClick={onCancel}>Cancel</Button>
