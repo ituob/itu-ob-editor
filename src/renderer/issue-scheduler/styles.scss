@@ -28,6 +28,7 @@ $cutColorDark: #D9822B;
   display: flex;
   flex-flow: row nowrap;
   align-items: stretch;
+  overflow: hidden;
 
   .calendarPane {
     @include pane;
