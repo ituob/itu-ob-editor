@@ -86,12 +86,12 @@ const IssueScheduleCard: React.FC<IssueScheduleCardProps> = function ({ issue, o
     status = <>
       <DateStatus
         dateClass={styles.cutDateLabel}
-        icon="tick-circle"
+        icon="folder-close"
         date={issue.cutoff_date}
         text="Information received by" />
       <DateStatus
         dateClass={styles.pubDateLabel}
-        icon="tick-circle"
+        icon="folder-shared"
         date={issue.publication_date}
         text="Published on" />
     </>;
@@ -99,7 +99,7 @@ const IssueScheduleCard: React.FC<IssueScheduleCardProps> = function ({ issue, o
     status = <>
       <DateStatus
         dateClass={styles.cutDateLabel}
-        icon="tick-circle"
+        icon="folder-close"
         date={issue.cutoff_date}
         text="Information received by" />
       <DateStatus
@@ -116,7 +116,7 @@ const IssueScheduleCard: React.FC<IssueScheduleCardProps> = function ({ issue, o
       <DateStatus
         dateClass={styles.cutDateLabel}
         className={styles.publicationStatusPrimary}
-        icon="inbox"
+        icon="folder-open"
         date={issue.cutoff_date}
         text="Collecting information until" />
       <DateStatus
