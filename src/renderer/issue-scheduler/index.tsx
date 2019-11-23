@@ -12,6 +12,7 @@ import { request } from 'sse/api/renderer';
 
 import { DateStamp } from 'renderer/widgets/dates';
 import { HelpButton } from 'renderer/widgets/help-button';
+import { WindowToaster } from 'renderer/toaster';
 import { ScheduledIssue } from 'models/issues';
 
 import { IssueDraft, ScheduleForm } from './schedule-form';
@@ -106,7 +107,18 @@ export const IssueScheduler: React.FC<{}> = function () {
   async function saveNewSchedule() {
     if (newIssueDraft && newIssueDraft.publication_date && newIssueDraft.cutoff_date) {
       const draft = newIssueDraft as ScheduledIssue;
-      await request<{ success: boolean }>('ob-schedule-add', { issueId: `${draft.id}`, newData: draft });
+      try {
+        await request<{ success: boolean }>('ob-schedule-add', { newData: draft });
+      } catch (e) {
+        for (const msg of e.errorMessageList) {
+          WindowToaster.show({
+            message: msg,
+            intent: 'warning',
+            icon: 'warning-sign',
+          });
+        }
+        return;
+      }
       updateNewIssueDraft(null);
       await ipcRenderer.send('scheduled-new-issue', {});
       await fetchSchedule();
