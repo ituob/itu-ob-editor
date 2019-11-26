@@ -1,0 +1,71 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
+:local .batchCommitWindow {
+  height: 100vh;
+  display: flex;
+  flex-flow: column nowrap;
+  background: $pt-app-background-color;
+
+  .paneBody {
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .paneHeader {
+    flex-shrink: 0;
+  }
+}
+
+:local .modifiedItem {
+  padding: .5rem 20px;
+}
+
+:local .itemList {
+  padding: 0 1rem 1rem 20px;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: flex-start;
+
+  > * {
+    flex-basis: 20%;
+  }
+}
+
+:local .actionFooter {
+  padding: 0 1rem 1rem;
+
+  display: flex;
+  flex-flow: row nowrap;
+
+  > * {
+    flex: 1;
+    white-space: nowrap;
+  }
+
+  :global .bp3-popover-wrapper, :global .bp3-popover-target {
+    width: 100%;
+  }
+
+  :global .bp3-button {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+}
+
+:local .actionPrompt {
+  display: flex;
+  flex-flow: column nowrap;
+  width: 50vw;
+  align-items: stretch;
+
+  .actionFooter {
+    padding: 0;
+  }
+
+  // Textarea
+  > :first-child {
+    max-height: 50vh;
+    border: 0;
+    box-shadow: none !important;
+  }
+}

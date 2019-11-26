@@ -6,37 +6,57 @@
 
 import React, { useContext } from 'react';
 
-import { Index } from 'sse/storage/query';
-import { OBIssue } from 'models/issues';
+import { RendererStorage as BaseRendererStorage } from 'sse/storage/renderer';
+
 import { Publication } from 'models/publications';
 import { ITURecommendation } from 'models/recommendations';
 import { RunningAnnex, getRunningAnnexesForIssue } from 'models/running-annexes';
 
-import { Workspace } from 'main/storage';
+import { RendererStorage } from 'storage/renderer';
 
 
-export interface WorkspaceContextSpec {
-  current: {
-    issues: Index<OBIssue>,
-    publications: Index<Publication>,
-    recommendations: Index<ITURecommendation>,
-  },
-  refresh(): Promise<void>,
+export type ModifiedObjectStatus<R extends BaseRendererStorage<any>> = {
+  [K in keyof R]: (string | number)[]
 }
 
-export const WorkspaceContext = React.createContext<WorkspaceContextSpec>({
+
+export interface StorageContextSpec<R extends BaseRendererStorage<any>> {
+  // Snapshot of all objects, per type
+  current: R,
+  refresh(): Promise<void>,
+
+  // Snapshot of modified object IDs, per type, pointing to arrays of changed file paths
+  modified: ModifiedObjectStatus<R>,
+  refreshModified(hasLocalChanges?: boolean): Promise<void>,
+}
+
+
+export const WorkspaceContext = React.createContext<StorageContextSpec<RendererStorage>>({
   current: {
     issues: {},
     publications: {},
     recommendations: {},
   },
   refresh: async () => {},
+
+  modified: {
+    issues: [],
+    publications: [],
+    recommendations: [],
+  },
+  refreshModified: async () => {},
 });
 
 
-export function useWorkspace(): Workspace {
+export function useWorkspace(): RendererStorage {
   const workspace = useContext(WorkspaceContext);
   return workspace.current;
+}
+
+
+export function useModified(): ModifiedObjectStatus<RendererStorage> {
+  const workspace = useContext(WorkspaceContext);
+  return workspace.modified;
 }
 
 

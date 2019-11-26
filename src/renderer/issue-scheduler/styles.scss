@@ -8,23 +8,7 @@ $cutColorLight: #FFB366;
 $cutColorDark: #D9822B;
 
 
-:local .issueSchedulerBase {
-  height: 100vh;
-  display: flex;
-  flex-flow: column nowrap;
-
-  .storageStatus {
-    height: 2rem;
-    flex-shrink: 0;
-    flex-grow: 0;
-    box-shadow: $pt-elevation-shadow-1;
-    z-index: 2;
-    background: white;
-  }
-}
-
 :local .issueScheduler {
-  flex: 1;
   display: flex;
   flex-flow: row nowrap;
   align-items: stretch;
@@ -34,7 +18,7 @@ $cutColorDark: #D9822B;
     @include pane;
 
     width: 280px;
-    z-index: 1;
+    z-index: 2;
     background: $pt-app-background-color;
     box-shadow: $pt-elevation-shadow-1;
     flex: 0;
@@ -42,29 +26,24 @@ $cutColorDark: #D9822B;
     .paneBody {
       display: flex;
       flex-flow: column nowrap;
-      align-items: center;
-      padding: 0 .5rem;
     }
 
     :global .bp3-datepicker {
       background: none;
+      padding: 0 .5rem;
 
       .DayPicker-Day, .DayPicker-Day--disabled {
         cursor: default !important;
       }
     }
 
-    .daySchedule {
+    .hint {
       align-self: stretch;
       display: flex;
       flex-flow: column nowrap;
       align-items: stretch;
       color: $pt-text-color-muted;
-      padding: 0 1rem;
-
-      .dayScheduleHeader {
-        margin-bottom: 1rem;
-      }
+      padding: 0 1rem 0 20px;
 
       margin-top: 1rem;
 
@@ -75,7 +54,7 @@ $cutColorDark: #D9822B;
   }
 
   .selectedDayPane {
-    @include rightPane;
+    @include sidebar;
 
     .paneBody {
       display: flex;
@@ -86,15 +65,9 @@ $cutColorDark: #D9822B;
     }
   }
 
-  .upcomingIssuesPane {
-    @include rightPane;
-
-    .paneBody {
-      display: flex;
-      flex-flow: column nowrap;
-      align-items: stretch;
-      padding: .5rem 1rem 1rem 20px;
-    }
+  .issueListPane {
+    flex: 1;
+    overflow: auto;
   }
 }
 
@@ -104,6 +77,8 @@ $cutColorDark: #D9822B;
   display: flex;
   flex-flow: column nowrap;
   align-items: stretch;
+  padding: .5rem 20px 1rem 20px;
+  flex: 1;
 
   .scheduleFormPublicationDate {
     @include scheduleFormDateRow($pubColorDark);
@@ -111,6 +86,14 @@ $cutColorDark: #D9822B;
 
   .scheduleFormCutoffDate {
     @include scheduleFormDateRow($cutColorDark);
+  }
+
+  .scheduleFormBody {
+    flex: 1;
+
+    > * {
+      flex: 1;
+    }
   }
 
   .scheduleFormActions {
@@ -151,7 +134,7 @@ $cutColorDark: #D9822B;
 :local .upcomingIssues {
   display: flex;
   flex-flow: column nowrap;
-  padding-bottom: 7.5em;
+  justify-content: space-around;
 }
 
 

@@ -41,6 +41,7 @@
 @mixin pane {
   display: flex;
   flex-flow: column nowrap;
+  flex-shrink: 0;
 
   .paneBody {
     flex: 1;
@@ -48,7 +49,7 @@
   }
 }
 
-@mixin rightPane {
+@mixin sidebar {
   @include pane;
   flex: 1;
 }

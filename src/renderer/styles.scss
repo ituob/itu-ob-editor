@@ -23,7 +23,7 @@ html.platform--win32::before {
   cursor: default !important;
 
   &.bp3-minimal:hover:not(:active) {
-    background: none !important;
+    //background: none !important;
   }
   &:focus {
     outline: none;

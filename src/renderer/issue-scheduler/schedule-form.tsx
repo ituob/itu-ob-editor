@@ -15,6 +15,7 @@ export interface IssueDraft {
 
 
 interface ScheduleFormProps {
+  busy: boolean,
   draft: IssueDraft,
   maxId?: number,
   minId?: number,
@@ -22,7 +23,7 @@ interface ScheduleFormProps {
   onSave: () => void,
   onCancel: () => void,
 }
-export const ScheduleForm: React.FC<ScheduleFormProps> = function ({ draft, maxId, minId, onChange, onSave, onCancel }) {
+export const ScheduleForm: React.FC<ScheduleFormProps> = function ({ busy, draft, maxId, minId, onChange, onSave, onCancel }) {
   const ws = useWorkspace();
 
   function validateId(val: number | undefined): string[] {
@@ -46,78 +47,87 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = function ({ draft, maxI
   const idRequirementsText = idRequirements.length > 0
     ? `Should be ${idRequirements.join(', ')}.`
     : undefined;
+
   const existingIssue = draft.id ? ws.issues[draft.id] : undefined;
-  const alreadyExistsError = existingIssue !== undefined
+  const alreadyExistsError = busy === false && existingIssue !== undefined
     ? <>
         Edition {draft.id} already exists.
-        Want to <a onClick={() => openWindow('issue-editor', { issueId: existingIssue.id })}>edit it</a>?
+        &ensp;
+        <a onClick={() => openWindow('issue-editor', { issueId: existingIssue.id })}>Open</a>
       </>
     : undefined;
 
   return (
     <div className={styles.scheduleForm}>
-      <FormGroup
-          label="New edition no.:"
-          labelFor="issue-id"
-          intent={idRequirements.length > 0 || existingIssue !== undefined ? 'danger' : undefined}
-          helperText={idRequirementsText || alreadyExistsError}>
-        <InputGroup
-          type="number"
-          id="issue-id"
-          large={true}
-          placeholder="E.g., 1234"
-          value={draft.id ? draft.id.toString() : ''}
-          intent={idRequirements.length > 0 ? 'danger' : undefined}
-          onChange={(evt: React.FormEvent<HTMLElement>) => {
-            onChange({ ...draft, id: parseInt((evt.target as HTMLInputElement).value, 10) });
-          }}
-        />
-      </FormGroup>
 
-      <p className={styles.scheduleFormCutoffDate}>
-        <strong>Cutoff:</strong>
-        <span>
-          {draft.cutoff_date !== undefined
-            ? <strong><DateStamp date={draft.cutoff_date} /></strong>
-            : <>Click on a day to set</>}
-        </span>
-        <Button
-          small={true}
-          className={styles.editDateButton}
-          onClick={() => onChange({ ...draft, cutoff_date: undefined })}
-          disabled={draft.cutoff_date === undefined}
-          icon={draft.cutoff_date !== undefined ? 'edit' : 'arrow-left'} />
-      </p>
+      <div className={styles.scheduleFormBody}>
+        <p className={styles.scheduleFormCutoffDate}>
+          <strong>Cutoff:</strong>
+          <span>
+            {draft.cutoff_date !== undefined
+              ? <strong><DateStamp date={draft.cutoff_date} /></strong>
+              : null}
+          </span>
+          <Button
+            small={true}
+            className={styles.editDateButton}
+            onClick={() => onChange({ ...draft, cutoff_date: undefined })}
+            disabled={draft.cutoff_date === undefined}
+            text={draft.cutoff_date === undefined ? "Click to set" : undefined}
+            icon={draft.cutoff_date !== undefined ? 'edit' : 'arrow-up'} />
+        </p>
 
-      <p className={styles.scheduleFormPublicationDate}>
-        <strong>Publication:</strong>
-        <span>
-          {draft.publication_date !== undefined
-            ? <strong><DateStamp date={draft.publication_date} /></strong>
-            : <>Click on a day to set</>}
-        </span>
-        <Button
-          small={true}
-          className={styles.editDateButton}
-          onClick={() => onChange({ ...draft, publication_date: undefined })}
-          disabled={draft.publication_date === undefined}
-          icon={draft.publication_date !== undefined ? 'edit' : 'arrow-left'} />
-      </p>
+        <p className={styles.scheduleFormPublicationDate}>
+          <strong>Publication:</strong>
+          <span>
+            {draft.publication_date !== undefined
+              ? <strong><DateStamp date={draft.publication_date} /></strong>
+              : null}
+          </span>
+          <Button
+            small={true}
+            className={styles.editDateButton}
+            onClick={() => onChange({ ...draft, publication_date: undefined })}
+            disabled={draft.publication_date === undefined}
+            text={draft.publication_date === undefined ? "Click to set" : undefined}
+            icon={draft.publication_date !== undefined ? 'edit' : 'arrow-up'} />
+        </p>
+
+        <FormGroup
+            label="Edition no.:"
+            labelFor="issue-id"
+            intent={idRequirements.length > 0 || existingIssue !== undefined ? 'danger' : undefined}
+            helperText={idRequirementsText || alreadyExistsError}>
+          <InputGroup
+            type="number"
+            id="issue-id"
+            large={true}
+            placeholder="E.g., 1234"
+            value={draft.id ? draft.id.toString() : ''}
+            intent={idRequirements.length > 0 ? 'danger' : undefined}
+            onChange={(evt: React.FormEvent<HTMLElement>) => {
+              onChange({ ...draft, id: parseInt((evt.target as HTMLInputElement).value, 10) });
+            }}
+          />
+        </FormGroup>
+      </div>
 
       <div className={styles.scheduleFormActions}>
         <ButtonGroup fill={true}>
           <Button
-            intent="primary"
-            icon="add"
+            intent="success"
+            icon="git-commit"
             disabled={
+              busy ||
               existingIssue !== undefined ||
               idRequirements.length > 0 ||
               draft.publication_date === undefined ||
               draft.cutoff_date === undefined
             }
+            loading={busy}
             onClick={onSave}
-            title="Save new issue schedule">Save</Button>
-          <Button icon="undo" onClick={onCancel}>Cancel</Button>
+            title="Save new issue schedule">Commit</Button>
+          <Button disabled={busy} icon="undo" onClick={onCancel}>Cancel</Button>
         </ButtonGroup>
       </div>
     </div>

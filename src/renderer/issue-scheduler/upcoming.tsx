@@ -25,27 +25,29 @@ export const UpcomingIssues: React.FC<UpcomingIssuesProps> = function({ issues, 
   const nextIssueId = currentIssueId ? (currentIssueId + 1) : undefined;
 
   return (
-    <div className={styles.upcomingIssues}>
+    <>
       {existingIssues.length > 0
-        ? <TransitionGroup
-              className="upcoming-issue-list"
-              exit={userIsEditing === true}
-              enter={userIsEditing === true}>
-            {existingIssues.map((issue) =>
-              <CSSTransition
-                  key={issue.id}
-                  timeout={ITEM_ENTRY_EXIT_TRANSITION_DURATION_MS}
-                  classNames="issueScheduleCardTransition">
-                <IssueScheduleCard
-                  issue={issue}
-                  isCurrent={currentIssueId === issue.id}
-                  isNext={nextIssueId === issue.id}
-                  onEditClick={() => openWindow('issue-editor', { issueId: issue.id })}
-                />
-              </CSSTransition>)}
-          </TransitionGroup>
+        ? <div className={styles.upcomingIssues}>
+            <TransitionGroup
+                className="upcoming-issue-list"
+                exit={userIsEditing === true}
+                enter={userIsEditing === true}>
+              {existingIssues.map((issue) =>
+                <CSSTransition
+                    key={issue.id}
+                    timeout={ITEM_ENTRY_EXIT_TRANSITION_DURATION_MS}
+                    classNames="issueScheduleCardTransition">
+                  <IssueScheduleCard
+                    issue={issue}
+                    isCurrent={currentIssueId === issue.id}
+                    isNext={nextIssueId === issue.id}
+                    onEditClick={() => openWindow('issue-editor', { issueId: issue.id })}
+                  />
+                </CSSTransition>)}
+            </TransitionGroup>
+          </div>
         : <NonIdealState icon="zoom-out" title="No OB editions found" />}
-    </div>
+    </>
   );
 };
 

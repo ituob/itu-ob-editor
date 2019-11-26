@@ -1,65 +1,77 @@
 @import "~@blueprintjs/core/lib/scss/variables";
 
-body {
-  font-family: sans-serif;
-}
 
-:local .homeMenuContainer {
-  $draggableRegionHeight: 3em;
+:local .homeWindow {
+  $sidebarSide: 5rem;
 
-  height: 100%;
-  padding-top: $draggableRegionHeight;
+  height: 100vh;
+  display: flex;
+  flex-flow: row-reverse nowrap;
 
-  .platform--win32 & {
-    padding-top: 0;
+  .logo {
+    height: $sidebarSide / 2;
+    width: $sidebarSide / 2;
   }
 
-  &:before {
-    content: " ";
+  // Object browser
+  > :first-child {
+    flex: 1;
+  }
+
+  .dataBarButtonWithTooltip {
     display: block;
-    position: fixed;
-    z-index: 3;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: $draggableRegionHeight;
+    width: $sidebarSide - 2rem;
+    height: $sidebarSide - 2rem;
+    margin: 0 1rem 0 1rem;
+
+    :global .bp3-button {
+      width: $sidebarSide - 2rem;
+      height: $sidebarSide - 2rem;
+      padding: 0 !important;
+
+      border-radius: 100% !important;
+    }
+  }
+
+  .dataBar {
     -webkit-app-region: drag;
-  }
-}
 
-:local .mainButtonGroup {
-  :global .bp3-button {
-    justify-content: flex-start;
-    padding-left: 2rem !important;
-  }
-}
+    width: $sidebarSide;
+    flex-shrink: 0;
+    flex-grow: 0;
+    box-shadow: $pt-elevation-shadow-1;
+    z-index: 2;
+    background: $pt-app-background-color;
 
-:local .secondaryButton {
-  position: relative;
-  margin-top: 1rem;
+    display: flex;
+    flex-flow: column nowrap;
 
-  &::before {
-    display: block;
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: -1rem;
-    height: .5rem;
-    content: " ";
-    margin-top: .5rem;
-    border-top: 1px solid silver !important;
-    width: 100%;
-  }
+    .contentTypes {
+      padding-top: 3rem;
+      flex: 1;
 
-  &:hover {
-    opacity: 1;
-  }
-}
+      > * {
+        @extend .dataBarButtonWithTooltip;
+        margin-bottom: 1rem;
+      }
+    }
 
-:local .secondaryButton + .secondaryButton {
-  margin-top: 0;
+    .selectedCType {
+      color: $pt-text-color !important;
+      background: $light-gray2 !important;
+    }
 
-  &::before {
-    display: none;
+    .status {
+      width: $sidebarSide;
+      display: flex;
+      flex-flow: column nowrap;
+      align-items: center;
+      justify-content: center;
+
+      .storageStatusIcon {
+        width: $sidebarSide;
+        height: $sidebarSide;
+      }
+    }
   }
 }

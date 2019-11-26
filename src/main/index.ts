@@ -5,24 +5,22 @@ import fetch from 'node-fetch';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as moment from 'moment';
-import * as dns from 'dns';
 
 import { app, Menu, ipcMain } from 'electron';
 import * as log from 'electron-log';
 
-import { WindowOpenerParams, openWindow, getWindowByTitle, getWindow, windows } from 'sse/main/window';
+import { WindowOpenerParams, openWindow, windows, notifyAllWindows } from 'sse/main/window';
 import { listen, makeWindowEndpoint } from 'sse/api/main';
 import { SettingManager } from 'sse/settings/main';
 import { QuerySet, sortIntegerAscending } from 'sse/storage/query';
-import { GitController, setRepoUrl, initRepo } from 'sse/storage/main/git-controller';
+import { initRepo } from 'sse/storage/main/git/controller';
+import { IDTakenError, CommitError } from 'sse/storage/main/store/base';
+import { provideAll, provideModified, listenToBatchCommits, listenToBatchDiscardRequests } from 'sse/storage/main/api';
 
-import { PartialRemoteStorageStatus } from 'remote-storage';
-
-import { OBIssue, ScheduledIssue, OBMessageSection, issueFactories } from 'models/issues';
-import { Message } from 'models/messages';
+import { OBIssue, ScheduledIssue } from 'models/issues';
 
 import { buildAppMenu } from './menu';
-import { initStorage, Storage } from './storage';
+import { getStorage, MainStorage } from 'storage/main';
 
 
 // Ensure only one instance of the app can run at a time on given user’s machine
@@ -33,8 +31,6 @@ app.disableHardwareAcceleration();
 
 // Catch unhandled errors in electron-log
 log.catchErrors({ showDialog: true });
-
-Menu.setApplicationMenu(null);
 
 
 // Proceed with app launch sequence
@@ -63,25 +59,26 @@ const UPSTREAM_REPO_URL = 'https://github.com/ituob/itu-ob-data';
 const CORS_PROXY_URL = 'https://cors.isomorphic-git.org';
 
 
-const WELCOME_SCREEN_WINDOW_OPTS: WindowOpenerParams = {
-  component: 'welcomeConfig',
-  title: 'Welcome',
-  componentParams: `defaultRepoUrl=${UPSTREAM_REPO_URL || ''}`,
-  dimensions: { width: 800, height: 600, minWidth: 600, minHeight: 600 },
-  frameless: true,
-};
+// const WELCOME_SCREEN_WINDOW_OPTS: WindowOpenerParams = {
+//   component: 'welcomeConfig',
+//   title: 'Welcome',
+//   componentParams: `defaultRepoUrl=${UPSTREAM_REPO_URL || ''}`,
+//   dimensions: { width: 800, height: 600, minWidth: 600, minHeight: 600 },
+//   frameless: true,
+// };
 
 const CONFIG_WINDOW_OPTS: WindowOpenerParams = {
   component: 'dataSynchronizer',
-  title: 'Merge Changes',
-  dimensions: { width: 800, minWidth: 600, height: 640, minHeight: 640 },
+  title: 'Settings',
+  componentParams: `defaultRepoUrl=${UPSTREAM_REPO_URL || ''}`,
+  dimensions: { width: 800, minWidth: 600, maxWidth: 1000, height: 450, minHeight: 400, maxHeight: 400 },
 };
 
-const ISSUE_SCHEDULER_WINDOW_OPTS: WindowOpenerParams = {
-  component: 'issueScheduler',
-  title: 'OB schedule',
+const HOME_WINDOW_OPTS: WindowOpenerParams = {
+  component: 'home',
+  title: 'ITU OB Editor',
   frameless: true,
-  dimensions: { width: 700, height: 500, minWidth: 700, minHeight: 400 },
+  dimensions: { width: 800, height: 500, minWidth: 800, minHeight: 500 },
 };
 
 const HELP_WINDOW_OPTS: WindowOpenerParams = {
@@ -157,51 +154,34 @@ then(() => {
     }
   });
 
-  makeWindowEndpoint('settings', () => ({
-    component: 'settings',
-    title: 'Settings',
-    dimensions: { width: 500, minWidth: 500, height: 640, minHeight: 640 },
-  }));
+  makeWindowEndpoint('settings', () => CONFIG_WINDOW_OPTS);
 
-  return setRepoUrl(WELCOME_SCREEN_WINDOW_OPTS, settings);
+  return initRepo(
+    WORK_DIR,
+    UPSTREAM_REPO_URL,
+    CORS_PROXY_URL,
+    false,
+    settings, {
+      ...CONFIG_WINDOW_OPTS,
+      componentParams: `${CONFIG_WINDOW_OPTS.componentParams}&inPreLaunchSetup=1`,
+    },
+  );
 }).
 
-then(({ url, hasChanged }) => {
-  // Stage 2: Open home window and initialize data repository (in parallel)
-
-  log.verbose("App launch: stage 2");
-  return Promise.all([
-    openHomeWindow(),
-    initRepo(WORK_DIR, url || UPSTREAM_REPO_URL, UPSTREAM_REPO_URL, CORS_PROXY_URL, hasChanged),
-  ]);
-}).
-
-then(results => {
-  // Stage 3: Initialize storage (read data repository data)
-  log.verbose("App launch: stage 3");
-
-  const gitCtrl: GitController = results[1];
-
-  return Promise.all([
-    Promise.resolve(gitCtrl),
-    initStorage(WORK_DIR),
-  ]);
-}).
-
-then(results => {
-  // Stage 4: Set up API endpoints and notify main app screen that launch was successful
+then(gitCtrl => {
+  // Stage 2: Set up API endpoints and notify main app screen that launch was successful
   log.verbose("App launch: stage 4");
 
-  const gitCtrl: GitController = results[0];
-  const storage: Storage = results[1];
+  openHomeWindow();
+  const storage: MainStorage = getStorage(gitCtrl);
 
   if (isMacOS) {
     // Set up app menu
     Menu.setApplicationMenu(buildAppMenu({
       getFileMenuItems: () => ([
         {
-          label: "Open Calendar",
-          click: async () => await openWindow(ISSUE_SCHEDULER_WINDOW_OPTS),
+          label: "Open main window",
+          click: async () => await openWindow(HOME_WINDOW_OPTS),
         },
       ]),
       getHelpMenuItems: () => ([
@@ -228,60 +208,37 @@ then(results => {
   // possibly record timeline states into a temporary file;
   // allow dispatching reducer actions through API endpoints (including types UNDO/REDO).
 
-  storage.setUpAPIEndpoints((notify: string[]) => {
-    if (notify.indexOf('publications') >= 0) {
-      const issueEditor = getWindow(win => win.getTitle().indexOf('Issue ') === 0);
-      if (issueEditor) {
-        issueEditor.webContents.send('publications-changed');
-      }
-    }
-  });
-
   gitCtrl.setUpAPIEndpoints();
 
-  var lastPushSucceeded: boolean | undefined = undefined;
 
-  async function syncChanges() {
-    log.verbose("Syncing changes");
+  // When we hear any of these events, sync remote storage.
+  // In addition to that, it will also get called in object update handlers below.
+  ipcMain.on('sync-remote-storage', gitCtrl.synchronize);
 
-    await sendRemoteStatus({ isPushing: true });
 
-    let isOffline: boolean;
-    try {
-      await dns.promises.lookup('github.com');
-      isOffline = false;
-    } catch (e) {
-      isOffline = true;
-    }
-    await sendRemoteStatus({ isOffline });
+  /* Storage endpoints */
 
-    try {
-      await gitCtrl.syncToRemote();
-      lastPushSucceeded = true;
-    } catch (e) {
-      log.error("Failed to push", e);
-      lastPushSucceeded = false;
-    }
-    await sendRemoteStatus({ lastPushSucceeded, isPushing: false });
+  provideAll(storage, 'issues');
+  provideAll(storage, 'publications');
+  provideAll(storage, 'recommendations');
 
-    await gitCtrl.fetchUpstream();
-    await sendRemoteStatus({
-      isAheadOfUpstream: await gitCtrl.isAheadOfUpstream(),
-      upstreamIsAhead: await gitCtrl.upstreamIsAhead(),
-    });
-  }
+  provideModified(storage, 'issues');
+  provideModified(storage, 'publications');
+  provideModified(storage, 'recommendations');
 
-  //setInterval(syncChanges, 10000);
+  listenToBatchCommits(storage, 'issues');
+  listenToBatchCommits(storage, 'publications');
+  listenToBatchCommits(storage, 'recommendations');
 
-  async function sendRemoteStatus(update: PartialRemoteStorageStatus) {
-    await messageHome('remote-storage-status', update);
-  }
+  listenToBatchDiscardRequests(storage, 'issues');
+  listenToBatchDiscardRequests(storage, 'publications');
+  listenToBatchDiscardRequests(storage, 'recommendations');
 
 
   /* Home screen */
 
   listen<{}, { id: number | null }>('current-issue-id', async () => {
-    const issues = new QuerySet<OBIssue>(storage.workspace.issues);
+    const issues = new QuerySet<OBIssue>(await storage.issues.getIndex());
     const currentIssue: OBIssue | null = issues.filter(item => {
       return new Date(item[1].publication_date).getTime() >= new Date().getTime();
     }).orderBy(sortIntegerAscending).all()[0] || null;
@@ -293,7 +250,7 @@ then(results => {
 
   listen<{ month: Date | null }, ScheduledIssue[]>
   ('ob-schedule', async ({ month }) => {
-    const issues = new QuerySet<OBIssue>(storage.workspace.issues);
+    const issues = new QuerySet<OBIssue>(await storage.issues.getIndex());
     return issues.orderBy(sortIntegerAscending).filter(item => {
       if (month) {
         return (
@@ -311,25 +268,34 @@ then(results => {
     });
   });
 
-  listen<{ issueId: string, newData: ScheduledIssue }, { success: boolean }>
-  ('ob-schedule-add', async ({ issueId, newData }) => {
-    const existingIssue = storage.workspace.issues[newData.id];
-    storage.workspace.issues[newData.id] = Object.assign(existingIssue || {} as OBIssue, newData);
-    await storage.storeWorkspace();
-    await messageHome('update-current-issue');
+  listen<{ newData: ScheduledIssue }, { success: true }>
+  ('ob-schedule-add', async ({ newData }) => {
+    try {
+      await storage.issues.schedule(newData);
+    } catch (e) {
+      if (e instanceof IDTakenError) {
+        throw new Error(`OB ${newData.id} already exists. If you want to reschedule, please edit it instead.`);
+      } else if (e instanceof CommitError) {
+        log.error(e.code, e.message, e.stack);
+        await notifyAllWindows('issues-changed');
+        throw new Error(`Couldn’t commit the newly scheduled issue: ${e.code}`);
+      } else {
+        log.error(e.message, e.stack);
+        await notifyAllWindows('issues-changed');
+        throw new Error("Got unexpected error while scheduling new issue");
+      }
+    }
+    await notifyAllWindows('issues-changed');
+    await gitCtrl.synchronize();
     return { success: true };
   });
 
 
   /* Issue editor */
 
-  listen<{ issueId: string }, OBIssue>
+  listen<{ issueId: number }, OBIssue>
   ('issue', async ({ issueId }) => {
-    const issue: OBIssue = storage.workspace.issues[issueId];
-    if (!issue) {
-      throw new Error(`Requested issue ${issueId} could not be found`);
-    }
-
+    const issue: OBIssue = await storage.issues.read(issueId);
     if (!(issue.general || {}).messages) {
       issue.general = { messages: [] };
     }
@@ -339,124 +305,17 @@ then(results => {
     return issue;
   });
 
-  listen<{ issueId: string, data: OBIssue }, { success: boolean }>
-  ('issue-update', async ({ issueId, data }) => {
-    const issue: OBIssue = storage.workspace.issues[issueId];
-    if (!issue) {
-      throw new Error(`Requested issue ${issueId} could not be found`);
-    }
-
-    await storage.storeManagers.issues.store(data, storage);
-
-    return { success: true };
-  });
-
-  // Messages
-
-  listen<{ issueId: string, section: OBMessageSection, msgIdx: number, msg: Message }, { success: boolean }>
-  ('issue-create-message', async ({ issueId, section, msgIdx, msg }) => {
-    const issue: OBIssue = storage.workspace.issues[issueId];
-    if (!issue) {
-      throw new Error(`Requested issue ${issueId} could not be found`);
-    }
-
-    const newIssue = issueFactories.withAddedMessage(issue, section, msgIdx, msg);
-    await storage.storeManagers.issues.store(newIssue, storage);
-
-    return { success: true };
-  });
-
-  listen<{ issueId: string, section: OBMessageSection, msgIdx: number }, Message>
-  ('issue-read-message', async ({ issueId, section, msgIdx }) => {
-    const msg: Message = (storage.workspace.issues[issueId] || {})[section].messages[msgIdx];
-    if (!msg) {
-      throw new Error(`Requested message ${issueId}/${section}#${msgIdx} could not be found`);
-    }
-
-    return msg;
-  });
-
-  listen<{ issueId: string, section: OBMessageSection, msgIdx: number, updatedMsg: Message }, { success: boolean }>
-  ('issue-update-message', async ({ issueId, section, msgIdx, updatedMsg }) => {
-    // TODO: We need our storage to lock here (#59)
-
-    const issue: OBIssue = storage.workspace.issues[issueId];
-    if (!issue) {
-      throw new Error(`Requested issue ${issueId} could not be found`);
-    }
-    const msg: Message = issue[section].messages[msgIdx];
-    if (!msg) {
-      throw new Error(`Requested message ${issueId}/${section}#${msgIdx} could not be found`);
-    }
-
-    const newIssue = issueFactories.withEditedMessage(issue, section, msgIdx, updatedMsg);
-    await storage.storeManagers.issues.store(newIssue, storage);
-
-    return { success: true };
-  });
-
-  listen<{ issueId: string, section: OBMessageSection, msgIdx: number }, { success: boolean }>
-  ('issue-delete-message', async ({ issueId, section, msgIdx }) => {
-    const issue: OBIssue = storage.workspace.issues[issueId];
-    if (!issue) {
-      throw new Error(`Requested issue ${issueId} could not be found`);
-    }
-    const msg: Message = issue[section].messages[msgIdx];
-    if (!msg) {
-      throw new Error(`Requested message ${issueId}/${section}#${msgIdx} could not be found`);
-    }
-
-    const newIssue = issueFactories.withRemovedMessage(issue, section, msgIdx);
-    await storage.storeManagers.issues.store(newIssue, storage);
-
-    return { success: true };
-  });
-
-  // Annexes
-
-  listen<{ issueId: string, pubId: string }, { success: boolean }>
-  ('issue-create-annex', async ({ issueId, pubId }) => {
-    const issue: OBIssue = storage.workspace.issues[issueId];
-    if (!issue) {
-      throw new Error(`Requested issue ${issueId} could not be found`);
-    }
-
-    const newIssue = issueFactories.withAddedAnnex(issue, pubId);
-    await storage.storeManagers.issues.store(newIssue, storage);
-
-    return { success: true };
-  });
-
-  listen<{ issueId: string, pubId: string, updatedPosition: Date | null }, { success: boolean }>
-  ('issue-edit-annex', async ({ issueId, pubId, updatedPosition }) => {
-    const issue: OBIssue = storage.workspace.issues[issueId];
-    if (!issue) {
-      throw new Error(`Requested issue ${issueId} could not be found`);
-    }
-
-    const newIssue = issueFactories.withUpdatedAnnexedPublicationPosition(issue, pubId, updatedPosition);
-    await storage.storeManagers.issues.store(newIssue, storage);
-
-    return { success: true };
-  });
-
-  listen<{ issueId: string, pubId: string }, { success: boolean }>
-  ('issue-delete-annex', async ({ issueId, pubId }) => {
-    const issue: OBIssue = storage.workspace.issues[issueId];
-    if (!issue) {
-      throw new Error(`Requested issue ${issueId} could not be found`);
-    }
-
-    const newIssue = issueFactories.withDeletedAnnex(issue, pubId);
-    await storage.storeManagers.issues.store(newIssue, storage);
-
+  listen<{ issueId: number, data: OBIssue, commit: boolean }, { success: true }>
+  ('issue-update', async ({ issueId, data, commit }) => {
+    await storage.issues.update(issueId, data, commit);
+    await gitCtrl.synchronize();
     return { success: true };
   });
 
 
   /* Set up window-opening endpoints */
 
-  makeWindowEndpoint('publication-editor', ({ pubId } : { pubId: string }) => ({
+  makeWindowEndpoint('publication-editor', ({ pubId }: { pubId: string }) => ({
     component: 'publicationEditor',
     title: `Publication ${pubId}`,
     componentParams: `pubId=${pubId}`,
@@ -472,21 +331,11 @@ then(results => {
     dimensions: { width: 800, height: 600, minWidth: 700, minHeight: 500 },
   }));
 
-  ipcMain.on('scheduled-new-issue', (event: any) => {
-    event.reply('ok');
-  });
-
-  makeWindowEndpoint('spotlight', () => ({
-    component: 'spotlight',
-    title: 'Spotlight',
+  makeWindowEndpoint('batch-commit', () => ({
+    component: 'batchCommit',
+    title: 'Commit or discard changes',
     frameless: true,
-    dimensions: { width: 800, height: 200 },
-  }));
-
-  makeWindowEndpoint('preflight', () => ({
-    component: 'preflight',
-    title: 'Preflight',
-    dimensions: { width: 800, minWidth: 600, height: 650, minHeight: 650 },
+    dimensions: { width: 700, height: 500 },
   }));
 
   makeWindowEndpoint('help', ({ path, title }: { path?: string, title?: string }) => ({
@@ -495,29 +344,19 @@ then(results => {
     url: `${APP_HELP_ROOT}${path || ''}`,
   }));
 
-  makeWindowEndpoint('settings', () => CONFIG_WINDOW_OPTS);
-
   if (windows.length < 1) {
     log.verbose("No windows loaded at app launch, maybe will quit");
     maybeQuit();
   }
 
   log.verbose("Message home screen that app has loaded");
-  messageHome('app-loaded');
+  notifyAllWindows('app-loaded');
 
 });
 
 
-async function messageHome(eventName: string, payload?: any) {
-  const homeWindow = getWindowByTitle(ISSUE_SCHEDULER_WINDOW_OPTS.title);
-  if (homeWindow !== undefined) {
-    await homeWindow.webContents.send(eventName, payload);
-  }
-}
-
-
 async function openHomeWindow() {
-  return await openWindow(ISSUE_SCHEDULER_WINDOW_OPTS);
+  return await openWindow(HOME_WINDOW_OPTS);
 }
 
 

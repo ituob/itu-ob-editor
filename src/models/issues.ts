@@ -1,5 +1,6 @@
 import { IndexableObject } from 'sse/storage/query';
 import { Message, MessageType } from 'models/messages';
+import { AvailableLanguages } from 'models/languages';
 
 
 export interface MessageBlock {
@@ -12,35 +13,57 @@ export interface PublicationPosition {
 
 export type AnnexesBlock = PublicationPosition;
 
-export type OBMessageSection = 'amendments' | 'general';
-export type OBAnnexesSection = 'annexes';
-export type OBSection = OBMessageSection | OBAnnexesSection;
+enum OBSections {
+  amendments = 'amendments',
+  general = 'general',
+  annexes = 'annexes',
+}
+enum OBMessageSections {
+  amendments = OBSections.amendments,
+  general = OBSections.general,
+}
+
+export type OBMessageSection = keyof typeof OBMessageSections;
+export type OBAnnexesSection = OBSections.annexes;
+export type OBSection = keyof typeof OBSections;
 
 export function isOBSection(val: string): val is OBSection {
-  return ['amendments', 'general', 'annexes'].indexOf(val) >= 0;
+  return [OBSections.amendments, OBSections.general, OBSections.annexes].map(s => `${s}`).indexOf(val) >= 0;
 }
 export function isOBMessageSection(val: string): val is OBMessageSection {
-  return ['amendments', 'general'].indexOf(val) >= 0;
+  return [OBSections.amendments, OBSections.general].map(s => `${s}`).indexOf(val) >= 0;
 }
 export function isOBAnnexesSection(val: string): val is OBAnnexesSection {
   return val === 'annexes';
 }
 
-export interface OBIssue extends IndexableObject {
-  // Stored data
-  id: number,
-  publication_date: Date,
-  cutoff_date: Date,
-  general: MessageBlock,
-  amendments: MessageBlock,
-  annexes: AnnexesBlock,
+interface Contact {
+  type: 'phone' | 'email' | 'fax',
+  data: string,
+  recommended?: boolean,
 }
 
-export interface ScheduledIssue extends IndexableObject {
+interface OBAuthorOrg {
+  address?: string,
+  name?: string,
+  // We’ll expect either address or name to be present.
+  contacts: Contact[],
+}
+
+export interface ScheduledIssue extends IndexableObject<number> {
   // Trimmed down OBIssue, schedule only
   id: number,
   publication_date: Date,
   cutoff_date: Date,
+}
+
+export interface OBIssue extends ScheduledIssue {
+  general: MessageBlock,
+  amendments: MessageBlock,
+  annexes: AnnexesBlock,
+  issn: string,
+  authors: OBAuthorOrg[],
+  languages: { [L in keyof typeof AvailableLanguages]?: true },
 }
 
 

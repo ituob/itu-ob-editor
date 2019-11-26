@@ -6,22 +6,24 @@ import { NonIdealState } from '@blueprintjs/core';
 
 import { LangConfigContext } from 'sse/localizer/renderer';
 import { DataSynchronizer } from 'sse/storage/renderer/data-synchronizer';
-import { Spotlight } from 'sse/spotlight/renderer';
-import { Preflight } from 'sse/preflight/renderer';
+import { request } from 'sse/api/renderer';
+import { Index } from 'sse/storage/query';
+import { RemoteStorageStatus } from 'sse/storage/main/remote';
+
+import { RendererStorage } from 'storage/renderer';
 
 import { HomeScreen } from './home';
 import { Settings } from './settings';
 import { Window as IssueEditor } from './issue-editor';
 import { IssueScheduler } from './issue-scheduler';
 import { PublicationEditor } from './publication-editor';
+import { BatchCommit } from './widgets/batch-commit';
+import { WorkspaceContext, StorageContextSpec, ModifiedObjectStatus } from './workspace-context';
 
-import { WorkspaceContext, WorkspaceContextSpec } from './workspace-context';
-import { LocalStorageStatusContextProvider } from './sync-context';
-import { request } from 'sse/api/renderer';
-import { Index } from 'sse/storage/query';
 import { OBIssue } from 'models/issues';
 import { Publication } from 'models/publications';
 import { ITURecommendation } from 'models/recommendations';
+import { AvailableLanguages } from 'models/languages';
 
 import '!style-loader!css-loader!@blueprintjs/datetime/lib/css/blueprint-datetime.css';
 import '!style-loader!css-loader!@blueprintjs/core/lib/css/blueprint.css';
@@ -60,17 +62,11 @@ const App: React.FC<{}> = function () {
       upstreamURL={searchParams.get('upstreamURL') || ''}
       inPreLaunchSetup={searchParams.get('inPreLaunchSetup') === '1'} />;
 
-  } else if (searchParams.get('c') === 'spotlight') {
-    component = <Spotlight />;
-
-  } else if (searchParams.get('c') === 'preflight') {
-    component = <Preflight />;
-
   } else if (searchParams.get('c') === 'settings') {
     component = <Settings />;
 
-  // } else if (searchParams.get('c') === 'migrationAssistant') {
-  //   component = <MigrationAssistant />;
+  } else if (searchParams.get('c') === 'batchCommit') {
+    component = <BatchCommit />;
 
   } else {
     component = <NonIdealState
@@ -78,34 +74,69 @@ const App: React.FC<{}> = function () {
       title="Unknown component requested" />;
   }
 
-  const initWorkspace: WorkspaceContextSpec = {
+  const initWorkspace: StorageContextSpec<RendererStorage> = {
     current: {
       issues: {},
       publications: {},
       recommendations: {},
     },
+    modified: {
+      issues: [],
+      publications: [],
+      recommendations: [],
+    },
     refresh: async () => {
       const newCurrent = {
-        issues: await request<Index<OBIssue>>('storage-get-all-issues'),
-        publications: await request<Index<Publication>>('storage-get-all-publications'),
-        recommendations: await request<Index<ITURecommendation>>('storage-get-all-recommendations'),
+        issues: await request<Index<OBIssue>>('storage-read-all-issues'),
+        publications: await request<Index<Publication>>('storage-read-all-publications'),
+        recommendations: await request<Index<ITURecommendation>>('storage-read-all-recommendations'),
       };
       updateWorkspace(workspace => ({ ...workspace, current: newCurrent }));
+    },
+    refreshModified: async (hasLocalChanges) => {
+      let modified: ModifiedObjectStatus<RendererStorage>;
+
+      if (hasLocalChanges !== false) {
+        modified = {
+          issues: await request<number[]>('storage-read-modified-in-issues'),
+          publications: await request<string[]>('storage-read-modified-in-publications'),
+          recommendations: await request<string[]>('storage-read-modified-in-recommendations'),
+        };
+      } else {
+        modified = {
+          issues: [],
+          publications: [],
+          recommendations: [],
+        };
+      }
+      updateWorkspace(workspace => ({ ...workspace, modified }));
     },
   };
   const [workspace, updateWorkspace] = useState(initWorkspace);
 
+  async function handleRemoteStorage(evt: any, remoteStorageStatus: Partial<RemoteStorageStatus>) {
+    await workspace.refreshModified(remoteStorageStatus.hasLocalChanges);
+  }
+
   useEffect(() => {
     workspace.refresh();
+    workspace.refreshModified();
+
+    ipcRenderer.once('app-loaded', workspace.refresh);
     ipcRenderer.on('publications-changed', workspace.refresh);
+    ipcRenderer.on('issues-changed', workspace.refresh);
+    ipcRenderer.on('remote-storage-status', handleRemoteStorage);
 
     return function cleanup() {
+      ipcRenderer.removeListener('app-loaded', workspace.refresh);
       ipcRenderer.removeListener('publications-changed', workspace.refresh);
+      ipcRenderer.removeListener('issues-changed', workspace.refresh);
+      ipcRenderer.removeListener('remote-storage-status', handleRemoteStorage);
     };
   }, []);
 
   const [langConfig, setLangConfig] = useState({
-    available: { en: 'English', zh: 'Chinese', ru: 'Russian' },
+    available: AvailableLanguages,
     default: 'en',
     selected: 'en',
     select: (langId: string) => {
@@ -116,9 +147,7 @@ const App: React.FC<{}> = function () {
   return (
     <LangConfigContext.Provider value={langConfig}>
       <WorkspaceContext.Provider value={workspace}>
-        <LocalStorageStatusContextProvider>
-          {component}
-        </LocalStorageStatusContextProvider>
+        {component}
       </WorkspaceContext.Provider>
     </LangConfigContext.Provider>
   );

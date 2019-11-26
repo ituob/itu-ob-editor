@@ -1,16 +1,16 @@
 import AsyncLock from 'async-lock';
 
-import React, { useMemo, useState, useEffect } from 'react';
-import { Spinner, Icon, NonIdealState, Tooltip } from '@blueprintjs/core';
+import { remote, ipcRenderer } from 'electron';
 
-import { useWorkspace } from 'renderer/workspace-context';
+import React, { useMemo, useState, useEffect } from 'react';
+import { Spinner, Icon, NonIdealState, Tooltip, Button } from '@blueprintjs/core';
+
+import { useWorkspace, useModified } from 'renderer/workspace-context';
 
 import { request } from 'sse/api/renderer';
 import { PaneHeader } from 'sse/renderer/widgets/pane-header';
 
 import { PublicationTitle } from 'renderer/widgets/publication-title';
-
-// import { useStorageOperation } from 'renderer/use-api';
 
 import {
   OBIssue,
@@ -20,6 +20,8 @@ import {
 } from 'models/issues';
 
 import { Message, AmendmentMessage } from 'models/messages';
+
+import { WindowToaster } from 'renderer/toaster';
 
 import { ItemList } from './item-list';
 import { NewGeneralMessagePrompt } from './item-list/new-general-message-menu';
@@ -36,21 +38,40 @@ interface IssueEditorSelection {
   item: string,
 }
 
+const operationLock = new AsyncLock();
+
+var issueUpdate: NodeJS.Timer;
+
 
 interface IssueEditorWindowProps {
   issueId: string,
-  selectedSection?: string,
+  selectedSection?: OBSection,
   selectedItem?: string,
 }
 export const Window: React.FC<IssueEditorWindowProps> = ({ issueId, selectedSection, selectedItem }) => {
+  const numIssueId = parseInt(issueId, 10);
+
   const [maybeIssue, updateIssue] = useState(null as OBIssue | null);
+
+  function handleChangedIssues(evt: any, data: { objIds: number[] }) {
+    // Just reload the window if our issue question changed
+    console.debug("Changed issues", data.objIds);
+    if (data.objIds.indexOf(numIssueId) >= 0) {
+      remote.getCurrentWindow().reload();
+    }
+  }
 
   useEffect(() => {
     storageGetIssue();
+
+    ipcRenderer.on('issues-changed', handleChangedIssues);
+    return function cleanup() {
+      ipcRenderer.removeListener('issues-changed', handleChangedIssues);
+    }
   }, []);
 
   async function storageGetIssue() {
-    const issue = await request<OBIssue>('issue', { issueId });
+    const issue = await request<OBIssue>('issue', { issueId: numIssueId });
     updateIssue(issue);
   }
 
@@ -61,31 +82,20 @@ export const Window: React.FC<IssueEditorWindowProps> = ({ issueId, selectedSect
     } else {
       selection = undefined;
     }
-    return <IssueEditor issue={maybeIssue as OBIssue} selection={selection} />;
+    return <IssueEditor issue={maybeIssue} selection={selection} />;
   }
 
   return <Spinner className={styles.spinner} />;
 };
 
 
-const operationLock = new AsyncLock();
-var issueUpdate: NodeJS.Timer;
-
-
 export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSelection }> = (props) => {
-  const [issue, updateIssue] = useState(props.issue);
+  const [issue, _updateIssue] = useState({ ...props.issue });
   const ws = useWorkspace();
 
-  const [haveSaved, setSaved] = useState(undefined as boolean | undefined);
-  const [isLoading, setLoading] = useState(true);
+  const modified = useModified().issues.find(id => id === props.issue.id);
 
-  useEffect(() => {
-    if (isLoading) {
-      setLoading(false);
-    } else {
-      issueStorageOperation('update', { data: issue });
-    }
-  }, [issue]);
+  const [haveSaved, setSaved] = useState(undefined as boolean | undefined);
 
 
   /* Prepare initial item selection status */
@@ -116,18 +126,20 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
 
   /* Storage API utilities */
 
-  function issueStorageOperation(action: string, data: any) {
+  async function updateIssue(data: OBIssue, commit?: true) {
     setSaved(false);
 
-    operationLock.acquire('update-issue', async () => {
+    _updateIssue(data);
+
+    await operationLock.acquire('update-issue', async () => {
       clearTimeout(issueUpdate);
 
       // TODO: Handle API failure
-      await request<{ success: boolean }>(`issue-${action}`, { issueId: props.issue.id, ...data });
+      await request<{ success: boolean }>('issue-update', { issueId: props.issue.id, data, commit: commit });
 
       issueUpdate = setTimeout(() => {
         setSaved(true);
-      }, 1000);
+      }, 500);
     });
   }
 
@@ -153,7 +165,6 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
       const message = issue[selectedSection].messages[parseInt(selectedItem, 10)];
       if (message) {
         return <MessageEditor
-            workspace={ws}
             message={message}
             issue={issue}
             onChange={handleMessageEdit}
@@ -259,25 +270,59 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
   ];
 
 
+  async function handleCommitAndQuit() {
+    try {
+      await updateIssue(issue, true);
+    } catch (e) {
+      WindowToaster.show({ intent: 'danger', message: "Failed to commit changes" });
+      return;
+    }
+    remote.getCurrentWindow().close();
+  }
+
+
+  /* Changed status mark */
+
+  const hasUncommittedChanges = modified !== undefined;
+
+  let changeStatus: JSX.Element;
+  let tooltipText: string;
+  if (haveSaved === false) {
+    changeStatus = <Icon icon="asterisk" intent="danger" />
+    tooltipText = "Saving edits…";
+  } else if (hasUncommittedChanges === true) {
+    changeStatus = <Button
+        intent="success"
+        onClick={handleCommitAndQuit}
+        icon="git-commit"
+        small={true}
+        className={styles.commitButton}>
+      Done
+    </Button>;
+    tooltipText = "Click to commit changes";
+  } else {
+    changeStatus = <Icon icon="tick-circle" intent="success" />
+    tooltipText = "Edition is up-to-date";
+  }
+
+
   /* Main JSX */
 
   return (
     <div className={styles.twoPaneEditor}>
       <div className={styles.messageListPane}>
 
-        <PaneHeader align="right" major={true} className={styles.paneHeader}>
-          {haveSaved !== undefined
-            ? <Tooltip
-                  className={styles.statusIcon}
-                  content={haveSaved === true ? "Edits were saved locally." : "Saving edits…"}>
-                <Icon
-                  icon={haveSaved === false ? "asterisk" : "tick-circle"}
-                  intent={haveSaved === false ? "primary" : "success"}
-                />
-              </Tooltip>
-            : null}
-          Edition № <span className={styles.paneHeaderIssueId}>{issue.id}</span>
-        </PaneHeader>
+        <div className={styles.paneHeader}>
+          <PaneHeader align="right" major={true}>
+            <Tooltip
+                className={styles.statusIcon}
+                content={tooltipText}>
+              {changeStatus}
+            </Tooltip>
+            № <span className={styles.paneHeaderIssueId}>{issue.id}</span>
+          </PaneHeader>
+        </div>
+
         <div className={styles.paneBody}>
 
           <ItemList

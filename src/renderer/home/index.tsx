@@ -1,77 +1,108 @@
-import { ipcRenderer } from 'electron';
-import React, { useState, useEffect } from 'react';
-import { ButtonGroup, Button, Classes } from '@blueprintjs/core';
+import React, { useState } from 'react';
+import { NonIdealState, Button, Icon, Tooltip, Position } from '@blueprintjs/core';
 
-import { request, openWindow } from 'sse/api/renderer';
+// import { getStatic } from 'sse/renderer/static';
+// <img src={getStatic('itu-logo.png')} alt="ITU logo" className={styles.logo} />
+
+import { Storage as BaseStorage } from 'sse/storage';
+import { openWindow } from 'sse/api/renderer';
+
+import { Storage } from 'storage';
+import { StorageStatus } from 'renderer/widgets/sync-status';
+import { IssueScheduler } from '../issue-scheduler';
 import * as styles from './styles.scss';
+
+
+interface ContentTypeOptions<S extends BaseStorage> {
+  id: keyof S,
+  title: string,
+  getIcon: () => JSX.Element,
+  getBrowser?: () => JSX.Element,
+}
+
+type ContentTypeOptionSet<S extends BaseStorage> = ContentTypeOptions<S>[];
+
+
+const contentTypes: ContentTypeOptionSet<Storage> = [
+  {
+    id: 'issues',
+    title: 'OB editions',
+    getIcon: () => <Icon icon="projects" />,
+    getBrowser: () => <IssueScheduler />,
+  },
+  {
+    id: 'publications',
+    title: 'Service publications',
+    getIcon: () => <Icon icon="th" />,
+  },
+  {
+    id: 'recommendations',
+    title: 'Recommendations',
+    getIcon: () => <Icon icon="manual" />,
+  },
+];
 
 
 interface HomeScreenProps {}
 export const HomeScreen: React.FC<HomeScreenProps> = function () {
-  const [currentIssue, setCurrentIssue] = useState({ id: null } as { id: number | null });
-  const [loading, setLoading] = useState(true);
+  
+  const [selectedCType, selectCType] = useState('issues' as keyof Storage);
 
-  async function reloadCurrentIssue() {
-    const currentIssue = await request<{ id: number | null }>('current-issue-id');
-    setLoading(false);
-    setCurrentIssue(currentIssue);
+  const cTypeOptions = contentTypes.find(cType => cType.id === selectedCType);
+
+  let viewer: JSX.Element;
+  if (cTypeOptions !== undefined && cTypeOptions.getBrowser) {
+    viewer = cTypeOptions.getBrowser();
+  } else {
+    viewer = <NonIdealState title="Not found viewer for type" />;
   }
 
-  useEffect(() => {
-    reloadCurrentIssue();
-    ipcRenderer.once('app-loaded', reloadCurrentIssue);
-    ipcRenderer.on('update-current-issue', reloadCurrentIssue);
-    return function cleanup() {
-      ipcRenderer.removeListener('update-current-issue', reloadCurrentIssue);
-      ipcRenderer.removeListener('app-loaded', reloadCurrentIssue);
-    };
-  }, []);
-
   return (
-    <div className={styles.homeMenuContainer}>
-      <ButtonGroup
-          className={styles.mainButtonGroup}
-          large={true}
-          vertical={true}
-          fill={true}>
+    <div className={styles.homeWindow}>
+      {viewer}
 
+      <div className={styles.dataBar}>
+        <div className={styles.contentTypes}>
+          {contentTypes.map(cType => (
+            <DataBarButton
+                title={cType.title}
+                buttonClassName={cType.id === selectedCType ? styles.selectedCType : undefined}
+                onClick={() => selectCType(cType.id)}>
+              {cType.getIcon()}
+            </DataBarButton>
+          ))}
+        </div>
+
+        <div className={styles.status}>
+          <DataBarButton
+              onClick={() => openWindow('settings')}
+              title="Settings">
+            <Icon icon="settings" />
+          </DataBarButton>
+
+          <StorageStatus
+            tooltipPosition={Position.RIGHT}
+            iconClassName={styles.storageStatusIcon} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+const DataBarButton: React.FC<{ onClick: () => void, buttonClassName?: string, title: string }> = function ({ onClick, buttonClassName, title, children }) {
+  return (
+    <div className={styles.dataBarButtonWithTooltip}>
+      <Tooltip content={title} position={Position.RIGHT}>
         <Button
+            large={true}
+            title={title}
             minimal={true}
-            intent="primary"
-            title="Edit current edition"
-            disabled={currentIssue.id === null}
-            icon="edit"
-            onClick={() => currentIssue.id ? openWindow('issue-editor', { issueId: currentIssue.id }) : void 0}>
-          <span className={loading ? Classes.SKELETON : undefined}>
-            {currentIssue.id !== null ? `Open no. ${currentIssue.id}` : "Open current"}
-          </span>
+            className={buttonClassName}
+            onClick={onClick}>
+          {children}
         </Button>
-
-        <Button
-          minimal={true}
-          text="Schedule"
-          title="Schedule future editions"
-          disabled={loading}
-          icon="timeline-events"
-          onClick={() => openWindow('issue-scheduler')}
-        />
-        <Button
-          minimal={true}
-          intent="success"
-          text="Merge"
-          title="Fetch latest changes & submit yours"
-          disabled={loading}
-          icon="git-merge"
-          onClick={() => openWindow('data-synchronizer')}
-        />
-        <Button
-          minimal={true}
-          text="Settings"
-          icon="settings"
-          className={styles.secondaryButton}
-          onClick={() => openWindow('settings')}
-        />
-      </ButtonGroup>
+      </Tooltip>
     </div>
   );
 };

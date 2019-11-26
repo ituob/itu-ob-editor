@@ -12,7 +12,6 @@ import { RecommendationTitle, PublicationTitle } from 'renderer/widgets/publicat
 import { usePublication, useLatestAnnex } from 'renderer/workspace-context';
 import { HelpButton } from 'renderer/widgets/help-button';
 
-import { Workspace } from 'main/storage';
 import { OBIssue } from 'models/issues';
 
 import {
@@ -48,7 +47,6 @@ import * as styles from './styles.scss';
    React class based on given message type. */
 
 interface MessageEditorProps {
-  workspace: Workspace,
   message: Message,
   issue: OBIssue,
   onChange: (updatedMessage: Message) => void,
@@ -90,6 +88,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = function (props) {
       <>
         <header className={styles.messageEditorPaneHeader}>
           <PaneHeader
+              major={true}
               align="left"
               actions={<HelpButton className="big-icon-button" path={helpPath} />}>
             <MessageTitle message={props.message} />
@@ -98,7 +97,6 @@ export const MessageEditor: React.FC<MessageEditorProps> = function (props) {
         </header>
 
         <EditorCls
-          workspace={props.workspace}
           message={props.message}
           issue={props.issue}
           onChange={(updatedMessage: any) => props.onChange({ ...updatedMessage, type: props.message.type })}
@@ -126,7 +124,6 @@ export const MessageEditor: React.FC<MessageEditorProps> = function (props) {
    other messages within current OB edition, or data from past editions. */
 
 export interface MessageFormProps {
-  workspace: Workspace,
   issue: OBIssue,
   message: Message,
   onChange: (updatedMessage: any) => void,

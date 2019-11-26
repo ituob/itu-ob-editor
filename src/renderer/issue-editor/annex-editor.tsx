@@ -60,6 +60,7 @@ export const AnnexEditor: React.FC<AnnexEditorProps> = function ({ pubId, positi
       <div className={styles.messageEditorPaneHeader}>
         <PaneHeader
             align="left"
+            major={true}
             actions={<HelpButton className="big-icon-button" path="annex-publication/" />}>
           <small>Annex</small>&ensp;<PublicationTitle id={pubId} />
         </PaneHeader>

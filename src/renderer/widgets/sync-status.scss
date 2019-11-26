@@ -3,3 +3,21 @@
     animation-duration: 2s;
   }
 }
+
+:local .statusIcon {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+
+  // Center, really needed if BP3 Icon (not Button)
+  display: flex !important;
+  flex-flow: column nowrap;
+  align-items: center;
+  justify-content: center;
+}
+
+:local .storageStatusBase {
+}
+
+:local .passwordPrompt {
+  padding: 1rem 1rem 0 1rem;
+}
