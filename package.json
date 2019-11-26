@@ -37,7 +37,6 @@
     "electron-log": "^3.0.9",
     "fs-extra": "^8.1.0",
     "immer": "^5.0.0",
-    "isomorphic-git": "^0.55.4",
     "moment": "^2.24.0",
     "node-fetch": "^2.6.0",
     "react": "^16.11.0",
