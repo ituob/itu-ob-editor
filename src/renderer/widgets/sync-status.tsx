@@ -58,15 +58,15 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
 
   if (remote.isMisconfigured) {
     statusIcon = "error";
-    tooltipText = "Failed to synchronize. Please check settings";
+    tooltipText = "Failed to synchronize—click to open settings";
     statusIntent = "danger";
     action = () => openWindow('settings');
 
   } else if (remote.isOffline) {
     statusIcon = "offline";
-    tooltipText = "No Internet connection";
+    tooltipText = "No Internet connection—click to retry";
     statusIntent = "danger";
-    action = null;
+    action = () => ipcRenderer.send('sync-remote-storage');
 
   } else if (remote.needsPassword) {
     statusIcon = "lock";
@@ -76,9 +76,15 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
 
   } else if (remote.hasLocalChanges) {
     statusIcon = "asterisk";
-    tooltipText = "Uncommitted changes present, unable to sync";
+    tooltipText = "Uncommitted changes present—click to resolve";
     statusIntent = "warning";
     action = () => openWindow('batch-commit');
+
+  } else if (remote.isPulling) {
+    statusIcon = "cloud-download"
+    tooltipText = "Synchronizing changes…";
+    statusIntent = "primary";
+    action = null;
 
   } else if (remote.isPushing) {
     statusIcon = "cloud-upload"
@@ -88,9 +94,9 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
 
   } else if (remote.statusRelativeToLocal === 'diverged') {
     statusIcon = "outdated"
-    tooltipText = "Diverging changes present";
+    tooltipText = "Diverging changes present—click to retry";
     statusIntent = "danger";
-    action = null;
+    action = () => ipcRenderer.send('sync-remote-storage');
 
   } else if (remote.statusRelativeToLocal === 'behind') {
     statusIcon = "cloud-upload"
