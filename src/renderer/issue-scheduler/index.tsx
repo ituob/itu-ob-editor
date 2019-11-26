@@ -130,6 +130,7 @@ export const IssueScheduler: React.FC<{}> = function () {
       setSchedulingInProgress(false);
       updateNewIssueDraft(null);
 
+      await ipcRenderer.send('sync-remote-storage');
       await notifyAllWindows('issues-changed');
       await fetchSchedule();
     }

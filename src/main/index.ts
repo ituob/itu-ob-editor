@@ -277,16 +277,12 @@ then(gitCtrl => {
         throw new Error(`OB ${newData.id} already exists. If you want to reschedule, please edit it instead.`);
       } else if (e instanceof CommitError) {
         log.error(e.code, e.message, e.stack);
-        await notifyAllWindows('issues-changed');
         throw new Error(`Couldn’t commit the newly scheduled issue: ${e.code}`);
       } else {
         log.error(e.message, e.stack);
-        await notifyAllWindows('issues-changed');
         throw new Error("Got unexpected error while scheduling new issue");
       }
     }
-    await notifyAllWindows('issues-changed');
-    gitCtrl.synchronize();
     return { success: true };
   });
 
@@ -308,7 +304,6 @@ then(gitCtrl => {
   listen<{ issueId: number, data: OBIssue, commit: boolean }, { success: true }>
   ('issue-update', async ({ issueId, data, commit }) => {
     await storage.issues.update(issueId, data, commit);
-    gitCtrl.synchronize();
     return { success: true };
   });
 

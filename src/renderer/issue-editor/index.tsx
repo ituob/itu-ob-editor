@@ -8,6 +8,7 @@ import { Spinner, Icon, NonIdealState, Tooltip, Button } from '@blueprintjs/core
 import { useWorkspace, useModified } from 'renderer/workspace-context';
 
 import { request } from 'sse/api/renderer';
+import { notifyAllWindows } from 'sse/main/window';
 import { PaneHeader } from 'sse/renderer/widgets/pane-header';
 
 import { PublicationTitle } from 'renderer/widgets/publication-title';
@@ -277,6 +278,8 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
       WindowToaster.show({ intent: 'danger', message: "Failed to commit changes" });
       return;
     }
+    await ipcRenderer.send('sync-remote-storage');
+    await notifyAllWindows('issues-changed');
     remote.getCurrentWindow().close();
   }
 
