@@ -1,3 +1,7 @@
+// Jerry-rig globa.fetch to make Isomorphic Git work under Node
+import fetch from 'node-fetch';
+(global as any).fetch = fetch;
+
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as moment from 'moment';
