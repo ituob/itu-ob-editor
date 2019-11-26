@@ -286,7 +286,7 @@ then(gitCtrl => {
       }
     }
     await notifyAllWindows('issues-changed');
-    await gitCtrl.synchronize();
+    gitCtrl.synchronize();
     return { success: true };
   });
 
@@ -308,7 +308,7 @@ then(gitCtrl => {
   listen<{ issueId: number, data: OBIssue, commit: boolean }, { success: true }>
   ('issue-update', async ({ issueId, data, commit }) => {
     await storage.issues.update(issueId, data, commit);
-    await gitCtrl.synchronize();
+    gitCtrl.synchronize();
     return { success: true };
   });
 
