@@ -55,9 +55,12 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
 
   useEffect(() => {
     if (remote.hasLocalChanges && !hasModifiedItems) {
-      ipcRenderer.send('remote-storage-discard-all');
+      (async () => {
+        await ipcRenderer.send('remote-storage-discard-all');
+        await ipcRenderer.send('remote-storage-trigger-uncommitted-check');
+      })();
     }
-  }, [remote.hasLocalChanges, hasModifiedItems]);
+  }, [hasModifiedItems]);
 
   async function triggerInitialStorageSync() {
     await ipcRenderer.send('remote-storage-trigger-sync');
