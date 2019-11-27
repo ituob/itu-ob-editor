@@ -114,6 +114,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = function ({ busy, draft
 
       <div className={styles.scheduleFormActions}>
         <ButtonGroup fill={true}>
+          <Button disabled={busy} icon="undo" onClick={onCancel}>Cancel</Button>
           <Button
             intent="success"
             icon="git-commit"
@@ -127,7 +128,6 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = function ({ busy, draft
             loading={busy}
             onClick={onSave}
             title="Save new issue schedule">Commit</Button>
-          <Button disabled={busy} icon="undo" onClick={onCancel}>Cancel</Button>
         </ButtonGroup>
       </div>
     </div>
