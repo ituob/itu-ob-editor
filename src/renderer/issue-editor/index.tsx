@@ -152,13 +152,6 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
 
   /* Issue update operations */
 
-  // const updateMessage = useStorageOperation<
-  //   { issueId: number },
-  //   { updatedMsg: Message, section: OBMessageSection, msgIdx: number },
-  //   { success: boolean }>(
-  //   "Edited message",
-  //   'issue-update-message', { issueId: issue.id }, {},
-  //   [selectedSection, selectedItem]);
 
   /* Message editor JSX */
 
@@ -213,10 +206,7 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
   function handleNewMessage(msg: Message, inSection: OBMessageSection) {
     const newIssue = issueFactories.withAddedMessage(issue, inSection, msg);
     const idx = newIssue[inSection].messages.indexOf(msg);
-
     updateIssue(newIssue);
-
-    //storageUpdateIssue('create-message', { section: inSection, msgIdx: idx, msg: msg });
 
     selectSection(inSection);
     selectItem(`${idx}`);
@@ -226,18 +216,6 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
     if (selectedMessageIdx !== undefined && isOBMessageSection(selectedSection)) {
       const newIssue = issueFactories.withEditedMessage(issue, selectedSection, selectedItem, updatedMessage);
       updateIssue(newIssue);
-
-      // updateMessage(getMessageTypeTitle(updatedMessage.type), {
-      //   section: selectedSection,
-      //   msgIdx: selectedMessageIdx,
-      //   updatedMsg: updatedMessage,
-      // });
-
-      //storageUpdateIssue('update-message', {
-      //  section: selectedSection,
-      //  msgIdx: selectedMessage,
-      //  updatedMsg: updatedMessage,
-      //});
     }
   }
 
@@ -252,6 +230,7 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
 
   function handleNewAnnex(pubId: string) {
     updateIssue(issueFactories.withAddedAnnex(issue, pubId));
+
     setTimeout(() => {
       selectItem(pubId);
       selectSection('annexes');
