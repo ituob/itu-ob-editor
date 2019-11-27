@@ -1,6 +1,6 @@
 {
   "name": "itu-ob-editor",
-  "version": "0.1.0-beta4",
+  "version": "0.1.0-beta5",
   "license": "MIT",
   "scripts": {
     "dev": "electron-webpack dev",
