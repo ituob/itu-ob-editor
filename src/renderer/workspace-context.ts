@@ -77,7 +77,7 @@ export function useRecommendation(code: string | undefined): ITURecommendation |
 }
 
 
-export function useLatestAnnex(issueId: number, pubId: string): RunningAnnex | undefined {
+export function useLatestAnnex(issueId: number, pubId?: string): RunningAnnex | undefined {
   const previousAnnexes = useRunningAnnexes(issueId, pubId);
   if (previousAnnexes.length > 0) {
     return previousAnnexes[0];

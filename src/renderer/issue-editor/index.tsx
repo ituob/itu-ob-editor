@@ -16,11 +16,11 @@ import { PublicationTitle } from 'renderer/widgets/publication-title';
 import {
   OBIssue,
   OBSection, OBMessageSection,
-  isOBSection, isOBMessageSection, isOBAnnexesSection,
+  isOBMessageSection, isOBAnnexesSection,
   issueFactories,
 } from 'models/issues';
 
-import { Message, AmendmentMessage } from 'models/messages';
+import { Message, AmendmentMessage, isAmendment } from 'models/messages';
 
 import { WindowToaster } from 'renderer/toaster';
 
@@ -29,6 +29,7 @@ import { NewGeneralMessagePrompt } from './item-list/new-general-message-menu';
 import { NewAmendmentPrompt } from './item-list/new-amendment-menu';
 import { NewAnnexPrompt } from './item-list/new-annex-menu';
 import { MessageTitle, MessageEditor } from './message-editor';
+import { AmendmentMeta } from './message-forms/amendment';
 import { AnnexEditor } from './annex-editor';
 
 import * as styles from './styles.scss';
@@ -56,7 +57,6 @@ export const Window: React.FC<IssueEditorWindowProps> = ({ issueId, selectedSect
 
   function handleChangedIssues(evt: any, data: { objIds: number[] }) {
     // Just reload the window if our issue question changed
-    console.debug("Changed issues", data.objIds);
     if (data.objIds.indexOf(numIssueId) >= 0) {
       remote.getCurrentWindow().reload();
     }
@@ -76,22 +76,19 @@ export const Window: React.FC<IssueEditorWindowProps> = ({ issueId, selectedSect
     updateIssue(issue);
   }
 
-  if (maybeIssue !== null) {
-    let selection: IssueEditorSelection | undefined;
-    if (selectedItem && selectedSection && isOBSection(selectedSection)) {
-      selection = { section: selectedSection, item: selectedItem };
-    } else {
-      selection = undefined;
+  return useMemo(() => {
+    console.debug("Rendering", (maybeIssue || {}).id);
+    if (maybeIssue !== null) {
+      return <IssueEditor issue={maybeIssue} />;
     }
-    return <IssueEditor issue={maybeIssue} selection={selection} />;
-  }
 
-  return <Spinner className={styles.spinner} />;
+    return <Spinner className={styles.spinner} />;
+  }, [(maybeIssue || {}).id]);
 };
 
 
 export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSelection }> = (props) => {
-  const [issue, _updateIssue] = useState({ ...props.issue });
+  const [issue, _updateIssue] = useState(props.issue);
   const ws = useWorkspace();
 
   const _hasUncommittedChanges = useModified().issues.indexOf(props.issue.id) >= 0;
@@ -138,14 +135,15 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
 
       // TODO: Handle API failure
       const updateResult = await request<{ modified: boolean }>('issue-update', { issueId: props.issue.id, data, commit: commit });
-      if (commit) {
-        await ipcRenderer.send('remote-storage-trigger-sync');
-      } else {
-        await ipcRenderer.send('remote-storage-trigger-uncommitted-check');
-      }
 
       issueUpdate = setTimeout(() => {
         setHasUncommittedChanges(updateResult.modified);
+
+        if (commit) {
+          ipcRenderer.send('remote-storage-trigger-sync');
+        } else {
+          ipcRenderer.send('remote-storage-trigger-uncommitted-check');
+        }
         setSaved(true);
       }, 500);
     });
@@ -168,13 +166,15 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
   // doesn’t cause the editor pane to re-render, which may lose cursor position and undo history.
   // Only re-render if selected item index or section, meaning a switch to another item.
   const editor = useMemo(() => {
-
     if (isOBMessageSection(selectedSection) && selectedItem !== undefined) {
       const message = issue[selectedSection].messages[parseInt(selectedItem, 10)];
       if (message) {
         return <MessageEditor
             message={message}
             issue={issue}
+            meta={isAmendment(message)
+              ? <AmendmentMeta amendment={message as AmendmentMessage} issue={issue} />
+              : undefined}
             onChange={handleMessageEdit}
           />;
       }

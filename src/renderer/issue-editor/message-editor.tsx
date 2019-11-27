@@ -1,15 +1,11 @@
-import { remote } from 'electron';
 
 import React, { useContext } from 'react';
-import { Icon, Text } from '@blueprintjs/core';
 
 import { LangConfigContext } from 'sse/localizer/renderer';
 import { NonIdealState, Classes, Dialog } from '@blueprintjs/core';
 import { PaneHeader } from 'sse/renderer/widgets/pane-header';
 
-import { DateStamp } from 'renderer/widgets/dates';
-import { RecommendationTitle, PublicationTitle } from 'renderer/widgets/publication-title';
-import { usePublication, useLatestAnnex } from 'renderer/workspace-context';
+import { PublicationTitle } from 'renderer/widgets/publication-title';
 import { HelpButton } from 'renderer/widgets/help-button';
 
 import { OBIssue } from 'models/issues';
@@ -49,40 +45,13 @@ import * as styles from './styles.scss';
 interface MessageEditorProps {
   message: Message,
   issue: OBIssue,
+  meta?: JSX.Element,
   onChange: (updatedMessage: Message) => void,
 }
 export const MessageEditor: React.FC<MessageEditorProps> = function (props) {
   if (props.message) {
     const EditorCls = getMessageEditor(props.message);
-
     const helpPath = isAmendment(props.message) ? "amend-publication/" : `messages/${props.message.type}/`;
-
-    // Show publication info for amendments
-    let meta: JSX.Element | null;
-    if (isAmendment(props.message)) {
-      const amd = props.message as AmendmentMessage;
-      const pub = usePublication(amd.target.publication);
-      const latestAnnex = useLatestAnnex(props.issue.id, amd.target.publication);
-      const pubUrl = pub ? pub.url : undefined;
-
-      if (pub) {
-        meta = <div className={styles.editorMeta}>
-          {pub.recommendation
-            ? <Text ellipsize={true}>Per <RecommendationTitle rec={pub.recommendation} /></Text>
-            : null}
-          {pubUrl
-            ? <Text ellipsize={true}>SP resource: <a onClick={() => remote.shell.openExternal(pubUrl)}>{pubUrl}</a></Text>
-            : null}
-          {latestAnnex && latestAnnex.positionOn
-            ? <div>Amending position of <DateStamp date={latestAnnex.positionOn} /> annexed to OB {latestAnnex.annexedTo.id}:</div>
-            : <div><Icon icon="warning-sign" /> This publication doesn’t seem to have been annexed to OB</div>}
-        </div>;
-      } else {
-        meta = <div className={styles.editorMeta}>Publication amended is not found in the database</div>
-      }
-    } else {
-      meta = null;
-    }
 
     return (
       <>
@@ -93,7 +62,9 @@ export const MessageEditor: React.FC<MessageEditorProps> = function (props) {
               actions={<HelpButton className="big-icon-button" path={helpPath} />}>
             <MessageTitle message={props.message} />
           </PaneHeader>
-          {meta}
+          {props.meta
+            ? <div className={styles.editorMeta}>{props.meta}</div>
+            : null}
         </header>
 
         <EditorCls
