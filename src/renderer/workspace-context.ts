@@ -15,6 +15,7 @@ import { RunningAnnex, getRunningAnnexesForIssue } from 'models/running-annexes'
 import { RendererStorage } from 'storage/renderer';
 
 
+// Of the form: { objType1: [id1, id2], objType2: [id3, id4] }
 export type ModifiedObjectStatus<R extends BaseRendererStorage<any>> = {
   [K in keyof R]: (string | number)[]
 }
