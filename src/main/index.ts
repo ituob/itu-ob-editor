@@ -306,7 +306,12 @@ then(gitCtrl => {
   listen<{ issueId: number, data: OBIssue, commit: boolean }, { modified: boolean }>
   ('issue-update', async ({ issueId, data, commit }) => {
     await storage.issues.update(issueId, data, commit);
-    return { modified: (await storage.issues.listUncommitted()).indexOf(issueId) >= 0 };
+    if (!commit) {
+      return { modified: (await storage.issues.listUncommitted()).indexOf(issueId) >= 0 };
+    } else {
+      return { modified: false };
+    }
+  });
   });
 
 
