@@ -150,7 +150,7 @@ const renderLaunchPublicationCreator = function (query: string) {
 }
 
 function launchPublicationEditor(forPublicationWithId: string) {
-  openWindow('publication-editor', { pubId: forPublicationWithId });
+  openWindow('publication-editor', { pubId: forPublicationWithId, create: true });
 }
 
 const NewAnnexSelector = Select.ofType<AnnexablePublication>();

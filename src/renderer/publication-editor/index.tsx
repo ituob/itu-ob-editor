@@ -1,3 +1,6 @@
+import AsyncLock from 'async-lock';
+import { remote, ipcRenderer } from 'electron';
+
 import React, { useContext, useState, useEffect } from 'react';
 import { Button, FormGroup, InputGroup } from '@blueprintjs/core';
 
@@ -11,10 +14,14 @@ import { HelpButton } from 'renderer/widgets/help-button';
 import * as styles from './styles.scss';
 
 
+const pubOperationQueue = new AsyncLock();
+
+
 interface PublicationEditorProps {
   publicationId: string,
+  create: boolean,
 }
-export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ publicationId }) {
+export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ publicationId, create }) {
   const lang = useContext(LangConfigContext);
 
   const [publication, setPublication] = useState({
@@ -24,77 +31,87 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
     title: { [lang.default]: '' },
   } as Publication);
 
-  const fieldRequirements = {
+  const fieldRequirements: FieldRequirements<Publication> = {
     title: {
-      specified: `have a title in ${lang.available[lang.default]}`,
+      specified: {
+        err: `have a title in ${lang.available[lang.default]}`,
+        didFail: async (pub) => (pub.title[lang.default] === ''),
+      },
     },
     id: {
-      unique: `have a unique ID (“${publication.id}” is already taken)`,
-      specified: `have a unique string ID`,
+      unique: {
+        err: `have a unique ID (“${publication.id}” is already taken)`,
+        didFail: async (pub) => (create === true && (await get(pub.id)) !== null),
+      },
+      specified: {
+        err: `have a unique string ID`,
+        didFail: async (pub) => (pub.id.trim() === ''),
+      },
     },
   };
 
-  type UnmetRequirements = {
-    [F in keyof typeof fieldRequirements]?: {
-      [R in keyof (typeof fieldRequirements)[F]]?: boolean
-    }
-  };
+  const UnmetReq = UnmetRequirementNotice as _UnmetRequirementNotice<typeof fieldRequirements>;
 
-  const [isNew, setIsNew] = useState(true);
   const [canSave, setCanSave] = useState(false);
-  const [unmetRequirements, setUnmetRequirements] = useState({} as UnmetRequirements);
+  const [unmetRequirements, setUnmetRequirements] = useState({} as UnmetRequirements<typeof fieldRequirements>);
 
-  useEffect(() => { load(); }, []);
-
-  useEffect(() => { setCanSave(Object.keys(unmetRequirements).length === 0); }, [unmetRequirements]);
+  useEffect(() => {
+    (async () => {
+      const pub = await get(publication.id);
+      if (pub) {
+        setPublication(pub);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     setCanSave(false);
-    (async () => {
-      const reqs = await getUnmetRequirements();
+
+    console.debug("Checking updated pub");
+    pubOperationQueue.acquire('1', async () => {
+      console.debug("Checking updated pub, acquired");
+      const reqs = await getUnmetRequirements(publication, fieldRequirements);
+      const canSave = Object.keys(unmetRequirements).length === 0;
+
+      setCanSave(canSave);
       setUnmetRequirements(reqs);
-    })();
-  }, [isNew, publication.id, publication.title]);
 
-  async function getUnmetRequirements() {
-    var result: UnmetRequirements = {};
-
-    if (publication.title[lang.default] === '') {
-      result['title'] = { ...result.title, specified: false };
-    }
-
-    if (publication.id === '') {
-      result['id'] = { ...result.id, specified: false };
-    } else if (isNew) {
-      const alreadyExists = (await get(publication.id)) !== null;
-      if (alreadyExists) {
-        result['id'] = { ...result.id, unique: false };
+      if (canSave && !create) {
+        update(publication);
       }
-    }
-
-    return result;
-  }
-
-  async function save() {
-    await request<Publication>('storage-store-one-in-publications', {
-      objectId: publication.id,
-      newData: publication,
     });
-    await load();
+  }, [JSON.stringify(publication)]);
+
+
+  async function update(publication: Publication) {
+    await pubOperationQueue.acquire('1', async () => {
+      await request<Publication>('publication-update', { pubId: publication.id, data: publication });
+    });
   }
 
-  async function load() {
-    const result = await get(publication.id);
-    if (result !== null) {
-      setIsNew(false);
-      setPublication(result);
+  async function commitAndClose() {
+    if (!canSave) {
+      return;
     }
+    setCanSave(false);
+
+    await pubOperationQueue.acquire('1', async () => {
+      if (create) {
+        await request<Publication>('publication-create', { data: publication });
+      } else {
+        await request<Publication>('publication-update', { pubId: publication.id, data: publication, commit: true });
+      }
+    });
+
+    await ipcRenderer.send('remote-storage-trigger-sync');
+    await ipcRenderer.send('publications-changed');
+    await remote.getCurrentWindow().close();
   }
 
   return (
     <div className={styles.pubEditorWindow}>
       <PaneHeader major={true} actions={<HelpButton path="amend-publication/" />}>
-        {isNew ? "Create" : "Edit"} publication
+        {create ? "Create" : "Edit"} publication
       </PaneHeader>
 
       <main className={styles.windowBody}>
@@ -104,9 +121,7 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
             intent={unmetRequirements.id ? "danger" : undefined}
             helperText={
               <ul>
-                {unmetRequirements.id
-                  ? Object.keys(unmetRequirements.id).map(msgId => <li>Must {fieldRequirements.id[msgId as keyof typeof fieldRequirements.id]}.</li>)
-                  : ''}
+                <UnmetReq field="id" reqSpec={fieldRequirements} unmetReqs={unmetRequirements} />
                 <li>Use uppercase English string as publication ID: e.g., BUREAUFAX.</li>
                 <li>Choose an ID consistent with publication URL on ITU website, if possible.</li>
                 <li>Note: you can’t change this later easily.</li>
@@ -116,7 +131,7 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
             value={publication.id}
             type="text"
             large={true}
-            readOnly={!isNew}
+            readOnly={!create}
             onChange={(evt: React.FormEvent<HTMLElement>) => {
               setPublication({
                 ...publication,
@@ -131,9 +146,7 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
             intent={unmetRequirements.title ? "danger" : undefined}
             helperText={
               <ul>
-                {unmetRequirements.title
-                  ? Object.keys(unmetRequirements.title).map(msgId => <li>Must {fieldRequirements.title[msgId as keyof typeof fieldRequirements.title]}.</li>)
-                  : ''}
+                <UnmetReq field="title" reqSpec={fieldRequirements} unmetReqs={unmetRequirements} />
               </ul>
             }
             label={`Title in ${lang.available[lang.default]}`}>
@@ -171,14 +184,71 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
       <footer className={styles.actionButtons}>
         <Button
           disabled={canSave !== true}
-          intent="primary"
-          onClick={save}>Save and Close</Button>
+          intent="success"
+          icon="git-commit"
+          onClick={commitAndClose}>Commit and Close</Button>
       </footer>
     </div>
   );
 };
 
 
-async function get(id: string) {
-  return await request<Publication>('storage-get-one-in-publications', { objectId: id });
+async function get(id: string): Promise<Publication | null> {
+  try {
+    const pub = await request<Publication>('storage-read-one-in-publications', { objectId: id });
+    console.debug("Got pub");
+    return pub;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+}
+
+
+type UnmetRequirementNoticeProps<F extends FieldRequirements<any>> = {
+  field: string & keyof F,
+  reqSpec: F,
+  unmetReqs: UnmetRequirements<F>,
+}
+type _UnmetRequirementNotice<F = FieldRequirements<any>> = React.FC<UnmetRequirementNoticeProps<F>>
+const UnmetRequirementNotice: _UnmetRequirementNotice = function ({ field, reqSpec, unmetReqs }) {
+  if (!reqSpec[field]) { throw new Error("Unknown requirements key"); }
+  return <>
+    {Object.keys(unmetReqs[field] || {}).
+      map((checkName: string) => <li>Must {(reqSpec[field] as CheckSpecs<any>)[checkName].err}.</li>)}
+  </>;
+}
+
+
+type CheckSpecs<O> = {
+  [checkName: string]: {
+    err: string,
+    didFail: (obj: O) => Promise<boolean>,
+  }
+}
+
+type FieldRequirements<O> = {
+  [F in keyof O]?: CheckSpecs<O>
+};
+
+
+type UnmetRequirements<R extends FieldRequirements<any>> = {
+  [F in keyof R]?: {
+    [C in keyof R[F]]?: boolean
+  }
+};
+
+
+async function getUnmetRequirements<O>(obj: O, reqSpec: FieldRequirements<O>): Promise<UnmetRequirements<FieldRequirements<O>>> {
+  var reqs: UnmetRequirements<FieldRequirements<O>> = {};
+
+  for (const [field, checks] of Object.entries(reqSpec)) {
+    for (const [checkName, checkSpec] of Object.entries(checks as CheckSpecs<O>)) {
+      if (await checkSpec.didFail(obj)) {
+        reqs[field as keyof O] = { ...reqs[field as keyof O], [checkName]: false };
+      }
+    }
+  }
+
+  return reqs;
 }

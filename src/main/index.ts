@@ -15,9 +15,10 @@ import { SettingManager } from 'sse/settings/main';
 import { QuerySet, sortIntegerAscending } from 'sse/storage/query';
 import { initRepo } from 'sse/storage/main/git/controller';
 import { IDTakenError, CommitError } from 'sse/storage/main/store/base';
-import { provideAll, provideModified, listenToBatchCommits, listenToBatchDiscardRequests } from 'sse/storage/main/api';
+import { provideOne, provideAll, provideModified, listenToBatchCommits, listenToBatchDiscardRequests } from 'sse/storage/main/api';
 
 import { OBIssue, ScheduledIssue } from 'models/issues';
+import { Publication } from 'models/publications';
 
 import { buildAppMenu } from './menu';
 import { getStorage, MainStorage } from 'storage/main';
@@ -224,6 +225,10 @@ then(gitCtrl => {
   provideAll(storage, 'publications');
   provideAll(storage, 'recommendations');
 
+  provideOne(storage, 'issues');
+  provideOne(storage, 'publications');
+  provideOne(storage, 'recommendations');
+
   provideModified(storage, 'issues');
   provideModified(storage, 'publications');
   provideModified(storage, 'recommendations');
@@ -312,15 +317,30 @@ then(gitCtrl => {
       return { modified: false };
     }
   });
+
+  listen<{ data: Publication }, { success: true }>
+  ('publication-create', async ({ data }) => {
+    await storage.publications.create(data, true);
+    return { success: true };
+  });
+
+  listen<{ pubId: string, data: Publication, commit: boolean }, { modified: boolean }>
+  ('publication-update', async ({ pubId, data, commit }) => {
+    await storage.publications.update(pubId, data, commit);
+    if (!commit) {
+      return { modified: (await storage.publications.listUncommitted()).indexOf(pubId) >= 0 };
+    } else {
+      return { modified: false };
+    }
   });
 
 
   /* Set up window-opening endpoints */
 
-  makeWindowEndpoint('publication-editor', ({ pubId }: { pubId: string }) => ({
+  makeWindowEndpoint('publication-editor', ({ pubId, create }: { pubId: string, create: boolean }) => ({
     component: 'publicationEditor',
     title: `Publication ${pubId}`,
-    componentParams: `pubId=${pubId}`,
+    componentParams: `pubId=${pubId}&create=${create ? '1' : '0'}`,
     frameless: true,
     dimensions: { width: 800, height: 600, },
   }));

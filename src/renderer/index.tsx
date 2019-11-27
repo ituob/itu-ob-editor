@@ -55,7 +55,9 @@ const App: React.FC<{}> = function () {
     component = <IssueEditor issueId={searchParams.get('issueId') || ''} />;
 
   } else if (searchParams.get('c') === 'publicationEditor') {
-    component = <PublicationEditor publicationId={searchParams.get('pubId') || ''} />;
+    component = <PublicationEditor
+      publicationId={searchParams.get('pubId') || ''}
+      create={searchParams.get('create') === '1'} />;
 
   } else if (searchParams.get('c') === 'dataSynchronizer') {
     component = <DataSynchronizer
