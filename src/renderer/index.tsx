@@ -99,10 +99,15 @@ const App: React.FC<{}> = function () {
       let modified: ModifiedObjectStatus<RendererStorage>;
 
       if (hasLocalChanges !== false) {
+        const result = await Promise.all([
+          await request<number[]>('storage-read-modified-in-issues'),
+          await request<string[]>('storage-read-modified-in-publications'),
+          await request<string[]>('storage-read-modified-in-recommendations'),
+        ]);
         modified = {
-          issues: await request<number[]>('storage-read-modified-in-issues'),
-          publications: await request<string[]>('storage-read-modified-in-publications'),
-          recommendations: await request<string[]>('storage-read-modified-in-recommendations'),
+          issues: result[0],
+          publications: result[1],
+          recommendations: result[2],
         };
       } else {
         modified = {
