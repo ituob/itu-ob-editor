@@ -43,7 +43,7 @@
     "react-dom": "^16.11.0",
     "react-transition-group": "^4.3.0",
     "source-map-support": "^0.5.16",
-    "sse": "https://github.com/riboseinc/sse-elements#sse-elements-v0.2.2-gitpkg",
+    "sse": "https://github.com/riboseinc/sse-elements#sse-elements-v0.2.3-gitpkg",
     "throttle-debounce": "^2.1.0"
   },
   "resolutions": {
