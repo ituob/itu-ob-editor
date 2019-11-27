@@ -66,20 +66,23 @@ export const BatchCommit: React.FC<{}> = function () {
   const modifiedIds = useModified();
   const ws = useWorkspace();
 
+
   // selectedItems = { objType1: [id1, id2], objType2: [id3, id4] }
   const initSelectedItems: { [K in keyof Storage]: (number | string)[] } = Object.assign(
     {}, ...contentTypes.map(c => ({ [c]: [] })));
   const [selectedItems, updateSelectedItems] = useState(initSelectedItems);
 
+
+  // Make sure selected items don’t contain IDs that are no longer modified.
+  // Could happen e.g. after user discards or commits changes.
   useEffect(() => {
-    // Make sure selected items don’t contain IDs that are no longer modified.
-    // Could happen e.g. after user discards or commits changes.
     var selectedValid = { ...selectedItems };
     for (const [ctype, items] of Object.entries(selectedValid)) {
       selectedValid[ctype] = items.filter(i => modifiedIds[ctype].indexOf(i) >= 0);
     }
     updateSelectedItems(selectedValid);
   }, [modifiedIds]);
+
 
   const [commitMessage, updateCommitMessage] = useState('');
   const [commitPromptIsOpen, toggleCommitPrompt] = useState(false);
@@ -93,6 +96,11 @@ export const BatchCommit: React.FC<{}> = function () {
 
   const hasSelectedItems = Object.values(selectedItems).
     reduce((acc, val) => [ ...acc, ...val ]).length > 0;
+
+  const buttonsDisabled = !hasSelectedItems || commitPromptIsOpen || discardConfirmationIsOpen;
+
+
+  /* Event handlers */
 
   function onSelect(ctype: keyof Storage, id: AnyIDType) {
     var selected = selectedItems[ctype];
@@ -156,7 +164,6 @@ export const BatchCommit: React.FC<{}> = function () {
     toggleCommitPrompt(false);
   }
 
-  const buttonsDisabled = !hasSelectedItems || commitPromptIsOpen || discardConfirmationIsOpen;
 
   return (
     <div className={styles.batchCommitWindow}>
