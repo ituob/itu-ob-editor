@@ -94,7 +94,8 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
   const [issue, _updateIssue] = useState({ ...props.issue });
   const ws = useWorkspace();
 
-  const modified = useModified().issues.find(id => id === props.issue.id);
+  const _hasUncommittedChanges = useModified().issues.indexOf(props.issue.id) >= 0;
+  const [hasUncommittedChanges, setHasUncommittedChanges] = useState(_hasUncommittedChanges);
 
   const [haveSaved, setSaved] = useState(undefined as boolean | undefined);
 
@@ -136,9 +137,15 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
       clearTimeout(issueUpdate);
 
       // TODO: Handle API failure
-      await request<{ success: boolean }>('issue-update', { issueId: props.issue.id, data, commit: commit });
+      const updateResult = await request<{ modified: boolean }>('issue-update', { issueId: props.issue.id, data, commit: commit });
+      if (commit) {
+        await ipcRenderer.send('remote-storage-trigger-sync');
+      } else {
+        await ipcRenderer.send('remote-storage-trigger-uncommitted-check');
+      }
 
       issueUpdate = setTimeout(() => {
+        setHasUncommittedChanges(updateResult.modified);
         setSaved(true);
       }, 500);
     });
@@ -278,15 +285,12 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
       WindowToaster.show({ intent: 'danger', message: "Failed to commit changes" });
       return;
     }
-    await ipcRenderer.send('sync-remote-storage');
     await notifyAllWindows('issues-changed');
     remote.getCurrentWindow().close();
   }
 
 
   /* Changed status mark */
-
-  const hasUncommittedChanges = modified !== undefined;
 
   let changeStatus: JSX.Element;
   let tooltipText: string;

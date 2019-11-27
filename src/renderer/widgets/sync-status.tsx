@@ -27,11 +27,13 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
   } as RemoteStorageStatus);
 
   useEffect(() => {
-    requestStorageSync();
-    ipcRenderer.once('app-loaded', requestStorageSync);
+    triggerInitialStorageSync();
+
+    ipcRenderer.once('app-loaded', triggerInitialStorageSync);
     ipcRenderer.on('remote-storage-status', handleStorageStatusUpdate);
+
     return function cleanup() {
-      ipcRenderer.removeListener('app-loaded', requestStorageSync);
+      ipcRenderer.removeListener('app-loaded', triggerInitialStorageSync);
       ipcRenderer.removeListener('remote-storage-status', handleStorageStatusUpdate);
     };
   }, []);
@@ -42,8 +44,8 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
     openPasswordPrompt(remote.needsPassword);
   }, [remote.needsPassword]);
 
-  async function requestStorageSync() {
-    await ipcRenderer.send('sync-remote-storage');
+  async function triggerInitialStorageSync() {
+    await ipcRenderer.send('remote-storage-trigger-sync');
   }
 
   function handleStorageStatusUpdate(evt: any, remoteStatus: Partial<RemoteStorageStatus>) {
@@ -66,7 +68,7 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
     statusIcon = "offline";
     tooltipText = "No Internet connection—click to retry";
     statusIntent = "danger";
-    action = () => ipcRenderer.send('sync-remote-storage');
+    action = () => ipcRenderer.send('remote-storage-trigger-sync');
 
   } else if (remote.needsPassword) {
     statusIcon = "lock";
@@ -96,7 +98,7 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
     statusIcon = "outdated"
     tooltipText = "Diverging changes present—click to retry";
     statusIntent = "danger";
-    action = () => ipcRenderer.send('sync-remote-storage');
+    action = () => ipcRenderer.send('remote-storage-trigger-sync');
 
   } else if (remote.statusRelativeToLocal === 'behind') {
     statusIcon = "cloud-upload"

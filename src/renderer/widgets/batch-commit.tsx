@@ -66,6 +66,7 @@ export const BatchCommit: React.FC<{}> = function () {
   const modifiedIds = useModified();
   const ws = useWorkspace();
 
+  // selectedItems = { objType1: [id1, id2], objType2: [id3, id4] }
   const initSelectedItems: { [K in keyof Storage]: (number | string)[] } = Object.assign(
     {}, ...contentTypes.map(c => ({ [c]: [] })));
   const [selectedItems, updateSelectedItems] = useState(initSelectedItems);
@@ -112,14 +113,14 @@ export const BatchCommit: React.FC<{}> = function () {
     updateDiscardingInProgress(true);
 
     try {
-      await Promise.all([...Object.entries(modifiedIds).map(
+      await Promise.all([...Object.entries(selectedItems).map(
         async ([ctype, objIds]: [keyof Storage, AnyIDType[]]) =>
           await request<{ success: true }>
           (`storage-discard-uncommitted-changes-for-objects-in-${ctype}`, { objIds })
       )]);
-      await ipcRenderer.send('sync-remote-storage');
+      await ipcRenderer.send('remote-storage-trigger-uncommitted-check');
     } catch (e) {
-      WindowToaster.show({ intent: 'danger', message: "Error occured while discarding changes" });
+      WindowToaster.show({ intent: 'danger', message: "Error occured while discarding changes to selected items" });
       updateDiscardingInProgress(false);
       return;
     }
@@ -138,14 +139,14 @@ export const BatchCommit: React.FC<{}> = function () {
     updateCommitInProgress(true);
 
     try {
-      await Promise.all([...Object.entries(modifiedIds).map(
+      await Promise.all([...Object.entries(selectedItems).map(
         async ([ctype, objIds]: [keyof Storage, AnyIDType[]]) =>
           await request<{ success: true }>
           (`storage-commit-objects-in-${ctype}`, { objIds, commitMsg: commitMessage })
       )]);
-      await ipcRenderer.send('sync-remote-storage');
+      await ipcRenderer.send('remote-storage-trigger-sync');
     } catch (e) {
-      WindowToaster.show({ intent: 'danger', message: "Error occured during commit" });
+      WindowToaster.show({ intent: 'danger', message: "Error occured while committing selected items" });
       updateCommitInProgress(false);
       return;
     }
