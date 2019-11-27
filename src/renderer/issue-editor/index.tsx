@@ -136,14 +136,14 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
       // TODO: Handle API failure
       const updateResult = await request<{ modified: boolean }>('issue-update', { issueId: props.issue.id, data, commit: commit });
 
+      if (commit) {
+        await ipcRenderer.send('remote-storage-trigger-sync');
+      } else {
+        await ipcRenderer.send('remote-storage-trigger-uncommitted-check');
+      }
+
       issueUpdate = setTimeout(() => {
         setHasUncommittedChanges(updateResult.modified);
-
-        if (commit) {
-          ipcRenderer.send('remote-storage-trigger-sync');
-        } else {
-          ipcRenderer.send('remote-storage-trigger-uncommitted-check');
-        }
         setSaved(true);
       }, 500);
     });
