@@ -49,7 +49,6 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
   }
 
   function handleStorageStatusUpdate(evt: any, remoteStatus: Partial<RemoteStorageStatus>) {
-    console.debug("Got remote status", remoteStatus);
     updateRemote(remote => ({ ...remote, ...remoteStatus }));
   }
 
