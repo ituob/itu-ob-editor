@@ -103,9 +103,7 @@ export const IssueScheduler: React.FC<{}> = function () {
   }
 
   async function fetchCurrentIssue() {
-    console.debug('oi', 'fetching');
     const currentIssue = await request<{ id: number | null }>('current-issue-id');
-    //setLoading(false);
     setCurrentIssue(currentIssue);
   }
 
