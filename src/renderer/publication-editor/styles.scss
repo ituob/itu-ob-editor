@@ -1,20 +1,30 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
 :local .pubEditorWindow {
   height: 100vh;
   display: flex;
   flex-flow: column nowrap;
+  background: $pt-app-background-color;
 
-  .windowBody, .actionButtons {
-    padding: 0 20px 0 14px;
+  .windowHeader {
+    flex-shrink: 0;
+    align-items: center;
+    display: flex;
+  }
+
+  .windowBody {
+    padding: 2rem;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+
+    > * {
+      flex: 1;
+    }
   }
 
   .windowBody {
     flex: 1;
-  }
-
-  .actionButtons {
-    display: flex;
-    flex-flow: row nowrap;
-    justify-content: flex-end;
-    padding-bottom: 1rem;
+    overflow-y: auto;
   }
 }

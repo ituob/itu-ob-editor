@@ -342,7 +342,7 @@ then(gitCtrl => {
     title: `Publication ${pubId}`,
     componentParams: `pubId=${pubId}&create=${create ? '1' : '0'}`,
     frameless: true,
-    dimensions: { width: 800, height: 600, },
+    dimensions: { width: 600, minWidth: 600, height: 500, minHeight: 500 },
   }));
 
   makeWindowEndpoint('issue-editor', ({ issueId }: { issueId: number }) => ({

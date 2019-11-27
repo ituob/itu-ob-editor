@@ -24,6 +24,8 @@ interface PublicationEditorProps {
 export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ publicationId, create }) {
   const lang = useContext(LangConfigContext);
 
+  /* Load publication at start */
+
   const [publication, setPublication] = useState({
     id: publicationId,
     url: '',
@@ -31,50 +33,52 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
     title: { [lang.default]: '' },
   } as Publication);
 
-  const fieldRequirements: FieldRequirements<Publication> = {
+  useEffect(() => {
+    (async () => {
+      const pub = await get(publication.id);
+      if (pub) { setPublication(pub); }
+    })();
+  }, []);
+
+
+  /* Configure form validation */
+
+  const validators: ObjectValidators<Publication> = {
     title: {
       specified: {
-        err: `have a title in ${lang.available[lang.default]}`,
+        errorMessage: `have a title in ${lang.available[lang.default]}`,
         didFail: async (pub) => (pub.title[lang.default] === ''),
       },
     },
     id: {
       unique: {
-        err: `have a unique ID (“${publication.id}” is already taken)`,
+        errorMessage: `have a unique ID (“${publication.id}” is already taken)`,
         didFail: async (pub) => (create === true && (await get(pub.id)) !== null),
       },
       specified: {
-        err: `have a unique string ID`,
+        errorMessage: "have a unique string ID",
         didFail: async (pub) => (pub.id.trim() === ''),
       },
     },
   };
 
-  const UnmetReq = UnmetRequirementNotice as _UnmetRequirementNotice<typeof fieldRequirements>;
+  const ValidationErr = ValidationErrorsNotice as _ValidationErrorsNotice<typeof validators>;
 
+  const [validationErrors, setValidationErrors] = useState({} as ValidationErrors<typeof validators>);
   const [canSave, setCanSave] = useState(false);
-  const [unmetRequirements, setUnmetRequirements] = useState({} as UnmetRequirements<typeof fieldRequirements>);
 
-  useEffect(() => {
-    (async () => {
-      const pub = await get(publication.id);
-      if (pub) {
-        setPublication(pub);
-      }
-    })();
-  }, []);
+
+  /* Validation publication & write to storage (if applicable) when user makes edits */
 
   useEffect(() => {
     setCanSave(false);
 
-    console.debug("Checking updated pub");
     pubOperationQueue.acquire('1', async () => {
-      console.debug("Checking updated pub, acquired");
-      const reqs = await getUnmetRequirements(publication, fieldRequirements);
-      const canSave = Object.keys(unmetRequirements).length === 0;
+      const validationErrors = await validate(publication, validators);
+      const canSave = Object.keys(validationErrors).length === 0;
 
       setCanSave(canSave);
-      setUnmetRequirements(reqs);
+      setValidationErrors(validationErrors);
 
       if (canSave && !create) {
         update(publication);
@@ -82,6 +86,8 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
     });
   }, [JSON.stringify(publication)]);
 
+
+  /* IPC helpers */
 
   async function update(publication: Publication) {
     await pubOperationQueue.acquire('1', async () => {
@@ -110,18 +116,33 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
 
   return (
     <div className={styles.pubEditorWindow}>
-      <PaneHeader major={true} actions={<HelpButton path="amend-publication/" />}>
-        {create ? "Create" : "Edit"} publication
+      <PaneHeader
+          className={styles.windowHeader}
+          align="right"
+          major={true}
+          actions={<HelpButton path="amend-publication/" />}>
+
+        <Button
+          disabled={canSave !== true}
+          intent="success"
+          icon="git-commit"
+          small={true}
+          onClick={commitAndClose}>Commit and Close</Button>
+
+          &ensp;
+
+        <span>{create ? "Add" : "Edit"} service publication</span>
+
       </PaneHeader>
 
       <main className={styles.windowBody}>
         <FormGroup
             key="id"
-            label="ID"
-            intent={unmetRequirements.id ? "danger" : undefined}
+            label="Publication identifier:"
+            intent={validationErrors.id ? "danger" : undefined}
             helperText={
               <ul>
-                <UnmetReq field="id" reqSpec={fieldRequirements} unmetReqs={unmetRequirements} />
+                <ValidationErr fieldName="id" validators={validators} errors={validationErrors} />
                 <li>Use uppercase English string as publication ID: e.g., BUREAUFAX.</li>
                 <li>Choose an ID consistent with publication URL on ITU website, if possible.</li>
                 <li>Note: you can’t change this later easily.</li>
@@ -143,13 +164,13 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
 
         <FormGroup
             key="title"
-            intent={unmetRequirements.title ? "danger" : undefined}
+            intent={validationErrors.title ? "danger" : undefined}
             helperText={
               <ul>
-                <UnmetReq field="title" reqSpec={fieldRequirements} unmetReqs={unmetRequirements} />
+                <ValidationErr fieldName="title" validators={validators} errors={validationErrors} />
               </ul>
             }
-            label={`Title in ${lang.available[lang.default]}`}>
+            label={`Title in ${lang.available[lang.default]}:`}>
           <InputGroup
             value={publication.title[lang.default]}
             type="text"
@@ -166,7 +187,7 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
           />
         </FormGroup>
 
-        <FormGroup key="url" label="URL">
+        <FormGroup key="url" label="Authoritative resource URL for this publication:">
           <InputGroup
             value={publication.url}
             type="url"
@@ -180,14 +201,6 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
           />
         </FormGroup>
       </main>
-
-      <footer className={styles.actionButtons}>
-        <Button
-          disabled={canSave !== true}
-          intent="success"
-          icon="git-commit"
-          onClick={commitAndClose}>Commit and Close</Button>
-      </footer>
     </div>
   );
 };
@@ -205,50 +218,63 @@ async function get(id: string): Promise<Publication | null> {
 }
 
 
-type UnmetRequirementNoticeProps<F extends FieldRequirements<any>> = {
-  field: string & keyof F,
-  reqSpec: F,
-  unmetReqs: UnmetRequirements<F>,
-}
-type _UnmetRequirementNotice<F = FieldRequirements<any>> = React.FC<UnmetRequirementNoticeProps<F>>
-const UnmetRequirementNotice: _UnmetRequirementNotice = function ({ field, reqSpec, unmetReqs }) {
-  if (!reqSpec[field]) { throw new Error("Unknown requirements key"); }
-  return <>
-    {Object.keys(unmetReqs[field] || {}).
-      map((checkName: string) => <li>Must {(reqSpec[field] as CheckSpecs<any>)[checkName].err}.</li>)}
-  </>;
-}
+/* Generic form validation stub */
 
 
-type CheckSpecs<O> = {
+type FieldValidators<Object> = {
   [checkName: string]: {
-    err: string,
-    didFail: (obj: O) => Promise<boolean>,
+    errorMessage: string,
+    didFail: (obj: Object) => Promise<boolean>,
   }
+};
+
+type ObjectValidators<Object> = {
+  [FieldName in keyof Object]?: FieldValidators<Object>
+};
+
+
+type ValidationErrors<Validators extends ObjectValidators<any>> = {
+  [FieldName in keyof Validators]?: {
+    [CheckName in keyof Validators[FieldName]]?: false
+  }
+};
+
+
+type ValidationErrorsNoticeProps<Validators extends ObjectValidators<any>> = {
+  fieldName: string & keyof Validators,
+  validators: Validators,
+  errors: ValidationErrors<Validators>,
 }
+// Generic React functional components require a workaround in TS
+type _ValidationErrorsNotice<V = ObjectValidators<any>> = React.FC<ValidationErrorsNoticeProps<V>>
+const ValidationErrorsNotice: _ValidationErrorsNotice = function ({ fieldName, validators, errors }) {
+  /* Formats validation error notice as a number of <li> tags. */
 
-type FieldRequirements<O> = {
-  [F in keyof O]?: CheckSpecs<O>
+  if (!validators[fieldName]) { throw new Error("No validator for given field name"); }
+
+  return <>
+    {Object.keys(errors[fieldName] || {}).map((validatorName: string) =>
+      <li>Must {(validators[fieldName] as FieldValidators<any>)[validatorName].errorMessage}.</li>
+    )}
+  </>;
+
 };
 
 
-type UnmetRequirements<R extends FieldRequirements<any>> = {
-  [F in keyof R]?: {
-    [C in keyof R[F]]?: boolean
-  }
-};
+async function validate<Object>(obj: Object, validators: ObjectValidators<Object>): Promise<ValidationErrors<ObjectValidators<Object>>> {
+  var errs: ValidationErrors<ObjectValidators<Object>> = {};
 
-
-async function getUnmetRequirements<O>(obj: O, reqSpec: FieldRequirements<O>): Promise<UnmetRequirements<FieldRequirements<O>>> {
-  var reqs: UnmetRequirements<FieldRequirements<O>> = {};
-
-  for (const [field, checks] of Object.entries(reqSpec)) {
-    for (const [checkName, checkSpec] of Object.entries(checks as CheckSpecs<O>)) {
-      if (await checkSpec.didFail(obj)) {
-        reqs[field as keyof O] = { ...reqs[field as keyof O], [checkName]: false };
+  for (const [fieldName, fieldValidators] of Object.entries(validators)) {
+    for (const [validatorName, validator] of Object.entries(fieldValidators as FieldValidators<Object>)) {
+      if (await validator.didFail(obj)) {
+        errs[fieldName as keyof Object] = {
+          ...errs[fieldName as keyof Object],
+          [validatorName]: false as false,
+          // Without as-casting false is typed as wider boolean, but we literally only allow false.
+        };
       }
     }
   }
 
-  return reqs;
-}
+  return errs;
+};
