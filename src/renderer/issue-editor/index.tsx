@@ -1,4 +1,5 @@
 import AsyncLock from 'async-lock';
+import { debounce } from 'throttle-debounce';
 
 import { remote, ipcRenderer } from 'electron';
 
@@ -91,10 +92,16 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
   const [issue, _updateIssue] = useState(props.issue);
   const ws = useWorkspace();
 
-  const _hasUncommittedChanges = useModified().issues.indexOf(props.issue.id) >= 0;
-  const [hasUncommittedChanges, setHasUncommittedChanges] = useState(_hasUncommittedChanges);
+  const modified = useModified();
+
+  const [hasUncommittedChanges, setHasUncommittedChanges] = useState(false);
 
   const [haveSaved, setSaved] = useState(undefined as boolean | undefined);
+
+  useEffect(() => {
+    const _hasUncommittedChanges = modified.issues.indexOf(props.issue.id) >= 0;
+    setHasUncommittedChanges(_hasUncommittedChanges);
+  }, [modified.issues]);
 
 
   /* Prepare initial item selection status */
@@ -125,11 +132,7 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
 
   /* Storage API utilities */
 
-  async function updateIssue(data: OBIssue, commit?: true) {
-    setSaved(false);
-
-    _updateIssue(data);
-
+  async function _storageUpdateIssue(data: OBIssue, commit?: true) {
     await operationLock.acquire('update-issue', async () => {
       clearTimeout(issueUpdate);
 
@@ -148,10 +151,16 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
       }, 500);
     });
   }
+  const storageUpdateIssue = debounce(500, _storageUpdateIssue);
 
 
   /* Issue update operations */
 
+  async function updateIssue(data: OBIssue, commit?: true) {
+    setSaved(false);
+    _updateIssue(data);
+    await storageUpdateIssue(data, commit);
+  }
 
   /* Message editor JSX */
 
