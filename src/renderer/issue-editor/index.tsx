@@ -162,6 +162,18 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
     await storageUpdateIssue(data, commit);
   }
 
+  async function handleCommitAndQuit() {
+    try {
+      await _storageUpdateIssue(issue, true);
+    } catch (e) {
+      WindowToaster.show({ intent: 'danger', message: "Failed to commit changes" });
+      return;
+    }
+    await notifyAllWindows('issues-changed');
+    remote.getCurrentWindow().close();
+  }
+
+
   /* Message editor JSX */
 
   // Memoization ensures that updating items on every keystroke
@@ -264,18 +276,6 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
     ...issue.amendments.messages.map(msg => (msg as AmendmentMessage)).map(amd => amd.target.publication),
     ...Object.keys(issue.annexes || {}),
   ];
-
-
-  async function handleCommitAndQuit() {
-    try {
-      await updateIssue(issue, true);
-    } catch (e) {
-      WindowToaster.show({ intent: 'danger', message: "Failed to commit changes" });
-      return;
-    }
-    await notifyAllWindows('issues-changed');
-    remote.getCurrentWindow().close();
-  }
 
 
   /* Changed status mark */
