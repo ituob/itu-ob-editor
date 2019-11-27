@@ -7,7 +7,12 @@ import { Button, IconName, Tooltip, FormGroup, InputGroup, Intent, Icon, Popover
 import { RemoteStorageStatus } from 'sse/storage/main/remote';
 import { request } from 'sse/api/renderer';
 
+import { useModified } from 'renderer/workspace-context';
+
 import * as styles from './sync-status.scss';
+
+
+type AnyIDType = string | number;
 
 
 interface StorageStatusProps {
@@ -26,6 +31,10 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
     statusRelativeToLocal: undefined,
   } as RemoteStorageStatus);
 
+  const modifiedIds = useModified();
+  const hasModifiedItems = Object.values(modifiedIds).
+    reduce((acc, val) => { return [ ...acc, ...Object.keys(val) ] }, [] as AnyIDType[]).length > 0;
+
   useEffect(() => {
     triggerInitialStorageSync();
 
@@ -43,6 +52,12 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
   useEffect(() => {
     openPasswordPrompt(remote.needsPassword);
   }, [remote.needsPassword]);
+
+  useEffect(() => {
+    if (remote.hasLocalChanges && !hasModifiedItems) {
+      ipcRenderer.send('remote-storage-discard-all');
+    }
+  }, [remote.hasLocalChanges, hasModifiedItems]);
 
   async function triggerInitialStorageSync() {
     await ipcRenderer.send('remote-storage-trigger-sync');

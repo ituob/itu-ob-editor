@@ -214,6 +214,7 @@ then(gitCtrl => {
   // When we hear any of these events, sync remote storage.
   // In addition to that, it will also get called in object update handlers below.
   ipcMain.on('remote-storage-trigger-sync', gitCtrl.synchronize);
+  ipcMain.on('remote-storage-discard-all', () => gitCtrl.resetFiles());
   ipcMain.on('remote-storage-trigger-uncommitted-check', gitCtrl.checkUncommitted);
 
 
