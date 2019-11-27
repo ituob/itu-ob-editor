@@ -78,11 +78,11 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
     statusIntent = "danger";
     action = () => openWindow('settings');
 
-  } else if (remote.isOffline) {
-    statusIcon = "offline";
-    tooltipText = "No Internet connection—click to retry";
-    statusIntent = "danger";
-    action = () => ipcRenderer.send('remote-storage-trigger-sync');
+  } else if (remote.hasLocalChanges) {
+    statusIcon = "asterisk";
+    tooltipText = "Uncommitted changes present—click to resolve";
+    statusIntent = "warning";
+    action = () => openWindow('batch-commit');
 
   } else if (remote.needsPassword) {
     statusIcon = "lock";
@@ -90,11 +90,11 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
     statusIntent = "primary";
     action = null;
 
-  } else if (remote.hasLocalChanges) {
-    statusIcon = "asterisk";
-    tooltipText = "Uncommitted changes present—click to resolve";
-    statusIntent = "warning";
-    action = () => openWindow('batch-commit');
+  } else if (remote.isOffline) {
+    statusIcon = "offline";
+    tooltipText = "No Internet connection—click to retry";
+    statusIntent = "danger";
+    action = () => ipcRenderer.send('remote-storage-trigger-sync');
 
   } else if (remote.isPulling) {
     statusIcon = "cloud-download"
