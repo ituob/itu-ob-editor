@@ -99,7 +99,7 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
 
   async function update(publication: Publication) {
     await pubOperationQueue.acquire('1', async () => {
-      await request<Publication>('publication-update', { pubId: publication.id, data: publication });
+      await request<{ modified: boolean }>('publication-update', { pubId: publication.id, data: publication });
     });
   }
 
