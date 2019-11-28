@@ -27,7 +27,7 @@ const modifiedFileListing: { [K in keyof Storage]: React.FC<ModifiedFileOverview
   // IMPORTANT: key is implied to be corresponding FS backend directory relative to Git working directory.
 
   issues: ({ items, selectedItems, onSelect }) => <>
-    <PaneHeader align="left">{items.length} modified OB {items.length !== 1 ? "issues" : "issue"}</PaneHeader>
+    <PaneHeader align="left">{items.length} modified OB {items.length !== 1 ? "editions" : "edition"}</PaneHeader>
 
     <div className={styles.itemList}>
       {items.map(item => <ItemCard
@@ -39,7 +39,7 @@ const modifiedFileListing: { [K in keyof Storage]: React.FC<ModifiedFileOverview
   </>,
 
   publications: ({ items, selectedItems, onSelect }) => <>
-    <PaneHeader align="left">{items.length} modified {items.length !== 1 ? "publications" : "publication"}</PaneHeader>
+    <PaneHeader align="left">{items.length} modified service {items.length !== 1 ? "publications" : "publication"}</PaneHeader>
 
     <div className={styles.itemList}>
       {items.map(item => <ItemCard
