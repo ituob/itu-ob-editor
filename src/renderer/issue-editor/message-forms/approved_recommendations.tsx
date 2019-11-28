@@ -6,7 +6,7 @@ import { AddCardTrigger, SimpleEditableCard } from 'sse/renderer/widgets/editabl
 
 import { ITURecCode, ITURecVersion } from 'models/recommendations';
 import { Message as ApprovedRecommendationsMessage } from 'models/messages/approved_recommendations';
-import { useRecommendation } from 'renderer/workspace-context';
+import { useRecommendation } from 'storage/renderer';
 
 import { MessageFormProps, MessageEditorDialog } from '../message-editor';
 

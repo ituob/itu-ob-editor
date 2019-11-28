@@ -2,8 +2,8 @@ import React from 'react';
 import { Button, ButtonGroup, InputGroup, FormGroup } from '@blueprintjs/core';
 
 import { openWindow } from 'sse/api/renderer';
+import { useStorage } from 'storage/renderer';
 import { DateStamp } from 'renderer/widgets/dates';
-import { useWorkspace } from 'renderer/workspace-context';
 import * as styles from './styles.scss';
 
 
@@ -24,7 +24,7 @@ interface ScheduleFormProps {
   onCancel: () => void,
 }
 export const ScheduleForm: React.FC<ScheduleFormProps> = function ({ busy, draft, maxId, minId, onChange, onSave, onCancel }) {
-  const ws = useWorkspace();
+  const issues = useStorage().issues;
 
   function validateId(val: number | undefined): string[] {
     if (!val) {
@@ -48,7 +48,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = function ({ busy, draft
     ? `Should be ${idRequirements.join(', ')}.`
     : undefined;
 
-  const existingIssue = draft.id ? ws.issues[draft.id] : undefined;
+  const existingIssue = draft.id ? issues[draft.id] : undefined;
   const alreadyExistsError = busy === false && existingIssue !== undefined
     ? <>
         Edition {draft.id} already exists.

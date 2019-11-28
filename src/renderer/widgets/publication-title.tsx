@@ -2,7 +2,7 @@ import moment from 'moment';
 import React, { useContext } from 'react';
 
 import { LangConfigContext } from 'sse/localizer/renderer';
-import { usePublication, useRecommendation } from 'renderer/workspace-context';
+import { usePublication, useRecommendation } from 'storage/renderer';
 import { Recommendation, ITURecommendation } from 'models/recommendations';
 
 

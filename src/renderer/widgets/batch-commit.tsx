@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { NonIdealState, Checkbox, Button, Callout, TextArea, Popover } from '@blueprintjs/core';
 import { PaneHeader } from 'sse/renderer/widgets/pane-header';
 import { request, openWindow, notifyAllWindows } from 'sse/api/renderer';
-import { useWorkspace, useModified } from 'renderer/workspace-context';
+import { useStorage, useModified } from 'storage/renderer';
 import { Storage } from 'storage';
 import { WindowToaster } from 'renderer/toaster';
 
@@ -64,7 +64,7 @@ const contentTypes: (keyof typeof modifiedFileListing)[] = [
 
 export const BatchCommit: React.FC<{}> = function () {
   const modifiedIds = useModified();
-  const ws = useWorkspace();
+  const storage = useStorage();
 
 
   // selectedItems = { objType1: [id1, id2], objType2: [id3, id4] }
@@ -181,7 +181,7 @@ export const BatchCommit: React.FC<{}> = function () {
         ? <div className={styles.paneBody}>
             {contentTypes.filter(cType => Object.keys(modifiedIds[cType]).length > 0)
             .map(cType => modifiedFileListing[cType]({
-              items: modifiedIds[cType].map(objId => ws[cType][`${objId}`]).filter(obj => obj !== undefined),
+              items: modifiedIds[cType].map(objId => storage[cType][`${objId}`]).filter(obj => obj !== undefined),
               selectedItems: selectedItems[cType],
               onSelect: (objId) => onSelect(cType, objId),
             }))}

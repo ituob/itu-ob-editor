@@ -7,7 +7,7 @@ import { Button, IconName, Tooltip, FormGroup, InputGroup, Intent, Icon, Popover
 import { RemoteStorageStatus } from 'sse/storage/main/remote';
 import { request } from 'sse/api/renderer';
 
-import { useModified } from 'renderer/workspace-context';
+import { useModified } from 'storage/renderer';
 
 import * as styles from './sync-status.scss';
 

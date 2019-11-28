@@ -6,7 +6,7 @@ import { Button, FormGroup, Text } from '@blueprintjs/core';
 import { DatePicker } from '@blueprintjs/datetime';
 import { PaneHeader } from 'sse/renderer/widgets';
 
-import { usePublication, useLatestAnnex } from 'renderer/workspace-context';
+import { usePublication, useLatestAnnex } from 'storage/renderer';
 import { DateStamp } from 'renderer/widgets/dates';
 import { RecommendationTitle, PublicationTitle } from 'renderer/widgets/publication-title';
 import { HelpButton } from 'renderer/widgets/help-button';

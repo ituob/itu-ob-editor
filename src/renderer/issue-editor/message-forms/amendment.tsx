@@ -7,8 +7,8 @@ import { LangConfigContext } from 'sse/localizer/renderer';
 
 import { OBIssue } from 'models/issues';
 import { Message as AmendmentMessage } from 'models/messages/amendment';
+import { usePublication, useLatestAnnex } from 'storage/renderer';
 import { DateStamp } from 'renderer/widgets/dates';
-import { usePublication, useLatestAnnex } from 'renderer/workspace-context';
 import { RecommendationTitle } from 'renderer/widgets/publication-title';
 import { FreeformContents } from '../freeform-contents';
 import { MessageFormProps } from '../message-editor';

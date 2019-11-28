@@ -3,12 +3,12 @@ import { Tabs, Tab, Button, Label, InputGroup } from '@blueprintjs/core';
 
 import { AddCardTrigger, SimpleEditableCard } from 'sse/renderer/widgets/editable-card-list';
 
-import { RunningAnnex } from 'models/running-annexes';
-import { Message as RunningAnnexesMessage } from 'models/messages/running_annexes';
-import { useRunningAnnexes } from 'renderer/workspace-context';
-
+import { useRunningAnnexes } from 'storage/renderer';
 import { PublicationTitle } from 'renderer/widgets/publication-title';
 import { DateStamp } from 'renderer/widgets/dates';
+
+import { RunningAnnex } from 'models/running-annexes';
+import { Message as RunningAnnexesMessage } from 'models/messages/running_annexes';
 
 import { MessageFormProps, MessageEditorDialog } from '../message-editor';
 import * as styles from '../styles.scss';

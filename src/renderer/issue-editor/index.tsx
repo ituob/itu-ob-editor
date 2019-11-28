@@ -6,24 +6,21 @@ import { remote, ipcRenderer } from 'electron';
 import React, { useMemo, useState, useEffect } from 'react';
 import { Spinner, Icon, NonIdealState, Tooltip, Button } from '@blueprintjs/core';
 
-import { useWorkspace, useModified } from 'renderer/workspace-context';
-
 import { request } from 'sse/api/renderer';
 import { notifyAllWindows } from 'sse/main/window';
 import { PaneHeader } from 'sse/renderer/widgets/pane-header';
 
+import { useStorage, useModified } from 'storage/renderer';
+import { WindowToaster } from 'renderer/toaster';
 import { PublicationTitle } from 'renderer/widgets/publication-title';
 
+import { Message, AmendmentMessage, isAmendment } from 'models/messages';
 import {
   OBIssue,
   OBSection, OBMessageSection,
   isOBMessageSection, isOBAnnexesSection,
   issueFactories,
 } from 'models/issues';
-
-import { Message, AmendmentMessage, isAmendment } from 'models/messages';
-
-import { WindowToaster } from 'renderer/toaster';
 
 import { ItemList } from './item-list';
 import { NewGeneralMessagePrompt } from './item-list/new-general-message-menu';
@@ -90,7 +87,7 @@ export const Window: React.FC<IssueEditorWindowProps> = ({ issueId, selectedSect
 
 export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSelection }> = (props) => {
   const [issue, _updateIssue] = useState(props.issue);
-  const ws = useWorkspace();
+  const storage = useStorage();
 
   const modified = useModified();
 
@@ -351,8 +348,8 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
               <NewAmendmentPrompt
                 highlight={highlight}
                 issueId={issue.id}
-                issueIndex={ws.issues}
-                publicationIndex={ws.publications}
+                issueIndex={storage.issues}
+                publicationIndex={storage.publications}
                 disabledPublicationIDs={takenPublicationIDs}
                 onCreate={item => handleNewMessage(item as Message, 'amendments')} />}
 
@@ -373,8 +370,8 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
               <NewAnnexPrompt
                 highlight={highlight}
                 issueId={issue.id}
-                issueIndex={ws.issues}
-                publicationIndex={ws.publications}
+                issueIndex={storage.issues}
+                publicationIndex={storage.publications}
                 disabledPublicationIDs={takenPublicationIDs}
                 onCreate={item => handleNewAnnex(item as string)} />}
 
