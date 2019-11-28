@@ -68,7 +68,7 @@ export const BatchCommit: React.FC<{}> = function () {
 
 
   // selectedItems = { objType1: [id1, id2], objType2: [id3, id4] }
-  const initSelectedItems: { [K in keyof Storage]: (number | string)[] } = Object.assign(
+  const initSelectedItems: { [K in keyof Storage]: AnyIDType[] } = Object.assign(
     {}, ...contentTypes.map(c => ({ [c]: [] })));
   const [selectedItems, updateSelectedItems] = useState(initSelectedItems);
 
@@ -183,7 +183,7 @@ export const BatchCommit: React.FC<{}> = function () {
             .map(cType => modifiedFileListing[cType]({
               items: modifiedIds[cType].map(objId => storage[cType][`${objId}`]).filter(obj => obj !== undefined),
               selectedItems: selectedItems[cType],
-              onSelect: (objId) => onSelect(cType, objId),
+              onSelect: (objId: AnyIDType) => onSelect(cType, objId),
             }))}
           </div>
         : <NonIdealState title="No uncommitted changes found" icon="tick-circle" />}
