@@ -10,6 +10,14 @@ import { LangConfigContext } from 'sse/localizer/renderer';
 
 import { Publication } from 'models/publications';
 import { HelpButton } from 'renderer/widgets/help-button';
+import {
+  ObjectValidators,
+  ValidationErrors,
+  validate,
+  ValidationErrorsNotice,
+  GenericValidationErrorsNotice,
+} from 'renderer/form-validation';
+
 
 import * as styles from './styles.scss';
 
@@ -62,9 +70,9 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
     },
   };
 
-  const ValidationErr = ValidationErrorsNotice as _ValidationErrorsNotice<typeof validators>;
+  const ValidationErr = GenericValidationErrorsNotice as ValidationErrorsNotice<typeof validators>;
 
-  const [validationErrors, setValidationErrors] = useState({} as ValidationErrors<typeof validators>);
+  const [validationErrors, setValidationErrors] = useState({} as ValidationErrors<ObjectValidators<Publication>>);
   const [canSave, setCanSave] = useState(false);
 
 
@@ -216,65 +224,3 @@ async function get(id: string): Promise<Publication | null> {
     return null;
   }
 }
-
-
-/* Generic form validation stub */
-
-
-type FieldValidators<Object> = {
-  [checkName: string]: {
-    errorMessage: string,
-    didFail: (obj: Object) => Promise<boolean>,
-  }
-};
-
-type ObjectValidators<Object> = {
-  [FieldName in keyof Object]?: FieldValidators<Object>
-};
-
-
-type ValidationErrors<Validators extends ObjectValidators<any>> = {
-  [FieldName in keyof Validators]?: {
-    [CheckName in keyof Validators[FieldName]]?: false
-  }
-};
-
-
-type ValidationErrorsNoticeProps<Validators extends ObjectValidators<any>> = {
-  fieldName: string & keyof Validators,
-  validators: Validators,
-  errors: ValidationErrors<Validators>,
-}
-// Generic React functional components require a workaround in TS
-type _ValidationErrorsNotice<V = ObjectValidators<any>> = React.FC<ValidationErrorsNoticeProps<V>>
-const ValidationErrorsNotice: _ValidationErrorsNotice = function ({ fieldName, validators, errors }) {
-  /* Formats validation error notice as a number of <li> tags. */
-
-  if (!validators[fieldName]) { throw new Error("No validator for given field name"); }
-
-  return <>
-    {Object.keys(errors[fieldName] || {}).map((validatorName: string) =>
-      <li>Must {(validators[fieldName] as FieldValidators<any>)[validatorName].errorMessage}.</li>
-    )}
-  </>;
-
-};
-
-
-async function validate<Object>(obj: Object, validators: ObjectValidators<Object>): Promise<ValidationErrors<ObjectValidators<Object>>> {
-  var errs: ValidationErrors<ObjectValidators<Object>> = {};
-
-  for (const [fieldName, fieldValidators] of Object.entries(validators)) {
-    for (const [validatorName, validator] of Object.entries(fieldValidators as FieldValidators<Object>)) {
-      if (await validator.didFail(obj)) {
-        errs[fieldName as keyof Object] = {
-          ...errs[fieldName as keyof Object],
-          [validatorName]: false as false,
-          // Without as-casting false is typed as wider boolean, but we literally only allow false.
-        };
-      }
-    }
-  }
-
-  return errs;
-};
