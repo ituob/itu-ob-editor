@@ -60,13 +60,13 @@ export const IssueScheduler: React.FC<{}> = function () {
 
     ipcRenderer.once('app-loaded', fetchCurrentIssue);
     ipcRenderer.once('app-loaded', fetchSchedule);
-    ipcRenderer.on('issues-updated', fetchCurrentIssue);
-    ipcRenderer.on('issues-updated', fetchSchedule);
+    ipcRenderer.on('issues-changed', fetchCurrentIssue);
+    ipcRenderer.on('issues-changed', fetchSchedule);
     return function cleanup() {
       ipcRenderer.removeListener('app-loaded', fetchCurrentIssue);
       ipcRenderer.removeListener('app-loaded', fetchSchedule);
-      ipcRenderer.removeListener('issues-updated', fetchCurrentIssue);
-      ipcRenderer.removeListener('issues-updated', fetchSchedule);
+      ipcRenderer.removeListener('issues-changed', fetchCurrentIssue);
+      ipcRenderer.removeListener('issues-changed', fetchSchedule);
     };
   }, []);
 
