@@ -32,8 +32,6 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
   } as RemoteStorageStatus);
 
   const modifiedIds = useModified();
-  const hasModifiedItems = Object.values(modifiedIds).
-    reduce((acc, val) => { return [ ...acc, ...Object.keys(val) ] }, [] as AnyIDType[]).length > 0;
 
   useEffect(() => {
     triggerInitialStorageSync();
@@ -52,15 +50,6 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
   useEffect(() => {
     openPasswordPrompt(remote.needsPassword);
   }, [remote.needsPassword]);
-
-  useEffect(() => {
-    if (remote.hasLocalChanges && !hasModifiedItems) {
-      (async () => {
-        await ipcRenderer.send('remote-storage-discard-all');
-        await ipcRenderer.send('remote-storage-trigger-uncommitted-check');
-      })();
-    }
-  }, [hasModifiedItems]);
 
   async function triggerInitialStorageSync() {
     await ipcRenderer.send('remote-storage-trigger-sync');
@@ -85,7 +74,17 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
     statusIcon = "git-commit";
     tooltipText = "Uncommitted local changes present—click to resolve";
     statusIntent = "warning";
-    action = () => openWindow('batch-commit');
+    action = async () => {
+      // Discard orphaned files, if any, before opening batch commit window
+      const hasModifiedItems = Object.values(modifiedIds).
+        reduce((acc, val) => { return [ ...acc, ...Object.keys(val) ] }, [] as AnyIDType[]).length > 0;
+      if (remote.hasLocalChanges && !hasModifiedItems) {
+        await ipcRenderer.send('remote-storage-discard-all');
+        await ipcRenderer.send('remote-storage-trigger-sync');
+      } else {
+        openWindow('batch-commit');
+      }
+    }
 
   } else if (remote.needsPassword) {
     statusIcon = "lock";
