@@ -111,7 +111,7 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
     action = null;
 
   } else if (remote.statusRelativeToLocal === 'diverged') {
-    statusIcon = "outdated"
+    statusIcon = "git-branch"
     tooltipText = "Local and remote storage have diverging changes—click to retry";
     statusIntent = "danger";
     action = () => ipcRenderer.send('remote-storage-trigger-sync');
