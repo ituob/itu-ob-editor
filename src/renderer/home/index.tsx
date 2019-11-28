@@ -10,6 +10,8 @@ import { openWindow } from 'sse/api/renderer';
 import { Storage } from 'storage';
 import { StorageStatus } from 'renderer/widgets/sync-status';
 import { IssueScheduler } from '../issue-scheduler';
+import { Browser as PublicationBrowser } from '../publication-browser';
+//import { RecommendationBrowser } from '../recommendation-browser';
 import * as styles from './styles.scss';
 
 
@@ -34,6 +36,7 @@ const contentTypes: ContentTypeOptionSet<Storage> = [
     id: 'publications',
     title: 'Service publications',
     getIcon: () => <Icon icon="th" />,
+    getBrowser: () => <PublicationBrowser />,
   },
   {
     id: 'recommendations',

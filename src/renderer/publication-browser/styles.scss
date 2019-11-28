@@ -1,0 +1,36 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
+:local .objectList {
+  overflow-y: auto;
+
+  .pubCard {
+    &:hover {
+      z-index: 2;
+    }
+
+    .headerLabel {
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: center;
+      margin: 0;
+      overflow: hidden;
+      text-overflow: none;
+    }
+
+    .pubTitle {
+      margin: 0;
+      flex: 1;
+      flex-shrink: 0;
+      font-weight: normal;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .pubId {
+      flex-shrink: 0;
+      margin-left: 1rem;
+      font-weight: normal;
+      font-size: $pt-font-size-small;
+    }
+  }
+}
