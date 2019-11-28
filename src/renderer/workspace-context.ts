@@ -29,7 +29,7 @@ export interface StorageContextSpec<R extends BaseRendererStorage<any>> {
   current: R,
   refresh(): Promise<void>,
 
-  // Snapshot of modified object IDs, per type, pointing to arrays of changed file paths
+  // Snapshot of modified object IDs, per type
   modified: ModifiedObjectStatus<R>,
   refreshModified(hasLocalChanges?: boolean): Promise<void>,
 }
