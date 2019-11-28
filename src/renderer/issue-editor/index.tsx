@@ -4,7 +4,7 @@ import { debounce } from 'throttle-debounce';
 import { remote, ipcRenderer } from 'electron';
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { Spinner, Icon, NonIdealState, Tooltip, Button } from '@blueprintjs/core';
+import { Spinner, NonIdealState } from '@blueprintjs/core';
 
 import { request } from 'sse/api/renderer';
 import { notifyAllWindows } from 'sse/main/window';
@@ -13,6 +13,7 @@ import { PaneHeader } from 'sse/renderer/widgets/pane-header';
 import { useStorage, useModified } from 'storage/renderer';
 import { WindowToaster } from 'renderer/toaster';
 import { PublicationTitle } from 'renderer/widgets/publication-title';
+import { ObjectStorageStatus } from 'renderer/widgets/change-status';
 
 import { Message, AmendmentMessage, isAmendment } from 'models/messages';
 import {
@@ -53,7 +54,7 @@ export const Window: React.FC<IssueEditorWindowProps> = ({ issueId, selectedSect
 
   const [maybeIssue, updateIssue] = useState(null as OBIssue | null);
 
-  function handleChangedIssues(evt: any, data: { objIds: number[] }) {
+  function handleChanged(evt: any, data: { objIds: number[] }) {
     // Just reload the window if our issue question changed
     if (data.objIds.indexOf(numIssueId) >= 0) {
       remote.getCurrentWindow().reload();
@@ -63,9 +64,9 @@ export const Window: React.FC<IssueEditorWindowProps> = ({ issueId, selectedSect
   useEffect(() => {
     storageGetIssue();
 
-    ipcRenderer.on('issues-changed', handleChangedIssues);
+    ipcRenderer.on('issues-changed', handleChanged);
     return function cleanup() {
-      ipcRenderer.removeListener('issues-changed', handleChangedIssues);
+      ipcRenderer.removeListener('issues-changed', handleChanged);
     }
   }, []);
 
@@ -75,7 +76,6 @@ export const Window: React.FC<IssueEditorWindowProps> = ({ issueId, selectedSect
   }
 
   return useMemo(() => {
-    console.debug("Rendering", (maybeIssue || {}).id);
     if (maybeIssue !== null) {
       return <IssueEditor issue={maybeIssue} />;
     }
@@ -89,16 +89,16 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
   const [issue, _updateIssue] = useState(props.issue);
   const storage = useStorage();
 
-  const modified = useModified();
+  /* Issue change status */
 
+  const modifiedIssues = useModified().issues;
+  const [haveSaved, setSaved] = useState(undefined as boolean | undefined);
   const [hasUncommittedChanges, setHasUncommittedChanges] = useState(false);
 
-  const [haveSaved, setSaved] = useState(undefined as boolean | undefined);
-
   useEffect(() => {
-    const _hasUncommittedChanges = modified.issues.indexOf(props.issue.id) >= 0;
+    const _hasUncommittedChanges = modifiedIssues.indexOf(props.issue.id) >= 0;
     setHasUncommittedChanges(_hasUncommittedChanges);
-  }, [modified.issues]);
+  }, [modifiedIssues]);
 
 
   /* Prepare initial item selection status */
@@ -275,29 +275,6 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
   ];
 
 
-  /* Changed status mark */
-
-  let changeStatus: JSX.Element;
-  let tooltipText: string;
-  if (haveSaved === false) {
-    changeStatus = <Icon icon="asterisk" intent="danger" />
-    tooltipText = "Saving edits…";
-  } else if (hasUncommittedChanges === true) {
-    changeStatus = <Button
-        intent="success"
-        onClick={handleCommitAndQuit}
-        icon="git-commit"
-        small={true}
-        className={styles.commitButton}>
-      Done
-    </Button>;
-    tooltipText = "Click to commit changes";
-  } else {
-    changeStatus = <Icon icon="tick-circle" intent="success" />
-    tooltipText = "Edition is up-to-date";
-  }
-
-
   /* Main JSX */
 
   return (
@@ -306,11 +283,10 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
 
         <div className={styles.paneHeader}>
           <PaneHeader align="right" major={true}>
-            <Tooltip
-                className={styles.statusIcon}
-                content={tooltipText}>
-              {changeStatus}
-            </Tooltip>
+            <ObjectStorageStatus
+              haveSaved={haveSaved}
+              hasUncommittedChanges={hasUncommittedChanges}
+              onCommit={handleCommitAndQuit} />
             № <span className={styles.paneHeaderIssueId}>{issue.id}</span>
           </PaneHeader>
         </div>
