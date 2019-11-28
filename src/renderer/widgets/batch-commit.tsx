@@ -45,7 +45,7 @@ const modifiedFileListing: { [K in keyof Storage]: React.FC<ModifiedFileOverview
       {items.map(item => <ItemCard
         title={item.id}
         onEdit={() => openWindow('publication-editor', { publicationId: item.id })}
-        onSelect={() => onSelect(item)}
+        onSelect={() => onSelect(item.id)}
         isSelected={selectedItems.indexOf(item.id) >= 0} />)}
     </div>
   </>,
