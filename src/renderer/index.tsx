@@ -1,14 +1,11 @@
-import { ipcRenderer } from 'electron';
-
 import * as ReactDOM from 'react-dom';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { NonIdealState } from '@blueprintjs/core';
 
 import { LangConfigContext } from 'sse/localizer/renderer';
 import { DataSynchronizer } from 'sse/storage/renderer/data-synchronizer';
 import { request } from 'sse/api/renderer';
 import { Index } from 'sse/storage/query';
-import { RemoteStorageStatus } from 'sse/storage/main/remote';
 
 import { RendererStorage } from 'storage/renderer';
 
@@ -120,27 +117,6 @@ const App: React.FC<{}> = function () {
     },
   };
   const [workspace, updateWorkspace] = useState(initWorkspace);
-
-  async function handleRemoteStorage(evt: any, remoteStorageStatus: Partial<RemoteStorageStatus>) {
-    await workspace.refreshModified(remoteStorageStatus.hasLocalChanges);
-  }
-
-  useEffect(() => {
-    workspace.refresh();
-    workspace.refreshModified();
-
-    ipcRenderer.once('app-loaded', workspace.refresh);
-    ipcRenderer.on('publications-changed', workspace.refresh);
-    ipcRenderer.on('issues-changed', workspace.refresh);
-    ipcRenderer.on('remote-storage-status', handleRemoteStorage);
-
-    return function cleanup() {
-      ipcRenderer.removeListener('app-loaded', workspace.refresh);
-      ipcRenderer.removeListener('publications-changed', workspace.refresh);
-      ipcRenderer.removeListener('issues-changed', workspace.refresh);
-      ipcRenderer.removeListener('remote-storage-status', handleRemoteStorage);
-    };
-  }, []);
 
   const [langConfig, setLangConfig] = useState({
     available: AvailableLanguages,

@@ -2,11 +2,14 @@
    The data is intended to be read only, no changes will get synced back to storage.
    Refresh method is provided to fetch new data from storage. */
 
-// TODO: Move to SSE
+// TODO: Move to SSE & make generic
 
-import React, { useContext } from 'react';
+import { ipcRenderer } from 'electron';
+
+import React, { useEffect, useContext } from 'react';
 
 import { RendererStorage as BaseRendererStorage } from 'sse/storage/renderer';
+import { RemoteStorageStatus } from 'sse/storage/main/remote';
 
 import { Publication } from 'models/publications';
 import { ITURecommendation } from 'models/recommendations';
@@ -51,12 +54,41 @@ export const WorkspaceContext = React.createContext<StorageContextSpec<RendererS
 
 export function useWorkspace(): RendererStorage {
   const workspace = useContext(WorkspaceContext);
+
+  useEffect(() => {
+    workspace.refresh();
+
+    ipcRenderer.once('app-loaded', workspace.refresh);
+    ipcRenderer.on('publications-changed', workspace.refresh);
+    ipcRenderer.on('issues-changed', workspace.refresh);
+
+    return function cleanup() {
+      ipcRenderer.removeListener('app-loaded', workspace.refresh);
+      ipcRenderer.removeListener('publications-changed', workspace.refresh);
+      ipcRenderer.removeListener('issues-changed', workspace.refresh);
+    };
+  }, []);
+
   return workspace.current;
 }
 
 
 export function useModified(): ModifiedObjectStatus<RendererStorage> {
   const workspace = useContext(WorkspaceContext);
+
+  async function handleRemoteStorage(evt: any, remoteStorageStatus: Partial<RemoteStorageStatus>) {
+    await workspace.refreshModified(remoteStorageStatus.hasLocalChanges);
+  }
+
+  useEffect(() => {
+    workspace.refreshModified();
+    ipcRenderer.on('remote-storage-status', handleRemoteStorage);
+
+    return function cleanup() {
+      ipcRenderer.removeListener('remote-storage-status', handleRemoteStorage);
+    };
+  }, []);
+
   return workspace.modified;
 }
 
