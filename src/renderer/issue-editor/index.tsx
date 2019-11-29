@@ -268,11 +268,10 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
   }
 
 
-  // IDs of publications that cannot be annexed or amended, because they already were.
-  const takenPublicationIDs = [
-    ...issue.amendments.messages.map(msg => (msg as AmendmentMessage)).map(amd => amd.target.publication),
-    ...Object.keys(issue.annexes || {}),
-  ];
+  // IDs of publications that cannot be annexed or amended, because they already were in this issue.
+  const alreadyAmendedPubIDs =
+    issue.amendments.messages.map(msg => (msg as AmendmentMessage)).map(amd => amd.target.publication);
+  const alreadyAnnexedPubIDs = Object.keys(issue.annexes || {});
 
 
   /* Main JSX */
@@ -326,7 +325,7 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
                 issueId={issue.id}
                 issueIndex={storage.issues}
                 publicationIndex={storage.publications}
-                disabledPublicationIDs={takenPublicationIDs}
+                disabledPublicationIDs={alreadyAmendedPubIDs}
                 onCreate={item => handleNewMessage(item as Message, 'amendments')} />}
 
             className={styles.amendmentsList}
@@ -348,7 +347,7 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
                 issueId={issue.id}
                 issueIndex={storage.issues}
                 publicationIndex={storage.publications}
-                disabledPublicationIDs={takenPublicationIDs}
+                disabledPublicationIDs={alreadyAnnexedPubIDs}
                 onCreate={item => handleNewAnnex(item as string)} />}
 
             className={styles.amendmentsList}

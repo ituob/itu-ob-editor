@@ -46,7 +46,10 @@ export function useRecommendation(code: string | undefined): ITURecommendation |
 
 
 export function useLatestAnnex(issueId: number, pubId?: string): RunningAnnex | undefined {
-  const previousAnnexes = useRunningAnnexes(issueId, pubId);
+  /* Returns RunningAnnex instance corresponding to position of publication with given pubId
+     that was last annexed *before* OB edition with given issueId, or undefined if none is found. */
+
+  const previousAnnexes = useRunningAnnexes(issueId, pubId).filter(ra => ra.annexedTo.id !== issueId);
   if (previousAnnexes.length > 0) {
     return previousAnnexes[0];
   }
@@ -55,6 +58,8 @@ export function useLatestAnnex(issueId: number, pubId?: string): RunningAnnex | 
 
 
 export function useRunningAnnexes(issueId: number, pubId?: string) {
+  /* Returns running annexes up to and including OB edition with given issueId. */
+
   const storage = useStorage();
   return getRunningAnnexesForIssue(issueId, storage.issues, storage.publications, pubId);
 }

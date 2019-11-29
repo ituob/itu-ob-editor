@@ -18,7 +18,7 @@ export function getRunningAnnexesForIssue(
     onlyForPublicationID?: string): RunningAnnex[] {
 
   /* Given issue ID, runs through preceding issues and builds a list
-     of annexed publications up to that issue.
+     of annexed publications up to and including that issue.
      Optionally, selects only given publication ID.
 
      This is useful when determining the state of “Lists Annexed”
@@ -29,7 +29,7 @@ export function getRunningAnnexesForIssue(
 
   const _pastIssues = new QuerySet<OBIssue>(issueIndex).
     orderBy(sortIntegerAscending).
-    filter((item: [string, OBIssue]) => item[1].id < issueId);
+    filter((item: [string, OBIssue]) => item[1].id <= issueId);
 
   const pastIssues = _pastIssues.orderBy(sortIntegerDescending).all();
 
