@@ -169,11 +169,12 @@ then(() => {
   );
 }).
 
-then(gitCtrl => {
+then(async (gitCtrl) => {
   // Stage 2: Set up API endpoints and notify main app screen that launch was successful
   log.verbose("App launch: stage 4");
 
-  openHomeWindow();
+  await openHomeWindow();
+
   const storage: MainStorage = getStorage(gitCtrl);
 
   if (isMacOS) {
@@ -366,13 +367,9 @@ then(gitCtrl => {
     url: `${APP_HELP_ROOT}${path || ''}`,
   }));
 
-  if (windows.length < 1) {
-    log.verbose("No windows loaded at app launch, maybe will quit");
-    maybeQuit();
-  }
 
   log.verbose("Message home screen that app has loaded");
-  notifyAllWindows('app-loaded');
+  await notifyAllWindows('app-loaded');
 
 });
 
