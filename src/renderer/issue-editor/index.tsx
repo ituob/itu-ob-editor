@@ -153,10 +153,10 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
 
   /* Issue update operations */
 
-  async function updateIssue(data: OBIssue, commit?: true) {
+  async function updateIssue(data: OBIssue) {
     setSaved(false);
     _updateIssue(data);
-    await storageUpdateIssue(data, commit);
+    await storageUpdateIssue(data);
   }
 
   async function handleCommitAndQuit() {
