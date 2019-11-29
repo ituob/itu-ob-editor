@@ -164,60 +164,56 @@ $cutColorDark: #D9822B;
   &:hover {
     z-index: 2;
   }
-  .headerLabel {
-    :last-child {
-      // Icon
-      margin-left: 5px;
-      vertical-align: top;
-    }
-  }
+}
+:local .issueCardCurrent {
 }
 
 :local .issueCardContents {
   display: flex;
   flex-flow: row nowrap;
-  justify-content: space-between;
+  align-items: stretch;
 
-  > * {
+  .issueInfo {
+    flex: 1;
+  }
+
+  .headerLabel {
     display: flex;
-    flex-flow: column nowrap;
+    flex-flow: row nowrap;
+  }
 
-    > * {
-      white-space: nowrap;
-    }
+  .actions {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: flex-end;
+    flex-flow: column nowrap;
+    width: $pt-navbar-height * 2;
   }
 
   .scheduleInfo {
-    > :first-child {
-      flex: 1;
-    }
-  }
-
-  .cutoffDate, .publicationDate {
-    > :first-child {
-      margin-right: .5rem;
-      transform: scale(.8);
+    > * {
+      display: flex;
+      flex-flow: column nowrap;
     }
   }
 
   .publicationStatus > * {
     margin-bottom: .25rem;
-    text-align: right;
     white-space: nowrap;
+
+    > * {
+      display: inline-block;
+    }
 
     &:last-child {
       margin-bottom: 0;
     }
     > :first-child {
-      display: inline;
-    }
-    > :last-child {
-      margin-left: .5rem;
+      margin-right: .5rem;
     }
   }
 
   .publicationStatusPrimary {
-    color: $pt-intent-primary;
     font-weight: bold;
   }
 

@@ -1,8 +1,9 @@
 import * as moment from 'moment';
+import { remote } from 'electron';
 
 import React from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import { NonIdealState, H5, Icon, IconName, Text } from '@blueprintjs/core';
+import { NonIdealState, H5, Icon, IconName, Text, Button } from '@blueprintjs/core';
 import { Index, QuerySet } from 'sse/storage/query';
 import { openWindow } from 'sse/api/renderer';
 import { SimpleEditableCard } from 'sse/renderer/widgets/editable-card-list';
@@ -54,7 +55,7 @@ export const UpcomingIssues: React.FC<UpcomingIssuesProps> = function({ issues, 
 
 interface DateStatusProps {
   date: Date,
-  text: string,
+  text: JSX.Element | string,
   icon: IconName,
   dateClass?: string,
   className?: string,
@@ -62,7 +63,7 @@ interface DateStatusProps {
 const DateStatus: React.FC<DateStatusProps> = function ({ icon, className, dateClass, date, text }) {
   const ICON_SIZE = 16;
   return <div className={className}>
-    <Text>{text}</Text> <DateStamp date={date} /><Icon iconSize={ICON_SIZE} icon={icon} className={dateClass} />
+    <Icon iconSize={ICON_SIZE} icon={icon} className={dateClass} /><Text>{text}</Text> <DateStamp date={date} />
   </div>;
 };
 
@@ -95,7 +96,8 @@ const IssueScheduleCard: React.FC<IssueScheduleCardProps> = function ({ issue, o
         dateClass={styles.pubDateLabel}
         icon="folder-shared"
         date={issue.publication_date}
-        text="Published on" />
+        text={<>Published (<IssueWebLinks issueId={issue.id} pubDate={issue.publication_date} />) on</>} />
+            
     </>;
   } else if (isCurrent) {
     status = <>
@@ -148,19 +150,36 @@ const IssueScheduleCard: React.FC<IssueScheduleCardProps> = function ({ issue, o
     <SimpleEditableCard
         extended={true}
         contentsClassName={styles.issueCardContents}
-        className={styles.issueCard}
-        onClick={onEditClick}>
+        className={`${styles.issueCard} {isCurrent? styles.issueCardCurrent : ''}`}>
 
       <header className={styles.issueInfo}>
-        <H5 className={styles.headerLabel}>{issue.id} {bigIcon}</H5>
+        <div className={styles.headerLabel}>
+          <H5>{issue.id} {bigIcon}</H5>
+        </div>
+
+        <div className={styles.scheduleInfo}>
+          <div className={styles.publicationStatus}>
+            {status}
+          </div>
+        </div>
       </header>
 
-      <div className={styles.scheduleInfo}>
-        <div className={styles.publicationStatus}>
-          {status}
-        </div>
-      </div>
+      <footer className={styles.actions}>
+        {isCurrent
+          ? <Button fill={true} onClick={onEditClick} intent="primary">Edit</Button>
+          : <Button fill={true} onClick={onEditClick} minimal={true}>Open</Button>}
+      </footer>
 
     </SimpleEditableCard>
   );
+};
+
+
+const IssueWebLinks: React.FC<{ issueId: number, pubDate: Date }> = function ({ issueId, pubDate }) {
+  const ituUrl = `https://www.itu.int/pub/T-SP-OB.${issueId}-${pubDate.getFullYear()}`;
+  const ituObUrl = `https://www.ituob.org/issues/${issueId}-en/`;
+
+  return <span title="Edition is expected to be viewable online here. Newly added editions may take some time to appear online.">
+    <a onClick={() => remote.shell.openExternal(ituUrl)}>itu.int</a>, <a onClick={() => remote.shell.openExternal(ituObUrl)}>ituob.org</a>
+  </span>
 };
