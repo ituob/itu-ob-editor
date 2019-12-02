@@ -206,9 +206,7 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
             key="title"
             intent={validationErrors.title ? "danger" : undefined}
             helperText={
-              <ul>
-                <ValidationErr fieldName="title" validators={validators} errors={validationErrors} />
-              </ul>
+              <ul><ValidationErr fieldName="title" validators={validators} errors={validationErrors} /></ul>
             }
             label={`Title in ${lang.available[lang.default]}:`}>
           <InputGroup
