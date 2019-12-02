@@ -104,6 +104,21 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
         didFail: async (pub) => (pub.id.trim() === ''),
       },
     },
+    url: {
+      valid: {
+        errorMessage: "contain a valid URL, if specified",
+        didFail: async (pub) => {
+          if (pub.url) {
+            try {
+              new URL(pub.url);
+            } catch (e) {
+              return true;
+            }
+          }
+          return false;
+        },
+      },
+    },
   };
 
   const ValidationErr = GenericValidationErrorsNotice as ValidationErrorsNotice<typeof validators>;
@@ -225,7 +240,18 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
           />
         </FormGroup>
 
-        <FormGroup key="url" label="Authoritative resource URL for this publication:">
+        <FormGroup
+            key="url"
+            intent={validationErrors.url ? "danger" : undefined}
+            helperText={
+              <ul>
+                <ValidationErr fieldName="url" validators={validators} errors={validationErrors} />
+                {!validationErrors.url && (publication.url || '') !== ''
+                  ? <li><a onClick={() => remote.shell.openExternal(publication.url as string)}>Test this URL in browser</a></li>
+                  : null}
+              </ul>
+            }
+            label="Authoritative resource URL for this publication:">
           <InputGroup
             value={publication.url}
             type="url"
