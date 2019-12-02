@@ -28,11 +28,13 @@ Access application help at https://www.ituob.org/docs/.
 
 ITU OB Editor is under active development, so please mind that sometimes the app may misbehave.
 
-* If you have encountered an error or other possible malfunction while using the application,
-  please [report it here](https://github.com/ituob/itu-ob-editor/issues/new/choose).
+If you have encountered an error or other possible malfunction while using the application,
+please [report it here](https://github.com/ituob/itu-ob-editor/issues/new/choose).
 
-* As a troubleshooting measure, you can try accessing Settings -> Reset application data.
-  You will lose any local changes you may have made to ITU OB.
+You may try removing application data:
+
+* From `~/Library/Application Support/itu-ob-editor` on macOS
+* From `%USERPROFILE%\AppData\Roaming\itu-ob-editor\` on Windows
 
 ## Developer’s documentation
 
