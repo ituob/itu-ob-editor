@@ -12,19 +12,7 @@ $sidebarWidth: 17em;
 }
 
 :local .paneHeader {
-  flex-grow: 0;
-  z-index: 5;
-  font-size: $pt-font-size-small;
-
-  :global .bp3-text-overflow-ellipsis {
-    display: flex;
-    align-items: center;
-  }
-  .paneHeaderIssueId {
-    color: $pt-intent-primary;
-    margin-left: .1rem;
-    font-size: $pt-font-size-large;
-  }
+  @include objectEditorPaneHeader;
 }
 
 :local .twoPaneEditor {

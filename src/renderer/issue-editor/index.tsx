@@ -286,7 +286,7 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
               haveSaved={haveSaved}
               hasUncommittedChanges={hasUncommittedChanges}
               onCommit={handleCommitAndQuit} />
-            № <span className={styles.paneHeaderIssueId}>{issue.id}</span>
+            № <span className="object-id">{issue.id}</span>
           </PaneHeader>
         </div>
 

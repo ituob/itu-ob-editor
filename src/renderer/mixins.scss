@@ -1,3 +1,5 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
 :local .paneBody {
   overflow-y: auto;
   flex: 1;
@@ -17,5 +19,23 @@
   > :first-child {
     flex: unset;
     width: $leftPaneWidth;
+  }
+}
+
+@mixin objectEditorPaneHeader {
+  flex-grow: 0;
+  flex-shrink: 0;
+  z-index: 5;
+  font-size: $pt-font-size-small;
+
+  :global .bp3-text-overflow-ellipsis {
+    display: flex;
+    align-items: center;
+  }
+
+  :global .object-id {
+    color: $pt-intent-primary;
+    margin-left: .1rem;
+    font-size: $pt-font-size-large;
   }
 }

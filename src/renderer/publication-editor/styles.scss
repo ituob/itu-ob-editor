@@ -1,4 +1,5 @@
 @import "~@blueprintjs/core/lib/scss/variables";
+@import "renderer/mixins.scss";
 
 :local .pubEditorWindow {
   height: 100vh;
@@ -7,9 +8,9 @@
   background: $pt-app-background-color;
 
   .windowHeader {
-    flex-shrink: 0;
     align-items: center;
     display: flex;
+    @include objectEditorPaneHeader;
   }
 
   .windowBody {
