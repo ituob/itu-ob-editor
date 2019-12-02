@@ -233,7 +233,7 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
             onChange={(evt: React.FormEvent<HTMLElement>) => {
               setPublication({
                 ...publication,
-                url:  (evt.target as HTMLInputElement).value as string,
+                url: (evt.target as HTMLInputElement).value as string,
               });
             }}
           />
