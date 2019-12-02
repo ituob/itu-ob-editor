@@ -122,8 +122,7 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
   };
 
   const ValidationErr = GenericValidationErrorsNotice as ValidationErrorsNotice<typeof validators>;
-
-  const [validationErrors, setValidationErrors] = useState({} as ValidationErrors<ObjectValidators<Publication>>);
+  const [validationErrors, setValidationErrors] = useState({} as ValidationErrors<typeof validators>);
   const [canSave, setCanSave] = useState(false);
 
 
