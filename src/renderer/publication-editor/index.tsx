@@ -182,6 +182,7 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
           actions={<HelpButton path="amend-publication/" />}>
         <ObjectStorageStatus
           canSave={canSave}
+          doneButtonLabel={create ? "Create" : undefined}
           hasUncommittedChanges={hasUncommittedChanges}
           onCommit={commitAndClose} />
         service publication&nbsp;“<span className="object-id">{publication.id}</span>”
