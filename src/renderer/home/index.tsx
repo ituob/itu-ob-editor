@@ -57,7 +57,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
   if (cTypeOptions !== undefined && cTypeOptions.getBrowser) {
     viewer = cTypeOptions.getBrowser();
   } else {
-    viewer = <NonIdealState title="Not found viewer for type" />;
+    viewer = <NonIdealState
+      icon="widget"
+      title="Not found"
+      description={`Object browser for content type “${selectedCType}” has not been implemented yet. Sorry!`}
+    />;
   }
 
   return (
