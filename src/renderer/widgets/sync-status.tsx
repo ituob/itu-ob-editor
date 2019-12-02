@@ -124,9 +124,9 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
 
   } else {
     statusIcon = "updated"
-    tooltipText = undefined;
+    tooltipText = "Click to trigger remote storage sync";
     statusIntent = "success";
-    action = null;
+    action = () => ipcRenderer.send('remote-storage-trigger-sync');
   }
 
   return <div className={`${styles.storageStatusBase} ${className || ''}`}>
