@@ -170,36 +170,37 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
           canSave={canSave}
           hasUncommittedChanges={hasUncommittedChanges}
           onCommit={commitAndClose} />
-        <span>{create ? "Add" : "Edit"} service publication</span>
+        service publication&nbsp;“<span className="object-id">{publication.id}</span>”
 
       </PaneHeader>
 
       <main className={styles.windowBody}>
-        <FormGroup
-            key="id"
-            label="Publication identifier:"
-            intent={validationErrors.id ? "danger" : undefined}
-            helperText={
-              <ul>
-                <ValidationErr fieldName="id" validators={validators} errors={validationErrors} />
-                <li>Use uppercase English string as publication ID: e.g., BUREAUFAX.</li>
-                <li>Choose an ID consistent with publication URL on ITU website, if possible.</li>
-                <li>Note: you can’t change this later easily.</li>
-              </ul>
-            }>
-          <InputGroup
-            value={publication.id}
-            type="text"
-            large={true}
-            readOnly={!create}
-            onChange={(evt: React.FormEvent<HTMLElement>) => {
-              setPublication({
-                ...publication,
-                id: (evt.target as HTMLInputElement).value as string,
-              });
-            }}
-          />
-        </FormGroup>
+        {create
+          ? <FormGroup
+                key="id"
+                label="Publication identifier:"
+                intent={validationErrors.id ? "danger" : undefined}
+                helperText={
+                  <ul>
+                    <ValidationErr fieldName="id" validators={validators} errors={validationErrors} />
+                    <li>Use uppercase English string as publication ID: e.g., BUREAUFAX.</li>
+                    <li>Choose an ID consistent with publication URL on ITU website, if possible.</li>
+                    <li>Note: you can’t change this later easily.</li>
+                  </ul>}>
+              <InputGroup
+                value={publication.id}
+                type="text"
+                large={true}
+                readOnly={!create}
+                onChange={(evt: React.FormEvent<HTMLElement>) => {
+                  setPublication({
+                    ...publication,
+                    id: (evt.target as HTMLInputElement).value as string,
+                  });
+                }}
+              />
+            </FormGroup>
+          : null}
 
         <FormGroup
             key="title"
