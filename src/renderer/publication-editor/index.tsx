@@ -92,7 +92,12 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
     id: {
       unique: {
         errorMessage: `have a unique ID (“${publication.id}” is already taken)`,
-        didFail: async (pub) => (create === true && (await get(pub.id)) !== null),
+        didFail: async (pub) => {
+          if (create === true) {
+            return (await pubOperationQueue.acquire(SINGLETON_LOCK, () => get(pub.id))) !== null;
+          }
+          return false;
+        },
       },
       specified: {
         errorMessage: "have a unique string ID",
@@ -112,7 +117,7 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
   useEffect(() => {
     setCanSave(false);
 
-    pubOperationQueue.acquire('1', async () => {
+    (async () => {
       const validationErrors = await validate(publication, validators);
       const canSave = Object.keys(validationErrors).length === 0;
 
@@ -122,7 +127,7 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
       if (canSave && !create) {
         update(publication);
       }
-    });
+    })();
   }, [JSON.stringify(publication)]);
 
 
