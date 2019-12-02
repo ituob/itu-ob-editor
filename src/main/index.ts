@@ -218,6 +218,8 @@ then(async (gitCtrl) => {
   ipcMain.on('remote-storage-trigger-sync', gitCtrl.synchronize);
   ipcMain.on('remote-storage-discard-all', () => gitCtrl.resetFiles());
   ipcMain.on('remote-storage-trigger-uncommitted-check', gitCtrl.checkUncommitted);
+  ipcMain.on('publications-changed', async () => await notifyAllWindows('publications-changed'));
+  ipcMain.on('issues-changed', async () => await notifyAllWindows('issues-changed'));
 
 
   /* Storage endpoints */
