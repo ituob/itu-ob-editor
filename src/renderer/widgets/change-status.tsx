@@ -6,11 +6,12 @@ import * as styles from './change-status.scss';
 
 interface ObjectStorageStatusProps {
   haveSaved?: boolean,
+  doneButtonLabel?: string,
   canSave?: boolean,
   hasUncommittedChanges: boolean,
   onCommit: () => Promise<void>,
 }
-export const ObjectStorageStatus: React.FC<ObjectStorageStatusProps> = function ({ canSave, haveSaved, hasUncommittedChanges, onCommit }) {
+export const ObjectStorageStatus: React.FC<ObjectStorageStatusProps> = function ({ canSave, haveSaved, doneButtonLabel, hasUncommittedChanges, onCommit }) {
   /* Shows an icon showing save is in progress, or commit button if applicable. */
 
   let changeStatus: JSX.Element;
@@ -27,7 +28,7 @@ export const ObjectStorageStatus: React.FC<ObjectStorageStatusProps> = function 
         icon="git-commit"
         disabled={canSave === false}
         small={true}>
-      Done
+      {doneButtonLabel || 'Done'}
     </Button>;
     tooltipText = "Click to commit changes";
 
