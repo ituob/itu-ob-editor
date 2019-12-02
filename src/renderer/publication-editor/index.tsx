@@ -25,6 +25,7 @@ import * as styles from './styles.scss';
 
 
 const pubOperationQueue = new AsyncLock();
+const SINGLETON_LOCK = 'singletonLock';
 
 
 interface PublicationEditorProps {
@@ -128,7 +129,7 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
   /* IPC helpers */
 
   async function update(publication: Publication) {
-    await pubOperationQueue.acquire('1', async () => {
+    await pubOperationQueue.acquire(SINGLETON_LOCK, async () => {
       const updateResult = await request<{ modified: boolean }>('publication-update', { pubId: publication.id, data: publication });
       setHasUncommittedChanges(updateResult.modified);
     });
@@ -140,7 +141,7 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
     }
     setCanSave(false);
 
-    await pubOperationQueue.acquire('1', async () => {
+    await pubOperationQueue.acquire(SINGLETON_LOCK, async () => {
       if (create) {
         await request<Publication>('publication-create', { data: publication });
       } else {
