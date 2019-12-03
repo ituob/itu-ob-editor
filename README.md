@@ -1,3 +1,5 @@
+<img src="docs/HomeWindowScreenshot.png?raw=true" width="600">
+
 # ITU OB editor
 
 Standalone application for editing [ITU OB website](https://ituob.org) data.
