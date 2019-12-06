@@ -33,6 +33,7 @@ html.platform--win32::before {
 
 .bp3-menu-item {
   cursor: default;
+
   &, .bp3-menu &.bp3-disabled {
     cursor: default !important;
   }
