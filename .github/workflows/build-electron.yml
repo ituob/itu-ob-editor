@@ -60,6 +60,8 @@ jobs:
         path: dist
     - name: release
       env:
+        CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+        CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
         GH_TOKEN: ${{ secrets.GH_ITUOB_CI_TOKEN }}
       run: yarn release
 
