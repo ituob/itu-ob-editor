@@ -32,6 +32,10 @@ jobs:
     - name: release
       if: github.ref == 'refs/heads/master'
       env:
+        AID: ${{ secrets.AID }}
+        AIP: ${{ secrets.AIP }}
+        CSC_LINK: ${{ secrets.CSC_LINK }}
+        CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
         GH_TOKEN: ${{ secrets.GH_ITUOB_CI_TOKEN }}
       run: yarn release
 
