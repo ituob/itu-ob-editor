@@ -4,18 +4,18 @@ const fs = require('fs');
 const path = require('path');
 var electron_notarize = require('electron-notarize');
 
-module.exports = async function (params) {
-  // Only notarize the app on Mac OS only.
+module.exports = async function notarize(params) {
+  // Only notarize the app on macOS
   if (process.platform !== 'darwin') {
     return;
   }
   console.log('afterSign hook triggered', params);
   
   if (process.env.NODE_ENV === 'development') {
-    return console.warn('skipping notarization, NODE_ENV=development')
+    return console.warn('Skipping notarization, NODE_ENV=development');
   }
 
-  // Same appId in electron-builder.
+  // Use the same appId as specified in electron-builder configuration
   let appId = 'org.ituob.editor';
 
   let appPath = path.join(
@@ -29,10 +29,10 @@ module.exports = async function (params) {
   console.log(`Notarizing ${appId} found at ${appPath}`);
 
   let appleId = process.env.AID
-  if (!appleId) throw new Error('no appleid found')
+  if (!appleId) throw new Error('No Apple ID found ($AID variable)');
 
   let appleIdPassword = process.env.AIP
-  if (!appleIdPassword) throw new Error('no appleIdPassword found')
+  if (!appleIdPassword) throw new Error('No Apple ID password found ($AIP variable)')
 
   try {
     await electron_notarize.notarize({
@@ -43,7 +43,7 @@ module.exports = async function (params) {
     });
   } catch (error) {
     console.error(
-      `failed to notarize: ${err ? err.message : 'NO ERROR MESSAGE FOUND'}`
+      `Failed to notarize: ${err ? err.message : 'error message not specified'}`
     );
   }
 
