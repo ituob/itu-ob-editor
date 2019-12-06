@@ -22,9 +22,6 @@ html.platform--win32::before {
 .bp3-button {
   cursor: default !important;
 
-  &.bp3-minimal:hover:not(:active) {
-    //background: none !important;
-  }
   &:focus {
     outline: none;
   }
