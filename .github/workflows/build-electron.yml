@@ -25,6 +25,7 @@ jobs:
         name: dist-mac
         path: dist
     - name: release
+      if: github.ref == 'refs/heads/master'
       env:
         AID: ${{ secrets.AID }}
         AIP: ${{ secrets.AIP }}
@@ -59,6 +60,7 @@ jobs:
         name: dist-windows
         path: dist
     - name: release
+      if: github.ref == 'refs/heads/master'
       env:
         CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
         CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
