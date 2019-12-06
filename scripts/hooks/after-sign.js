@@ -32,7 +32,7 @@ module.exports = async function notarize(params) {
   if (!appleId) throw new Error('No Apple ID found ($AID variable)');
 
   let appleIdPassword = process.env.AIP
-  if (!appleIdPassword) throw new Error('No Apple ID password found ($AIP variable)')
+  if (!appleIdPassword) throw new Error('No Apple ID password found ($AIP variable)');
 
   try {
     await electron_notarize.notarize({
@@ -42,9 +42,7 @@ module.exports = async function notarize(params) {
       appleIdPassword: appleIdPassword,
     });
   } catch (error) {
-    console.error(
-      `Failed to notarize: ${err ? err.message : 'error message not specified'}`
-    );
+    console.error(`Failed to notarize: ${err ? err.message : 'error message not specified'}`);
   }
 
   console.log(`Done notarizing ${appId}`);
