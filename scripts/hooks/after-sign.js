@@ -42,7 +42,7 @@ module.exports = async function notarize(params) {
       appleIdPassword: appleIdPassword,
     });
   } catch (error) {
-    console.error(`Failed to notarize: ${err ? err.message : 'error message not specified'}`);
+    console.error(`Failed to notarize: ${error ? error.message : 'error message not specified'}`);
   }
 
   console.log(`Done notarizing ${appId}`);
