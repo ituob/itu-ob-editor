@@ -14,9 +14,16 @@ class IssueManager extends Manager<OBIssue, number, { onlyIDs?: number[], month?
   runningAnnexes: Record<string, RunningAnnex[]> = {};
 
   async init() {
-    const idx = await this.readAll({}, true);
-    this.rebuildSchedule(idx);
-    this.rebuildRunningAnnexes(idx);
+    let idx: Index<OBIssue> | null;
+    try {
+      idx = await this.readAll({}, true);
+    } catch (e) {
+      idx = null;
+    }
+    if (idx) {
+      this.rebuildSchedule(idx);
+      this.rebuildRunningAnnexes(idx);
+    }
   }
 
   rebuildRunningAnnexes(idx: Index<OBIssue>, forIssueID?: number) {
