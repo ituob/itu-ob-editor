@@ -1,7 +1,6 @@
 import * as moment from 'moment';
 import * as log from 'electron-log';
 
-import { BehaviorSubject } from 'rxjs';
 import { default as Manager } from 'coulomb/db/isogit-yaml/main/manager';
 import { sortIntegerAscending, QuerySet, Index } from 'coulomb/db/query';
 import { listen } from 'coulomb/ipc/main';
@@ -11,7 +10,6 @@ import { RunningAnnex, getRunningAnnexesForIssue } from 'models/running-annexes'
 
 class IssueManager extends Manager<OBIssue, number, { onlyIDs?: number[], month?: Date }> {
 
-  currentIssueID = new BehaviorSubject<number | null>(null);
   schedule: Index<ScheduledIssue> = {};
   runningAnnexes: Record<string, RunningAnnex[]> = {};
 
