@@ -94,7 +94,7 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
   } else if (!remote.isOnline) {
     statusIcon = "offline";
     tooltipText = "No connection to remote storage—click to retry";
-    statusIntent = "danger";
+    statusIntent = "primary";
     action = triggerStorageSync;
 
   } else if (remote.isPulling) {
