@@ -14,7 +14,6 @@ import { HelpButton } from 'renderer/widgets/help-button';
 import { WindowToaster } from 'renderer/toaster';
 import { ScheduledIssue } from 'models/issues';
 
-import { app } from 'renderer/index';
 import { IssueDraft, ScheduleForm } from './schedule-form';
 import { UpcomingIssues } from './upcoming';
 

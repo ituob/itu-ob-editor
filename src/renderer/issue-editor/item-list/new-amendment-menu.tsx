@@ -116,12 +116,12 @@ const NewAmendmentMenuRenderer: ItemListRenderer<AmendablePublication> =
 };
 
 const NewAmendmentMenuItemRenderer: ItemRenderer<AmendablePublication> =
-    function ({ title, id }, { handleClick, modifiers, query }) {
+    function ({ id }, { handleClick, modifiers, query }) {
 
   return (
     <Menu.Item
       key={id}
-      text={title ? title : <PublicationTitle id={id} />}
+      text={<PublicationTitle id={id} />}
       onClick={handleClick}
       active={modifiers.active}
       title={modifiers.disabled ? `Publication was annexed to or amended in this edition` : undefined}

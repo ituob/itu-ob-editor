@@ -1,5 +1,4 @@
 import * as path from 'path';
-import * as log from 'electron-log';
 import { app as electronApp } from 'electron';
 
 import { MainConfig } from 'coulomb/config/main';

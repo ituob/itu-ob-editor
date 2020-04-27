@@ -22,7 +22,6 @@ import {
 
 import * as styles from './styles.scss';
 import { callIPC } from 'coulomb/ipc/renderer';
-import { useModifiedIDs } from 'renderer/hooks';
 
 
 const pubOperationQueue = new AsyncLock();
