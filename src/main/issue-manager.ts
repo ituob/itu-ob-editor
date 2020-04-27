@@ -43,8 +43,6 @@ class IssueManager extends Manager<OBIssue, number, { onlyIDs?: number[], month?
   }
 
   rebuildSchedule(idx: Index<OBIssue>) {
-    console.debug("schedule rebuild")
-
     this.schedule = Object.values(idx).
       map(item => ({ [item.id]: {
         id: item.id,
@@ -80,8 +78,6 @@ class IssueManager extends Manager<OBIssue, number, { onlyIDs?: number[], month?
   }
 
   async getSchedule(query?: { month: Date | null }): Promise<Index<ScheduledIssue>> {
-    console.debug("Getting schedule", query?.month);
-
     const issues = this.schedule;
     const month = query?.month;
 
@@ -94,7 +90,6 @@ class IssueManager extends Manager<OBIssue, number, { onlyIDs?: number[], month?
         }).
         map(item => ({ [item.id]: item })).
         reduce((prevVal, curVal) => ({ ...prevVal, ...curVal }), {});
-      console.debug("Got:", filtered);
       return filtered;
     } else {
       return issues;
