@@ -29,7 +29,6 @@
   "build": {
     "productName": "ITU OB Editor",
     "appId": "org.ituob.editor",
-    "afterSign": "./scripts/hooks/after-sign.js",
     "mac": {
       "category": "public.app-category.productivity",
       "icon": "build/icon.icns",
