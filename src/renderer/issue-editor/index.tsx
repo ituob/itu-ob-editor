@@ -1,27 +1,27 @@
 import AsyncLock from 'async-lock';
-import { debounce } from 'throttle-debounce';
 
 import { remote, ipcRenderer } from 'electron';
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { Spinner, NonIdealState } from '@blueprintjs/core';
 
-import { request } from 'sse/api/renderer';
-import { notifyAllWindows } from 'sse/main/window';
-import { PaneHeader } from 'sse/renderer/widgets/pane-header';
+import { callIPC } from 'coulomb/ipc/renderer';
+import { PaneHeader } from 'coulomb/renderer/widgets';
 
-import { useStorage, useModified } from 'storage/renderer';
 import { WindowToaster } from 'renderer/toaster';
 import { PublicationTitle } from 'renderer/widgets/publication-title';
 import { ObjectStorageStatus } from 'renderer/widgets/change-status';
 
 import { Message, AmendmentMessage, isAmendment } from 'models/messages';
+import { Publication } from 'models/publications';
 import {
   OBIssue,
   OBSection, OBMessageSection,
   isOBMessageSection, isOBAnnexesSection,
   issueFactories,
 } from 'models/issues';
+
+import { app } from 'renderer/index';
 
 import { ItemList } from './item-list';
 import { NewGeneralMessagePrompt } from './item-list/new-general-message-menu';
@@ -32,90 +32,68 @@ import { AmendmentMeta } from './message-forms/amendment';
 import { AnnexEditor } from './annex-editor';
 
 import * as styles from './styles.scss';
+import { WindowComponentProps } from 'coulomb/config/renderer';
 
-
-interface IssueEditorSelection {
-  section: OBSection,
-  item: string,
-}
 
 const operationLock = new AsyncLock();
 
-var issueUpdate: NodeJS.Timer;
+const Window: React.FC<WindowComponentProps> = ({ query }) => {
+  const rawIssueID = query.get('objectID');
+  const numIssueID: number | null = rawIssueID ? parseInt(rawIssueID, 10) : null;
 
+  const issue = app.useOne<OBIssue, number>('issues', numIssueID).object;
 
-interface IssueEditorWindowProps {
-  issueId: string,
-  selectedSection?: OBSection,
-  selectedItem?: string,
-}
-export const Window: React.FC<IssueEditorWindowProps> = ({ issueId, selectedSection, selectedItem }) => {
-  const numIssueId = parseInt(issueId, 10);
-
-  const [maybeIssue, updateIssue] = useState(null as OBIssue | null);
-
-  function handleChanged(evt: any, data: { objIds: number[] }) {
+  function handleChanged(evt: any, data: { ids: number[] }) {
     // Just reload the window if our issue question changed
-    if (data.objIds.indexOf(numIssueId) >= 0) {
+    if (numIssueID !== null && data.ids.indexOf(numIssueID) >= 0) {
       remote.getCurrentWindow().reload();
     }
   }
 
   useEffect(() => {
-    storageGetIssue();
-
-    ipcRenderer.on('issues-changed', handleChanged);
+    ipcRenderer.on('model-issues-objects-changed', handleChanged);
     return function cleanup() {
-      ipcRenderer.removeListener('issues-changed', handleChanged);
+      ipcRenderer.removeListener('model-issues-objects-changed', handleChanged);
     }
   }, []);
 
-  async function storageGetIssue() {
-    const issue = await request<OBIssue>('issue', { issueId: numIssueId });
-    updateIssue(issue);
-  }
-
   return useMemo(() => {
-    if (maybeIssue !== null) {
-      return <IssueEditor issue={maybeIssue} />;
+    if (issue !== null) {
+      return <IssueEditor issue={issue} />;
+    } else {
+      return <NonIdealState
+        icon={<Spinner className={styles.spinner} />}
+        title="No issue to show right now"
+        description="If you’re still seeing this, this might mean the issue failed to load." />;
     }
-
-    return <Spinner className={styles.spinner} />;
-  }, [(maybeIssue || {}).id]);
+  }, [(issue || {}).id]);
 };
 
 
-export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSelection }> = (props) => {
+export const IssueEditor: React.FC<{ issue: OBIssue }> = (props) => {
   const [issue, _updateIssue] = useState(props.issue);
-  const storage = useStorage();
+
+  const publications = app.useMany<Publication, {}>('publications', {}).objects;
 
   /* Issue change status */
 
-  const modifiedIssues = useModified().issues;
-  const [haveSaved, setSaved] = useState(undefined as boolean | undefined);
-  const [hasUncommittedChanges, setHasUncommittedChanges] = useState(false);
+  const [saved, setSaved] = useState(true);
 
-  useEffect(() => {
-    const _hasUncommittedChanges = modifiedIssues.indexOf(props.issue.id) >= 0;
-    setHasUncommittedChanges(_hasUncommittedChanges);
-  }, [modifiedIssues]);
+  //useEffect(() => {
+  //  const _hasUncommittedChanges = modifiedIssues.value.indexOf(props.issue.id) >= 0;
+  //  setHasUncommittedChanges(_hasUncommittedChanges);
+  //}, [modifiedIssues]);
 
 
   /* Prepare initial item selection status */
 
   let initialItemIdx: string | undefined;
   let initialSection: OBSection;
+  initialItemIdx = undefined;
+  initialSection = 'general';
 
-  if (props.selection) {
-    initialItemIdx = props.selection.item;
-    initialSection = props.selection.section;
-  } else {
-    initialItemIdx = undefined;
-    initialSection = 'general';
-  }
-
-  const [selectedItem, selectItem] = useState(initialItemIdx);
-  const [selectedSection, selectSection] = useState(initialSection);
+  const [selectedItem, selectItem] = useState<string | undefined>(initialItemIdx);
+  const [selectedSection, selectSection] = useState<OBSection>(initialSection);
 
   // Convenience shortcuts
   const selectedMessageIdx: number | undefined = isOBMessageSection(selectedSection) && selectedItem !== undefined
@@ -129,45 +107,32 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
 
   /* Storage API utilities */
 
-  async function _storageUpdateIssue(data: OBIssue, commit?: true) {
+  async function _commitIssue(data: OBIssue) {
     await operationLock.acquire('update-issue', async () => {
-      clearTimeout(issueUpdate);
-
-      // TODO: Handle API failure
-      const updateResult = await request<{ modified: boolean }>('issue-update', { issueId: props.issue.id, data, commit: commit });
-
-      if (commit) {
-        await ipcRenderer.send('remote-storage-trigger-sync');
-      } else {
-        await ipcRenderer.send('remote-storage-trigger-uncommitted-check');
-      }
-
-      issueUpdate = setTimeout(() => {
-        setHasUncommittedChanges(updateResult.modified);
-        setSaved(true);
-      }, 500);
+      await callIPC
+        <{ objectID: number, object: OBIssue, commit: boolean }, { modified: boolean }>
+        ('model-issues-update-one', { objectID: props.issue.id, object: data, commit: true });
     });
   }
-  const storageUpdateIssue = debounce(500, _storageUpdateIssue);
 
 
   /* Issue update operations */
 
   async function updateIssue(data: OBIssue) {
     setSaved(false);
+    //setHasUncommittedChanges(true);
     _updateIssue(data);
-    await storageUpdateIssue(data);
+    //await storageUpdateIssue(data);
   }
 
   async function handleCommitAndQuit() {
     try {
-      await _storageUpdateIssue(issue, true);
+      await _commitIssue(issue);
+      setSaved(true);
     } catch (e) {
       WindowToaster.show({ intent: 'danger', message: "Failed to commit changes" });
       return;
     }
-    await notifyAllWindows('issues-changed');
-    remote.getCurrentWindow().close();
   }
 
 
@@ -283,8 +248,7 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
         <div className={styles.paneHeader}>
           <PaneHeader align="right" major={true}>
             <ObjectStorageStatus
-              haveSaved={haveSaved}
-              hasUncommittedChanges={hasUncommittedChanges}
+              haveSaved={saved}
               onCommit={handleCommitAndQuit} />
             № <span className="object-id">{issue.id}</span>
           </PaneHeader>
@@ -323,8 +287,7 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
               <NewAmendmentPrompt
                 highlight={highlight}
                 issueId={issue.id}
-                issueIndex={storage.issues}
-                publicationIndex={storage.publications}
+                publicationIndex={publications}
                 disabledPublicationIDs={alreadyAmendedPubIDs}
                 onCreate={item => handleNewMessage(item as Message, 'amendments')} />}
 
@@ -345,8 +308,7 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
               <NewAnnexPrompt
                 highlight={highlight}
                 issueId={issue.id}
-                issueIndex={storage.issues}
-                publicationIndex={storage.publications}
+                publicationIndex={publications}
                 disabledPublicationIDs={alreadyAnnexedPubIDs}
                 onCreate={item => handleNewAnnex(item as string)} />}
 
@@ -369,3 +331,6 @@ export const IssueEditor: React.FC<{ issue: OBIssue, selection?: IssueEditorSele
     </div>
   );
 };
+
+
+export default Window;

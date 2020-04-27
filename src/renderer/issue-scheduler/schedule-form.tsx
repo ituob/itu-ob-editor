@@ -1,9 +1,8 @@
 import React from 'react';
 import { Button, ButtonGroup, InputGroup, FormGroup } from '@blueprintjs/core';
 
-import { openWindow } from 'sse/api/renderer';
-import { useStorage } from 'storage/renderer';
 import { DateStamp } from 'renderer/widgets/dates';
+import { app } from 'renderer/index';
 import * as styles from './styles.scss';
 
 
@@ -24,7 +23,7 @@ interface ScheduleFormProps {
   onCancel: () => void,
 }
 export const ScheduleForm: React.FC<ScheduleFormProps> = function ({ busy, draft, maxId, minId, onChange, onSave, onCancel }) {
-  const issues = useStorage().issues;
+  const existingIDs = app.useIDs<number>('issues').ids;
 
   function validateId(val: number | undefined): string[] {
     if (!val) {
@@ -48,12 +47,12 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = function ({ busy, draft
     ? `Should be ${idRequirements.join(', ')}.`
     : undefined;
 
-  const existingIssue = draft.id ? issues[draft.id] : undefined;
-  const alreadyExistsError = busy === false && existingIssue !== undefined
+  const issueExists = draft.id ? existingIDs.indexOf(draft.id) >= 0 : false;
+  const alreadyExistsError = busy === false && issueExists !== undefined
     ? <>
         Edition {draft.id} already exists.
         &ensp;
-        <a onClick={() => openWindow('issue-editor', { issueId: existingIssue.id })}>Open</a>
+        <a onClick={() => app.openObjectEditor('issues', draft.id)}>Open</a>
       </>
     : undefined;
 
@@ -64,7 +63,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = function ({ busy, draft
         <p className={styles.scheduleFormCutoffDate}>
           <strong>Cutoff:</strong>
           <span>
-            {draft.cutoff_date !== undefined
+            {draft.cutoff_date !== undefined && draft.cutoff_date !== null
               ? <strong><DateStamp date={draft.cutoff_date} /></strong>
               : null}
           </span>
@@ -96,7 +95,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = function ({ busy, draft
         <FormGroup
             label="Edition no.:"
             labelFor="issue-id"
-            intent={idRequirements.length > 0 || existingIssue !== undefined ? 'danger' : undefined}
+            intent={(idRequirements.length > 0 || issueExists) ? 'danger' : undefined}
             helperText={idRequirementsText || alreadyExistsError}>
           <InputGroup
             type="number"
@@ -120,7 +119,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = function ({ busy, draft
             icon="git-commit"
             disabled={
               busy ||
-              existingIssue !== undefined ||
+              issueExists ||
               idRequirements.length > 0 ||
               draft.publication_date === undefined ||
               draft.cutoff_date === undefined

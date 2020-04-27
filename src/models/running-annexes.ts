@@ -1,20 +1,17 @@
-import { Index, QuerySet, sortIntegerAscending, sortIntegerDescending } from 'sse/storage/query';
-
-import { Publication } from 'models/publications';
+import { Index, QuerySet, sortIntegerAscending, sortIntegerDescending } from 'coulomb/db/query';
 import { OBIssue } from 'models/issues';
 
 
 export interface RunningAnnex {
-  publication: Publication,
+  publicationID: string,
   annexedTo: OBIssue,
   positionOn: Date | null,
 }
 
 
 export function getRunningAnnexesForIssue(
-    issueId: number,
+    asOfIssueID: number,
     issueIndex: Index<OBIssue>,
-    publicationIndex: Index<Publication>,
     onlyForPublicationID?: string): RunningAnnex[] {
 
   /* Given issue ID, runs through preceding issues and builds a list
@@ -29,7 +26,7 @@ export function getRunningAnnexesForIssue(
 
   const _pastIssues = new QuerySet<OBIssue>(issueIndex).
     orderBy(sortIntegerAscending).
-    filter((item: [string, OBIssue]) => item[1].id <= issueId);
+    filter((item: [string, OBIssue]) => item[1].id <= asOfIssueID);
 
   const pastIssues = _pastIssues.orderBy(sortIntegerDescending).all();
 
@@ -43,12 +40,10 @@ export function getRunningAnnexesForIssue(
         continue;
       }
 
-      const pub = publicationIndex[annexedPublicationId];
-
-      if (pub && runningAnnexes.find(ann => ann.publication.id == pub.id) === undefined) {
+      if (runningAnnexes.find(ann => ann.publicationID === annexedPublicationId) === undefined) {
         const position = annexedPublicationPosition;
         runningAnnexes.push({
-          publication: pub as Publication,
+          publicationID: annexedPublicationId,
           annexedTo: pastIssue,
           positionOn: position ? (position.position_on as Date) : null,
         });

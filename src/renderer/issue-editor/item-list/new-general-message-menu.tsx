@@ -1,8 +1,8 @@
 import React from 'react';
 import { Position, Popover, Menu } from '@blueprintjs/core';
 
-import { AddCardTriggerButton } from 'sse/renderer/widgets/editable-card-list';
-import * as editableCardListStyles from 'sse/renderer/widgets/editable-card-list/styles.scss';
+import { AddCardTriggerButton } from 'coulomb/renderer/widgets/editable-card-list';
+import * as editableCardListStyles from 'coulomb/renderer/widgets/editable-card-list/styles.scss';
 
 import { Message, MessageType } from 'models/messages';
 

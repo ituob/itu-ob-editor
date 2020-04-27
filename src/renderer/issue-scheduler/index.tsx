@@ -6,31 +6,40 @@ import React, { useEffect, useState } from 'react';
 import { Icon } from '@blueprintjs/core';
 import { DatePicker } from '@blueprintjs/datetime';
 
-import { Index } from 'sse/storage/query';
-import { PaneHeader } from 'sse/renderer/widgets';
-import { request } from 'sse/api/renderer';
-import { notifyAllWindows } from 'sse/main/window';
+import { PaneHeader } from 'coulomb/renderer/widgets';
+import { relayIPCEvent, useIPCValue, callIPC } from 'coulomb/ipc/renderer';
 
 import { DateStamp } from 'renderer/widgets/dates';
 import { HelpButton } from 'renderer/widgets/help-button';
 import { WindowToaster } from 'renderer/toaster';
 import { ScheduledIssue } from 'models/issues';
 
+import { app } from 'renderer/index';
 import { IssueDraft, ScheduleForm } from './schedule-form';
 import { UpcomingIssues } from './upcoming';
 
 import * as styles from './styles.scss';
+import { sortIntegerAscending, QuerySet, Index } from 'coulomb/db/query';
 
 
 const DEFAULT_MAX_DATE: Date = moment().add(1, 'years').toDate();
 
 
-export const IssueScheduler: React.FC<{}> = function () {
-  const [schedule, updateSchedule] = useState([] as ScheduledIssue[]);
-  const [issueIndex, updateIssueIndex] = useState({} as Index<ScheduledIssue>);
-  const [currentIssue, setCurrentIssue] = useState({ id: null } as { id: number | null });
+const Scheduler: React.FC<{}> = function () {
+  //const [schedule, updateSchedule] = useState([] as ScheduledIssue[]);
+
+  const currentIssue = useIPCValue<{}, { id: number | null }>('model-issues-get-current-issue-id', { id: null });
+  //const [currentIssue, setCurrentIssue] = useState({ id: null } as { id: number | null });
+
   const [date, selectDate] = useState(new Date());
   const [month, selectMonth] = useState(new Date());
+
+  const issueIndex = useIPCValue<{ month: Date }, Index<ScheduledIssue>>('model-issues-get-schedule', {}, { month });
+  const schedule = new QuerySet(issueIndex.value).orderBy(sortIntegerAscending).all();
+
+  //const schedule = useIPCValue<{ month: Date }, { issues: ScheduledIssue[] }>('model-issues-get-schedule', { issues: [] }, { month });
+  //console.debug(month, issueIndex.objects, schedule.value);
+
   const [hoveredDate, hoverDate] = useState(null as Date | null);
   const [newIssueDraft, updateNewIssueDraft] = useState(null as IssueDraft | null);
   const [daySchedule, updateDaySchedule] = useState(null as ScheduledIssue | null);
@@ -54,25 +63,21 @@ export const IssueScheduler: React.FC<{}> = function () {
     }
   }
 
-  useEffect(() => {
-    fetchCurrentIssue();
-    fetchSchedule();
+  function refreshIssues() {
+    console.debug("Refreshing issues");
+    issueIndex.refresh();
+  }
 
-    ipcRenderer.once('app-loaded', fetchCurrentIssue);
-    ipcRenderer.once('app-loaded', fetchSchedule);
-    ipcRenderer.on('issues-changed', fetchCurrentIssue);
-    ipcRenderer.on('issues-changed', fetchSchedule);
+  useEffect(() => {
+    refreshIssues();
+    ipcRenderer.on('model-issues-objects-changed', refreshIssues);
     return function cleanup() {
-      ipcRenderer.removeListener('app-loaded', fetchCurrentIssue);
-      ipcRenderer.removeListener('app-loaded', fetchSchedule);
-      ipcRenderer.removeListener('issues-changed', fetchCurrentIssue);
-      ipcRenderer.removeListener('issues-changed', fetchSchedule);
+      ipcRenderer.removeListener('model-issues-objects-changed', refreshIssues);
     };
   }, []);
 
   useEffect(() => {
     setUserIsEditing(false);
-    fetchSchedule();
   }, [month]);
 
   useEffect(() => {
@@ -95,17 +100,19 @@ export const IssueScheduler: React.FC<{}> = function () {
 
   /* Storage API utilities */
 
-  async function fetchSchedule() {
-    const scheduledIssues = await request<Index<ScheduledIssue>>('ob-schedule', { month });
-    updateSchedule(Object.values(scheduledIssues));
-    updateIssueIndex(scheduledIssues);
-    setUserIsEditing(true);
-  }
+  // TODO: useMany()
+  // async function fetchSchedule() {
+  //   const scheduledIssues = await request<Index<ScheduledIssue>>('ob-schedule', { month });
+  //   updateSchedule(Object.values(scheduledIssues));
+  //   updateIssueIndex(scheduledIssues);
+  //   setUserIsEditing(true);
+  // }
 
-  async function fetchCurrentIssue() {
-    const currentIssue = await request<{ id: number | null }>('current-issue-id');
-    setCurrentIssue(currentIssue);
-  }
+  // TODO: useMany()
+  // async function fetchCurrentIssue() {
+  //   const currentIssue = await request<{ id: number | null }>('current-issue-id');
+  //   setCurrentIssue(currentIssue);
+  // }
 
   async function saveNewSchedule() {
     if (newIssueDraft && newIssueDraft.publication_date && newIssueDraft.cutoff_date) {
@@ -113,7 +120,7 @@ export const IssueScheduler: React.FC<{}> = function () {
 
       const draft = newIssueDraft as ScheduledIssue;
       try {
-        await request<{ success: boolean }>('ob-schedule-add', { newData: draft });
+        await callIPC<{ obj: ScheduledIssue }, { success: true }>('model-issues-schedule-one', { obj: draft });
       } catch (e) {
         for (const msg of e.errorMessageList) {
           WindowToaster.show({
@@ -128,9 +135,9 @@ export const IssueScheduler: React.FC<{}> = function () {
       setSchedulingInProgress(false);
       updateNewIssueDraft(null);
 
-      await ipcRenderer.send('remote-storage-trigger-sync');
-      await notifyAllWindows('issues-changed');
-      await fetchSchedule();
+      await ipcRenderer.send('db-default-git-trigger-sync');
+      await relayIPCEvent({ eventName: 'model-issues-objects-changed' });
+      await issueIndex.refresh();
     }
   }
 
@@ -138,9 +145,9 @@ export const IssueScheduler: React.FC<{}> = function () {
     <div className={styles.issueScheduler}>
       <div className={styles.issueListPane}>
         <UpcomingIssues
-          issues={issueIndex}
+          issues={issueIndex.value}
           userIsEditing={userIsEditing}
-          currentIssueId={currentIssue.id || undefined} />
+          currentIssueId={currentIssue.value.id || undefined} />
       </div>
 
       <div className={styles.calendarPane}>
@@ -232,3 +239,6 @@ function getIssueWithPublication(onDate: Date, issues: ScheduledIssue[]): Schedu
 function getIssueWithCutoff(onDate: Date, issues: ScheduledIssue[]): ScheduledIssue | null {
   return issues.find(i => moment(i.cutoff_date).isSame(onDate, 'day')) || null;
 }
+
+
+export default Scheduler;

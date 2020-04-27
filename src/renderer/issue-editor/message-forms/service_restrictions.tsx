@@ -1,8 +1,8 @@
 import React, { useState, useContext } from 'react';
 import { Label, Button, InputGroup } from '@blueprintjs/core';
 
-import { AddCardTrigger, SimpleEditableCard } from 'sse/renderer/widgets/editable-card-list';
-import { LangConfigContext } from 'sse/localizer/renderer';
+import { AddCardTrigger, SimpleEditableCard } from 'coulomb/renderer/widgets/editable-card-list';
+import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
 import { Message as ServiceRestrictionsMessage, SRItem } from 'models/messages/service_restrictions';
 

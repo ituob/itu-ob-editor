@@ -4,28 +4,29 @@ import { NonIdealState, Button, Icon, Tooltip, Position } from '@blueprintjs/cor
 // import { getStatic } from 'sse/renderer/static';
 // <img src={getStatic('itu-logo.png')} alt="ITU logo" className={styles.logo} />
 
-import { Storage as BaseStorage } from 'sse/storage';
-import { openWindow } from 'sse/api/renderer';
+import { callIPC } from 'coulomb/ipc/renderer';
+import { WindowComponentProps } from 'coulomb/config/renderer';
 
-import { Storage } from 'storage';
+import { conf } from 'app';
+
 import { StorageStatus } from 'renderer/widgets/sync-status';
-import { IssueScheduler } from '../issue-scheduler';
+import { default as IssueScheduler } from '../issue-scheduler';
 import { Browser as PublicationBrowser } from '../publication-browser';
 //import { RecommendationBrowser } from '../recommendation-browser';
 import * as styles from './styles.scss';
 
 
-interface ContentTypeOptions<S extends BaseStorage> {
-  id: keyof S,
+interface ContentTypeOptions {
+  id: keyof typeof conf["data"],
   title: string,
   getIcon: () => JSX.Element,
   getBrowser?: () => JSX.Element,
 }
 
-type ContentTypeOptionSet<S extends BaseStorage> = ContentTypeOptions<S>[];
+type ContentTypeOptionSet = ContentTypeOptions[];
 
 
-const contentTypes: ContentTypeOptionSet<Storage> = [
+const contentTypes: ContentTypeOptionSet = [
   {
     id: 'issues',
     title: 'OB editions',
@@ -46,10 +47,9 @@ const contentTypes: ContentTypeOptionSet<Storage> = [
 ];
 
 
-interface HomeScreenProps {}
-export const HomeScreen: React.FC<HomeScreenProps> = function () {
+const Window: React.FC<WindowComponentProps> = function () {
   
-  const [selectedCType, selectCType] = useState('issues' as keyof Storage);
+  const [selectedCType, selectCType] = useState('issues' as keyof typeof conf["data"]);
 
   const cTypeOptions = contentTypes.find(cType => cType.id === selectedCType);
 
@@ -82,7 +82,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = function () {
 
         <div className={styles.status}>
           <DataBarButton
-              onClick={() => openWindow('settings')}
+              onClick={() => callIPC('open-predefined-window', { id: 'settings' })}
               title="Settings">
             <Icon icon="settings" />
           </DataBarButton>
@@ -113,3 +113,6 @@ const DataBarButton: React.FC<{ onClick: () => void, buttonClassName?: string, t
     </div>
   );
 };
+
+
+export default Window;

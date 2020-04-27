@@ -3,15 +3,17 @@ import { remote } from 'electron';
 import React, { useContext } from 'react';
 import { Icon, Text } from '@blueprintjs/core';
 
-import { LangConfigContext } from 'sse/localizer/renderer';
+import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
 import { OBIssue } from 'models/issues';
 import { Message as AmendmentMessage } from 'models/messages/amendment';
-import { usePublication, useLatestAnnex } from 'storage/renderer';
+import { useLatestAnnex } from 'renderer/hooks';
+import { app } from 'renderer/index';
 import { DateStamp } from 'renderer/widgets/dates';
 import { RecommendationTitle } from 'renderer/widgets/publication-title';
 import { FreeformContents } from '../freeform-contents';
 import { MessageFormProps } from '../message-editor';
+import { Publication } from 'models/publications';
 
 
 export const MessageForm: React.FC<MessageFormProps> = function ({ message, onChange }) {
@@ -31,8 +33,8 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
 
 export const AmendmentMeta: React.FC<{ amendment: AmendmentMessage, issue: OBIssue }> = function ({ amendment, issue }) {
   const pubId = amendment.target.publication;
-  const pub = usePublication(pubId);
-  const latestAnnex = useLatestAnnex(issue.id, pubId);
+  const pub = app.useOne<Publication, string>('publications', pubId).object;
+  const latestAnnex = useLatestAnnex(pubId, issue.id);
   const pubUrl = pub ? pub.url : undefined;
 
   if (pub) {

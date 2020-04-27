@@ -4,11 +4,11 @@ import { remote } from 'electron';
 import React from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { NonIdealState, H5, Icon, IconName, Text, Button } from '@blueprintjs/core';
-import { Index, QuerySet } from 'sse/storage/query';
-import { openWindow } from 'sse/api/renderer';
-import { SimpleEditableCard } from 'sse/renderer/widgets/editable-card-list';
+import { Index, QuerySet } from 'coulomb/db/query';
+import { SimpleEditableCard } from 'coulomb/renderer/widgets/editable-card-list';
 import { DateStamp } from 'renderer/widgets/dates';
 import { ScheduledIssue } from 'models/issues';
+import { app } from 'renderer/index';
 import * as styles from './styles.scss';
 
 
@@ -42,7 +42,9 @@ export const UpcomingIssues: React.FC<UpcomingIssuesProps> = function({ issues, 
                     issue={issue}
                     isCurrent={currentIssueId === issue.id}
                     isNext={nextIssueId === issue.id}
-                    onEditClick={() => openWindow('issue-editor', { issueId: issue.id })}
+                    onEditClick={() =>
+                      app.openObjectEditor('issues', issue.id)
+                    }
                   />
                 </CSSTransition>)}
             </TransitionGroup>
@@ -63,7 +65,7 @@ interface DateStatusProps {
 const DateStatus: React.FC<DateStatusProps> = function ({ icon, className, dateClass, date, text }) {
   const ICON_SIZE = 16;
   return <div className={className}>
-    <Icon iconSize={ICON_SIZE} icon={icon} className={dateClass} /><Text>{text}</Text> <DateStamp date={date} />
+    <Icon iconSize={ICON_SIZE} icon={icon} className={dateClass} /><Text>{text}</Text> {date ? <DateStamp date={date} /> : '(no date)'}
   </div>;
 };
 

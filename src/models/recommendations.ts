@@ -1,5 +1,4 @@
-import { IndexableObject } from 'sse/storage/query';
-import { Translatable } from 'sse/localizer/types';
+import { Translatable } from 'coulomb/localizer/types';
 
 
 export type ITURecCode = string;
@@ -13,7 +12,7 @@ export interface Recommendation {
 }
 
 
-export interface ITURecommendation extends IndexableObject {
+export interface ITURecommendation {
   id: ITURecCode,
   version: ITURecVersion,
   title: Translatable<string>,

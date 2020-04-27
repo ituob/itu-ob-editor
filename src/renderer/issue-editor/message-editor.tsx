@@ -1,9 +1,9 @@
 
 import React, { useContext } from 'react';
 
-import { LangConfigContext } from 'sse/localizer/renderer';
+import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import { NonIdealState, Classes, Dialog } from '@blueprintjs/core';
-import { PaneHeader } from 'sse/renderer/widgets/pane-header';
+import { PaneHeader } from 'coulomb/renderer/widgets/pane-header';
 
 import { PublicationTitle } from 'renderer/widgets/publication-title';
 import { HelpButton } from 'renderer/widgets/help-button';

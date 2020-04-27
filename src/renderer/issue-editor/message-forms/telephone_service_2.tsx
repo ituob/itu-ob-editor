@@ -2,8 +2,8 @@ import React, { useMemo, useState, useEffect, useContext } from 'react';
 import { Tooltip, H4, Label, Button, FormGroup, InputGroup, TextArea } from '@blueprintjs/core';
 import { DatePicker } from '@blueprintjs/datetime';
 
-import { AddCardTrigger, SimpleEditableCard } from 'sse/renderer/widgets/editable-card-list';
-import { LangConfigContext } from 'sse/localizer/renderer';
+import { AddCardTrigger, SimpleEditableCard } from 'coulomb/renderer/widgets/editable-card-list';
+import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
 import {
   TSCommunication,

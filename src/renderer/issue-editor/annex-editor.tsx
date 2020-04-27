@@ -4,13 +4,14 @@ import React, { useState } from 'react';
 
 import { Button, FormGroup, Text } from '@blueprintjs/core';
 import { DatePicker } from '@blueprintjs/datetime';
-import { PaneHeader } from 'sse/renderer/widgets';
+import { PaneHeader } from 'coulomb/renderer/widgets';
 
-import { usePublication, useLatestAnnex } from 'storage/renderer';
+import { app } from 'renderer/index';
+import { useLatestAnnex } from 'renderer/hooks';
 import { DateStamp } from 'renderer/widgets/dates';
 import { RecommendationTitle, PublicationTitle } from 'renderer/widgets/publication-title';
 import { HelpButton } from 'renderer/widgets/help-button';
-
+import { Publication } from 'models/publications';
 import * as styles from './styles.scss';
 
 
@@ -22,8 +23,8 @@ interface AnnexEditorProps {
 }
 export const AnnexEditor: React.FC<AnnexEditorProps> = function ({ pubId, position, onChange, issueId }) {
   const [editingPosition, updateEditingPosition] = useState(false);
-  const pub = usePublication(pubId);
-  const latestAnnex = useLatestAnnex(issueId, pubId);
+  const pub = app.useOne<Publication, string>('publications', pubId).object;
+  const latestAnnex = useLatestAnnex(pubId, issueId);
 
   const pubUrl = pub ? pub.url : undefined;
 

@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 
 import { Callout, FormGroup, InputGroup } from '@blueprintjs/core';
-import { LangConfigContext } from 'sse/localizer/renderer';
+import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
 import { Message as CustomMessage } from 'models/messages/custom';
 import { FreeformContents } from '../freeform-contents';

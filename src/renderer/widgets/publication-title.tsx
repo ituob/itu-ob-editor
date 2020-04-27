@@ -1,14 +1,15 @@
 import moment from 'moment';
 import React, { useContext } from 'react';
 
-import { LangConfigContext } from 'sse/localizer/renderer';
-import { usePublication, useRecommendation } from 'storage/renderer';
+import { LangConfigContext } from 'coulomb/localizer/renderer/context';
+import { app } from 'renderer/index';
+import { Publication } from 'models/publications';
 import { Recommendation, ITURecommendation } from 'models/recommendations';
 
 
 export const PublicationTitle: React.FC<{ id: string }> = function ({ id }) {
   const lang = useContext(LangConfigContext);
-  const pub = usePublication(id);
+  const pub = app.useOne<Publication, string>('publications', id).object;
 
   if (pub) {
     return <>{pub.title[lang.default]}</>;
@@ -21,9 +22,9 @@ export const PublicationTitle: React.FC<{ id: string }> = function ({ id }) {
 export const RecommendationTitle: React.FC<{ rec: Recommendation }> = function ({ rec }) {
   const lang = useContext(LangConfigContext);
   const version = rec.version ? `(${moment(rec.version).format('YYYY-MM')})` : null;
-  const ituRec: ITURecommendation | undefined = useRecommendation(rec.code);
+  const ituRec: ITURecommendation | null = app.useOne<ITURecommendation, string>('recommendations', rec.code).object;
 
-  if (ituRec) {
+  if (ituRec !== null) {
     return <>
       {rec.body} Rec. {rec.code} {version} <em>{ituRec.title[lang.default]}</em>
     </>;

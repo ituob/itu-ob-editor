@@ -2,44 +2,43 @@ import React from 'react';
 import { Position, Menu } from '@blueprintjs/core';
 import { Select, ItemPredicate, ItemRenderer, ItemListRenderer, renderFilteredItems } from '@blueprintjs/select';
 
-import { Index, QuerySet } from 'sse/storage/query';
-import { openWindow } from 'sse/api/renderer';
-import { AddCardTriggerButton } from 'sse/renderer/widgets/editable-card-list';
-import * as editableCardListStyles from 'sse/renderer/widgets/editable-card-list/styles.scss';
+import { Index, QuerySet } from 'coulomb/db/query';
+import { AddCardTriggerButton } from 'coulomb/renderer/widgets/editable-card-list';
+import * as editableCardListStyles from 'coulomb/renderer/widgets/editable-card-list/styles.scss';
 
 import { Publication } from 'models/publications';
-import { OBIssue } from 'models/issues';
-import { getRunningAnnexesForIssue } from 'models/running-annexes';
 
+import { app } from 'renderer/index';
+import { PublicationTitle } from 'renderer/widgets/publication-title';
 import { NewItemPromptProps } from './new-item-menu';
 import * as styles from '../styles.scss';
+import { useRunningAnnexes } from 'renderer/hooks';
 
 
 const MAX_MENU_ITEMS_TO_SHOW = 7;
 
+interface AnnexablePublication {
+  id: string,
+  position: Date | null,
+}
+
 
 type NewAnnexPromptProps = NewItemPromptProps & {
   issueId: number,
-  issueIndex: Index<OBIssue>,
   disabledPublicationIDs: string[],
   publicationIndex: Index<Publication>,
 }
 export const NewAnnexPrompt: React.FC<NewAnnexPromptProps> = function (props) {
-  const runningAnnexes = getRunningAnnexesForIssue(
-    props.issueId,
-    props.issueIndex,
-    props.publicationIndex);
+  const runningAnnexes = useRunningAnnexes(props.issueId);
 
-  const annexedPublicationIds = runningAnnexes.map(item => item.publication.id);
+  const annexedPublicationIds = runningAnnexes.map(item => item.publicationID);
   const nonAnnexedPublications = new QuerySet<Publication>(props.publicationIndex).
     filter((item: [string, Publication]) => annexedPublicationIds.indexOf(item[0]) < 0).all();
 
-  const items = [...runningAnnexes.map(annex => { return {
-    title: annex.publication.title.en,
-    id: annex.publication.id,
-    position: annex.publication.positionOn,
+  const items: AnnexablePublication[] = [...runningAnnexes.map(annex => { return {
+    id: annex.publicationID,
+    position: annex.positionOn,
   }}), ...nonAnnexedPublications.map(pub => { return {
-    title: pub.title.en,
     id: pub.id,
     position: null,
   }})];
@@ -81,12 +80,6 @@ const filterUsageTip = (
   <Menu.Item disabled={true} text="Type publication title or rec. ID…" />
 );
 
-interface AnnexablePublication {
-  title: string,
-  id: string,
-  position: Date | null,
-}
-
 const NewAnnexMenuRenderer: ItemListRenderer<AnnexablePublication> =
     function (props) {
 
@@ -109,12 +102,12 @@ const NewAnnexMenuRenderer: ItemListRenderer<AnnexablePublication> =
 };
 
 const NewAnnexMenuItemRenderer: ItemRenderer<AnnexablePublication> =
-    function (pub, { handleClick, modifiers, query }) {
+    function ({ id }, { handleClick, modifiers, query }) {
 
   return (
     <Menu.Item
-      key={pub.id}
-      text={pub.title}
+      key={id}
+      text={<PublicationTitle id={id} />}
       onClick={handleClick}
       active={modifiers.active}
       title={modifiers.disabled ? `Publication was annexed to or amended in this edition` : undefined}
@@ -125,14 +118,14 @@ const NewAnnexMenuItemRenderer: ItemRenderer<AnnexablePublication> =
 const NewAnnexMenuItemFilter: ItemPredicate<AnnexablePublication> =
     function (query, pub, _index, exactMatch) {
 
-  const normalizedTitle: string = pub.title.toLowerCase();
+  //const normalizedTitle: string = pub.title.toLowerCase();
   const normalizedId: string = pub.id.toLowerCase();
   const normalizedQuery: string = query.toLowerCase();
 
   if (exactMatch) {
-    return normalizedTitle === normalizedQuery;
+    return normalizedId === normalizedQuery;
   } else {
-    return `${normalizedId} ${normalizedTitle}`.indexOf(normalizedQuery) >= 0;
+    return normalizedId.indexOf(normalizedQuery) >= 0;
   }
 };
 
@@ -150,7 +143,7 @@ const renderLaunchPublicationCreator = function (query: string) {
 }
 
 function launchPublicationEditor(forPublicationWithId: string) {
-  openWindow('publication-editor', { pubId: forPublicationWithId, create: true });
+  app.openObjectEditor('publications', forPublicationWithId, 'create=true');
 }
 
 const NewAnnexSelector = Select.ofType<AnnexablePublication>();

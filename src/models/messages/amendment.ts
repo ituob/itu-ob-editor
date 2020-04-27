@@ -1,4 +1,4 @@
-import { Translatable } from 'sse/localizer/types';
+import { Translatable } from 'coulomb/localizer/types';
 import { PublicationID } from 'models/publications';
 
 

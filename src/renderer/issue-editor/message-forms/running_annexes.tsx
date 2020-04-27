@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, Tab, Button, Label, InputGroup } from '@blueprintjs/core';
 
-import { AddCardTrigger, SimpleEditableCard } from 'sse/renderer/widgets/editable-card-list';
+import { AddCardTrigger, SimpleEditableCard } from 'coulomb/renderer/widgets/editable-card-list';
 
-import { useRunningAnnexes } from 'storage/renderer';
+import { useRunningAnnexes } from 'renderer/hooks';
 import { PublicationTitle } from 'renderer/widgets/publication-title';
 import { DateStamp } from 'renderer/widgets/dates';
 
@@ -48,10 +48,10 @@ const RunningAnnexes: React.FC<{ annexes: RunningAnnex[] }> = function ({ annexe
   return (
     <>
       {annexes.map((annex: RunningAnnex) => (
-        <SimpleEditableCard key={annex.publication.id}>
+        <SimpleEditableCard key={annex.publicationID}>
           <strong>{annex.annexedTo.id}:</strong>
           &emsp;
-          {annex.publication.title.en}
+          <PublicationTitle id={annex.publicationID} />
           &emsp;
           {annex.positionOn
             ? <span>(position on <DateStamp date={annex.positionOn} />)</span>

@@ -1,5 +1,4 @@
-import { IndexableObject } from 'sse/storage/query';
-import { Translatable } from 'sse/localizer/types';
+import { Translatable } from 'coulomb/localizer/types';
 
 import { Recommendation } from 'models/recommendations';
 
@@ -7,7 +6,9 @@ import { Recommendation } from 'models/recommendations';
 export type PublicationID = string;
 
 
-export interface Publication extends IndexableObject {
+export interface Publication {
+  /* Represents ITU Service Publication (SP). */
+
   title: Translatable<string>,
   id: PublicationID,
   url?: string,

@@ -4,13 +4,12 @@ import { remote, ipcRenderer } from 'electron';
 import React, { useContext, useState, useEffect } from 'react';
 import { FormGroup, InputGroup } from '@blueprintjs/core';
 
-import { request } from 'sse/api/renderer';
-import { PaneHeader } from 'sse/renderer/widgets/pane-header';
-import { LangConfigContext } from 'sse/localizer/renderer';
-
-import { useModified } from 'storage/renderer';
+import { PaneHeader } from 'coulomb/renderer/widgets/pane-header';
+import { LangConfigContext } from 'coulomb/localizer/renderer/context';
+import { WindowComponentProps } from 'coulomb/config/renderer';
 
 import { Publication } from 'models/publications';
+import { app } from 'renderer/index';
 import { HelpButton } from 'renderer/widgets/help-button';
 import { ObjectStorageStatus } from 'renderer/widgets/change-status';
 import {
@@ -22,62 +21,57 @@ import {
 } from 'renderer/form-validation';
 
 import * as styles from './styles.scss';
+import { callIPC } from 'coulomb/ipc/renderer';
+import { useModifiedIDs } from 'renderer/hooks';
 
 
 const pubOperationQueue = new AsyncLock();
 const SINGLETON_LOCK = 'singletonLock';
 
 
-interface PublicationEditorProps {
-  publicationId: string,
-  create: boolean,
-}
-export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ publicationId, create }) {
+const Window: React.FC<WindowComponentProps> = function ({ query }) {
+  const publicationID = query.get('objectID') || '';
+  const create = query.get('create') ? true : false;
+
   const lang = useContext(LangConfigContext);
 
   /* Load publication at start */
 
+  const _publication = app.useOne<Publication, string>('publications', publicationID);
+
   const [publication, setPublication] = useState({
-    id: publicationId,
+    id: publicationID,
     url: '',
     recommendation: null,
     title: { [lang.default]: '' },
   } as Publication);
 
   useEffect(() => {
-    (async () => {
-      const pub = await get(publication.id);
-      if (pub) { setPublication(pub); }
-    })();
-  }, []);
+    const pub = _publication.object;
+    if (pub) { setPublication(pub); }
+  }, [JSON.stringify(_publication.object)]);
 
 
   /* Reload window if publication changed from outside */
 
-  function handleChanged(evt: any, data: { objIds: string[] }) {
+  function handleChanged(evt: any, data: { ids: string[] }) {
     // Just reload the window if our issue question changed
-    if (data.objIds.indexOf(publicationId) >= 0) {
-      remote.getCurrentWindow().reload();
-    }
+    // if (data.ids.indexOf(publicationID) >= 0) {
+    //   remote.getCurrentWindow().reload();
+    // }
   }
 
   useEffect(() => {
-    ipcRenderer.on('publications-changed', handleChanged);
+    ipcRenderer.on('model-publications-objects-changed', handleChanged);
     return function cleanup() {
-      ipcRenderer.removeListener('publications-changed', handleChanged);
+      ipcRenderer.removeListener('model-publications-objects-changed', handleChanged);
     }
   }, []);
 
 
   /* Changed status mark */
 
-  const modifiedPublications = useModified().publications;
   const [hasUncommittedChanges, setHasUncommittedChanges] = useState(false);
-
-  useEffect(() => {
-    const _hasUncommittedChanges = create || modifiedPublications.indexOf(publicationId) >= 0;
-    setHasUncommittedChanges(_hasUncommittedChanges);
-  }, [modifiedPublications]);
 
 
   /* Configure form validation */
@@ -138,21 +132,14 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
       setCanSave(canSave);
       setValidationErrors(validationErrors);
 
-      if (canSave && !create) {
-        update(publication);
+      if (canSave) {
+        setHasUncommittedChanges(true);
       }
     })();
   }, [JSON.stringify(publication)]);
 
 
   /* IPC helpers */
-
-  async function update(publication: Publication) {
-    await pubOperationQueue.acquire(SINGLETON_LOCK, async () => {
-      const updateResult = await request<{ modified: boolean }>('publication-update', { pubId: publication.id, data: publication });
-      setHasUncommittedChanges(updateResult.modified);
-    });
-  }
 
   async function commitAndClose() {
     if (!canSave) {
@@ -162,15 +149,21 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
 
     await pubOperationQueue.acquire(SINGLETON_LOCK, async () => {
       if (create) {
-        await request<Publication>('publication-create', { data: publication });
+        await callIPC<{ commit: boolean, object: Publication }, { success: true }>
+        ('model-publications-create-one', {
+          object: publication,
+          commit: true,
+        });
       } else {
-        await request<Publication>('publication-update', { pubId: publication.id, data: publication, commit: true });
+        await callIPC<{ commit: boolean, objectID: string, object: Publication }, { success: true }>
+        ('model-publications-update-one', {
+          objectID: publication.id,
+          object: publication,
+          commit: true,
+        });
       }
+      setHasUncommittedChanges(false);
     });
-
-    await ipcRenderer.send('remote-storage-trigger-sync');
-    await ipcRenderer.send('publications-changed');
-    await remote.getCurrentWindow().close();
   }
 
   return (
@@ -183,7 +176,7 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
         <ObjectStorageStatus
           canSave={canSave}
           doneButtonLabel={create ? "Create" : undefined}
-          hasUncommittedChanges={hasUncommittedChanges}
+          haveSaved={!hasUncommittedChanges}
           onCommit={commitAndClose} />
         service publication&nbsp;“<span className="object-id">{publication.id}</span>”
 
@@ -272,11 +265,14 @@ export const PublicationEditor: React.FC<PublicationEditorProps> = function ({ p
 
 async function get(id: string): Promise<Publication | null> {
   try {
-    const pub = await request<Publication>('storage-read-one-in-publications', { objectId: id });
-    console.debug("Got pub");
-    return pub;
+    const pub = await callIPC<{ objectID: string }, { object: Publication | null }>
+    ('model-publications-read-one', { objectID: id });
+    return pub.object;
   } catch (e) {
     console.error(e);
     return null;
   }
 }
+
+
+export default Window;

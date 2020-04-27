@@ -8,20 +8,16 @@ interface ObjectStorageStatusProps {
   haveSaved?: boolean,
   doneButtonLabel?: string,
   canSave?: boolean,
-  hasUncommittedChanges: boolean,
   onCommit: () => Promise<void>,
 }
-export const ObjectStorageStatus: React.FC<ObjectStorageStatusProps> = function ({ canSave, haveSaved, doneButtonLabel, hasUncommittedChanges, onCommit }) {
+export const ObjectStorageStatus: React.FC<ObjectStorageStatusProps> =
+function ({ canSave, haveSaved, doneButtonLabel, onCommit }) {
   /* Shows an icon showing save is in progress, or commit button if applicable. */
 
   let changeStatus: JSX.Element;
   let tooltipText: string;
 
   if (haveSaved === false) {
-    changeStatus = <Icon icon="asterisk" intent="danger" />
-    tooltipText = "Saving edits…";
-
-  } else if (hasUncommittedChanges === true) {
     changeStatus = <Button
         intent="success"
         onClick={onCommit}

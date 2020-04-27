@@ -1,7 +1,7 @@
 // Normalized telephone service message
 // https://github.com/ituob/itu-ob-data/issues/24
 
-import { Translatable } from 'sse/localizer/types';
+import { Translatable } from 'coulomb/localizer/types';
 
 
 export interface TSCommunication {

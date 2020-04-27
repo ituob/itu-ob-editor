@@ -1,18 +1,17 @@
 import { ipcRenderer } from 'electron';
-import { openWindow } from 'sse/api/renderer';
 
 import React, { useState, useEffect } from 'react';
 import { Button, IconName, Tooltip, FormGroup, InputGroup, Intent, Icon, Popover, Position } from '@blueprintjs/core';
 
-import { RemoteStorageStatus } from 'sse/storage/main/remote';
-import { request } from 'sse/api/renderer';
-
-import { useModified } from 'storage/renderer';
+import { BackendStatus } from 'coulomb/db/isogit-yaml/base';
+import { useIPCValue, callIPC } from 'coulomb/ipc/renderer';
+import { conf, app } from '..';
 
 import * as styles from './sync-status.scss';
 
 
 type AnyIDType = string | number;
+type AnyDataType = keyof typeof conf["app"]["data"];
 
 
 interface StorageStatusProps {
@@ -21,27 +20,28 @@ interface StorageStatusProps {
   tooltipPosition?: Position,
 }
 export const StorageStatus: React.FC<StorageStatusProps> = function ({ className, iconClassName, tooltipPosition }) {
-  const [remote, updateRemote] = useState({
+  const [remote, updateRemote] = useState<BackendStatus>({
     isMisconfigured: false,
-    isOffline: false,
     hasLocalChanges: false,
     needsPassword: false,
     isPushing: false,
     isPulling: false,
     statusRelativeToLocal: undefined,
-  } as RemoteStorageStatus);
+    isOnline: false,
+    lastSynchronized: null,
+  });
 
-  const modifiedIds = useModified();
+  const modifiedIds: { [K in AnyDataType]: string[] } =
+  Object.keys(conf.app.data).map((key) => {
+    return {
+      [key]: useIPCValue<{}, string[]>(`model-${key}-read-uncommitted-ids`, []).value,
+    };
+  }).reduce((prevValue, currValue) => ({ ...prevValue, ...currValue }));
 
   useEffect(() => {
-    triggerInitialStorageSync();
-
-    ipcRenderer.once('app-loaded', triggerInitialStorageSync);
-    ipcRenderer.on('remote-storage-status', handleStorageStatusUpdate);
-
+    ipcRenderer.on('db-default-status', handleStorageStatusUpdate);
     return function cleanup() {
-      ipcRenderer.removeListener('app-loaded', triggerInitialStorageSync);
-      ipcRenderer.removeListener('remote-storage-status', handleStorageStatusUpdate);
+      ipcRenderer.removeListener('db-default-status', handleStorageStatusUpdate);
     };
   }, []);
 
@@ -51,11 +51,11 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
     openPasswordPrompt(remote.needsPassword);
   }, [remote.needsPassword]);
 
-  async function triggerInitialStorageSync() {
-    await ipcRenderer.send('remote-storage-trigger-sync');
+  async function triggerStorageSync() {
+    await callIPC('db-default-git-trigger-sync');
   }
 
-  function handleStorageStatusUpdate(evt: any, remoteStatus: Partial<RemoteStorageStatus>) {
+  function handleStorageStatusUpdate(evt: any, remoteStatus: Partial<BackendStatus>) {
     updateRemote(remote => ({ ...remote, ...remoteStatus }));
   }
 
@@ -68,8 +68,7 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
     statusIcon = "error";
     tooltipText = "Remote storage is missing configuration";
     statusIntent = "danger";
-    action = () => openWindow('settings');
-
+    action = () => app.openPredefinedWindow('settings');
   } else if (remote.hasLocalChanges) {
     statusIcon = "git-commit";
     tooltipText = "Uncommitted local changes present—click to resolve";
@@ -79,10 +78,10 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
       const hasModifiedItems = Object.values(modifiedIds).
         reduce((acc, val) => { return [ ...acc, ...Object.keys(val) ] }, [] as AnyIDType[]).length > 0;
       if (remote.hasLocalChanges && !hasModifiedItems) {
-        await ipcRenderer.send('remote-storage-discard-all');
-        await ipcRenderer.send('remote-storage-trigger-sync');
+        await ipcRenderer.send('db-default-discard-unstaged');
+        await triggerStorageSync();
       } else {
-        openWindow('batch-commit');
+        app.openPredefinedWindow('batchCommit');
       }
     }
 
@@ -92,11 +91,11 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
     statusIntent = "primary";
     action = null;
 
-  } else if (remote.isOffline) {
+  } else if (!remote.isOnline) {
     statusIcon = "offline";
     tooltipText = "No connection to remote storage—click to retry";
     statusIntent = "danger";
-    action = () => ipcRenderer.send('remote-storage-trigger-sync');
+    action = triggerStorageSync;
 
   } else if (remote.isPulling) {
     statusIcon = "cloud-download"
@@ -114,7 +113,7 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
     statusIcon = "git-branch"
     tooltipText = "Local and remote storage have diverging changes—click to retry";
     statusIntent = "danger";
-    action = () => ipcRenderer.send('remote-storage-trigger-sync');
+    action = triggerStorageSync;
 
   } else if (remote.statusRelativeToLocal === 'behind') {
     statusIcon = "cloud-upload"
@@ -126,7 +125,7 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
     statusIcon = "updated"
     tooltipText = "Click to trigger remote storage sync";
     statusIntent = "success";
-    action = () => ipcRenderer.send('remote-storage-trigger-sync');
+    action = triggerStorageSync;
   }
 
   return <div className={`${styles.storageStatusBase} ${className || ''}`}>
@@ -154,7 +153,7 @@ const PasswordPrompt: React.FC<{ onConfirm: () => void }> = function ({ onConfir
   const [value, setValue] = useState('');
 
   async function handlePasswordConfirm() {
-    await request<{ success: true }>('git-set-password', { password: value });
+    await callIPC<{ password: string }, { success: true }>('db-default-git-set-password', { password: value });
     onConfirm();
   }
 

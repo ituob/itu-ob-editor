@@ -2,11 +2,11 @@ import * as moment from 'moment';
 import React, { useState } from 'react';
 
 import { Button, Callout, Label, FormGroup, InputGroup } from '@blueprintjs/core';
-import { AddCardTrigger, SimpleEditableCard } from 'sse/renderer/widgets/editable-card-list';
+import { AddCardTrigger, SimpleEditableCard } from 'coulomb/renderer/widgets/editable-card-list';
 
-import { ITURecCode, ITURecVersion } from 'models/recommendations';
+import { ITURecCode, ITURecVersion, ITURecommendation } from 'models/recommendations';
 import { Message as ApprovedRecommendationsMessage } from 'models/messages/approved_recommendations';
-import { useRecommendation } from 'storage/renderer';
+import { app } from 'renderer/index';
 
 import { MessageFormProps, MessageEditorDialog } from '../message-editor';
 
@@ -74,7 +74,7 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
 
       <>
         {Object.entries(msg.items).map(([code, version]: [string, string]) => {
-          const rec = useRecommendation(code);
+          const rec = app.useOne<ITURecommendation, string>('recommendations', code).object;
           const title = rec ? rec.title.en : '';
           return (
             <SimpleEditableCard

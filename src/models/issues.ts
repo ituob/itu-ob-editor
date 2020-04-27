@@ -1,4 +1,3 @@
-import { IndexableObject } from 'sse/storage/query';
 import { Message, MessageType } from 'models/messages';
 import { AvailableLanguages } from 'models/languages';
 
@@ -50,7 +49,7 @@ interface OBAuthorOrg {
   contacts: Contact[],
 }
 
-export interface ScheduledIssue extends IndexableObject<number> {
+export interface ScheduledIssue {
   // Trimmed down OBIssue, schedule only
   id: number,
   publication_date: Date,
