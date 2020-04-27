@@ -15,6 +15,7 @@ import { conf as appConf } from '../app';
 import { OBIssue } from 'models/issues';
 import { Publication } from 'models/publications';
 import { ITURecommendation } from 'models/recommendations';
+import { default as FSWrapper } from 'coulomb/db/isogit-yaml/main/yaml/directory';
 
 
 const appDataPath = electronApp.getPath('userData');
@@ -36,7 +37,7 @@ export const conf: MainConfig<typeof appConf> = {
         workDir: path.join(appDataPath, 'ituob-data'),
         upstreamRepoURL: 'https://github.com/ituob/itu-ob-data',
         corsProxyURL: 'https://cors.isomorphic-git.org',
-        fsWrapperClass: async () => await import('coulomb/db/isogit-yaml/main/yaml/directory'),
+        fsWrapperClass: FSWrapper,
       },
     },
   },
