@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 import { NonIdealState, Button, Icon, Tooltip, Position } from '@blueprintjs/core';
 
-// import { getStatic } from 'sse/renderer/static';
-// <img src={getStatic('itu-logo.png')} alt="ITU logo" className={styles.logo} />
-
 import { callIPC } from 'coulomb/ipc/renderer';
 import { WindowComponentProps } from 'coulomb/config/renderer';
 
@@ -12,7 +9,6 @@ import { conf } from 'app';
 import { StorageStatus } from 'renderer/widgets/sync-status';
 import { default as IssueScheduler } from '../issue-scheduler';
 import { Browser as PublicationBrowser } from '../publication-browser';
-//import { RecommendationBrowser } from '../recommendation-browser';
 import * as styles from './styles.scss';
 
 
