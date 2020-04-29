@@ -55,7 +55,7 @@ export const conf: AppConfig = {
     default: {
       openerParams: {
         title: 'ITU OB Editor',
-        dimensions: { width: 800, height: 500, minWidth: 800, minHeight: 500 },
+        dimensions: { width: 800, height: 550, minWidth: 800, minHeight: 550 },
       },
     },
     issueEditor: {
