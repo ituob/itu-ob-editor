@@ -63,7 +63,6 @@ const Scheduler: React.FC<{}> = function () {
   }
 
   function refreshIssues() {
-    console.debug("Refreshing issues");
     issueIndex.refresh();
   }
 
