@@ -56,60 +56,37 @@ const MetaIDEditor: React.FC<MetaEditorProps<MetaID>> = function ({ data, onChan
 
 
 const MetaAuthorsEditor: React.FC<MetaEditorProps<MetaAuthors>> = function ({ data, onChange }) {
-  type AuthorOrPlaceholder = OBAuthorOrg & { isPlaceholder?: true };
-
-  const [_data, _setData] = useState<MetaAuthors>(data);
-
-  var authors: AuthorOrPlaceholder[] =  [ ...(_data.authors || []) ];;
-  if (authors.find(a => a.isPlaceholder === true) === undefined) {
-    authors.push({ isPlaceholder: true, contacts: [] });
+  function updateData(newAuthors: OBAuthorOrg[]) {
+    onChange({ ...data, authors: newAuthors });
   }
 
-  function updateData(newAuthors: AuthorOrPlaceholder[]) {
-    _setData({ ...data, authors: newAuthors });
-
-    const authors: OBAuthorOrg[] = newAuthors.filter(a => a.isPlaceholder !== true);
-    onChange({ ...data, authors });
-  }
-
-  function updateItem(idx: number, item: AuthorOrPlaceholder) {
-    var _newItem: AuthorOrPlaceholder = { ...item };
-    if (itemIsNotEmpty(_newItem)) {
-      _newItem.isPlaceholder = undefined;
-    }
-
-    var items = [ ...authors ];
-    items[idx] = _newItem;
-    updateData(sanitizeAuthors(items));
-  }
-
-  function itemIsNotEmpty(a: AuthorOrPlaceholder) {
-    return a && ((a.name || '').trim() !== '' || (a.address || '').trim() !== '');
-  }
-
-  function sanitizeAuthors(items: OBAuthorOrg[]) {
-    return items.filter(itemIsNotEmpty);
+  function updateItem(idx: number, item: OBAuthorOrg) {
+    var items = [ ...data.authors ];
+    items[idx] = item;
+    updateData(items);
   }
 
   function deleteItem(idx: number) {
-    updateData(update(authors, { $splice: [[idx, 1]] }));
+    updateData(update(data.authors, { $splice: [[idx, 1]] }));
+  }
+
+  function appendNew() {
+    updateData([ ...data.authors, { name: '', contacts: [] }]);
   }
 
   const moveItem = useCallback((dragIndex: number, hoverIndex: number) => {
     if (dragIndex === undefined) return;
-    if (authors[dragIndex].isPlaceholder) return;
 
-    const dragItem = authors[dragIndex];
-    updateData(update(authors, { $splice: [[dragIndex, 1], [hoverIndex, 0, dragItem]] }));
-  }, [authors]);
+    const dragItem = data.authors[dragIndex];
+    updateData(update(data.authors, { $splice: [[dragIndex, 1], [hoverIndex, 0, dragItem]] }));
+  }, [data.authors]);
 
-  function renderAuthor(author: AuthorOrPlaceholder, idx: number) {
+  function renderAuthor(author: OBAuthorOrg, idx: number) {
     return (
       author !== undefined
         ? <Sortable
-              key={author.isPlaceholder ? 'placeholder' : (_data.authors || []).indexOf(author)}
+              key={(data.authors || []).indexOf(author)}
               idx={idx}
-              canReorder={author.isPlaceholder !== true}
               itemType='author'
               onReorder={moveItem}
               handleIcon="menu"
@@ -119,12 +96,11 @@ const MetaAuthorsEditor: React.FC<MetaEditorProps<MetaAuthors>> = function ({ da
           <PaneHeader
               className={styles.metaAuthorItemTitle}
               actions={<Button
-                disabled={author.isPlaceholder}
                 onClick={() => deleteItem(idx)}
-                icon="cross"
-                title="Delete this author." />}
+                icon="delete"
+                title="Delete this author.">Delete</Button>}
               align="left">
-            {author.isPlaceholder ? <>New author</> : <>Author {idx + 1}</>}
+            Author {idx + 1}
           </PaneHeader>
           <AuthorItem
             author={author}
@@ -137,54 +113,39 @@ const MetaAuthorsEditor: React.FC<MetaEditorProps<MetaAuthors>> = function ({ da
   return <>
     <DndProvider backend={Backend}>
       <div>
-        {[ ...authors.entries() ].map(([idx, author]) => renderAuthor(author, idx) )}
+        {[ ...data.authors.entries() ].map(([idx, author]) => renderAuthor(author, idx) )}
       </div>
+      <Button className={styles.metaNewItem} onClick={appendNew} icon="add">Add author</Button>
     </DndProvider>
   </>;
 };
 
 const AuthorItem: React.FC<{ author: OBAuthorOrg, onChange: (author: OBAuthorOrg) => void }> = function ({ author, onChange }) {
-  type ContactOrPlaceholder = Contact & { isPlaceholder?: true };
-
-  //const [_data, _setData] = useState<OBAuthorOrg>(author);
-
   function updateData(newDataPartial: Partial<OBAuthorOrg>, save = true) {
     const newData = { ...author, ...newDataPartial };
-    //_setData(newData);
     if (save) { onChange(newData); }
   }
 
-  function itemIsNotEmpty(c: ContactOrPlaceholder) {
-    return c && c.data.trim() !== '';
-  }
-
   function updateItem(idx: number, c: Contact) {
-    var _newItem: ContactOrPlaceholder = { ...c };
-    if (itemIsNotEmpty(c)) {
-      _newItem.isPlaceholder = undefined;
-    }
-
     var items = [ ...author.contacts ];
-    items[idx] = _newItem;
+    items[idx] = c;
     updateData({ contacts: items }, true);
   }
 
   function deleteItem(idx: number) {
-    updateData({ contacts: update(contacts, { $splice: [[idx, 1]] }) });
+    updateData({ contacts: update(author.contacts, { $splice: [[idx, 1]] }) });
   }
 
-  var contacts: ContactOrPlaceholder[] =  [ ...(author.contacts || []) ];
-  if (contacts.find(c => c.isPlaceholder === true) === undefined) {
-    contacts.push({ type: 'phone', data: '', isPlaceholder: true });
+  function appendNew() {
+    updateData({ contacts: [ ...author.contacts, { data: '', type: 'phone' }] });
   }
 
   const moveItem = useCallback((dragIndex: number, hoverIndex: number) => {
     if (dragIndex === undefined) return;
-    if (contacts[dragIndex].isPlaceholder) return;
 
-    const dragItem = contacts[dragIndex];
-    updateData({ contacts: update(contacts, { $splice: [[dragIndex, 1], [hoverIndex, 0, dragItem]] }) });
-  }, [contacts]);
+    const dragItem = author.contacts[dragIndex];
+    updateData({ contacts: update(author.contacts, { $splice: [[dragIndex, 1], [hoverIndex, 0, dragItem]] }) });
+  }, [author.contacts]);
 
   return <>
     <FormGroup
@@ -209,11 +170,10 @@ const AuthorItem: React.FC<{ author: OBAuthorOrg, onChange: (author: OBAuthorOrg
     </FormGroup>
 
     <div className={styles.metaAuthorContacts}>
-      {[ ...contacts.entries() ].map(([idx, c]) =>
+      {[ ...author.contacts.entries() ].map(([idx, c]) =>
         <Sortable
-            key={c.isPlaceholder ? 'placeholder' : (author.contacts || []).indexOf(c)}
+            key={(author.contacts || []).indexOf(c)}
             idx={idx}
-            canReorder={c.isPlaceholder !== true}
             itemType={`contact`}
             onReorder={moveItem}
             handleIcon="menu"
@@ -223,10 +183,11 @@ const AuthorItem: React.FC<{ author: OBAuthorOrg, onChange: (author: OBAuthorOrg
           <AuthorContactItem
             key={idx}
             contact={c}
-            onDelete={c.isPlaceholder ? undefined : () => deleteItem(idx)}
+            onDelete={() => deleteItem(idx)}
             onChange={(newC) => updateItem(idx, newC)} />
         </Sortable>
       )}
+      <Button className={styles.metaNewItem} onClick={appendNew} icon="add">Add contact</Button>
     </div>
   </>;
 };
@@ -240,30 +201,42 @@ const AuthorContactItem: React.FC<{ contact: Contact, onChange: (contact: Contac
     if (save) { onChange(newData) };
   }
 
+  const contactTypes: ('phone' | 'email' | 'fax')[] = [
+    'phone',
+    'email',
+    'fax',
+  ];
+
   return <ControlGroup fill>
     <ButtonGroup>
-      <Button active={contact.type === 'phone'} onClick={() => updateData({ type: "phone" })}>Phone</Button>
-      <Button active={contact.type === 'email'} onClick={() => updateData({ type: "email" })}>Email</Button>
-      <Button active={contact.type === 'fax'} onClick={() => updateData({ type: "fax" })}>Fax</Button>
+      {contactTypes.map(ct =>
+        <Button
+            key={ct}
+            active={contact.type === ct}
+            onClick={() => updateData({ type: ct }, true)}>
+          {ct}
+        </Button>
+      )}
     </ButtonGroup>
     <InputGroup required
       fill
       type="text"
       placeholder="New contact data…"
-      onBlur={() => updateData({}, true)}
       value={contact.data || ''}
       onChange={(evt: React.FormEvent<HTMLInputElement>) =>
         updateData({ data: evt.currentTarget.value })} />
     <ButtonGroup>
       <Button
+        minimal
         active={contact.recommended === true}
         onClick={() =>
           updateData({ recommended: !contact.recommended }, true)}>Highlight</Button>
       <Button
+        minimal
         disabled={!onDelete}
         title="Delete this contact."
         onClick={onDelete}
-        icon="cross" />
+        icon="delete" />
     </ButtonGroup>
   </ControlGroup>;
 };

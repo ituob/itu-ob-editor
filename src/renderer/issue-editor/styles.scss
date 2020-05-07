@@ -171,6 +171,10 @@ $sidebarWidth: 17em;
   padding: $pt-grid-size * 2;
 }
 
+:local .metaNewItem {
+  margin: $pt-grid-size;
+}
+
 :local .metaSchedulePane {
   display: flex;
   flex-flow: row wrap;
