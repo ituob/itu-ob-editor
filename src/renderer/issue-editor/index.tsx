@@ -3,7 +3,7 @@ import AsyncLock from 'async-lock';
 import { remote, ipcRenderer } from 'electron';
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { Spinner, NonIdealState } from '@blueprintjs/core';
+import { Spinner, NonIdealState, Button } from '@blueprintjs/core';
 
 import { callIPC } from 'coulomb/ipc/renderer';
 import { PaneHeader } from 'coulomb/renderer/widgets';
@@ -178,10 +178,36 @@ export const IssueEditor: React.FC<{ issue: OBIssue }> = (props) => {
     selectedSection,
     selectedAnnex,
     JSON.stringify([issue.issn, issue.languages, issue.authors, issue.publication_date, issue.cutoff_date]),
-    issue.amendments.messages.length,
-    issue.general.messages.length,
+    (issue.amendments?.messages || []).length,
+    (issue.general?.messages || []).length,
     Object.keys(issue.annexes || {}).length,
   ]);
+
+
+  if (issue.amendments?.messages === undefined || issue.general?.messages === undefined) {
+    async function deleteIssue() {
+      callIPC('model-issues-delete-one', { objectID: issue.id });
+      remote.getCurrentWindow().close();
+    }
+
+    return <NonIdealState
+      title="Apologies"
+      icon="heart-broken"
+      description={<>
+        <p>
+          Data of OB issue {issue.id} appears to be malformed.
+          <br />
+          You may be instructed by app developers to delete it.
+          <br />
+          If so, click the button below.
+        </p>
+        <p>
+          After deleting the issue, you can re-create it if needed.
+        </p>
+        <Button onClick={deleteIssue} intent="danger">Delete issue {issue.id}</Button>
+      </>}
+    />
+  }
 
 
   /* Event handling utilities */
