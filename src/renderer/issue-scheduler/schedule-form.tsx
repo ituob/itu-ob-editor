@@ -48,7 +48,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = function ({ busy, draft
     : undefined;
 
   const issueExists = draft.id ? existingIDs.indexOf(draft.id) >= 0 : false;
-  const alreadyExistsError = busy === false && issueExists !== undefined
+  const alreadyExistsError = busy === false && issueExists === true
     ? <>
         Edition {draft.id} already exists.
         &ensp;
