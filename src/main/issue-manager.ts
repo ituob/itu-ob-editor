@@ -96,6 +96,11 @@ class IssueManager extends Manager<OBIssue, number, { onlyIDs?: number[], month?
     }
   }
 
+  protected getObjID(dbRef: string) {
+    const objID = super.getObjID(dbRef) as unknown as string;
+    return parseInt(objID, 10);
+  }
+
 
   public setUpIPC(modelName: string) {
     super.setUpIPC(modelName);
