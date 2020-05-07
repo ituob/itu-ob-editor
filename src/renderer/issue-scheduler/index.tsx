@@ -174,9 +174,9 @@ const Scheduler: React.FC<{}> = function () {
             maxDate={maxDate}
             value={date}
             onChange={(newDate, isUserChange) => {
-              if (isUserChange) { startOrUpdateDraft(newDate || date); }
+              if (isUserChange) { startOrUpdateDraft(newDate); }
               if (newDate !== null) { selectDate(newDate); }
-              if (!moment(newDate).isSame(date, 'month')) { selectMonth(newDate); }
+              if (!moment(newDate).isSame(newDate, 'month')) { selectMonth(newDate); }
             }}
           />
 
