@@ -34,7 +34,7 @@ import { AnnexEditor } from './annex-editor';
 import * as styles from './styles.scss';
 import { WindowComponentProps } from 'coulomb/config/renderer';
 import { SimpleEditableCard } from 'coulomb/renderer/widgets/editable-card-list';
-import { metaEditors } from './meta-editor';
+import { metaEditors } from './meta';
 
 
 const operationLock = new AsyncLock();
@@ -292,6 +292,12 @@ export const IssueEditor: React.FC<{ issue: OBIssue }> = (props) => {
                 selected={selectedSection === 'metaLanguages'}
                 onSelect={() => selectSection('metaLanguages')}>
               Languages
+            </SimpleEditableCard>
+            <SimpleEditableCard minimal
+                icon="delete"
+                selected={selectedSection === 'metaDeleteIssue'}
+                onSelect={() => selectSection('metaDeleteIssue')}>
+              Delete issue
             </SimpleEditableCard>
           </div>
 
