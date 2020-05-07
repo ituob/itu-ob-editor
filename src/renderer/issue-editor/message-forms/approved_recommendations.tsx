@@ -17,6 +17,7 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
   const [msg, updateMsg] = useState(message as ApprovedRecommendationsMessage);
 
   const [newRecDialogStatus, toggleNewRecDialogStatus] = useState(false);
+  const recs = app.useMany<ITURecommendation>('recommendations').objects;
 
   function _onChange(updatedMsg: { [K in keyof ApprovedRecommendationsMessage]?: ApprovedRecommendationsMessage[K] }) {
     updateMsg({ ...msg, ...updatedMsg });
@@ -74,7 +75,7 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
 
       <>
         {Object.entries(msg.items).map(([code, version]: [string, string]) => {
-          const rec = app.useOne<ITURecommendation, string>('recommendations', code).object;
+          const rec = recs[code];
           const title = rec ? rec.title.en : '';
           return (
             <SimpleEditableCard
