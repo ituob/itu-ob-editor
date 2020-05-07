@@ -19,6 +19,7 @@ interface SortableProps {
 }
 export const Sortable: React.FC<SortableProps> =
 function ({ idx, canReorder, onReorder, className, draggingClassName, children, itemType, handleClassName, handleIcon }) {
+  const reorderable = canReorder !== false;
 
   const ref = useRef<HTMLDivElement>(null);
 
@@ -75,7 +76,7 @@ function ({ idx, canReorder, onReorder, className, draggingClassName, children, 
   const [{ isDragging }, drag, preview] = useDrag({
     item: { type: itemType, idx },
     collect: (monitor: any) => ({
-      isDragging: canReorder && monitor.isDragging(),
+      isDragging: reorderable && monitor.isDragging(),
     }),
   });
 
@@ -84,7 +85,7 @@ function ({ idx, canReorder, onReorder, className, draggingClassName, children, 
   return <div
       className={`${className || ''} ${isDragging ? draggingClassName : ''}`}
       ref={handleIcon ? preview : ref}>
-    {canReorder && handleIcon
+    {reorderable && handleIcon
       ? <div ref={ref} className={handleClassName || ''} title="Hold and drag to reorder.">
           <div ref={dragHandle}>
             <Icon ref={dragHandle} icon={handleIcon} />
