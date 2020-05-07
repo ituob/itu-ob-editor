@@ -76,6 +76,12 @@ class IssueManager extends Manager<OBIssue, number, { onlyIDs?: number[], month?
     await this.reportUpdatedData([objID]);
   }
 
+  public async delete(objID: number, commit: boolean | string = false) {
+    await super.delete(objID, commit);
+    await this.rebuildSchedule(await this.readAll({}, true));
+    await this.reportUpdatedData([objID]);
+  }
+
   async getCurrentIssueID() {
     const issues = new QuerySet<ScheduledIssue>(this.schedule);
 
