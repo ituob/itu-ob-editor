@@ -1,4 +1,5 @@
 import { AppConfig } from 'coulomb/config/app';
+import { AvailableLanguages } from 'models/languages';
 
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -11,17 +12,11 @@ if (!isDevelopment) {
   APP_HELP_ROOT = "http://ituob.org:5001/_app_help/";
 }
 
-
-export const defaultLanguage: keyof typeof availableLanguages = 'en';
+export const defaultLanguage: keyof typeof AvailableLanguages = 'en';
 
 export const defaultISSN = '1564-5223';
 
-export const availableLanguages = {
-  'en': 'English',
-  'zh': 'Chinese',
-  'ru': 'Russian',
-};
-
+export const availableLanguages = AvailableLanguages;
 
 export const conf: AppConfig = {
   data: {
