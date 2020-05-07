@@ -267,7 +267,8 @@ export const IssueEditor: React.FC<{ issue: OBIssue }> = (props) => {
         <div className={styles.paneBody}>
 
           <div className={styles.metaSectionList}>
-            <PaneHeader minor={true} align="left">Publication meta</PaneHeader>
+            <PaneHeader minor={true} align="left">Settings</PaneHeader>
+
             <SimpleEditableCard minimal
                 icon="numerical"
                 selected={selectedSection === 'metaID'}
