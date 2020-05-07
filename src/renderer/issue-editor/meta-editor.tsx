@@ -71,7 +71,7 @@ const MetaAuthorsEditor: React.FC<MetaEditorProps<MetaAuthors>> = function ({ da
   }
 
   function appendNew() {
-    updateData([ ...data.authors, { name: '', contacts: [] }]);
+    updateData([ ...(data.authors || []), { name: '', contacts: [] }]);
   }
 
   const moveItem = useCallback((dragIndex: number, hoverIndex: number) => {
@@ -113,7 +113,7 @@ const MetaAuthorsEditor: React.FC<MetaEditorProps<MetaAuthors>> = function ({ da
   return <>
     <DndProvider backend={Backend}>
       <div>
-        {[ ...data.authors.entries() ].map(([idx, author]) => renderAuthor(author, idx) )}
+        {[ ...(data.authors || []).entries() ].map(([idx, author]) => renderAuthor(author, idx) )}
       </div>
       <Button className={styles.metaNewItem} onClick={appendNew} icon="add">Add author</Button>
     </DndProvider>
