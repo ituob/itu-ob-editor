@@ -68,6 +68,13 @@ by [electron-log](https://github.com/megahertz/electron-log/tree/v3.0.9):
 * on Windows: `%USERPROFILE%\AppData\Roaming\<app name>\log.log`
 * on Linux: `~/.config/<app name>/log.log`
 
+To debug in production mode on macOS, run built binary as follows
+(from inside repository root):
+
+```bash
+./dist/mac/ITU\ OB\ Editor.app/Contents/MacOS/ITU\ OB\ Editor --remote-debugging-port=8315
+```
+
 ### Resetting app data manually during development
 
 If the app errors out, a fix could be to manually delete the cloned data repository.
