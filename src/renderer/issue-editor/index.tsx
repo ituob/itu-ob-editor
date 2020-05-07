@@ -33,6 +33,8 @@ import { AnnexEditor } from './annex-editor';
 
 import * as styles from './styles.scss';
 import { WindowComponentProps } from 'coulomb/config/renderer';
+import { SimpleEditableCard } from 'coulomb/renderer/widgets/editable-card-list';
+import { metaEditors } from './meta-editor';
 
 
 const operationLock = new AsyncLock();
@@ -87,13 +89,12 @@ export const IssueEditor: React.FC<{ issue: OBIssue }> = (props) => {
 
   /* Prepare initial item selection status */
 
-  let initialItemIdx: string | undefined;
-  let initialSection: OBSection;
-  initialItemIdx = undefined;
-  initialSection = 'general';
+  type MetaSections = string & keyof typeof metaEditors;
+  const initialItemIdx: string | undefined = undefined;
+  const initialSection: OBSection | MetaSections = 'metaID';
 
   const [selectedItem, selectItem] = useState<string | undefined>(initialItemIdx);
-  const [selectedSection, selectSection] = useState<OBSection>(initialSection);
+  const [selectedSection, selectSection] = useState<OBSection | MetaSections>(initialSection);
 
   // Convenience shortcuts
   const selectedMessageIdx: number | undefined = isOBMessageSection(selectedSection) && selectedItem !== undefined
@@ -142,7 +143,10 @@ export const IssueEditor: React.FC<{ issue: OBIssue }> = (props) => {
   // doesn’t cause the editor pane to re-render, which may lose cursor position and undo history.
   // Only re-render if selected item index or section, meaning a switch to another item.
   const editor = useMemo(() => {
-    if (isOBMessageSection(selectedSection) && selectedItem !== undefined) {
+    if (metaEditors[selectedSection] !== undefined) {
+      const MetaEditor = metaEditors[selectedSection];
+      return <MetaEditor data={issue} onChange={handleMetaEdit} />;
+    } else if (isOBMessageSection(selectedSection) && selectedItem !== undefined) {
       const message = issue[selectedSection].messages[parseInt(selectedItem, 10)];
       if (message) {
         return <MessageEditor
@@ -173,6 +177,7 @@ export const IssueEditor: React.FC<{ issue: OBIssue }> = (props) => {
     selectedMessageIdx,
     selectedSection,
     selectedAnnex,
+    JSON.stringify([issue.issn, issue.languages, issue.authors, issue.publication_date, issue.cutoff_date]),
     issue.amendments.messages.length,
     issue.general.messages.length,
     Object.keys(issue.annexes || {}).length,
@@ -180,6 +185,11 @@ export const IssueEditor: React.FC<{ issue: OBIssue }> = (props) => {
 
 
   /* Event handling utilities */
+
+  function handleMetaEdit(data: Partial<OBIssue>) {
+    const newIssue = { ...issue, ...data };
+    updateIssue(newIssue);
+  }
 
   function handleItemSelection(inSection: OBSection, atIndex: string) {
     selectItem(atIndex);
@@ -256,6 +266,34 @@ export const IssueEditor: React.FC<{ issue: OBIssue }> = (props) => {
 
         <div className={styles.paneBody}>
 
+          <div className={styles.metaSectionList}>
+            <PaneHeader minor={true} align="left">Publication meta</PaneHeader>
+            <SimpleEditableCard minimal
+                icon="numerical"
+                selected={selectedSection === 'metaID'}
+                onSelect={() => selectSection('metaID')}>
+              Identifiers
+            </SimpleEditableCard>
+            <SimpleEditableCard minimal
+                icon="timeline-events"
+                selected={selectedSection === 'metaSchedule'}
+                onSelect={() => selectSection('metaSchedule')}>
+              Schedule
+            </SimpleEditableCard>
+            <SimpleEditableCard minimal
+                icon="people"
+                selected={selectedSection === 'metaAuthors'}
+                onSelect={() => selectSection('metaAuthors')}>
+              Authors
+            </SimpleEditableCard>
+            <SimpleEditableCard minimal
+                icon="translate"
+                selected={selectedSection === 'metaLanguages'}
+                onSelect={() => selectSection('metaLanguages')}>
+              Languages
+            </SimpleEditableCard>
+          </div>
+
           <ItemList
             title="General Messages"
             items={issue.general.messages}
@@ -271,6 +309,8 @@ export const IssueEditor: React.FC<{ issue: OBIssue }> = (props) => {
                 highlight={highlight}
                 existingMessages={issue.general.messages}
                 onCreate={item => handleNewMessage(item as Message, 'general')} />}
+
+            className={styles.generalMessageList}
           />
 
           <ItemList

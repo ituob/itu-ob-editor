@@ -36,13 +36,13 @@ export function isOBAnnexesSection(val: string): val is OBAnnexesSection {
   return val === 'annexes';
 }
 
-interface Contact {
+export interface Contact {
   type: 'phone' | 'email' | 'fax',
   data: string,
   recommended?: boolean,
 }
 
-interface OBAuthorOrg {
+export interface OBAuthorOrg {
   address?: string,
   name?: string,
   // We’ll expect either address or name to be present.
@@ -56,14 +56,19 @@ export interface ScheduledIssue {
   cutoff_date: Date,
 }
 
-export interface OBIssue extends ScheduledIssue {
-  general: MessageBlock,
-  amendments: MessageBlock,
-  annexes: AnnexesBlock,
+export interface IssueMeta {
   issn: string,
   authors: OBAuthorOrg[],
   languages: { [L in keyof typeof AvailableLanguages]?: true },
 }
+
+export interface IssueContents {
+  general: MessageBlock,
+  amendments: MessageBlock,
+  annexes: AnnexesBlock,
+}
+
+export interface OBIssue extends ScheduledIssue, IssueMeta, IssueContents {}
 
 
 interface Factories<M> {

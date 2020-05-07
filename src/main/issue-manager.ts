@@ -4,8 +4,12 @@ import * as log from 'electron-log';
 import { default as Manager } from 'coulomb/db/isogit-yaml/main/manager';
 import { sortIntegerAscending, QuerySet, Index } from 'coulomb/db/query';
 import { listen } from 'coulomb/ipc/main';
-import { OBIssue, ScheduledIssue } from 'models/issues';
+import { OBIssue, ScheduledIssue, IssueMeta } from 'models/issues';
 import { RunningAnnex, getRunningAnnexesForIssue } from 'models/running-annexes';
+import { defaultLanguage, defaultISSN } from '../app';
+
+
+const PUBLICATION_META_PATH = 'defaults/issue';
 
 
 class IssueManager extends Manager<OBIssue, number, { onlyIDs?: number[], month?: Date }> {
@@ -27,9 +31,14 @@ class IssueManager extends Manager<OBIssue, number, { onlyIDs?: number[], month?
   }
 
   rebuildRunningAnnexes(idx: Index<OBIssue>, forIssueID?: number) {
-    for (const issueID of Object.keys(idx)) {
-      this.runningAnnexes[issueID] =
-        getRunningAnnexesForIssue(parseInt(issueID, 10), idx);
+    if (forIssueID) {
+      this.runningAnnexes[forIssueID] =
+        getRunningAnnexesForIssue(forIssueID, idx);
+    } else {
+      for (const issueID of Object.keys(idx)) {
+        this.runningAnnexes[issueID] =
+          getRunningAnnexesForIssue(parseInt(issueID, 10), idx);
+      }
     }
   }
 
@@ -61,6 +70,12 @@ class IssueManager extends Manager<OBIssue, number, { onlyIDs?: number[], month?
     return super.readAll();
   }
 
+  public async update(objID: number, newData: OBIssue, commit: boolean | string = false) {
+    await super.update(objID, newData, commit);
+    await this.rebuildSchedule(await this.readAll({}, true));
+    await this.reportUpdatedData([objID]);
+  }
+
   async getCurrentIssueID() {
     const issues = new QuerySet<ScheduledIssue>(this.schedule);
 
@@ -71,9 +86,37 @@ class IssueManager extends Manager<OBIssue, number, { onlyIDs?: number[], month?
     return currentIssue ? { id: currentIssue.id } : { id: null };
   }
 
+  async savePublicationMeta(data: IssueMeta) {
+    await this.db.update(PUBLICATION_META_PATH, data, ['issn', 'languages', 'authors']);
+  }
+
   async scheduleIssue(obj: ScheduledIssue) {
-    const result = await this.create(obj as OBIssue, `scheduled OB ${obj.id}`);
-    await this.rebuildSchedule(await this.readAll({}, true));
+    let publicationMeta: IssueMeta;
+    try {
+      publicationMeta = await this.db.read(PUBLICATION_META_PATH, ['issn', 'languages', 'authors']) as IssueMeta;
+    } catch (e) {
+      log.error("ITU OB: Failed to read publication meta, using defaults");
+      publicationMeta = {
+        languages: { [defaultLanguage]: true },
+        authors: [],
+        issn: defaultISSN,
+      };
+    }
+
+    const full: OBIssue = {
+      general: { messages: [] },
+      amendments: { messages: [] },
+      annexes: {},
+      languages: publicationMeta.languages,
+      authors: publicationMeta.authors,
+      issn: publicationMeta.issn,
+      ...obj,
+    };
+
+    const result = await this.create(full, `scheduled OB ${obj.id}`);
+    const idx = await this.readAll({}, true);
+    await this.rebuildSchedule(idx);
+    await this.rebuildRunningAnnexes(idx, obj.id);
     return result;
   }
 
@@ -109,6 +152,12 @@ class IssueManager extends Manager<OBIssue, number, { onlyIDs?: number[], month?
     listen<{ obj: ScheduledIssue }, { success: true }>
     (`${prefix}-schedule-one`, async ({ obj }) => {
       await this.scheduleIssue(obj);
+      return { success: true };
+    });
+
+    listen<{ obj: IssueMeta }, { success: true }>
+    (`${prefix}-save-defaults`, async ({ obj }) => {
+      await this.savePublicationMeta(obj);
       return { success: true };
     });
 

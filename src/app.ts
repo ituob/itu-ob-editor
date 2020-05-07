@@ -12,8 +12,9 @@ if (!isDevelopment) {
 }
 
 
-export const defaultLanguage = 'en';
+export const defaultLanguage: keyof typeof availableLanguages = 'en';
 
+export const defaultISSN = '1564-5223';
 
 export const availableLanguages = {
   'en': 'English',
