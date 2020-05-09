@@ -9,8 +9,8 @@
   flex-flow: row-reverse nowrap;
 
   .logo {
-    height: $sidebarSide / 2;
-    width: $sidebarSide / 2;
+    width: $sidebarSide - 2rem;
+    height: $sidebarSide - 2rem;
   }
 
   // Object browser
@@ -47,12 +47,12 @@
     flex-flow: column nowrap;
 
     .contentTypes {
-      padding-top: 3rem;
+      padding-top: $pt-grid-size;
       flex: 1;
 
       > * {
         @extend .dataBarButtonWithTooltip;
-        margin-bottom: 1rem;
+        margin-bottom: $pt-grid-size;
       }
     }
 
@@ -67,6 +67,10 @@
       flex-flow: column nowrap;
       align-items: center;
       justify-content: center;
+
+      .dataBarButtonWithTooltip {
+        margin-bottom: $pt-grid-size;
+      }
 
       .storageStatusIcon {
         width: $sidebarSide;
