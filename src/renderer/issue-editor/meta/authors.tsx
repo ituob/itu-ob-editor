@@ -25,6 +25,13 @@ const CONTACT_TYPES: ('phone' | 'email' | 'fax')[] = [
 
 
 const MetaAuthorsEditor: React.FC<MetaEditorProps<MetaAuthors>> = function ({ data, onChange }) {
+  const moveItem = useCallback((dragIndex: number, hoverIndex: number) => {
+    if (dragIndex === undefined) return;
+
+    const dragItem = data.authors[dragIndex];
+    updateData(update(data.authors, { $splice: [[dragIndex, 1], [hoverIndex, 0, dragItem]] }));
+  }, [data.authors]);
+
   function updateData(newAuthors: OBAuthorOrg[]) {
     onChange({ ...data, authors: newAuthors });
   }
@@ -42,13 +49,6 @@ const MetaAuthorsEditor: React.FC<MetaEditorProps<MetaAuthors>> = function ({ da
   function appendNew() {
     updateData([ ...(data.authors || []), { name: '', contacts: [] }]);
   }
-
-  const moveItem = useCallback((dragIndex: number, hoverIndex: number) => {
-    if (dragIndex === undefined) return;
-
-    const dragItem = data.authors[dragIndex];
-    updateData(update(data.authors, { $splice: [[dragIndex, 1], [hoverIndex, 0, dragItem]] }));
-  }, [data.authors]);
 
   function renderAuthor(author: OBAuthorOrg, idx: number) {
     return (
@@ -97,6 +97,19 @@ const MetaAuthorsEditor: React.FC<MetaEditorProps<MetaAuthors>> = function ({ da
 const AuthorItem: React.FC<{ author: OBAuthorOrg, onChange: (author: OBAuthorOrg) => void }> = function ({ author, onChange }) {
   const nameInputRef = useRef<HTMLInputElement | null>(null);
 
+  useEffect(() => {
+    if ((author.name || '') === '' && (author.address || '') === '') {
+      nameInputRef.current?.focus();
+    }
+  }, []);
+
+  const moveItem = useCallback((dragIndex: number, hoverIndex: number) => {
+    if (dragIndex === undefined) return;
+
+    const dragItem = author.contacts[dragIndex];
+    updateData({ contacts: update(author.contacts, { $splice: [[dragIndex, 1], [hoverIndex, 0, dragItem]] }) });
+  }, [author.contacts]);
+
   function updateData(newDataPartial: Partial<OBAuthorOrg>, save = true) {
     const newData = { ...author, ...newDataPartial };
     if (save) { onChange(newData); }
@@ -115,19 +128,6 @@ const AuthorItem: React.FC<{ author: OBAuthorOrg, onChange: (author: OBAuthorOrg
   function appendNew() {
     updateData({ contacts: [ ...author.contacts, { data: '', type: 'phone' }] });
   }
-
-  useEffect(() => {
-    if ((author.name || '') === '' && (author.address || '') === '') {
-      nameInputRef.current?.focus();
-    }
-  }, []);
-
-  const moveItem = useCallback((dragIndex: number, hoverIndex: number) => {
-    if (dragIndex === undefined) return;
-
-    const dragItem = author.contacts[dragIndex];
-    updateData({ contacts: update(author.contacts, { $splice: [[dragIndex, 1], [hoverIndex, 0, dragItem]] }) });
-  }, [author.contacts]);
 
   return <>
     <FormGroup
@@ -186,18 +186,16 @@ const AuthorContactItem: React.FC<AuthorContactItemProps> =
 function ({ contact, onChange, onDelete }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  function updateData(newDataPartial: Partial<Contact>, save = true) {
-    const newData = { ...contact, ...newDataPartial };
-    //_setData(newData);
-    if (save) { onChange(newData) };
-  }
-
   useEffect(() => {
     if ((contact.data || '') === '') {
       inputRef.current?.focus();
     }
   }, []);
 
+  function updateData(newDataPartial: Partial<Contact>, save = true) {
+    const newData = { ...contact, ...newDataPartial };
+    if (save) { onChange(newData) };
+  }
 
   return <ControlGroup fill>
     <ButtonGroup>
