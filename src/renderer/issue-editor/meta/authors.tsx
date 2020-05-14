@@ -1,5 +1,5 @@
 import update from 'immutability-helper';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { DndProvider } from 'react-dnd';
 import Backend from 'react-dnd-html5-backend';
 import {
@@ -161,14 +161,28 @@ const AuthorItem: React.FC<{ author: OBAuthorOrg, onChange: (author: OBAuthorOrg
   </>;
 };
 
-const AuthorContactItem: React.FC<{ contact: Contact, onChange: (contact: Contact) => void, onDelete?: () => void }> = function ({ contact, onChange, onDelete }) {
+interface AuthorContactItemProps {
+  contact: Contact
+  onChange: (contact: Contact) => void
+  onDelete?: () => void 
+}
+const AuthorContactItem: React.FC<AuthorContactItemProps> =
+function ({ contact, onChange, onDelete }) {
   //const [_data, _setData] = useState<Contact>(contact);
+
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   function updateData(newDataPartial: Partial<Contact>, save = true) {
     const newData = { ...contact, ...newDataPartial };
     //_setData(newData);
     if (save) { onChange(newData) };
   }
+
+  useEffect(() => {
+    if ((contact.data || '') === '') {
+      inputRef.current?.focus();
+    }
+  }, []);
 
   const contactTypes: ('phone' | 'email' | 'fax')[] = [
     'phone',
@@ -189,6 +203,7 @@ const AuthorContactItem: React.FC<{ contact: Contact, onChange: (contact: Contac
     </ButtonGroup>
     <InputGroup required
       fill
+      inputRef={(r) => inputRef.current = r}
       type="text"
       placeholder="New contact data…"
       value={contact.data || ''}
