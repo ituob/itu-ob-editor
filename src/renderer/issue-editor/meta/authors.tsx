@@ -17,6 +17,13 @@ import * as styles from './styles.scss';
 type MetaAuthors = Pick<OBIssue, 'authors'>;
 
 
+const CONTACT_TYPES: ('phone' | 'email' | 'fax')[] = [
+  'phone',
+  'email',
+  'fax',
+];
+
+
 const MetaAuthorsEditor: React.FC<MetaEditorProps<MetaAuthors>> = function ({ data, onChange }) {
   function updateData(newAuthors: OBAuthorOrg[]) {
     onChange({ ...data, authors: newAuthors });
@@ -193,15 +200,10 @@ function ({ contact, onChange, onDelete }) {
     }
   }, []);
 
-  const contactTypes: ('phone' | 'email' | 'fax')[] = [
-    'phone',
-    'email',
-    'fax',
-  ];
 
   return <ControlGroup fill>
     <ButtonGroup>
-      {contactTypes.map(ct =>
+      {CONTACT_TYPES.map(ct =>
         <Button
             key={ct}
             active={contact.type === ct}
