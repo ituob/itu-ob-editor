@@ -51,10 +51,11 @@ const MetaAuthorsEditor: React.FC<MetaEditorProps<MetaAuthors>> = function ({ da
   }
 
   function renderAuthor(author: OBAuthorOrg, idx: number) {
+    const oldIdx = (data.authors || []).indexOf(author);
     return (
       author !== undefined
         ? <Sortable
-              key={(data.authors || []).indexOf(author)}
+              key={oldIdx}
               idx={idx}
               itemType='author'
               onReorder={moveItem}
@@ -73,6 +74,7 @@ const MetaAuthorsEditor: React.FC<MetaEditorProps<MetaAuthors>> = function ({ da
           </PaneHeader>
           <AuthorItem
             author={author}
+            _authorIndex={oldIdx}
             onChange={(data) => updateItem(idx, data)} />
         </Sortable>
       : null
@@ -94,7 +96,13 @@ const MetaAuthorsEditor: React.FC<MetaEditorProps<MetaAuthors>> = function ({ da
   </>;
 };
 
-const AuthorItem: React.FC<{ author: OBAuthorOrg, onChange: (author: OBAuthorOrg) => void }> = function ({ author, onChange }) {
+interface AuthorItemProps {
+  author: OBAuthorOrg
+  _authorIndex: number
+  onChange: (author: OBAuthorOrg) => void 
+}
+const AuthorItem: React.FC<AuthorItemProps> =
+function ({ author, onChange, _authorIndex }) {
   const nameInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -157,7 +165,7 @@ const AuthorItem: React.FC<{ author: OBAuthorOrg, onChange: (author: OBAuthorOrg
         <Sortable
             key={(author.contacts || []).indexOf(c)}
             idx={idx}
-            itemType={`contact`}
+            itemType={`contact-${_authorIndex}`}
             onReorder={moveItem}
             handleIcon="menu"
             className={`${styles.sortable} ${styles.metaAuthorContactItem}`}
