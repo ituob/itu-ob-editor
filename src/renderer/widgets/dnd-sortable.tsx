@@ -14,11 +14,12 @@ interface SortableProps {
   onReorder: (from: number, to: number) => void 
   className?: string
   draggingClassName?: string
+  droppableClassName?: string
   handleClassName?: string
   handleIcon?: IconName
 }
 export const Sortable: React.FC<SortableProps> =
-function ({ idx, canReorder, onReorder, className, draggingClassName, children, itemType, handleClassName, handleIcon }) {
+function ({ idx, canReorder, onReorder, className, droppableClassName, draggingClassName, children, itemType, handleClassName, handleIcon }) {
   const reorderable = canReorder !== false;
 
   const ref = useRef<HTMLDivElement>(null);
@@ -32,8 +33,11 @@ function ({ idx, canReorder, onReorder, className, draggingClassName, children, 
     }
   }, []);
 
-  const [, drop] = useDrop({
+  const [{ canDrop }, drop] = useDrop({
     accept: itemType,
+    collect: (monitor: any) => ({
+      canDrop: monitor.canDrop(),
+    }),
     hover(item: DragItem, monitor: DropTargetMonitor) {
       if (!ref.current) {
         return;
@@ -83,7 +87,11 @@ function ({ idx, canReorder, onReorder, className, draggingClassName, children, 
   drag(drop(ref));
 
   return <div
-      className={`${className || ''} ${isDragging ? draggingClassName : ''}`}
+      className={`
+        ${className || ''}
+        ${(draggingClassName && isDragging) ? draggingClassName : ''}
+        ${(droppableClassName && canDrop) ? droppableClassName : ''}
+      `}
       ref={handleIcon ? preview : ref}>
     {reorderable && handleIcon
       ? <div ref={ref} className={handleClassName || ''} title="Hold and drag to reorder.">
