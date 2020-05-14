@@ -69,10 +69,7 @@
   padding-bottom: $pt-grid-size;
   display: flex;
   flex-flow: column nowrap;
-
-  &:not(:last-child) {
-    border-bottom: 1px $pt-divider-black solid;
-  }
+  border-bottom: 1px $pt-divider-black solid;
 
   .metaAuthorItemTitle {
     margin-left: -$pt-grid-size * 2;
