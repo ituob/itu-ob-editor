@@ -61,14 +61,18 @@ const MetaAuthorsEditor: React.FC<MetaEditorProps<MetaAuthors>> = function ({ da
               onReorder={moveItem}
               handleIcon="menu"
               className={`${styles.sortable} ${styles.metaAuthorItem}`}
+              droppableClassName={styles.sortableOver}
               draggingClassName={styles.sortableDragged}
               handleClassName={styles.sortableDragHandle}>
           <PaneHeader
               className={styles.metaAuthorItemTitle}
-              actions={<Button
-                onClick={() => deleteItem(idx)}
-                icon="delete"
-                title="Delete this author.">Delete</Button>}
+              actions={
+                <Button
+                    onClick={() => deleteItem(idx)}
+                    icon="delete"
+                    title="Delete this author.">
+                  Delete
+                </Button>}
               align="left">
             Author {idx + 1}
           </PaneHeader>
@@ -111,22 +115,22 @@ function ({ author, onChange, _authorIndex }) {
     }
   }, []);
 
-  const moveItem = useCallback((dragIndex: number, hoverIndex: number) => {
+  const moveItem = (dragIndex: number, hoverIndex: number) => {
     if (dragIndex === undefined) return;
 
     const dragItem = author.contacts[dragIndex];
     updateData({ contacts: update(author.contacts, { $splice: [[dragIndex, 1], [hoverIndex, 0, dragItem]] }) });
-  }, [author.contacts]);
+  };
 
-  function updateData(newDataPartial: Partial<OBAuthorOrg>, save = true) {
+  function updateData(newDataPartial: Partial<OBAuthorOrg>) {
     const newData = { ...author, ...newDataPartial };
-    if (save) { onChange(newData); }
+    onChange(newData);
   }
 
   function updateItem(idx: number, c: Contact) {
     var items = [ ...author.contacts ];
     items[idx] = c;
-    updateData({ contacts: items }, true);
+    updateData({ contacts: items });
   }
 
   function deleteItem(idx: number) {
@@ -142,7 +146,6 @@ function ({ author, onChange, _authorIndex }) {
         label="Name"
         helperText="Name of organization or department.">
       <InputGroup
-        onBlur={() => updateData({}, true)}
         type="text"
         inputRef={(r) => nameInputRef.current = r}
         value={author.name || ''}
@@ -170,12 +173,15 @@ function ({ author, onChange, _authorIndex }) {
             handleIcon="menu"
             className={`${styles.sortable} ${styles.metaAuthorContactItem}`}
             draggingClassName={styles.sortableDragged}
+            droppableClassName={styles.sortableOver}
             handleClassName={styles.sortableDragHandle}>
-          <AuthorContactItem
-            key={idx}
-            contact={c}
-            onDelete={() => deleteItem(idx)}
-            onChange={(newC) => updateItem(idx, newC)} />
+          {c !== undefined
+            ? <AuthorContactItem
+                key={idx}
+                contact={c}
+                onDelete={() => deleteItem(idx)}
+                onChange={(newC) => updateItem(idx, newC)} />
+            : null}
         </Sortable>
       )}
       <div className={styles.metaNewItem}>
@@ -226,9 +232,11 @@ function ({ contact, onChange, onDelete }) {
         updateData({ data: evt.currentTarget.value })} />
     <ButtonGroup>
       <Button
-        active={contact.recommended === true}
-        onClick={() =>
-          updateData({ recommended: !contact.recommended }, true)}>Highlight</Button>
+          active={contact.recommended === true}
+          onClick={() =>
+            updateData({ recommended: !contact.recommended }, true)}>
+        Highlight
+      </Button>
       <Button
         disabled={!onDelete}
         title="Delete this contact."
