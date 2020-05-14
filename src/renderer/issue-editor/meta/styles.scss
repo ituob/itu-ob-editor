@@ -46,7 +46,7 @@
   padding: $pt-grid-size * 2;
 }
 
-:local .metaNewItem {
+:local .metaNewAuthor {
   margin: $pt-grid-size;
 }
 
@@ -86,12 +86,15 @@
   align-items: center;
 }
 
-:local .metaAuthorContactItem {
+:local .metaAuthorContactItem,
+:local .metaAuthorContacts .metaNewItem {
   background: $pt-app-background-color;
   padding: $pt-grid-size;
   padding-right: $pt-grid-size * 4;
   margin-bottom: 2px;
+}
 
+:local .metaAuthorContactItem {
   :global .bp3-form-group {
     margin-bottom: 0;
   }

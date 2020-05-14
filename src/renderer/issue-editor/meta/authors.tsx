@@ -77,7 +77,12 @@ const MetaAuthorsEditor: React.FC<MetaEditorProps<MetaAuthors>> = function ({ da
       <div>
         {[ ...(data.authors || []).entries() ].map(([idx, author]) => renderAuthor(author, idx) )}
       </div>
-      <Button className={styles.metaNewItem} onClick={appendNew} icon="add">Add author</Button>
+      <Button
+          className={styles.metaNewAuthor}
+          onClick={appendNew}
+          icon="add">
+        Add author
+      </Button>
     </DndProvider>
   </>;
 };
@@ -149,7 +154,9 @@ const AuthorItem: React.FC<{ author: OBAuthorOrg, onChange: (author: OBAuthorOrg
             onChange={(newC) => updateItem(idx, newC)} />
         </Sortable>
       )}
-      <Button className={styles.metaNewItem} onClick={appendNew} icon="add">Add contact</Button>
+      <div className={styles.metaNewItem}>
+        <Button onClick={appendNew} icon="add">Add contact</Button>
+      </div>
     </div>
   </>;
 };
@@ -189,12 +196,10 @@ const AuthorContactItem: React.FC<{ contact: Contact, onChange: (contact: Contac
         updateData({ data: evt.currentTarget.value })} />
     <ButtonGroup>
       <Button
-        minimal
         active={contact.recommended === true}
         onClick={() =>
           updateData({ recommended: !contact.recommended }, true)}>Highlight</Button>
       <Button
-        minimal
         disabled={!onDelete}
         title="Delete this contact."
         onClick={onDelete}
