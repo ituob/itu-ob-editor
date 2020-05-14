@@ -184,8 +184,6 @@ interface AuthorContactItemProps {
 }
 const AuthorContactItem: React.FC<AuthorContactItemProps> =
 function ({ contact, onChange, onDelete }) {
-  //const [_data, _setData] = useState<Contact>(contact);
-
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   function updateData(newDataPartial: Partial<Contact>, save = true) {
