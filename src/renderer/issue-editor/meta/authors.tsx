@@ -88,6 +88,8 @@ const MetaAuthorsEditor: React.FC<MetaEditorProps<MetaAuthors>> = function ({ da
 };
 
 const AuthorItem: React.FC<{ author: OBAuthorOrg, onChange: (author: OBAuthorOrg) => void }> = function ({ author, onChange }) {
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
+
   function updateData(newDataPartial: Partial<OBAuthorOrg>, save = true) {
     const newData = { ...author, ...newDataPartial };
     if (save) { onChange(newData); }
@@ -107,6 +109,12 @@ const AuthorItem: React.FC<{ author: OBAuthorOrg, onChange: (author: OBAuthorOrg
     updateData({ contacts: [ ...author.contacts, { data: '', type: 'phone' }] });
   }
 
+  useEffect(() => {
+    if ((author.name || '') === '' && (author.address || '') === '') {
+      nameInputRef.current?.focus();
+    }
+  }, []);
+
   const moveItem = useCallback((dragIndex: number, hoverIndex: number) => {
     if (dragIndex === undefined) return;
 
@@ -121,6 +129,7 @@ const AuthorItem: React.FC<{ author: OBAuthorOrg, onChange: (author: OBAuthorOrg
       <InputGroup
         onBlur={() => updateData({}, true)}
         type="text"
+        inputRef={(r) => nameInputRef.current = r}
         value={author.name || ''}
         placeholder={author.name}
         onChange={(evt: React.FormEvent<HTMLInputElement>) =>
