@@ -178,7 +178,6 @@ const Window: React.FC<WindowComponentProps> = function ({ query }) {
           haveSaved={!hasUncommittedChanges}
           onCommit={commitAndClose} />
         service publication&nbsp;“<span className="object-id">{publication.id}</span>”
-
       </PaneHeader>
 
       <main className={styles.windowBody}>
