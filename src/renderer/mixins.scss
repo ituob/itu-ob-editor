@@ -10,7 +10,6 @@
 @mixin twoPaneWindowLayout($leftPaneWidth) {
   display: flex;
   flex-flow: row nowrap;
-  align-items: stretch;
   height: 100vh;
 
   > * {

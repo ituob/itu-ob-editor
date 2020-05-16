@@ -281,14 +281,11 @@ export const IssueEditor: React.FC<{ issue: OBIssue }> = (props) => {
     <div className={styles.twoPaneEditor}>
       <div className={styles.messageListPane}>
 
-        <div className={styles.paneHeader}>
-          <PaneHeader align="right" major={true}>
-            <ObjectStorageStatus
-              haveSaved={saved}
-              onCommit={handleCommitAndQuit} />
-            № <span className="object-id">{issue.id}</span>
-          </PaneHeader>
-        </div>
+        <ObjectStorageStatus
+          objectType="OB"
+          objectID={issue.id}
+          haveSaved={saved}
+          onCommit={handleCommitAndQuit} />
 
         <div className={styles.paneBody}>
 

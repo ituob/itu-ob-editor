@@ -1,17 +1,10 @@
 @import "~@blueprintjs/core/lib/scss/variables";
-@import "renderer/mixins.scss";
 
 :local .pubEditorWindow {
   height: 100vh;
   display: flex;
   flex-flow: column nowrap;
   background: $pt-app-background-color;
-
-  .windowHeader {
-    align-items: center;
-    display: flex;
-    @include objectEditorPaneHeader;
-  }
 
   .windowBody {
     padding: 2rem;

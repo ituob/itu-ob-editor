@@ -11,10 +11,6 @@ $sidebarWidth: 17em;
   transform: translateY(-50%) translateX(-50%);
 }
 
-:local .paneHeader {
-  @include objectEditorPaneHeader;
-}
-
 :local .twoPaneEditor {
   @include twoPaneWindowLayout($sidebarWidth);
 }

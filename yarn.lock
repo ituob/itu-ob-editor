@@ -2483,9 +2483,9 @@ cosmiconfig@^5.0.0:
     js-yaml "^3.13.1"
     parse-json "^4.0.0"
 
-"coulomb@https://github.com/coulombjs/coulomb#coulomb-v0.4.3-gitpkg":
-  version "0.4.3"
-  resolved "https://github.com/coulombjs/coulomb#9662edabc9e516893b9bfe81b83f762e8dc5112c"
+"coulomb@https://github.com/coulombjs/coulomb#coulomb-v0.4.4-gitpkg":
+  version "0.4.4"
+  resolved "https://github.com/coulombjs/coulomb#085151262d00ae46700037686d58e30299a3d335"
   dependencies:
     "@isomorphic-git/lightning-fs" "^3.3.3"
     fs-extra "^8.1.0"

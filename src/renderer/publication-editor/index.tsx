@@ -4,7 +4,6 @@ import { remote, ipcRenderer } from 'electron';
 import React, { useContext, useState, useEffect } from 'react';
 import { FormGroup, InputGroup } from '@blueprintjs/core';
 
-import { PaneHeader } from 'coulomb/renderer/widgets/pane-header';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import { WindowComponentProps } from 'coulomb/config/renderer';
 
@@ -167,18 +166,16 @@ const Window: React.FC<WindowComponentProps> = function ({ query }) {
 
   return (
     <div className={styles.pubEditorWindow}>
-      <PaneHeader
-          className={styles.windowHeader}
-          align="right"
-          major={true}
-          actions={<HelpButton path="amend-publication/" />}>
-        <ObjectStorageStatus
-          canSave={canSave}
-          doneButtonLabel={create ? "Create" : undefined}
-          haveSaved={!hasUncommittedChanges}
-          onCommit={commitAndClose} />
-        service publication&nbsp;“<span className="object-id">{publication.id}</span>”
-      </PaneHeader>
+      <ObjectStorageStatus
+        objectType="SP"
+        objectID={publication.id}
+        paneHeaderProps={{
+          actions: <HelpButton path="amend-publication/" />,
+        }}
+        canSave={canSave}
+        doneButtonLabel={create ? "Create" : undefined}
+        haveSaved={!hasUncommittedChanges}
+        onCommit={commitAndClose} />
 
       <main className={styles.windowBody}>
         {create
