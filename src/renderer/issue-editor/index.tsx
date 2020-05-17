@@ -46,7 +46,7 @@ const Window: React.FC<WindowComponentProps> = ({ query }) => {
   const issue = app.useOne<OBIssue, number>('issues', numIssueID).object;
 
   function handleChanged(evt: any, data: { ids: number[] }) {
-    // Just reload the window if our issue question changed
+    // Just reload the window if our issue changed
     if (numIssueID !== null && data.ids.indexOf(numIssueID) >= 0) {
       remote.getCurrentWindow().reload();
     }
