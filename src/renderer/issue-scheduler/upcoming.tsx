@@ -169,7 +169,7 @@ const IssueScheduleCard: React.FC<IssueScheduleCardProps> = function ({ issue, o
       <footer className={styles.actions}>
         {isCurrent
           ? <Button fill={true} onClick={onEditClick} intent="primary">Edit</Button>
-          : <Button fill={true} onClick={onEditClick} minimal={true}>Open</Button>}
+          : <Button fill={true} onClick={onEditClick}>Open</Button>}
       </footer>
 
     </SimpleEditableCard>
