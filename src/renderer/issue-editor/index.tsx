@@ -64,7 +64,7 @@ const Window: React.FC<WindowComponentProps> = ({ query }) => {
       return <IssueEditor issue={issue} />;
     } else {
       return <NonIdealState
-        icon={<Spinner className={styles.spinner} />}
+        icon={<Spinner />}
         title="No issue to show right now"
         description="If you’re still seeing this, this might mean the issue failed to load." />;
     }
