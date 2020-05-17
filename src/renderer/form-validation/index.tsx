@@ -35,7 +35,9 @@ export const GenericValidationErrorsNotice: ValidationErrorsNotice = function ({
 
   return <>
     {Object.keys(errors[fieldName] || {}).map((validatorName: string) =>
-      <li>Must {(validators[fieldName] as FieldValidators<any>)[validatorName].errorMessage}.</li>
+      <li key={validatorName}>
+        Must {(validators[fieldName] as FieldValidators<any>)[validatorName].errorMessage}.
+      </li>
     )}
   </>;
 
