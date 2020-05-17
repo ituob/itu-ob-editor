@@ -1,10 +1,10 @@
 @import "~@blueprintjs/core/lib/scss/variables";
+@import "renderer/mixins.scss";
+
+$sidebarWidth: 17em;
 
 :local .pubEditorWindow {
-  height: 100vh;
-  display: flex;
-  flex-flow: column nowrap;
-  background: $pt-app-background-color;
+  @include twoPaneWindowLayout($sidebarWidth);
 
   .windowBody {
     padding: 2rem;
@@ -21,4 +21,16 @@
     flex: 1;
     overflow-y: auto;
   }
+}
+
+:local .navSidebar {
+  overflow-y: hidden;
+
+  background: $pt-app-background-color;
+  position: relative;
+
+  display: flex;
+  flex-flow: column nowrap;
+
+  cursor: default;
 }
