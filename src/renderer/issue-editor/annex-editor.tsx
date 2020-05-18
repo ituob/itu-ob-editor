@@ -16,10 +16,10 @@ import * as styles from './styles.scss';
 
 
 interface AnnexEditorProps {
-  pubId: string,
-  position: Date | undefined,
-  onChange?: (pubId: string, updatedPosition: Date | undefined) => void,
-  issueId: number,
+  pubId: string
+  position: Date | undefined
+  onChange?: (pubId: string, updatedPosition: Date | undefined) => void
+  issueId: number
 }
 export const AnnexEditor: React.FC<AnnexEditorProps> = function ({ pubId, position, onChange, issueId }) {
   const [editingPosition, updateEditingPosition] = useState(false);

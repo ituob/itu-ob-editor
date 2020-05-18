@@ -13,10 +13,10 @@ import * as styles from './styles.scss';
 
 
 interface ContentTypeOptions {
-  id: keyof typeof conf["data"],
-  title: string,
-  getIcon: () => JSX.Element,
-  getBrowser?: () => JSX.Element,
+  id: keyof typeof conf["data"]
+  title: string
+  getIcon: () => JSX.Element
+  getBrowser?: () => JSX.Element
 }
 
 type ContentTypeOptionSet = ContentTypeOptions[];
