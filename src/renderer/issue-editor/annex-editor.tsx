@@ -50,26 +50,20 @@ function ({ pubId, position, onChange, issueId }) {
   }
 
   let currentPosition: JSX.Element;
-  if (position) {
+  if (onChange && !editingPosition) {
     currentPosition = (
-      <span className={styles.annexEditorPosition}>
-        <DateStamp date={position} />
-      </span>
+        <Button
+            title="Click to set or change the annexed position."
+            intent={position ? undefined : "primary"}
+            onClick={() => updateEditingPosition(true)}>
+          {position ? <DateStamp date={position} /> : "Specify"}
+        </Button>
     );
-  } else if (onChange && !editingPosition) {
-    currentPosition = (
-      <Button intent="primary" onClick={() => updateEditingPosition(true)}>
-        Specify
-      </Button>
-    );
+  } else if (position) {
+    currentPosition = <DateStamp date={position} />;
   } else {
-    currentPosition = (
-      <em className={styles.annexEditorPosition}>
-        unspecified
-      </em>
-    );
+    currentPosition = <em>unspecified</em>;
   }
-
 
   return (
     <>
@@ -97,14 +91,25 @@ function ({ pubId, position, onChange, issueId }) {
       </div>
 
       <FormGroup
-          label={<>Position presently annexed:&ensp;{currentPosition}</>}
+          label={<>
+            Position presently annexed:
+            &ensp;
+            <span className={styles.annexEditorPosition}>
+              {currentPosition}
+            </span>
+          </>}
           helperText={onChange && !position
             ? <>
-                For a dataset that’s being published multiple times,
-                the exact position annexed currently must be specified here.
+                <p>
+                  The position of ITU SP annexed to OB is expressed by date.
+                </p>
+                <p>
+                  For a dataset that’s being annexed multiple times to different OBs,
+                  the position annexed to <em>this</em> OB should be specified here.
+                </p>
               </>
             : undefined}>
-        {onChange && (position || editingPosition)
+        {onChange && editingPosition
           ? <DatePicker
               value={position}
               canClearSelection={true}
