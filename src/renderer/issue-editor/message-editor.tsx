@@ -59,7 +59,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = function (props) {
           <PaneHeader
               major={true}
               align="left"
-              actions={<HelpButton className="big-icon-button" path={helpPath} />}>
+              actions={<HelpButton path={helpPath} />}>
             <MessageTitle message={props.message} />
           </PaneHeader>
           {props.meta
