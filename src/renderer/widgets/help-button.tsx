@@ -15,7 +15,7 @@ export const HelpButton: React.FC<{ path: string, className?: string }> = functi
       onClick={() => callIPC('open-arbitrary-window', {
         title: "ITU OB Editor help",
         url: `${ROOT_HELP_URL}${path}`,
-        dimensions: { width: 900 },
+        dimensions: { width: 1000 },
       })} />
   );
 };
