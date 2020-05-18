@@ -1,6 +1,6 @@
 {
   "name": "itu-ob-editor",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "ITU OB data editor",
   "repository": "git@github.com:ituob/itu-ob-editor.git",
   "bugs": "https://github.com/ituob/itu-ob-editor/issues",
