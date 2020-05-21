@@ -7,6 +7,8 @@ import { FormGroup, InputGroup, NonIdealState, Spinner, IconName } from '@bluepr
 
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import { WindowComponentProps } from 'coulomb/config/renderer';
+import { callIPC } from 'coulomb/ipc/renderer';
+import { SimpleEditableCard } from 'coulomb/renderer/widgets/editable-card-list';
 
 import { Publication } from 'models/publications';
 import { app } from 'renderer/index';
@@ -21,8 +23,6 @@ import {
 } from 'renderer/form-validation';
 
 import * as styles from './styles.scss';
-import { callIPC } from 'coulomb/ipc/renderer';
-import { SimpleEditableCard } from 'coulomb/renderer/widgets/editable-card-list';
 
 
 const pubOperationQueue = new AsyncLock();
