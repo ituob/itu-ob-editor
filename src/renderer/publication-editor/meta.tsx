@@ -83,7 +83,7 @@ function ({ publication, create, onChange, validators, validationErrors }) {
             <InputGroup
               value={publication.id}
               type="text"
-              large={true}
+              large
               readOnly={!create}
               onChange={(evt: React.FormEvent<HTMLElement>) => {
                 onChange({
