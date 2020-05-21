@@ -22,11 +22,11 @@ import {
 } from 'models/issues';
 
 import { app } from 'renderer/index';
+import { ItemList } from 'renderer/widgets/item-list';
 
-import { ItemList } from './item-list';
-import { NewGeneralMessagePrompt } from './item-list/new-general-message-menu';
-import { NewAmendmentPrompt } from './item-list/new-amendment-menu';
-import { NewAnnexPrompt } from './item-list/new-annex-menu';
+import { NewGeneralMessagePrompt } from './new-item-prompts/general-message';
+import { NewAmendmentPrompt } from './new-item-prompts/amendment';
+import { NewAnnexPrompt } from './new-item-prompts/annex';
 import { MessageTitle, MessageEditor } from './message-editor';
 import { AmendmentMeta } from './message-forms/amendment';
 import { AnnexEditor } from './annex-editor';

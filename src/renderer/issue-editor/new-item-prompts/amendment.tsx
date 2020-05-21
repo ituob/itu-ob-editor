@@ -11,7 +11,7 @@ import { Message } from 'models/messages';
 
 import { app } from 'renderer/index';
 import { PublicationTitle } from 'renderer/widgets/publication-title';
-import { NewItemPromptProps } from './new-item-menu';
+import { NewItemPromptProps } from 'renderer/widgets/item-list/new-item-menu';
 import * as styles from '../styles.scss';
 import { useRunningAnnexes } from 'renderer/hooks';
 

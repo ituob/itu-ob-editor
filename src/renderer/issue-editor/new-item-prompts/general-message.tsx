@@ -6,7 +6,7 @@ import * as editableCardListStyles from 'coulomb/renderer/widgets/editable-card-
 
 import { Message, MessageType } from 'models/messages';
 
-import { NewItemPromptProps } from './new-item-menu';
+import { NewItemPromptProps } from 'renderer/widgets/item-list/new-item-menu';
 import * as styles from '../styles.scss';
 
 
