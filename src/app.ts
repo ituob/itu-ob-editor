@@ -63,7 +63,7 @@ export const conf: AppConfig = {
     publicationEditor: {
       openerParams: {
         title: 'ITU OB Editor: Publication',
-        dimensions: { width: 600, height: 600, minWidth: 500, minHeight: 500 },
+        dimensions: { width: 800, height: 500, minWidth: 750, minHeight: 400 },
       },
     },
     batchCommit: {
