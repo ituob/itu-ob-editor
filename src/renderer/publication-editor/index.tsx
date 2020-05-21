@@ -3,7 +3,7 @@ import * as jsondiffpatch from 'jsondiffpatch';
 import { remote, ipcRenderer } from 'electron';
 
 import React, { useContext, useState, useEffect } from 'react';
-import { FormGroup, InputGroup, NonIdealState, Spinner, IconName } from '@blueprintjs/core';
+import { NonIdealState, Spinner, IconName } from '@blueprintjs/core';
 
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import { WindowComponentProps } from 'coulomb/config/renderer';
@@ -18,24 +18,16 @@ import {
   ObjectValidators,
   ValidationErrors,
   validate,
-  ValidationErrorsNotice,
-  GenericValidationErrorsNotice,
 } from 'renderer/form-validation';
 
+import { PublicationEditorViewProps } from './types';
+import { default as EditPublicationMeta } from './meta';
 import * as styles from './styles.scss';
 
 
 const pubOperationQueue = new AsyncLock();
 const SINGLETON_LOCK = 'singletonLock';
 
-
-interface PublicationEditorViewProps {
-  publication: Publication
-  onChange: (newPub: Publication) => void 
-  validators?: ObjectValidators<Publication>
-  validationErrors?: ValidationErrors<ObjectValidators<Publication>>
-  create?: boolean
-}
 
 interface PublicationEditorView {
   id: string
@@ -100,24 +92,11 @@ const PublicationEditor: React.FC<{ publication: Publication, create: boolean }>
   }, [props.publication]);
 
 
-  let sections: PublicationEditorView[];
-  if (!create) {
-    sections = [
-      ...META_SECTIONS,
-      { id: 'delete', title: "Delete publication", component: DeletePublication, icon: 'delete' },
-    ];
-  } else {
-    sections = META_SECTIONS;
-  }
-
-  const [selectedSection, selectSection] = useState<(typeof sections[number])["id"] | null>('meta');
-
-
   /* Changed status mark */
 
   const [hasUncommittedChanges, setHasUncommittedChanges] = useState(false);
 
-  /* Configure form validation */
+  /* Validation */
 
   const validators: ObjectValidators<Publication> = {
     title: {
@@ -163,9 +142,6 @@ const PublicationEditor: React.FC<{ publication: Publication, create: boolean }>
 
   const [canSave, setCanSave] = useState(false);
 
-
-  /* Validation publication & write to storage (if applicable) when user makes edits */
-
   useEffect(() => {
     setCanSave(false);
 
@@ -179,6 +155,47 @@ const PublicationEditor: React.FC<{ publication: Publication, create: boolean }>
       setHasUncommittedChanges(jsondiffpatch.diff(props.publication, publication) !== undefined);
     })();
   }, [publication]);
+
+
+  /* Section navigation */
+
+  let sections: PublicationEditorView[];
+  if (!create) {
+    sections = [
+      ...META_SECTIONS,
+      { id: 'delete', title: "Delete publication", component: DeletePublication, icon: 'delete' },
+    ];
+  } else {
+    sections = META_SECTIONS;
+  }
+
+  const [selectedSection, selectSection] = useState<(typeof sections[number])["id"] | null>('meta');
+
+  const sectionNavigation = sections.map(s =>
+    <SimpleEditableCard minimal
+        icon={s.icon}
+        selected={selectedSection === s.id}
+        onSelect={() => selectSection(s.id)}>
+      {s.title}
+    </SimpleEditableCard>
+  );
+
+
+  /* Section view */
+
+  const SelectedSectionComponent: React.FC<PublicationEditorViewProps> | null =
+      selectedSection !== null
+    ? (sections.find(s => s.id === selectedSection)?.component || null)
+    : null;
+
+  const selectedSectionView: JSX.Element | null = SelectedSectionComponent
+    ? <SelectedSectionComponent
+        onChange={setPublication}
+        create={create}
+        validators={validators}
+        validationErrors={validationErrors}
+        publication={publication} />
+    : null;
 
 
   /* IPC helpers */
@@ -208,20 +225,6 @@ const PublicationEditor: React.FC<{ publication: Publication, create: boolean }>
     });
   }
 
-  const SelectedSectionComponent: React.FC<PublicationEditorViewProps> | null =
-      selectedSection !== null
-    ? (sections.find(s => s.id === selectedSection)?.component || null)
-    : null;
-
-  const selectedSectionView: JSX.Element | null = SelectedSectionComponent
-    ? <SelectedSectionComponent
-        onChange={setPublication}
-        create={create}
-        validators={validators}
-        validationErrors={validationErrors}
-        publication={publication} />
-    : null;
-
   return (
     <div className={styles.pubEditorWindow}>
       <div className={styles.navSidebar}>
@@ -235,15 +238,9 @@ const PublicationEditor: React.FC<{ publication: Publication, create: boolean }>
           doneButtonLabel={create ? "Create" : undefined}
           haveSaved={!hasUncommittedChanges}
           onCommit={commitAndClose} />
+
         <div className={styles.paneBody}>
-          {sections.map(s =>
-            <SimpleEditableCard minimal
-                icon={s.icon}
-                selected={selectedSection === s.id}
-                onSelect={() => selectSection(s.id)}>
-              {s.title}
-            </SimpleEditableCard>
-          )}
+          {sectionNavigation}
         </div>
       </div>
 
@@ -260,103 +257,6 @@ const DeletePublication: React.FC<PublicationEditorViewProps> = function ({ publ
     icon="help"
     title="This functionality is temporarily unavailable"
     description="Please contact the development team for assistance in removing publicatons." />;
-};
-
-
-const EditPublicationMeta: React.FC<PublicationEditorViewProps> =
-function ({ publication, create, onChange, validators, validationErrors }) {
-  const lang = useContext(LangConfigContext);
-
-  if (!onChange || validators === undefined || validationErrors === undefined) {
-    return <NonIdealState
-      icon="heart-broken"
-      title="Apologies"
-      description="This view was misconfigured. Please contact application developers for assistance." />;
-  }
-
-  const ValidationErr = GenericValidationErrorsNotice as ValidationErrorsNotice<typeof validators>;
-
-  return (
-    <div>
-      <FormGroup
-          key="title"
-          intent={validationErrors.title ? "danger" : undefined}
-          helperText={
-            <ul><ValidationErr fieldName="title" validators={validators} errors={validationErrors} /></ul>
-          }
-          label={`Title in ${lang.available[lang.default]}:`}>
-        <InputGroup
-          value={publication.title[lang.default]}
-          type="text"
-          onChange={(evt: React.FormEvent<HTMLElement>) => {
-            onChange({
-              ...publication,
-              title: {
-                ...publication.title,
-                [lang.default]: (evt.target as HTMLInputElement).value as string,
-              },
-            });
-          }}
-        />
-      </FormGroup>
-
-      <FormGroup
-          key="url"
-          intent={validationErrors.url ? "danger" : undefined}
-          helperText={
-            <ul>
-              <ValidationErr fieldName="url" validators={validators} errors={validationErrors} />
-              {!validationErrors.url && (publication.url || '') !== ''
-                ? <li><a onClick={() => remote.shell.openExternal(publication.url as string)}>Test this URL in browser</a></li>
-                : null}
-            </ul>
-          }
-          label="Authoritative resource URL for this publication:">
-        <InputGroup
-          value={publication.url}
-          type="url"
-          onChange={(evt: React.FormEvent<HTMLElement>) => {
-            const newURL = (evt.target as HTMLInputElement).value as string;
-            onChange({
-              ...publication,
-              url: newURL.trim() !== '' ? newURL : undefined,
-            });
-          }}
-        />
-      </FormGroup>
-
-      {create
-        ? <FormGroup
-              key="id"
-              label="Publication identifier:"
-              intent={validationErrors.id ? "danger" : undefined}
-              helperText={
-                <ul>
-                  <ValidationErr fieldName="id" validators={validators} errors={validationErrors} />
-                  <li>Use uppercase English string as publication ID: e.g., BUREAUFAX.</li>
-                  <li>Choose an ID consistent with publication URL on ITU website, if possible.</li>
-                  <li>Note: you can’t change this later easily.</li>
-                </ul>}>
-            <InputGroup
-              value={publication.id}
-              type="text"
-              large={true}
-              readOnly={!create}
-              onChange={(evt: React.FormEvent<HTMLElement>) => {
-                onChange({
-                  ...publication,
-                  id: (evt.target as HTMLInputElement).value as string,
-                });
-              }}
-            />
-          </FormGroup>
-        : <FormGroup
-              label="Publication ID"
-              helperText="ID of a service publication cannot be changed after it is created.">
-            <InputGroup large type="string" disabled defaultValue={`${publication.id}`} />
-          </FormGroup>}
-    </div>
-  );
 };
 
 
