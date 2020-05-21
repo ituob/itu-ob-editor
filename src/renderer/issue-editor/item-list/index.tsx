@@ -6,7 +6,7 @@ import { SimpleEditableCard } from 'coulomb/renderer/widgets/editable-card-list'
 
 interface ItemListProps {
   title: string,
-  items: any,
+  items: any[],
   selectedIdx: string | undefined,
 
   onDelete: (idx: string) => void,
