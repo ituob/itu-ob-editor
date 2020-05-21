@@ -56,7 +56,7 @@ function ({ publication, create, onChange, validators, validationErrors }) {
           }
           label="Authoritative resource URL for this publication:">
         <InputGroup
-          value={publication.url}
+          value={publication.url || ''}
           type="url"
           onChange={(evt: React.FormEvent<HTMLElement>) => {
             const newURL = (evt.target as HTMLInputElement).value as string;
