@@ -289,7 +289,6 @@ function ({ publication, create, onChange, validators, validationErrors }) {
         <InputGroup
           value={publication.title[lang.default]}
           type="text"
-          large={true}
           onChange={(evt: React.FormEvent<HTMLElement>) => {
             onChange({
               ...publication,
@@ -317,7 +316,6 @@ function ({ publication, create, onChange, validators, validationErrors }) {
         <InputGroup
           value={publication.url}
           type="url"
-          large={true}
           onChange={(evt: React.FormEvent<HTMLElement>) => {
             onChange({
               ...publication,
