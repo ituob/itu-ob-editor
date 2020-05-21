@@ -1,4 +1,5 @@
 import AsyncLock from 'async-lock';
+import * as jsondiffpatch from 'jsondiffpatch';
 import { remote, ipcRenderer } from 'electron';
 
 import React, { useContext, useState, useEffect } from 'react';
@@ -175,11 +176,9 @@ const PublicationEditor: React.FC<{ publication: Publication, create: boolean }>
       setCanSave(canSave);
       setValidationErrors(validationErrors);
 
-      if (canSave) {
-        setHasUncommittedChanges(true);
-      }
+      setHasUncommittedChanges(jsondiffpatch.diff(props.publication, publication) !== undefined);
     })();
-  }, [JSON.stringify(publication)]);
+  }, [publication]);
 
 
   /* IPC helpers */
@@ -317,9 +316,10 @@ function ({ publication, create, onChange, validators, validationErrors }) {
           value={publication.url}
           type="url"
           onChange={(evt: React.FormEvent<HTMLElement>) => {
+            const newURL = (evt.target as HTMLInputElement).value as string;
             onChange({
               ...publication,
-              url: (evt.target as HTMLInputElement).value as string,
+              url: newURL.trim() !== '' ? newURL : undefined,
             });
           }}
         />
