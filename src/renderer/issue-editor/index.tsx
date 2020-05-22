@@ -33,7 +33,7 @@ import { AnnexEditor } from './annex-editor';
 
 import * as styles from './styles.scss';
 import { WindowComponentProps } from 'coulomb/config/renderer';
-import { SimpleEditableCard } from 'coulomb/renderer/widgets/editable-card-list';
+import { SimpleEditableCard } from 'coulomb/renderer/widgets';
 import { metaEditors } from './meta';
 
 

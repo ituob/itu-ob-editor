@@ -1,7 +1,6 @@
 import React from 'react';
 import { IconName } from '@blueprintjs/core';
-import { PaneHeader } from 'coulomb/renderer/widgets/pane-header';
-import { SimpleEditableCard } from 'coulomb/renderer/widgets/editable-card-list';
+import { PaneHeader, SimpleEditableCard } from 'coulomb/renderer/widgets';
 
 
 interface ItemListProps {

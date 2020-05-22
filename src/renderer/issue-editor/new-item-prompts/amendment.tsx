@@ -3,7 +3,7 @@ import { Position, Menu } from '@blueprintjs/core';
 import { Select, ItemPredicate, ItemRenderer, ItemListRenderer, renderFilteredItems } from '@blueprintjs/select';
 
 import { Index, QuerySet } from 'coulomb/db/query';
-import { AddCardTriggerButton } from 'coulomb/renderer/widgets/editable-card-list';
+import { AddCardTriggerButton } from 'coulomb/renderer/widgets';
 import * as editableCardListStyles from 'coulomb/renderer/widgets/editable-card-list/styles.scss';
 
 import { Publication } from 'models/publications';
