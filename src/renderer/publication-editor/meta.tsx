@@ -2,13 +2,18 @@ import { remote } from 'electron';
 import React, { useContext } from 'react';
 import { FormGroup, InputGroup, NonIdealState } from '@blueprintjs/core';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
-import { PublicationEditorViewProps } from './types';
 import { GenericValidationErrorsNotice, ValidationErrorsNotice } from 'renderer/form-validation';
+import { Publication } from 'models/publications';
+import { EditorViewProps } from './types';
 
 
-const EditPublicationMeta: React.FC<PublicationEditorViewProps> =
-function ({ publication, create, onChange, validators, validationErrors }) {
+interface MetaEditorProps extends EditorViewProps<Publication> {}
+
+
+const EditPublicationMeta: React.FC<MetaEditorProps> =
+function ({ obj, create, onChange, validators, validationErrors }) {
   const lang = useContext(LangConfigContext);
+  const publication = obj;
 
   if (!onChange || validators === undefined || validationErrors === undefined) {
     return <NonIdealState

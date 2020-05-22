@@ -6,9 +6,12 @@ import React, { useContext, useState, useEffect } from 'react';
 import { NonIdealState, Spinner, IconName } from '@blueprintjs/core';
 
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
+import { Trans } from 'coulomb/localizer/renderer/widgets';
 import { WindowComponentProps } from 'coulomb/config/renderer';
 import { callIPC } from 'coulomb/ipc/renderer';
 import { SimpleEditableCard } from 'coulomb/renderer/widgets/editable-card-list';
+import { AddCardTriggerButton } from 'coulomb/renderer/widgets/editable-card-list';
+import * as editableCardListStyles from 'coulomb/renderer/widgets/editable-card-list/styles.scss';
 
 import { Publication } from 'models/publications';
 import { app } from 'renderer/index';
@@ -20,9 +23,13 @@ import {
   validate,
 } from 'renderer/form-validation';
 
-import { PublicationEditorViewProps } from './types';
+import { EditorViewProps } from './types';
 import { default as EditPublicationMeta } from './meta';
+import { default as EditDatasetMeta } from './dataset';
 import * as styles from './styles.scss';
+import { ItemList } from 'renderer/widgets/item-list';
+import { Dataset } from 'models/dataset';
+import { PaneHeader } from 'coulomb/renderer/widgets';
 
 
 const pubOperationQueue = new AsyncLock();
@@ -31,9 +38,24 @@ const SINGLETON_LOCK = 'singletonLock';
 
 interface PublicationEditorView {
   id: string
-  title: string
-  component: React.FC<PublicationEditorViewProps>
+  title: JSX.Element
+
+  component?: React.FC<EditorViewProps<Publication>>
+  // Missing component would make this item a non-clickable header.
+
+  disabled?: true
   icon?: IconName
+}
+
+
+function getPublicationStub(defaultLang: string, publicationID: string): Publication {
+  return {
+    id: publicationID,
+    url: '',
+    recommendation: null,
+    title: { [defaultLang]: '' },
+    datasets: {},
+  };
 }
 
 
@@ -69,18 +91,17 @@ const Window: React.FC<WindowComponentProps> = function ({ query }) {
       title="No publication to show"
       description="If you’re still seeing this, this might mean the publication failed to load." />;
   } else {
-    const pub = _publication.object || {
-      id: publicationID,
-      url: '',
-      recommendation: null,
-      title: { [lang.default]: '' },
-    };
+    const pub = _publication.object || getPublicationStub(lang.default, publicationID);
     return <PublicationEditor publication={pub} create={create} />;
   }
 }
 
 
-const PublicationEditor: React.FC<{ publication: Publication, create: boolean }> = function (props) {
+interface PublicationEditorProps {
+  publication: Publication
+  create: boolean 
+}
+const PublicationEditor: React.FC<PublicationEditorProps> = function (props) {
   const lang = useContext(LangConfigContext);
   const create = props.create;
 
@@ -159,43 +180,108 @@ const PublicationEditor: React.FC<{ publication: Publication, create: boolean }>
 
   /* Section navigation */
 
-  let sections: PublicationEditorView[];
-  if (!create) {
-    sections = [
-      ...META_SECTIONS,
-      { id: 'delete', title: "Delete publication", component: DeletePublication, icon: 'delete' },
-    ];
-  } else {
-    sections = META_SECTIONS;
-  }
+  const metaSections: PublicationEditorView[] = [
+    ...META_SECTIONS,
+    ...(create
+      ? []
+      : [{ id: 'delete', title: <>Delete publication</>, component: DeletePublication, icon: 'delete' as IconName }]),
+  ];
+  type SectionIDs = string & ((typeof metaSections[number])["id"] | (keyof (typeof publication)["datasets"]));
 
-  const [selectedSection, selectSection] = useState<(typeof sections[number])["id"] | null>('meta');
+  const [selectedSection, selectSection] = useState<SectionIDs>(DEFAULT_SECTION_ID);
 
-  const sectionNavigation = sections.map(s =>
-    <SimpleEditableCard minimal
-        icon={s.icon}
-        selected={selectedSection === s.id}
-        onSelect={() => selectSection(s.id)}>
-      {s.title}
-    </SimpleEditableCard>
-  );
+  const sectionNavigation = <>
+    <PaneHeader minor align="left">Publication settings</PaneHeader>
+    {metaSections.map(s =>
+      <SimpleEditableCard minimal
+          icon={s.icon}
+          selected={selectedSection === s.id}
+          onSelect={() => selectSection(s.id)}>
+        {s.title}
+      </SimpleEditableCard>
+    )}
+    <ItemList
+      title="Dataset settings"
+      items={publication.datasets || {}}
+      onSelect={(idx) => selectSection(`dataset-${idx}`)}
+      onDelete={(idx) => {
+        var newPub = JSON.parse(JSON.stringify(publication));
+        if (newPub.datasets[idx]) {
+          delete newPub.datasets[idx];
+        }
+        if (selectedSection === `dataset-${idx}`) {
+          selectSection(DEFAULT_SECTION_ID);
+        }
+        setPublication(newPub);
+      }}
+      selectedIdx={selectedSection.indexOf('dataset-') === 0
+        ? selectedSection.replace('dataset-', '')
+        : undefined}
+      itemIcon={(item) => (item as Dataset).type === 'index' ? 'database' : 'th'}
+      prompt={(highlight) =>
+        <div className={editableCardListStyles.addCardTriggerContainer}>
+          <AddCardTriggerButton
+            highlight={highlight}
+            label="Add dataset"
+            onClick={() => {
+              setPublication({
+                ...publication,
+                datasets: {
+                  ...(publication.datasets || {}),
+                  [`data_${Object.keys(publication.datasets || {}).length + 1}`]:
+                    { type: 'array', item: { type: 'object', fields: [] } },
+                }});
+            }}
+          />
+        </div>
+      }
+      itemTitle={(item: unknown, idx: string) => ((item as Dataset)?.title || '') !== ''
+        ? <Trans what={(item as Dataset).title!} />
+        : <>Dataset {idx}</>}
+    />
+  </>;
 
 
   /* Section view */
 
-  const SelectedSectionComponent: React.FC<PublicationEditorViewProps> | null =
-      selectedSection !== null
-    ? (sections.find(s => s.id === selectedSection)?.component || null)
-    : null;
+  let selectedSectionView: JSX.Element;
+  const PublicationMetaEditor: React.FC<EditorViewProps<Publication>> | undefined =
+    metaSections.find(s => s.id === selectedSection)?.component;
 
-  const selectedSectionView: JSX.Element | null = SelectedSectionComponent
-    ? <SelectedSectionComponent
-        onChange={setPublication}
-        create={create}
-        validators={validators}
-        validationErrors={validationErrors}
-        publication={publication} />
-    : null;
+  if (selectedSection.startsWith('dataset-')) {
+    const datasetID = selectedSection.replace('dataset-', '');
+    const dataset = (publication.datasets || {})[datasetID];
+    if (dataset !== undefined) {
+      selectedSectionView = <EditDatasetMeta
+        onChange={(newDataset) => {
+          setPublication({
+            ...publication,
+            datasets: {
+              ...(publication.datasets || {}),
+              [datasetID]: newDataset
+            }
+          });
+        }}
+        obj={dataset} />;
+    } else {
+      selectedSectionView = <NonIdealState
+        title="Nothing to show"
+        description="Please select a settings pane or a dataset on the left." />;
+    }
+
+  } else if (PublicationMetaEditor !== undefined) {
+    selectedSectionView = <PublicationMetaEditor
+      obj={publication}
+      create={create}
+      validators={validators}
+      validationErrors={validationErrors}
+      onChange={setPublication} />;
+
+  } else {
+    selectedSectionView = <NonIdealState
+      icon="heart-broken"
+      title="Unable to locate editor class" />;
+  }
 
 
   /* IPC helpers */
@@ -252,7 +338,8 @@ const PublicationEditor: React.FC<{ publication: Publication, create: boolean }>
 };
 
 
-const DeletePublication: React.FC<PublicationEditorViewProps> = function ({ publication, onChange }) {
+const DeletePublication: React.FC<EditorViewProps<Publication>> =
+function ({ obj, onChange }) {
   return <NonIdealState
     icon="help"
     title="This functionality is temporarily unavailable"
@@ -261,8 +348,10 @@ const DeletePublication: React.FC<PublicationEditorViewProps> = function ({ publ
 
 
 const META_SECTIONS: PublicationEditorView[] = [
-  { id: 'meta', title: "Settings", component: EditPublicationMeta, icon: 'numerical' },
+  { id: 'identifiers', title: <>Identifiers</>, component: EditPublicationMeta, icon: 'numerical' },
 ];
+
+const DEFAULT_SECTION_ID = META_SECTIONS[0].id;
 
 
 async function get(id: string): Promise<Publication | null> {

@@ -6,16 +6,16 @@ import { SimpleEditableCard } from 'coulomb/renderer/widgets/editable-card-list'
 
 interface ItemListProps {
   title: string,
-  items: any[],
+  items: object | any[],
   selectedIdx: string | undefined,
 
-  onDelete: (idx: string) => void,
-  onSelect: (idx: string) => void,
+  onDelete?: (idx: string) => void,
+  onSelect?: (idx: string) => void,
 
   itemTitle: (item: unknown, idx: string) => JSX.Element,
   itemIcon?: (item: unknown) => IconName,
 
-  prompt: (highlight?: boolean) => JSX.Element,
+  prompt?: (highlight?: boolean) => JSX.Element,
 
   className?: string,
 }
@@ -30,13 +30,13 @@ export const ItemList: React.FC<ItemListProps> = function(props) {
             minimal={true}
             selected={props.selectedIdx === idx}
             icon={props.itemIcon ? props.itemIcon(item) : "document"}
-            onDelete={() => props.onDelete(idx)}
-            onSelect={() => props.onSelect(idx)}>
+            onDelete={props.onDelete ? (() => props.onDelete!(idx)) : undefined}
+            onSelect={props.onSelect ? (() => props.onSelect!(idx)) : undefined}>
           {props.itemTitle(item, idx)}
         </SimpleEditableCard>
       ))}
 
-      {props.prompt(true)}
+      {props.prompt ? props.prompt(true) : null}
 
     </div>
   );

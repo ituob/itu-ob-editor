@@ -1,12 +1,11 @@
 import { ValidationErrors, ObjectValidators } from "renderer/form-validation";
-import { Publication } from "models/publications";
 
 
-export interface PublicationEditorViewProps {
-  publication: Publication
-  onChange: (newPub: Publication) => void 
-  validators?: ObjectValidators<Publication>
-  validationErrors?: ValidationErrors<ObjectValidators<Publication>>
+export interface EditorViewProps<T> {
+  obj: T
+  onChange: (newObj: T) => void 
+  validators?: ObjectValidators<T>
+  validationErrors?: ValidationErrors<ObjectValidators<T>>
   create?: boolean
 }
 
