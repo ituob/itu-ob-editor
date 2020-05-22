@@ -9,9 +9,7 @@ import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import { Trans } from 'coulomb/localizer/renderer/widgets';
 import { WindowComponentProps } from 'coulomb/config/renderer';
 import { callIPC } from 'coulomb/ipc/renderer';
-import { SimpleEditableCard } from 'coulomb/renderer/widgets/editable-card-list';
-import { AddCardTriggerButton } from 'coulomb/renderer/widgets/editable-card-list';
-import * as editableCardListStyles from 'coulomb/renderer/widgets/editable-card-list/styles.scss';
+import { SimpleEditableCard, AddCardTrigger } from 'coulomb/renderer/widgets';
 
 import { Publication } from 'models/publications';
 import { app } from 'renderer/index';
@@ -27,6 +25,7 @@ import { EditorViewProps } from './types';
 import { default as EditPublicationMeta } from './meta';
 import { default as EditDatasetMeta } from './dataset';
 import * as styles from './styles.scss';
+import * as editableCardListStyles from 'coulomb/renderer/widgets/editable-card-list/styles.scss';
 import { ItemList } from 'renderer/widgets/item-list';
 import { Dataset } from 'models/dataset';
 import { PaneHeader } from 'coulomb/renderer/widgets';
@@ -219,21 +218,19 @@ const PublicationEditor: React.FC<PublicationEditorProps> = function (props) {
         : undefined}
       itemIcon={(item) => (item as Dataset).type === 'index' ? 'database' : 'th'}
       prompt={(highlight) =>
-        <div className={editableCardListStyles.addCardTriggerContainer}>
-          <AddCardTriggerButton
-            highlight={highlight}
-            label="Add dataset"
-            onClick={() => {
-              setPublication({
-                ...publication,
-                datasets: {
-                  ...(publication.datasets || {}),
-                  [`data_${Object.keys(publication.datasets || {}).length + 1}`]:
-                    { type: 'array', item: { type: 'object', fields: [] } },
-                }});
-            }}
-          />
-        </div>
+        <AddCardTrigger
+          highlight={highlight}
+          label="Add dataset"
+          onClick={() => {
+            setPublication({
+              ...publication,
+              datasets: {
+                ...(publication.datasets || {}),
+                [`data_${Object.keys(publication.datasets || {}).length + 1}`]:
+                  { type: 'array', item: { type: 'object', fields: [] } },
+              }});
+          }}
+        />
       }
       itemTitle={(item: unknown, idx: string) => ((item as Dataset)?.title || '') !== ''
         ? <Trans what={(item as Dataset).title!} />
