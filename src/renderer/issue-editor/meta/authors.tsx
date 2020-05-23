@@ -60,10 +60,7 @@ const MetaAuthorsEditor: React.FC<MetaEditorProps<MetaAuthors>> = function ({ da
               itemType='author'
               onReorder={moveItem}
               handleIcon="menu"
-              className={`${styles.sortable} ${styles.metaAuthorItem}`}
-              droppableClassName={styles.sortableOver}
-              draggingClassName={styles.sortableDragged}
-              handleClassName={styles.sortableDragHandle}>
+              className={styles.metaAuthorItem}>
           <PaneHeader
               className={styles.metaAuthorItemTitle}
               actions={
@@ -171,10 +168,8 @@ function ({ author, onChange, _authorIndex }) {
             itemType={`contact-${_authorIndex}`}
             onReorder={moveItem}
             handleIcon="menu"
-            className={`${styles.sortable} ${styles.metaAuthorContactItem}`}
-            draggingClassName={styles.sortableDragged}
-            droppableClassName={styles.sortableOver}
-            handleClassName={styles.sortableDragHandle}>
+            className={styles.metaAuthorContactItem}
+            handleClassName={styles.sortableContactDragHandle}>
           {c !== undefined
             ? <AuthorContactItem
                 key={idx}

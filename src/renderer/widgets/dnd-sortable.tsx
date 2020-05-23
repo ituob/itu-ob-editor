@@ -1,6 +1,7 @@
 import React, { useRef, useCallback } from 'react';
 import { useDrag, XYCoord, useDrop, DropTargetMonitor } from 'react-dnd';
 import { IconName, Icon } from '@blueprintjs/core';
+import styles from './dnd-sortable.scss';
 
 
 interface DragItem {
@@ -88,13 +89,19 @@ function ({ idx, canReorder, onReorder, className, droppableClassName, draggingC
 
   return <div
       className={`
+        ${styles.sortable}
         ${className || ''}
+        ${isDragging ? styles.sortableDragged : ''}
         ${(draggingClassName && isDragging) ? draggingClassName : ''}
+        ${(canDrop ? styles.sortableOver : '')}
         ${(droppableClassName && canDrop) ? droppableClassName : ''}
       `}
       ref={handleIcon ? preview : ref}>
     {reorderable && handleIcon
-      ? <div ref={ref} className={handleClassName || ''} title="Hold and drag to reorder.">
+      ? <div
+            ref={ref}
+            className={`${styles.sortableDragHandle} ${handleClassName || ''}`}
+            title="Hold and drag to reorder.">
           <div ref={dragHandle}>
             <Icon ref={dragHandle} icon={handleIcon} />
           </div>

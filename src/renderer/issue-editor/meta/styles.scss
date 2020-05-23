@@ -1,57 +1,11 @@
 @import "~@blueprintjs/core/lib/scss/variables";
 
-// General sortables
-
-:local .sortable {
-  position: relative;
-
-  .sortableDragHandle {
-    position: absolute;
-    left: 0px;
-    top: 0px;
-    bottom: 0px;
-    width: $pt-grid-size * 2;
-
-    padding: $pt-grid-size / 2;
-
-    background-color: $pt-app-background-color;
-
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: center;
-
-    cursor: move;
-
-    svg {
-      transform: scaleX(0.5);
-      transform-origin: left center;
-      path {
-        fill: $pt-text-color-disabled;
-      }
-    }
-  }
-
-  &.sortableDragged {
-    cursor: move;
-  }
-}
-
-
-:local .sortableOver {
-  opacity: .5;
-}
-
-// Meta panes
 
 :local .metaIDPane,
 :local .metaDeleteIssuePane,
 :local .metaLanguagesPane,
 :local .metaSchedulePane {
   padding: $pt-grid-size * 2;
-}
-
-:local .metaNewAuthor {
-  margin: $pt-grid-size;
 }
 
 :local .metaSchedulePane {
@@ -65,6 +19,13 @@
 :local .metaScheduleCalendar {
   background: $pt-app-background-color;
   display: inline-block;
+}
+
+
+// Authors
+
+:local .metaNewAuthor {
+  margin: $pt-grid-size;
 }
 
 :local .metaAuthorItem {
@@ -99,12 +60,13 @@
   :global .bp3-form-group {
     margin-bottom: 0;
   }
-  .sortableDragHandle {
-    left: unset;
-    right: 0px;
-    top: 0px;
-    bottom: 0px;
-  }
+}
+
+:local .sortableContactDragHandle {
+  left: unset;
+  right: 0px;
+  top: 0px;
+  bottom: 0px;
 }
 
 :local .metaAuthorAddressTextarea {

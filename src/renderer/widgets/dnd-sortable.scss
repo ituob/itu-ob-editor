@@ -1,0 +1,40 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
+
+:local .sortable {
+  position: relative;
+}
+
+:local .sortableDragHandle {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  bottom: 0px;
+  width: $pt-grid-size * 2;
+
+  padding: $pt-grid-size / 2;
+
+  background-color: $pt-app-background-color;
+
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+
+  cursor: move;
+
+  svg {
+    transform: scaleX(0.5);
+    transform-origin: left center;
+    path {
+      fill: $pt-text-color-disabled;
+    }
+  }
+}
+
+:local .sortableDragged {
+  cursor: move;
+}
+
+:local .sortableOver {
+  opacity: .5;
+}
