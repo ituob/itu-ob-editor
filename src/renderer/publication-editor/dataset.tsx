@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { FormGroup, InputGroup, ButtonGroup, Button } from '@blueprintjs/core';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
-import { Dataset, DataObject } from 'models/dataset';
+import { DataItem, Dataset, DataObject, ManipulatedDataItem, DataArray, DataIndex } from 'models/dataset';
 import { EditorViewProps } from './types';
 import Sortable from 'renderer/widgets/dnd-sortable';
 
@@ -37,54 +37,132 @@ const DatasetMeta: React.FC<DatasetMetaEditorProps> = function ({ obj, onChange 
         />
       </FormGroup>
 
-      <FormGroup label="Dataset type">
-        <ButtonGroup>
-          <Button active={obj.type === 'array'} onClick={() => onChange({ ...obj, type: 'array' })}>Array (list of items)</Button>
-          <Button active={obj.type === 'index'} onClick={() => onChange({ ...obj, type: 'index' })}>Index (key-value structure)</Button>
-        </ButtonGroup>
-      </FormGroup>
-
-      <DataItemSpec item={obj.item} onChange={(newItem) => onChange({ ...obj, item: newItem })} nestingLevel={0} />
+      <DataItemSpec
+        item={obj}
+        onChange={(newItem) => onChange({ ...obj, ...(newItem as (DataIndex | DataArray)) })}
+        nestingLevel={0}
+        allowedTypes={['array', 'index']}
+      />
     </>
   );
 };
 
 
+const FIELD_TYPES: DataItem["type"][] = ['text', 'translated-text', 'number', 'boolean'];
+const COMPLEX_FIELD_TYPES: DataItem["type"][] = ['array', 'object'];
+
+
 interface DataItemSpecProps {
-  item: DataObject
-  onChange: (newItem: DataObject) => void
+  item: ManipulatedDataItem
+  allowedTypes?: ('index' | DataItem["type"])[]
+  onChange: (newItem: ManipulatedDataItem) => void
   nestingLevel: number 
 }
-const DataItemSpec: React.FC<DataItemSpecProps> = function ({ item, onChange, nestingLevel }) {
-  return (
-    <>
-      <div>
+const DataItemSpec: React.FC<DataItemSpecProps> = function ({ item, onChange, nestingLevel, allowedTypes }) {
+  const typeOptions = allowedTypes || [ ...FIELD_TYPES, ...COMPLEX_FIELD_TYPES ];
+  const lang = useContext(LangConfigContext);
+
+  console.debug(nestingLevel, item, allowedTypes);
+
+  function moveField() {
+  }
+
+  function deleteField(idx: number) {
+  }
+
+  function updateField(idx: number, newField: ManipulatedDataItem) {
+  }
+
+  function appendField() {
+  }
+
+  let itemEditor: JSX.Element;
+  if (item.type === 'object') {
+    itemEditor = (
+      <>
         {[ ...item.fields.entries() ].map(([idx, field]) =>
-          <Sortable
-              key={(item.fields || []).indexOf(field)}
-              idx={idx}
-              itemType={`${nestingLevel}-field`}
-              onReorder={moveField}
-              handleIcon="menu"
-              className={`${styles.sortable} ${styles.metaAuthorContactItem}`}
-              draggingClassName={styles.sortableDragged}
-              droppableClassName={styles.sortableOver}
-              handleClassName={styles.sortableDragHandle}>
-            {field !== undefined
-              ? <DataFieldSpec
-                  key={idx}
-                  field={field}
-                  onDelete={() => deleteField(idx)}
-                  onChange={(newField) => updateField(idx, newField)} />
-              : null}
-          </Sortable>
+          field !== undefined
+          ? <Sortable
+                key={(item.fields || []).indexOf(field)}
+                idx={idx}
+                itemType={`${nestingLevel}-field`}
+                onReorder={moveField}
+                handleIcon="menu">
+              <Button
+                  onClick={() => deleteField(idx)}
+                  icon="delete"
+                  title="Delete this field.">
+                Delete
+              </Button>
+              <DataItemSpec
+                item={field}
+                nestingLevel={nestingLevel + 1}
+                onChange={(newField) => updateField(idx, newField)} />
+            </Sortable>
+          : null
         )}
-        <div className={styles.newField}>
+        <div>
           <Button onClick={appendField} icon="add">Add field</Button>
         </div>
+      </>
+    );
+  } else if (item.type === 'array' || item.type === 'index') {
+    itemEditor = <DataItemSpec
+      item={item.item}
+      allowedTypes={['object']}
+      nestingLevel={nestingLevel + 1}
+      onChange={(newItem) => onChange({ ...item, item: newItem as DataObject })}
+    />;
+  } else {
+    itemEditor = (
+      <FormGroup label="Field label">
+        <InputGroup
+          type="text"
+          value={item.label[lang.selected]}
+          onChange={(evt: React.FormEvent<HTMLInputElement>) =>
+            onChange({
+              ...item,
+              label: {
+                ...item.label,
+                [lang.selected]: evt.currentTarget.value as string,
+              }
+            })
+          }/>
+      </FormGroup>
+    );
+  }
+
+  return (
+    <>
+      <FormGroup inline>
+        <ButtonGroup>
+          {typeOptions.map(typ =>
+            <Button
+                key={typ}
+                active={item.type === typ}
+                onClick={() => onChange({ ...item, type: typ } as ManipulatedDataItem /* <-- TYPECAST DANGER */)}>
+              {typ}
+            </Button>
+          )}
+        </ButtonGroup>
+      </FormGroup>
+
+      <div>
+        {itemEditor}
       </div>
     </>
   );
 };
+
+
+// interface DataFieldSpecProps {
+//   field: DataItem
+//   onDelete: () => void
+//   onChange: (newField: DataItem) => void
+// }
+// const DataFieldSpec: React.FC<DataFieldSpecProps> = function ({ field, onDelete, onChange }) {
+//   return <p>Field!</p>;
+// };
+
 
 export default DatasetMeta;

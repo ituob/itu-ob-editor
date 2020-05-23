@@ -1,7 +1,7 @@
 import { Translatable } from "coulomb/localizer/types"
 
 
-type BasicField = {
+export type BasicField = {
   id: string
   label: Translatable<string>
   required?: true
@@ -24,12 +24,19 @@ type BooleanField = {
 }
 
 
-type ObjectField = TextField | TranslatedTextField | NumberField | BooleanField
-
-
 export type DataArray = {
   item: DataObject
 } & { type: 'array' }
+
+
+export type DataObject = {
+  fields: (BasicField & DataItem)[]
+} & { type: 'object' }
+
+
+export type SimpleValue = TextField | TranslatedTextField | NumberField | BooleanField
+export type ComplexValue =  DataArray | DataObject
+export type DataItem = SimpleValue | ComplexValue
 
 
 export type DataIndex = {
@@ -37,11 +44,4 @@ export type DataIndex = {
 } & { type: 'index' }
 
 
-export type DataObject = {
-  fields: (BasicField & ObjectField)[]
-} & { type: 'object' }
-
-
 export type Dataset = { title?: Translatable<string> } & (DataArray | DataIndex)
-
-export type DataItem = DataArray | DataObject
