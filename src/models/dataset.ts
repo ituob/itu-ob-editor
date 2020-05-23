@@ -27,17 +27,17 @@ type BooleanField = {
 type ObjectField = TextField | TranslatedTextField | NumberField | BooleanField
 
 
-type DataArray = {
+export type DataArray = {
   item: DataObject
 } & { type: 'array' }
 
 
-type DataIndex = {
+export type DataIndex = {
   item: DataObject
 } & { type: 'index' }
 
 
-type DataObject = {
+export type DataObject = {
   fields: (BasicField & ObjectField)[]
 } & { type: 'object' }
 

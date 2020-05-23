@@ -25,7 +25,6 @@ import { EditorViewProps } from './types';
 import { default as EditPublicationMeta } from './meta';
 import { default as EditDatasetMeta } from './dataset';
 import * as styles from './styles.scss';
-import * as editableCardListStyles from 'coulomb/renderer/widgets/editable-card-list/styles.scss';
 import { ItemList } from 'renderer/widgets/item-list';
 import { Dataset } from 'models/dataset';
 import { PaneHeader } from 'coulomb/renderer/widgets';
@@ -185,8 +184,8 @@ const PublicationEditor: React.FC<PublicationEditorProps> = function (props) {
       ? []
       : [{ id: 'delete', title: <>Delete publication</>, component: DeletePublication, icon: 'delete' as IconName }]),
   ];
-  type SectionIDs = string & ((typeof metaSections[number])["id"] | (keyof (typeof publication)["datasets"]));
 
+  type SectionIDs = string & ((typeof metaSections[number])["id"] | (keyof (typeof publication)["datasets"]));
   const [selectedSection, selectSection] = useState<SectionIDs>(DEFAULT_SECTION_ID);
 
   const sectionNavigation = <>
@@ -199,6 +198,7 @@ const PublicationEditor: React.FC<PublicationEditorProps> = function (props) {
         {s.title}
       </SimpleEditableCard>
     )}
+
     <ItemList
       title="Dataset settings"
       items={publication.datasets || {}}
