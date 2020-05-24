@@ -34,6 +34,9 @@ export type DataObject = {
 } & { type: 'object' }
 
 
+export type DataType = ('index' | DataItem["type"])
+
+
 export type SimpleValue = TextField | TranslatedTextField | NumberField | BooleanField
 export type ComplexValue =  DataArray | DataObject
 export type DataItem = SimpleValue | ComplexValue

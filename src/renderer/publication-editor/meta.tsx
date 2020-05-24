@@ -5,6 +5,7 @@ import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import { GenericValidationErrorsNotice, ValidationErrorsNotice } from 'renderer/form-validation';
 import { Publication } from 'models/publications';
 import { EditorViewProps } from './types';
+import styles from './styles.scss';
 
 
 interface MetaEditorProps extends EditorViewProps<Publication> {}
@@ -25,7 +26,7 @@ function ({ obj, create, onChange, validators, validationErrors }) {
   const ValidationErr = GenericValidationErrorsNotice as ValidationErrorsNotice<typeof validators>;
 
   return (
-    <div>
+    <div className={styles.publicationMetaEditor}>
       <FormGroup
           key="title"
           intent={validationErrors.title ? "danger" : undefined}

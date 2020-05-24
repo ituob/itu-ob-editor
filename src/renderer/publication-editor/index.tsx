@@ -26,7 +26,7 @@ import { default as EditPublicationMeta } from './meta';
 import { default as EditDatasetMeta } from './dataset';
 import * as styles from './styles.scss';
 import { ItemList } from 'renderer/widgets/item-list';
-import { Dataset } from 'models/dataset';
+import { Dataset, BasicField, DataItem } from 'models/dataset';
 import { PaneHeader } from 'coulomb/renderer/widgets';
 
 
@@ -104,6 +104,13 @@ const PublicationEditor: React.FC<PublicationEditorProps> = function (props) {
   const create = props.create;
 
   const [publication, setPublication] = useState<Publication>(props.publication);
+
+  const defaultObjectField: DataItem & BasicField = {
+    type: 'text',
+    label: { [lang.selected]: "Object ID" },
+    id: 'id',
+    required: true,
+  };
 
   useEffect(() => {
     const pub = props.publication;
@@ -227,7 +234,7 @@ const PublicationEditor: React.FC<PublicationEditorProps> = function (props) {
               datasets: {
                 ...(publication.datasets || {}),
                 [`data_${Object.keys(publication.datasets || {}).length + 1}`]:
-                  { type: 'array', item: { type: 'object', fields: [] } },
+                  { type: 'array', item: { type: 'object', fields: [defaultObjectField] } },
               }});
           }}
         />
