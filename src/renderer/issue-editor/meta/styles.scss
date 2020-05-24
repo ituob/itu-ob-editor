@@ -29,8 +29,7 @@
 }
 
 :local .metaAuthorItem {
-  padding-left: $pt-grid-size * 4;
-  padding-right: $pt-grid-size * 3;
+  padding-right: $pt-grid-size * 2;
   padding-bottom: $pt-grid-size;
   display: flex;
   flex-flow: column nowrap;

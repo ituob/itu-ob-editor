@@ -3,6 +3,7 @@
 
 :local .sortable {
   position: relative;
+  padding-left: $pt-grid-size * 3;
 }
 
 :local .sortableDragHandle {
