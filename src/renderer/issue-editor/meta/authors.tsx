@@ -23,6 +23,8 @@ const CONTACT_TYPES: ('phone' | 'email' | 'fax')[] = [
   'fax',
 ];
 
+const NEW_AUTHOR: OBAuthorOrg = { name: '', contacts: [] };
+
 
 const MetaAuthorsEditor: React.FC<MetaEditorProps<MetaAuthors>> = function ({ data, onChange }) {
   const moveItem = useCallback((dragIndex: number, hoverIndex: number) => {
@@ -47,7 +49,7 @@ const MetaAuthorsEditor: React.FC<MetaEditorProps<MetaAuthors>> = function ({ da
   }
 
   function appendNew() {
-    updateData([ ...(data.authors || []), { name: '', contacts: [] }]);
+    updateData([ ...(data.authors || []), NEW_AUTHOR]);
   }
 
   function renderAuthor(author: OBAuthorOrg, idx: number) {
