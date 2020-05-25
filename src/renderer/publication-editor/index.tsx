@@ -322,7 +322,7 @@ const PublicationEditor: React.FC<PublicationEditorProps> = function (props) {
           objectType="SP"
           objectID={publication.id}
           paneHeaderProps={{
-            actions: <HelpButton path="amend-publication/" />,
+            actions: <HelpButton path="edit-service-publication/" />,
           }}
           canSave={canSave}
           doneButtonLabel={create ? "Create" : undefined}
