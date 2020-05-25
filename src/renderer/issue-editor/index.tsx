@@ -81,11 +81,6 @@ export const IssueEditor: React.FC<{ issue: OBIssue }> = (props) => {
 
   const [saved, setSaved] = useState(true);
 
-  //useEffect(() => {
-  //  const _hasUncommittedChanges = modifiedIssues.value.indexOf(props.issue.id) >= 0;
-  //  setHasUncommittedChanges(_hasUncommittedChanges);
-  //}, [modifiedIssues]);
-
 
   /* Prepare initial item selection status */
 
