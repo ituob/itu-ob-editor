@@ -61,6 +61,10 @@
   .datasetContentsCell {
     padding: ($pt-grid-size / 2) $pt-grid-size;
 
+    .unsupportedField {
+      color: $pt-text-color-disabled;
+    }
+
     overflow: hidden;
     transform: translateY(2px) translateX(1px);
     border-width: 0 1px 1px 0;

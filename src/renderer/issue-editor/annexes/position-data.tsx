@@ -515,6 +515,8 @@ function ({ value, onFieldChange, fieldSpec }) {
       onConfirm={onFieldChange ? (val => onFieldChange(val)) : undefined} />
 
   } else {
-    return <>Unsupported field type</>;
+    return <span className={styles.unsupportedField}>
+      {JSON.stringify(value)}
+    </span>;
   }
 };
