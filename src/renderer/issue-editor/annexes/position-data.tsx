@@ -504,7 +504,7 @@ interface FieldCellProps {
 }
 const FieldCell: React.FC<FieldCellProps> =
 function ({ value, onFieldChange, fieldSpec }) {
-  const [ val, setVal ] = useState<any>(value);
+  const [val, setVal] = useState<any>(value);
 
   if (fieldSpec.type === 'text') {
     return <EditableText
