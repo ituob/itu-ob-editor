@@ -19,6 +19,7 @@ import {
   OBSection, OBMessageSection,
   isOBMessageSection, isOBAnnexesSection,
   issueFactories,
+  AnnexedPosition,
 } from 'models/issues';
 
 import { app } from 'renderer/index';
@@ -29,7 +30,7 @@ import { NewAmendmentPrompt } from './new-item-prompts/amendment';
 import { NewAnnexPrompt } from './new-item-prompts/annex';
 import { MessageTitle, MessageEditor } from './message-editor';
 import { AmendmentMeta } from './message-forms/amendment';
-import { AnnexEditor } from './annex-editor';
+import { AnnexEditor } from './annexes';
 
 import * as styles from './styles.scss';
 import { WindowComponentProps } from 'coulomb/config/renderer';
@@ -157,7 +158,7 @@ export const IssueEditor: React.FC<{ issue: OBIssue }> = (props) => {
       return <AnnexEditor
           pubId={selectedItem}
           issueId={issue.id}
-          position={selectedAnnex ? selectedAnnex.position_on : undefined}
+          position={selectedAnnex}
           onChange={handleAnnexPositionEdit}
         />;
     }
@@ -251,7 +252,7 @@ export const IssueEditor: React.FC<{ issue: OBIssue }> = (props) => {
     }, 100);
   }
 
-  function handleAnnexPositionEdit(pubId: string, updatedPosition: Date | undefined) {
+  function handleAnnexPositionEdit(pubId: string, updatedPosition: AnnexedPosition | null) {
     updateIssue(issueFactories.withUpdatedAnnexedPublicationPosition(issue, pubId, updatedPosition));
   }
 

@@ -1,6 +1,6 @@
 import { Translatable } from 'coulomb/localizer/types';
 import { Recommendation } from 'models/recommendations';
-import { Dataset } from 'models/dataset';
+import { DatasetMeta } from 'models/dataset';
 
 
 export type PublicationID = string;
@@ -14,7 +14,8 @@ export interface Publication {
   url?: string,
   recommendation?: Recommendation | null,
 
+  // TODO: Datasets are now filled in at annex level only, including meta
   datasets?: {
-    [id: string]: Dataset
+    [id: string]: DatasetMeta
   }
 }

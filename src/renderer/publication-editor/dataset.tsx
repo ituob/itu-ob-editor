@@ -4,16 +4,18 @@ import { DndProvider } from 'react-dnd';
 import Backend from 'react-dnd-html5-backend';
 import { FormGroup, InputGroup, Button, ControlGroup, HTMLSelect } from '@blueprintjs/core';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
-import { DataItem, Dataset, DataObject, DataArray, BasicField, DataType } from 'models/dataset';
+import { DataItem, DatasetMeta, DataObject, DataArray, BasicField, DataType } from 'models/dataset';
 import { EditorViewProps } from './types';
-import Sortable from 'renderer/widgets/dnd-sortable';
+
 import styles from './styles.scss';
+import Sortable from 'renderer/widgets/dnd-sortable';
 
 
-interface DatasetMetaEditorProps extends EditorViewProps<Dataset> {}
+interface DatasetMetaEditorProps extends EditorViewProps<DatasetMeta> {}
 
 
-const DatasetMeta: React.FC<DatasetMetaEditorProps> = function ({ obj, onChange }) {
+const DatasetMeta: React.FC<DatasetMetaEditorProps & { schemaLocked?: boolean }> =
+function ({ obj, onChange, schemaLocked }) {
   const dataset = obj;
   const lang = useContext(LangConfigContext);
   return (
@@ -22,43 +24,54 @@ const DatasetMeta: React.FC<DatasetMetaEditorProps> = function ({ obj, onChange 
         <FormGroup label="Dataset title:">
           <InputGroup
             value={dataset.title ? dataset.title[lang.selected] : ''}
-            onChange={(evt: React.FormEvent<HTMLInputElement>) => {
-              const newTitle = evt.currentTarget.value as string;
-              if (newTitle.trim() !== '') {
-                onChange({ ...obj, title: { ...obj.title, [lang.selected]: newTitle } });
-              } else {
-                var title = { ...obj.title || {} };
-                if (Object.keys(title).length > 0 && title[lang.selected]) {
-                  delete title[lang.selected];
-                  onChange({ ...obj, title });
-                }
-                if (Object.keys(title).length < 1) {
-                  var newObj = { ...obj };
-                  delete newObj.title;
-                  onChange(newObj);
+            readOnly={!onChange}
+            rightElement={<Button disabled minimal>{lang.available[lang.selected]}</Button>}
+            onChange={onChange
+              ? (evt: React.FormEvent<HTMLInputElement>) => {
+                const newTitle = evt.currentTarget.value as string;
+                if (newTitle.trim() !== '') {
+                  onChange({ ...obj, title: { ...obj.title, [lang.selected]: newTitle } });
+                } else {
+                  var title = { ...obj.title || {} };
+                  if (Object.keys(title).length > 0 && title[lang.selected]) {
+                    delete title[lang.selected];
+                    onChange({ ...obj, title });
+                  }
+                  if (Object.keys(title).length < 1) {
+                    var newObj = { ...obj };
+                    delete newObj.title;
+                    onChange(newObj);
+                  }
                 }
               }
-            }}
+            : undefined}
           />
         </FormGroup>
 
         <FormGroup
-            label="Dataset structure:"
+            label="Dataset schema:"
             inline
             helperText={<>
-              {obj.type === 'array' ? "Items are in an ordered list." : null}
-              {obj.type === 'index' ? "Each item is assigned a key." : null}
-              {" "}
-              Specify item fields below.
+              <p>
+                {obj.schema.type === 'array' ? "Items are in an ordered list." : null}
+                {obj.schema.type === 'index' ? "Each item is assigned a key." : null}
+                {" "}
+                Specify item fields below.
+              </p>
+              <p>
+                Note: to preserve data integrity,
+                {" "}
+                altering schema is not possible if dataset has any content.
+              </p>
             </>}>
           <DataTypeSelector
             allowedTypes={['index', 'array']}
-            selectedType={obj.type}
+            selectedType={obj.schema.type}
             className={styles.datasetType}
-            onChange={onChange
+            onChange={(onChange && !schemaLocked)
               ? ((typ) => {
                 if (typ === 'array' || typ === 'index') {
-                  onChange({ ...obj, type: typ } as Dataset)
+                  onChange({ ...obj, schema: { ...obj.schema, type: typ } } as DatasetMeta)
                 }
               })
               : undefined} />
@@ -68,8 +81,10 @@ const DatasetMeta: React.FC<DatasetMetaEditorProps> = function ({ obj, onChange 
 
       <DndProvider backend={Backend}>
         <DataObjectSpec
-          obj={obj.item}
-          onChange={(newItem) => onChange({ ...obj, item: newItem })}
+          obj={obj.schema.item}
+          onChange={(onChange && !schemaLocked)
+            ? ((newItem) => onChange({ ...obj, schema: { ...obj.schema, item: newItem }}))
+            : undefined}
           nestingLevel={0} />
       </DndProvider>
     </div>
@@ -176,10 +191,18 @@ function ({ field, onChange, onDelete, nestingLevel, allowedTypes }) {
   const typeOptions: DataItem["type"][] = allowedTypes || [ ...FIELD_TYPES, ...COMPLEX_FIELD_TYPES ];
 
   const lang = useContext(LangConfigContext);
-  const defaultObjectField: DataItem & BasicField = {
+
+  const defaultIDField: DataItem & BasicField = {
     type: 'text',
     label: { [lang.selected]: "Object ID" },
     id: 'id',
+    required: true,
+  };
+
+  const defaultField: DataItem & BasicField = {
+    type: 'text',
+    label: { [lang.selected]: "Field 1" },
+    id: 'field_1',
     required: true,
   };
 
@@ -246,10 +269,10 @@ function ({ field, onChange, onDelete, nestingLevel, allowedTypes }) {
             onChange={onChange
               ? ((typ) => {
                   if (typ === 'object') {
-                    const newField: DataObject & BasicField = { ...field, type: typ, fields: [defaultObjectField] };
+                    const newField: DataObject & BasicField = { ...field, type: typ, fields: [defaultField] };
                     onChange(newField);
                   } else if (typ === 'array') {
-                    const newField: DataArray & BasicField = { ...field, type: typ, item: { type: 'object', fields: [defaultObjectField] }};
+                    const newField: DataArray & BasicField = { ...field, type: typ, item: { type: 'object', fields: [defaultIDField] }};
                     onChange(newField)
                   } else if (typ === 'index') {
                     throw new Error("Index structures are not allowed beyond top-level dataset");

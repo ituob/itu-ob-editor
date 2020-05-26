@@ -4,7 +4,7 @@ import * as log from 'electron-log';
 import { default as Manager } from 'coulomb/db/isogit-yaml/main/manager';
 import { sortIntegerAscending, QuerySet, Index } from 'coulomb/db/query';
 import { listen } from 'coulomb/ipc/main';
-import { OBIssue, ScheduledIssue, IssueMeta } from 'models/issues';
+import { OBIssue, ScheduledIssue, IssueMeta, PositionDatasets } from 'models/issues';
 import { RunningAnnex, getRunningAnnexesForIssue } from 'models/running-annexes';
 import { defaultLanguage, defaultISSN } from '../app';
 
@@ -53,6 +53,31 @@ class IssueManager extends Manager<OBIssue, number, { onlyIDs?: number[], month?
   getLatestAnnex(ofPubID: string, asOfIssueID: number): RunningAnnex | undefined {
     return (this.runningAnnexes[`${asOfIssueID}`] || []).
       filter(annex => annex.publicationID === ofPubID)[0];
+  }
+
+  autoFillDatasets(forPubID: string, asOfIssueID: number): PositionDatasets | undefined {
+    const latestAnnex = this.getLatestAnnex(forPubID, asOfIssueID);
+
+    if (latestAnnex !== undefined) {
+      const latestDatasets = latestAnnex.annexedTo.annexes[forPubID]?.datasets;
+
+      if (latestDatasets !== undefined) {
+        var datasets: PositionDatasets = {};
+        for (const [datasetID, dataset] of Object.entries(latestDatasets)) {
+          datasets[datasetID] = {
+            meta: dataset.meta,
+
+            // TODO: Apply amendments during dataset auto-fill \^o^/
+            contents: dataset.contents,
+          };
+        }
+
+        if (Object.keys(datasets).length > 0) {
+          return datasets;
+        }
+      }
+    }
+    return undefined;
   }
 
   rebuildSchedule(idx: Index<OBIssue>) {
@@ -179,6 +204,11 @@ class IssueManager extends Manager<OBIssue, number, { onlyIDs?: number[], month?
     listen<{ pubID: string, asOfIssueID: number }, { annex: RunningAnnex | undefined }>
     (`${prefix}-get-latest-annex`, async ({ pubID, asOfIssueID }) => {
       return { annex: this.getLatestAnnex(pubID, asOfIssueID) };
+    });
+
+    listen<{ forPubID: string, asOfIssueID: number }, { datasets?: PositionDatasets }>
+    (`${prefix}-auto-fill-datasets`, async ({ forPubID, asOfIssueID }) => {
+      return { datasets: this.autoFillDatasets(forPubID, asOfIssueID) };
     });
 
     listen<{ asOfIssueID: number }, { annexes: RunningAnnex[] }>

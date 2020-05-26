@@ -47,4 +47,60 @@ export type DataIndex = {
 } & { type: 'index' }
 
 
-export type Dataset = { title?: Translatable<string> } & (DataArray | DataIndex)
+/* Dataset meta. */
+export interface DatasetMeta {
+  title?: Translatable<string>
+  schema: DataArray | DataIndex
+}
+
+export interface Dataset {
+  meta: DatasetMeta
+  contents: DatasetContents
+}
+
+export type DatasetContents = ArrayStructure | IndexStructure
+
+
+export type IndexStructure = { [key: string]: object }
+export type ArrayStructure = object[]
+
+
+interface ArrayDataset extends Dataset {
+  meta: ArrayDatasetMeta
+  contents: ArrayStructure
+}
+
+interface ArrayDatasetMeta extends DatasetMeta {
+  schema: DataArray
+}
+
+interface IndexDataset extends Dataset {
+  meta: IndexDatasetMeta
+  contents: IndexStructure
+}
+
+interface IndexDatasetMeta extends DatasetMeta {
+  schema: DataIndex
+}
+
+
+export function isArray(dataset: Dataset): dataset is ArrayDataset {
+  return specifiesArray(dataset.meta.schema) && containsArray(dataset.contents);
+}
+export function specifiesArray(schema: DataArray | DataIndex): schema is DataArray {
+  return schema.type === 'array';
+}
+export function containsArray(data: ArrayStructure | IndexStructure): data is ArrayStructure {
+  return Array.isArray(data);
+}
+
+
+export function isIndex(dataset: Dataset): dataset is IndexDataset {
+  return specifiesIndex(dataset.meta.schema) && containsIndex(dataset.contents);
+}
+export function specifiesIndex(schema: DataArray | DataIndex): schema is DataIndex {
+  return schema.type === 'index';
+}
+export function containsIndex(data: ArrayStructure | IndexStructure): data is IndexStructure {
+  return !Array.isArray(data);
+}

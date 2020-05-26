@@ -1,0 +1,83 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+
+
+:local .editPositionToggle {
+  vertical-align: baseline;
+}
+
+
+:local .editPositionForm {
+  flex: 1;
+  font-size: $pt-font-size-small;
+  display: flex;
+  align-items: flex-start;
+  flex-flow: column nowrap;
+  margin-bottom: 0;
+
+  :global .bp3-datepicker,
+  :global .bp3-form-helper-text {
+    margin-top: 1rem;
+  }
+
+  :global .bp3-datepicker {
+    padding: 1.5rem;
+    background: $pt-app-background-color;
+  }
+}
+
+
+:local .datasets {
+  display: flex;
+  flex-flow: row nowrap;
+  flex: 1;
+  overflow: hidden;
+
+  .mainPane {
+    flex: 1;
+  }
+
+  .navigation {
+    width: 10rem;
+    box-shadow: $pt-elevation-shadow-1;
+    background: $pt-app-background-color;
+    z-index: 1;
+  }
+}
+
+:local .datasetContents {
+  .datasetContentsTable {
+    z-index: 0;
+  }
+
+  .toolbar {
+    padding: $pt-grid-size;
+    background: $pt-app-background-color;
+    box-shadow: $pt-elevation-shadow-1;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    z-index: 2;
+  }
+  .datasetContentsCell {
+    font-size: $pt-font-size-small;
+    padding: $pt-grid-size / 2;
+    cursor: default;
+    overflow: hidden;
+    transform: translateY(2px) translateX(1px);
+    border-width: 0 1px 1px 0;
+    border-style: solid;
+    border-color: white;
+
+    &.columnHeader,
+    &.rowHeader {
+      font-weight: bold;
+    }
+
+    &.inSelectedRow {
+      background-color: $pt-divider-black;
+    }
+    &.selected {
+      background-color: $pt-text-selection-color;
+    }
+  }
+}

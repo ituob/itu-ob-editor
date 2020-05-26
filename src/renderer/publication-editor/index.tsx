@@ -26,7 +26,7 @@ import { default as EditPublicationMeta } from './meta';
 import { default as EditDatasetMeta } from './dataset';
 import * as styles from './styles.scss';
 import { ItemList } from 'renderer/widgets/item-list';
-import { Dataset, BasicField, DataItem } from 'models/dataset';
+import { DatasetMeta, BasicField, DataItem } from 'models/dataset';
 import { PaneHeader } from 'coulomb/renderer/widgets';
 
 
@@ -105,7 +105,7 @@ const PublicationEditor: React.FC<PublicationEditorProps> = function (props) {
 
   const [publication, setPublication] = useState<Publication>(props.publication);
 
-  const defaultObjectField: DataItem & BasicField = {
+  const defaultIDField: DataItem & BasicField = {
     type: 'text',
     label: { [lang.selected]: "Object ID" },
     id: 'id',
@@ -189,10 +189,17 @@ const PublicationEditor: React.FC<PublicationEditorProps> = function (props) {
     ...META_SECTIONS,
     ...(create
       ? []
-      : [{ id: 'delete', title: <>Delete publication</>, component: DeletePublication, icon: 'delete' as IconName }]),
+      : [{
+          id: 'delete',
+          title: <>Delete publication</>,
+          component: DeletePublication,
+          icon: 'delete' as IconName,
+        }]),
   ];
 
-  type SectionIDs = string & ((typeof metaSections[number])["id"] | (keyof (typeof publication)["datasets"]));
+  type SectionIDs =
+    string & ((typeof metaSections[number])["id"] |
+    (keyof (typeof publication)["datasets"]));
   const [selectedSection, selectSection] = useState<SectionIDs>(DEFAULT_SECTION_ID);
 
   const sectionNavigation = <>
@@ -207,7 +214,7 @@ const PublicationEditor: React.FC<PublicationEditorProps> = function (props) {
     )}
 
     <ItemList
-      title="Dataset settings"
+      title="Dataset specifications"
       items={publication.datasets || {}}
       onSelect={(idx) => selectSection(`dataset-${idx}`)}
       onDelete={(idx) => {
@@ -223,7 +230,7 @@ const PublicationEditor: React.FC<PublicationEditorProps> = function (props) {
       selectedIdx={selectedSection.indexOf('dataset-') === 0
         ? selectedSection.replace('dataset-', '')
         : undefined}
-      itemIcon={(item) => (item as Dataset).type === 'index' ? 'database' : 'th'}
+      itemIcon={(item) => (item as DatasetMeta).schema.type === 'index' ? 'database' : 'th'}
       prompt={(highlight) =>
         <AddCardTrigger
           highlight={highlight}
@@ -233,14 +240,18 @@ const PublicationEditor: React.FC<PublicationEditorProps> = function (props) {
               ...publication,
               datasets: {
                 ...(publication.datasets || {}),
-                [`data_${Object.keys(publication.datasets || {}).length + 1}`]:
-                  { type: 'array', item: { type: 'object', fields: [defaultObjectField] } },
+                [`data_${Object.keys(publication.datasets || {}).length + 1}`]: {
+                  schema: {
+                    type: 'array',
+                    item: { type: 'object', fields: [defaultIDField] },
+                  },
+                },
               }});
           }}
         />
       }
-      itemTitle={(item: unknown, idx: string) => ((item as Dataset)?.title || '') !== ''
-        ? <Trans what={(item as Dataset).title!} />
+      itemTitle={(item: unknown, idx: string) => ((item as DatasetMeta)?.title || '') !== ''
+        ? <Trans what={(item as DatasetMeta).title!} />
         : <>Dataset {idx}</>}
     />
   </>;

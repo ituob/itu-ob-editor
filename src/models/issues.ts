@@ -1,16 +1,25 @@
 import { Message, MessageType } from 'models/messages';
 import { AvailableLanguages } from 'models/languages';
+import { Dataset } from 'models/dataset';
 
 
 export interface MessageBlock {
   messages: Message[],
 }
 
-export interface PublicationPosition {
-  [pubId: string]: { position_on: Date } | null,
+export interface AnnexesBlock {
+  [pubId: string]: null | AnnexedPosition,
 }
 
-export type AnnexesBlock = PublicationPosition;
+export interface PositionDatasets {
+  [datasetId: string]: Dataset,
+}
+
+export interface AnnexedPosition {
+  position_on: Date,
+  // TODO: Migrate all annexes to the new structure and make datasets non-optional
+  datasets?: PositionDatasets,
+}
 
 enum OBSections {
   amendments = 'amendments',
@@ -105,14 +114,21 @@ export const issueFactories: Factories<OBIssue> = {
     return { ...issue, annexes: newAnnexes };
   },
 
-  withUpdatedAnnexedPublicationPosition: (issue: OBIssue, pubId: string, position: Date | undefined) => {
-    var newAnnexes = {...issue.annexes};
-    newAnnexes[pubId] = position ? { position_on: position } : null;
+  withUpdatedAnnexedPublicationPosition: (
+      issue: OBIssue,
+      pubId: string,
+      position: AnnexedPosition | null) => {
+    var newAnnexes = { ...issue.annexes };
+    newAnnexes[pubId] = position;
     return { ...issue, annexes: newAnnexes };
   },
 
-  withEditedMessage: (issue: OBIssue, section: OBMessageSection, msgIdx: number, updatedMessage: Message) => {
-    var newMessages = [...issue[section].messages];
+  withEditedMessage: (
+      issue: OBIssue,
+      section: OBMessageSection,
+      msgIdx: number,
+      updatedMessage: Message) => {
+    var newMessages = [ ...issue[section].messages ];
     newMessages[msgIdx] = updatedMessage;
     return { ...issue, [section]: {
       ...issue[section],
@@ -120,7 +136,10 @@ export const issueFactories: Factories<OBIssue> = {
     }};
   },
 
-  withAddedMessage: (issue: OBIssue, section: OBMessageSection, message: Message) => {
+  withAddedMessage: (
+      issue: OBIssue,
+      section: OBMessageSection,
+      message: Message) => {
     let idx: number;
     if (section === 'general') {
       idx = GENERAL_MESSAGE_ORDER.indexOf(message.type);
@@ -128,7 +147,7 @@ export const issueFactories: Factories<OBIssue> = {
       idx = issue[section].messages.length;
     }
 
-    var newMessages = [...issue[section].messages]; 
+    var newMessages = [ ...issue[section].messages ]; 
     newMessages.splice(idx, 0, message);
     return { ...issue, [section]: {
       ...issue[section],
@@ -136,8 +155,11 @@ export const issueFactories: Factories<OBIssue> = {
     }};
   },
 
-  withRemovedMessage: (issue: OBIssue, section: OBMessageSection, msgIdx: number) => {
-    var newMessages = [...issue[section].messages]; 
+  withRemovedMessage: (
+      issue: OBIssue,
+      section: OBMessageSection,
+      msgIdx: number) => {
+    var newMessages = [ ...issue[section].messages ]; 
     newMessages.splice(msgIdx, 1);
     return { ...issue, [section]: {
       ...issue[section],

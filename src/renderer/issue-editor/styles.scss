@@ -147,7 +147,7 @@ $sidebarWidth: 17em;
 .editor-pane-annex {
   :local .messageEditorPaneHeader {
     box-shadow: $pt-elevation-shadow-1;
-    z-index: 1;
+    z-index: 2;
   }
 }
 
@@ -156,7 +156,7 @@ $sidebarWidth: 17em;
   :local .editorMeta {
     > :last-child {
       margin-top: .5rem;
-      font-size: $pt-font-size;
+      font-size: $pt-font-size-large;
     }
   }
 }
@@ -166,28 +166,6 @@ $sidebarWidth: 17em;
 .editor-pane-annex {
   display: flex;
   flex-flow: column nowrap;
-
-  :local .annexEditorPosition {
-    font-size: $pt-font-size-large;
-  }
-
-  .bp3-form-group {
-    flex: 1;
-    display: flex;
-    align-items: flex-start;
-    flex-flow: column nowrap;
-    padding: 1.5rem 0 0 20px;
-
-    .bp3-datepicker,
-    .bp3-form-helper-text {
-      margin-top: 1rem;
-    }
-
-    .bp3-datepicker {
-      padding: 1.5rem;
-      background: $pt-app-background-color;
-    }
-  }
 }
 
 /* Approved recommendations */
