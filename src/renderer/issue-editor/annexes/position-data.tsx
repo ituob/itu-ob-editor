@@ -248,11 +248,13 @@ function ({ schema, data, onChange }) {
   function moveItemUp() {
     if (selectedArrayIndex !== undefined && selectedArrayIndex > 0) {
       moveArrayItem(selectedArrayIndex, selectedArrayIndex - 1);
+      selectRowIdx((selectedRowIdx as number) - 1);
     }
   }
   function moveItemDown() {
     if (selectedArrayIndex !== undefined) {
       moveArrayItem(selectedArrayIndex, selectedArrayIndex + 1);
+      selectRowIdx((selectedRowIdx as number) + 1);
     }
   }
 
