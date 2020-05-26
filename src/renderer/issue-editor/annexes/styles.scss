@@ -60,6 +60,7 @@
   }
   .datasetContentsCell {
     padding: ($pt-grid-size / 2) $pt-grid-size;
+    white-space: nowrap;
 
     .unsupportedField {
       color: $pt-text-color-disabled;
