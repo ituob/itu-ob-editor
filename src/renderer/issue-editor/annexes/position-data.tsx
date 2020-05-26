@@ -324,7 +324,7 @@ function ({ schema, data, onChange }) {
         type={schema.type}
         items={list}
         fields={schema.item.fields}
-        onFieldChange={modifyItemField}
+        onFieldChange={onChange ? modifyItemField : undefined}
         fieldKey={({ columnIndex, rowIndex }: { columnIndex: number, rowIndex: number }): string => {
           const itemIndex = rowIndex - 1;
           if (itemIndex < 0) {
@@ -408,7 +408,7 @@ interface ItemData {
   type: 'index' | 'array'
   items: object[] | [string, object][]
   fields: DataObject["fields"]
-  onFieldChange: (itemIndex: number, fieldID: string, newValue: any) => void
+  onFieldChange?: (itemIndex: number, fieldID: string, newValue: any) => void
 }
 
 interface Selection {
@@ -457,7 +457,9 @@ const CellView = ({ rowIndex, columnIndex, style, data }: { rowIndex: number, co
     cellView = <FieldCell
       value={value}
       fieldSpec={fieldSpec}
-      onFieldChange={newValue => data.onFieldChange(itemIndex, fieldSpec.id, newValue)} />;
+      onFieldChange={data.onFieldChange
+        ? (newValue => data.onFieldChange!(itemIndex, fieldSpec.id, newValue))
+        : undefined} />;
   }
 
   return (
@@ -488,7 +490,7 @@ const RowHeader: React.FC<{ itemKey: number | string }> = function ({ itemKey })
 interface FieldCellProps {
   value: any
   fieldSpec: BasicField & DataItem
-  onFieldChange: (newValue: any) => void
+  onFieldChange?: (newValue: any) => void
 }
 const FieldCell: React.FC<FieldCellProps> =
 function ({ value, onFieldChange, fieldSpec }) {
@@ -496,10 +498,11 @@ function ({ value, onFieldChange, fieldSpec }) {
 
   if (fieldSpec.type === 'text') {
     return <EditableText
-        type="text"
-        value={val}
-        onChange={setVal}
-        onConfirm={val => onFieldChange(val)} />
+      type="text"
+      value={onFieldChange ? val : value}
+      disabled={!onFieldChange}
+      onChange={onFieldChange ? setVal : undefined}
+      onConfirm={onFieldChange ? (val => onFieldChange(val)) : undefined} />
 
   } else {
     return <>Unsupported field type</>;
