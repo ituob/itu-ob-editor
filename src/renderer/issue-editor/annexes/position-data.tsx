@@ -114,6 +114,7 @@ function ({ schema, data, onChange }) {
   const [selectedRowIdx, selectRowIdx] = useState<number | undefined>(undefined);
   const [selectedColIdx, selectColIdx] = useState<number | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState<string | undefined>(undefined);
+  const [reordering, setReordering] = useState(false);
   const [newKey, setNewKey] = useState<string>('');
 
   const isArray = specifiesArray(schema) && containsArray(data);
@@ -238,10 +239,23 @@ function ({ schema, data, onChange }) {
       onChange(update(data, { $splice: [[selectedArrayIndex, 1]] }));
     }
   }
+
   function moveArrayItem(fromIdx: number, toIdx: number) {
     if (onChange && isArray && (fromIdx !== undefined) && (toIdx !== undefined)) {
+      setReordering(true);
       const item = list[fromIdx];
       onChange(update(data, { $splice: [[fromIdx, 1], [toIdx, 0, item]] }));
+      setImmediate(() => setReordering(false));
+    }
+  }
+  function moveItemUp() {
+    if (selectedArrayIndex !== undefined && selectedArrayIndex > 0) {
+      moveArrayItem(selectedArrayIndex, selectedArrayIndex - 1);
+    }
+  }
+  function moveItemDown() {
+    if (selectedArrayIndex !== undefined) {
+      moveArrayItem(selectedArrayIndex, selectedArrayIndex + 1);
     }
   }
 
@@ -262,12 +276,20 @@ function ({ schema, data, onChange }) {
     itemOperations = <>
       <Button
         icon="add-row-top"
-        disabled={!onChange}
+        disabled={!onChange || !isArray}
         onClick={addItemBefore} />
       <Button
         icon="add-row-bottom"
         disabled={!onChange || selectedArrayIndex === undefined}
         onClick={addItemAfter} />
+      <Button
+        icon="arrow-up"
+        disabled={!onChange || selectedArrayIndex === undefined}
+        onClick={moveItemUp} />
+      <Button
+        icon="arrow-down"
+        disabled={!onChange || selectedArrayIndex === undefined}
+        onClick={moveItemDown} />
       <Button
         icon="delete"
         disabled={!onChange || selectedArrayIndex === undefined}
@@ -310,14 +332,18 @@ function ({ schema, data, onChange }) {
             return `thead-${columnIndex}`;
           }
           let itemKey: string | number;
+          const item = list[itemIndex];
           if (isIndex) {
-            const item = list[itemIndex];
             if (!item) {
               throw new Error("Unable to locate key for item");
             }
             itemKey = item[0];
           } else {
-            itemKey = itemIndex;
+            if (reordering) {
+              itemKey = `${JSON.stringify(item)}-${columnIndex}`;
+            } else {
+              itemKey = itemIndex;
+            }
           }
           return `${itemKey}-${columnIndex}`;
         }} />
@@ -329,7 +355,7 @@ function ({ schema, data, onChange }) {
 
 interface ItemTableProps extends ItemData, Selection {
   itemCount: number
-  fieldKey: ({ columnIndex, data, rowIndex }: { columnIndex: number, data: ItemData, rowIndex: number }) => string
+  fieldKey?: ({ columnIndex, data, rowIndex }: { columnIndex: number, data: ItemData, rowIndex: number }) => string
 }
 const ItemTable: React.FC<ItemTableProps> =
 function ({ itemCount, fields, type, items, selectedCell, onSelectCell, fieldKey, onFieldChange }) {
