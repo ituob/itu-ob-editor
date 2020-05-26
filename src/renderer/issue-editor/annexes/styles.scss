@@ -59,25 +59,45 @@
     z-index: 2;
   }
   .datasetContentsCell {
-    font-size: $pt-font-size-small;
-    padding: $pt-grid-size / 2;
-    cursor: default;
+    padding: ($pt-grid-size / 2) $pt-grid-size;
+
     overflow: hidden;
     transform: translateY(2px) translateX(1px);
     border-width: 0 1px 1px 0;
     border-style: solid;
     border-color: white;
 
-    &.columnHeader,
-    &.rowHeader {
-      font-weight: bold;
-    }
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+
+    cursor: default;
+    font-size: $pt-font-size-small;
+
+    position: relative;
 
     &.inSelectedRow {
-      background-color: $pt-divider-black;
+      background-color: $pt-app-background-color;
     }
     &.selected {
       background-color: $pt-text-selection-color;
+    }
+    &.rowHeader {
+      opacity: .5;
+
+      &.inSelectedRow {
+        opacity: 1;
+        background-color: $pt-divider-black;
+      }
+    }
+    &.columnHeader,
+    &.rowHeader {
+      font-weight: bold;
+      background-color: $pt-divider-black;
+
+      &.selected {
+        background-color: $pt-text-selection-color;
+      }
     }
   }
 }
