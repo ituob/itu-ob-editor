@@ -359,8 +359,9 @@ interface ItemTableProps extends ItemData, Selection {
 const ItemTable: React.FC<ItemTableProps> =
 function ({ itemCount, fields, type, items, selectedCell, onSelectCell, fieldKey, onFieldChange }) {
   const gridEl = useRef<VariableSizeGrid>(null);
+  const lang = useContext(LangConfigContext);
 
-  const itemData: CellData = { selectedCell, items, type, onSelectCell, fields, onFieldChange };
+  const itemData: CellData = { selectedCell, items, type, onSelectCell, fields, onFieldChange, lang: lang.selected };
 
   const columnStyles = [
     { width: 50 },
@@ -408,6 +409,7 @@ interface ItemData {
   type: 'index' | 'array'
   items: object[] | [string, object][]
   fields: DataObject["fields"]
+  lang: string
   onFieldChange?: (itemIndex: number, fieldID: string, newValue: any) => void
 }
 
@@ -425,12 +427,16 @@ const CellView = ({ rowIndex, columnIndex, style, data }: { rowIndex: number, co
   const isSelected = (selected !== undefined && (selected[0] === rowIndex) && (selected[1] === columnIndex));
   const isRowSelected = (selected !== undefined && (selected[0] === rowIndex));
 
+  let tooltip: string;
   let cellView: JSX.Element;
   if (rowIndex < 1 && columnIndex < 1) {
     cellView = <>{data.type === 'array' ? "#" : "ID"}</>;
+    tooltip = '';
 
   } else if (rowIndex < 1) {
-    cellView = <ColumnHeader field={data.fields[columnIndex - 1]} />;
+    const field = data.fields[columnIndex - 1];
+    cellView = <ColumnHeader field={field} />;
+    tooltip = field.label[data.lang];
 
   } else if (columnIndex < 1) {
     let key: number | string;
@@ -440,6 +446,7 @@ const CellView = ({ rowIndex, columnIndex, style, data }: { rowIndex: number, co
       key = (data.items[rowIndex - 1] as [string, object])[0];
     }
     cellView = <RowHeader itemKey={key} />;
+    tooltip = `Item #${key}`;
 
   } else {
     const itemIndex = rowIndex - 1;
@@ -454,6 +461,8 @@ const CellView = ({ rowIndex, columnIndex, style, data }: { rowIndex: number, co
       value = item[1][fieldSpec.id];
     }
 
+    tooltip = JSON.stringify(value);
+
     cellView = <FieldCell
       value={value}
       fieldSpec={fieldSpec}
@@ -464,6 +473,7 @@ const CellView = ({ rowIndex, columnIndex, style, data }: { rowIndex: number, co
 
   return (
     <div
+        title={tooltip}
         style={style}
         className={`
           ${styles.datasetContentsCell}
