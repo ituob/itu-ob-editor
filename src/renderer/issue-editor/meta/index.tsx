@@ -58,7 +58,7 @@ const MetaLanguagesEditor: React.FC<MetaEditorProps<MetaLanguages>> = function (
     onChange(newData);
   }
 
-  const langs = data.languages || {};
+  const langs = data.languages || { en: true };
 
   return <div className={styles.metaLanguagesPane}>
     <FormGroup
@@ -90,7 +90,7 @@ const MetaLanguagesEditor: React.FC<MetaEditorProps<MetaLanguages>> = function (
           lang.select(evt.currentTarget.value);
         }}
         value={lang.selected}
-        options={Object.keys(data.languages).map(langID =>
+        options={Object.keys(langs).map(langID =>
           ({ label: lang.available[langID], value: langID }))} />
     </FormGroup>
   </div>;
