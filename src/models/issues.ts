@@ -1,6 +1,8 @@
+import * as jsonpatch from 'fast-json-patch';
 import { Message, MessageType } from 'models/messages';
 import { AvailableLanguages } from 'models/languages';
 import { Dataset } from 'models/dataset';
+import { DatasetChanges } from './messages/amendment';
 
 
 export interface MessageBlock {
@@ -168,3 +170,21 @@ export const issueFactories: Factories<OBIssue> = {
   },
 
 };
+
+
+export function patchDatasets(datasets: PositionDatasets, changes: DatasetChanges): PositionDatasets {
+  var patched: PositionDatasets = {};
+
+  for (const datasetID of Object.keys(datasets)) {
+    const ds = datasets[datasetID];
+
+    patched[datasetID] = {
+      meta: ds.meta,
+      contents: jsonpatch.applyPatch(
+        JSON.parse(JSON.stringify(ds.contents)),
+        (changes[datasetID]?.contents || [])).newDocument,
+    };
+  }
+
+  return patched;
+}

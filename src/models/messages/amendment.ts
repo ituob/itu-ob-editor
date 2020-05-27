@@ -1,5 +1,6 @@
 import { Translatable } from 'coulomb/localizer/types';
 import { PublicationID } from 'models/publications';
+import { Operation } from 'fast-json-patch';
 
 
 export interface AmendmentTarget {
@@ -14,4 +15,13 @@ export interface Message {
   type: "amendment",
   target: AmendmentTarget,
   contents: Translatable<any>,
+  datasetChanges?: DatasetChanges,
+}
+
+export interface DatasetChangeset {
+  contents: Operation[],
+}
+
+export interface DatasetChanges {
+  [datasetID: string]: DatasetChangeset,
 }

@@ -106,7 +106,7 @@ interface DatasetContentsEditorProps<Schema extends DataArray | DataIndex> {
   data: Schema extends DataArray ? ArrayStructure : IndexStructure
   onChange?: (data: Schema extends DataArray ? ArrayStructure : IndexStructure) => void
 }
-const DatasetContents: React.FC<DatasetContentsEditorProps<any>> =
+export const DatasetContents: React.FC<DatasetContentsEditorProps<any>> =
 function ({ schema, data, onChange }) {
   const lang = useContext(LangConfigContext);
   const [selectedRowIdx, selectRowIdx] = useState<number | undefined>(undefined);

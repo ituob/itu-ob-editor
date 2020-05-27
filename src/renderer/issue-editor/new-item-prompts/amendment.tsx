@@ -14,6 +14,9 @@ import { PublicationTitle } from 'renderer/widgets/publication-title';
 import { NewItemPromptProps } from 'renderer/widgets/item-list/new-item-menu';
 import * as styles from '../styles.scss';
 import { useRunningAnnexes } from 'renderer/hooks';
+import { callIPC } from 'coulomb/ipc/renderer';
+import { DatasetChanges } from 'models/messages/amendment';
+import { PositionDatasets } from 'models/issues';
 
 
 const MAX_MENU_ITEMS_TO_SHOW = 7;
@@ -45,20 +48,35 @@ export const NewAmendmentPrompt: React.FC<NewAmendmentPromptProps> = function (p
     position: null,
   }})];
 
-  function createAmendmentMessage(pub: AmendablePublication) {
+  async function createAmendmentMessage(pub: AmendablePublication) {
     let positionString: string | undefined;
     const position = pub.position;
     if (position != null) {
       positionString = `${position.getFullYear()}-${position.getMonth()}-${position.getDate()}`;
     }
-    return {
+
+    const datasets = (await callIPC
+    <{ forPubID: string, asOfIssueID: number }, { datasets?: PositionDatasets }>
+    ('model-issues-auto-fill-datasets', { forPubID: pub.id, asOfIssueID: props.issueId })).datasets;
+
+    var message: Message = {
       type: 'amendment',
       target: {
         publication: pub.id,
         position_on: positionString,
       },
       contents: {},
-    } as Message;
+    };
+
+    if (datasets !== undefined) {
+      var changes: DatasetChanges = {};
+      for (const datasetID of Object.keys(datasets)) {
+        changes[datasetID] = { contents: [] };
+      }
+      message.datasetChanges = changes;
+    }
+
+    return message;
   }
 
   return (

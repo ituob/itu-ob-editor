@@ -25,7 +25,7 @@ type BooleanField = {
 
 
 export type DataArray = {
-  item: DataObject
+  item: SimpleValue | DataObject
 } & { type: 'array' }
 
 

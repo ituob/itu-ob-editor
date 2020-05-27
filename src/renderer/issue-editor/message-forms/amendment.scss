@@ -1,0 +1,46 @@
+@import "~@blueprintjs/core/lib/scss/variables";
+@import "renderer/mixins.scss";
+
+
+:local .datasets {
+  @include datasets();
+
+  box-shadow: $pt-elevation-shadow-1;
+  z-index: 1;
+}
+
+:local .normalizedAmendment {
+  display: flex;
+  flex-flow: column nowrap;
+  overflow: hidden;
+  flex: 1;
+
+  > :first-child {
+    flex-shrink: 0;
+    min-height: 50vh;
+  }
+
+  > :last-child {
+    display: flex;
+    flex-flow: column nowrap;
+    overflow: hidden;
+  }
+}
+
+
+:local .changeMessageTabs {
+  :global .bp3-tab-list {
+    transform: translateX($pt-grid-size * 2) translateY($pt-grid-size);
+  }
+}
+
+:local .changeMessageTab {
+  display: flex;
+  flex-flow: column nowrap;
+  overflow: hidden;
+}
+
+:local .changeTab {
+  padding: $pt-grid-size;
+  overflow-y: auto;
+}

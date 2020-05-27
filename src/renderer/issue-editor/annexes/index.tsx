@@ -113,7 +113,8 @@ function ({ pubId, position, onChange, issueId }) {
                       onClick={autoFillDatasets}>
                     Auto-fill datasets
                   </Button>
-                  <p>or,</p>
+                  <br />
+                  <br />
                 </>
               : null}
             <Button
@@ -125,7 +126,7 @@ function ({ pubId, position, onChange, issueId }) {
                 }
                 large={!autoFillPossible}
                 intent={!autoFillPossible ? "primary" : undefined}>
-              Create blank first (“main”) dataset
+              Create a dataset
             </Button>
           </>
         : undefined} />;

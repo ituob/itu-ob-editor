@@ -4,9 +4,12 @@ import * as log from 'electron-log';
 import { default as Manager } from 'coulomb/db/isogit-yaml/main/manager';
 import { sortIntegerAscending, QuerySet, Index } from 'coulomb/db/query';
 import { listen } from 'coulomb/ipc/main';
-import { OBIssue, ScheduledIssue, IssueMeta, PositionDatasets } from 'models/issues';
-import { RunningAnnex, getRunningAnnexesForIssue } from 'models/running-annexes';
+import { OBIssue, ScheduledIssue, IssueMeta, PositionDatasets, patchDatasets } from 'models/issues';
+import { RunningAnnex, getRunningAnnexesForIssue, getAmendments } from 'models/running-annexes';
 import { defaultLanguage, defaultISSN } from '../app';
+import { Operation } from 'fast-json-patch';
+import { DatasetChanges } from 'models/messages/amendment';
+import { Data } from 'electron';
 
 
 const PUBLICATION_META_PATH = 'defaults/issue';
@@ -50,27 +53,54 @@ class IssueManager extends Manager<OBIssue, number, { onlyIDs?: number[], month?
     return this.runningAnnexes[`${asOfIssueID}`];
   }
 
-  getLatestAnnex(ofPubID: string, asOfIssueID: number): RunningAnnex | undefined {
+  // TODO: excluding is unused and bad
+  getLatestAnnex(ofPubID: string, asOfIssueID: number, excluding = false): RunningAnnex | undefined {
     return (this.runningAnnexes[`${asOfIssueID}`] || []).
-      filter(annex => annex.publicationID === ofPubID)[0];
+      filter(annex => annex.publicationID === ofPubID)[excluding ? 1 : 0];
   }
 
-  autoFillDatasets(forPubID: string, asOfIssueID: number): PositionDatasets | undefined {
+  // TODO: Super slow!
+  async getDatasetChanges(forPubID: string, asOfIssueID: number): Promise<DatasetChanges> {
+    const latestAnnex = this.getLatestAnnex(forPubID, asOfIssueID);
+    if (!latestAnnex) {
+      return {};
+    }
+
+    const latestAnnexedDatasets = latestAnnex?.annexedTo.annexes[forPubID]?.datasets;
+    if (latestAnnexedDatasets === undefined) {
+      return {};
+    }
+
+    const amendments = getAmendments(
+      forPubID,
+      latestAnnex.annexedTo.id,
+      asOfIssueID,
+      await this.readAll({}, true));
+
+    const amendmentsWithChanges = amendments.filter(amd => {
+      return amd.datasetChanges !== undefined;
+    })
+
+    var changes: DatasetChanges = {};
+    for (const dsID of Object.keys(latestAnnexedDatasets)) {
+      changes[dsID] = { contents: [] };
+
+      for (const amd of amendmentsWithChanges) {
+        changes[dsID].contents = [ ...changes[dsID].contents, ...(amd.datasetChanges![dsID]?.contents || []) ];
+      }
+    }
+
+    return changes;
+  }
+
+  async autoFillDatasets(forPubID: string, asOfIssueID: number): Promise<PositionDatasets | undefined> {
     const latestAnnex = this.getLatestAnnex(forPubID, asOfIssueID);
 
     if (latestAnnex !== undefined) {
       const latestDatasets = latestAnnex.annexedTo.annexes[forPubID]?.datasets;
 
       if (latestDatasets !== undefined) {
-        var datasets: PositionDatasets = {};
-        for (const [datasetID, dataset] of Object.entries(latestDatasets)) {
-          datasets[datasetID] = {
-            meta: dataset.meta,
-
-            // TODO: Apply amendments during dataset auto-fill \^o^/
-            contents: dataset.contents,
-          };
-        }
+        const datasets = patchDatasets(latestDatasets, await this.getDatasetChanges(forPubID, asOfIssueID));
 
         if (Object.keys(datasets).length > 0) {
           return datasets;
@@ -201,14 +231,19 @@ class IssueManager extends Manager<OBIssue, number, { onlyIDs?: number[], month?
       return await this.getSchedule({ month });
     });
 
-    listen<{ pubID: string, asOfIssueID: number }, { annex: RunningAnnex | undefined }>
-    (`${prefix}-get-latest-annex`, async ({ pubID, asOfIssueID }) => {
-      return { annex: this.getLatestAnnex(pubID, asOfIssueID) };
+    listen<{ pubID: string, asOfIssueID: number, excluding: boolean }, { annex: RunningAnnex | undefined }>
+    (`${prefix}-get-latest-annex`, async ({ pubID, asOfIssueID, excluding }) => {
+      return { annex: this.getLatestAnnex(pubID, asOfIssueID, excluding) };
+    });
+
+    listen<{ forPubID: string, asOfIssueID: number }, { changes: DatasetChanges }>
+    (`${prefix}-get-dataset-changes`, async ({ forPubID, asOfIssueID }) => {
+      return { changes: await this.getDatasetChanges(forPubID, asOfIssueID) };
     });
 
     listen<{ forPubID: string, asOfIssueID: number }, { datasets?: PositionDatasets }>
     (`${prefix}-auto-fill-datasets`, async ({ forPubID, asOfIssueID }) => {
-      return { datasets: this.autoFillDatasets(forPubID, asOfIssueID) };
+      return { datasets: await this.autoFillDatasets(forPubID, asOfIssueID) };
     });
 
     listen<{ asOfIssueID: number }, { annexes: RunningAnnex[] }>
