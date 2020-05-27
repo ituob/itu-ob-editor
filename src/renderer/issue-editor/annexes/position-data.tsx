@@ -3,7 +3,7 @@ import React, { useState, useRef, useContext, useEffect } from 'react';
 import { PositionDatasets } from 'models/issues';
 import * as styles from './styles.scss';
 import DatasetMeta from 'renderer/publication-editor/dataset';
-import { NonIdealState, InputGroup, ControlGroup, ButtonGroup, Button, EditableText } from '@blueprintjs/core';
+import { NonIdealState, InputGroup, ControlGroup, ButtonGroup, Button, EditableText, Icon } from '@blueprintjs/core';
 import { ItemList } from 'renderer/widgets/item-list';
 import {
   DataArray, DataIndex,
@@ -618,14 +618,31 @@ interface FieldCellProps {
 const FieldCell: React.FC<FieldCellProps> =
 function ({ value, onFieldChange, fieldSpec }) {
   const [val, setVal] = useState<any>(value);
+  const lang = useContext(LangConfigContext);
 
-  if (fieldSpec.type === 'text') {
+  if (fieldSpec.type === 'text' || fieldSpec.type === 'number') {
     return <EditableText
       type="text"
       value={onFieldChange ? val : value}
       disabled={!onFieldChange}
       onChange={onFieldChange ? setVal : undefined}
       onConfirm={onFieldChange ? (val => onFieldChange(val)) : undefined} />
+
+  } else if (fieldSpec.type === 'translated-text') {
+    return  <InputGroup
+        type="text"
+        rightElement={
+          <ButtonGroup>
+            {lang.default !== lang.selected && !val[lang.selected] ? <Button small minimal onClick={() => void 0} icon="clean" /> : undefined}
+            <Button small minimal disabled>{lang.selected}</Button>
+          </ButtonGroup>
+        }
+        small
+        className={styles.translatedTextInput}
+        value={onFieldChange ? val[lang.selected] : value[lang.selected]}
+        disabled={!onFieldChange}
+        onChange={onFieldChange ? (evt: React.FormEvent<HTMLInputElement>) => setVal({ ...val, [lang.selected]: evt.currentTarget.value }) : undefined}
+        onBlur={onFieldChange ? (() => onFieldChange(val)) : undefined} />;
 
   } else {
     return <span className={styles.unsupportedField}>

@@ -80,6 +80,10 @@
 
     position: relative;
 
+    .translatedTextInput {
+      border: 0;
+    }
+
     &.inSelectedRow {
       background-color: $pt-app-background-color;
     }
