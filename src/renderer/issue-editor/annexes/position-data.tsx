@@ -1,5 +1,5 @@
 import update from 'immutability-helper';
-import React, { useState, useRef, useContext } from 'react';
+import React, { useState, useRef, useContext, useEffect } from 'react';
 import { PositionDatasets } from 'models/issues';
 import * as styles from './styles.scss';
 import DatasetMeta from 'renderer/publication-editor/dataset';
@@ -15,6 +15,7 @@ import {
 import { VariableSizeGrid } from 'react-window';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import { Trans } from 'coulomb/localizer/renderer/widgets';
+import { debounce } from 'throttle-debounce';
 
 
 interface AnnexedPositionDataEditorProps {
@@ -320,6 +321,7 @@ function ({ schema, data, onChange }) {
       <ItemTable
         onSelectCell={(row, col) => { selectRowIdx(row); selectColIdx(col); }}
         selectedCell={[selectedRowIdx, selectedColIdx]}
+        lang={lang.selected}
         itemCount={list.length}
         type={schema.type}
         items={list}
@@ -363,25 +365,77 @@ function ({ itemCount, fields, type, items, selectedCell, onSelectCell, fieldKey
 
   const itemData: CellData = { selectedCell, items, type, onSelectCell, fields, onFieldChange, lang: lang.selected };
 
+  const [tableDimensions, setTableDimensions] = useState<[number, number]>([200, 200]); // width, height
+  const tableWrapper = useRef<HTMLDivElement>(null);
+  const tableEl = useRef<VariableSizeGrid>(null);
+
+  useEffect(() => {
+    const updateTableDimensions = debounce(40, () => {
+      const dimensions = [
+        tableWrapper.current?.parentElement?.offsetWidth || 200,
+        tableWrapper.current?.parentElement?.getBoundingClientRect()?.height || 200,
+      ];
+
+      setTableDimensions([
+        dimensions[0] - 1,
+        dimensions[1] - 50,
+      ]);
+
+      setImmediate(() => {
+        if (selectedCell) {
+          scrollTo(selectedCell);
+        }
+      });
+    });
+
+    window.addEventListener('resize', updateTableDimensions);
+
+    updateTableDimensions();
+
+    return function cleanup() {
+      window.removeEventListener('resize', updateTableDimensions);
+    }
+  }, [tableWrapper.current]);
+
+  useEffect(() => {
+    if (selectedCell !== undefined) {
+      scrollTo(selectedCell);
+    }
+  }, [JSON.stringify(selectedCell)]);
+
+  function scrollTo(cell: [number | undefined, number | undefined]) {
+    if (tableEl && tableEl.current) {
+      tableEl.current.scrollToItem({
+        align: 'smart',
+        columnIndex: cell[0],
+        rowIndex: cell[1],
+      });
+    }
+  }
+
   const columnStyles = [
     { width: 50 },
     ...fields.map(() => ({ width: 200 })),
   ];
 
   return (
-    <VariableSizeGrid
-        rowCount={itemCount + 1}
-        rowHeight={_ => 32}
-        itemKey={fieldKey}
-        columnCount={fields.length}
-        columnWidth={colIndex => columnStyles[colIndex].width}
-        itemData={itemData}
-        width={300}
-        height={200}
-        className={styles.datasetContentsTable}
-        ref={gridEl}>
-      {CellView}
-    </VariableSizeGrid>
+    <div
+        className={styles.datasetContentsTableWrapper}
+        ref={tableWrapper}>
+      <VariableSizeGrid
+          rowCount={itemCount + 1}
+          rowHeight={_ => 32}
+          itemKey={fieldKey}
+          columnCount={fields.length}
+          columnWidth={colIndex => columnStyles[colIndex].width}
+          itemData={itemData}
+          width={tableDimensions[0]}
+          height={tableDimensions[1]}
+          className={styles.datasetContentsTable}
+          ref={gridEl}>
+        {CellView}
+      </VariableSizeGrid>
+    </div>
   );
 };
 
