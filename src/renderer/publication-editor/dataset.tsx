@@ -223,7 +223,7 @@ function ({ field, onChange, onDelete, nestingLevel, allowedTypes }) {
         obj={field}
         nestingLevel={nestingLevel}
         onChange={onChange
-          ? ((newObj) => onChange({ ... field, ...newObj }))
+          ? ((newObj) => onChange({ ...field, ...newObj }))
           : undefined}
       />
     );
