@@ -3,7 +3,7 @@ import React, { useState, useRef, useContext, useEffect } from 'react';
 import { PositionDatasets } from 'models/issues';
 import * as styles from './styles.scss';
 import DatasetMeta from 'renderer/publication-editor/dataset';
-import { NonIdealState, InputGroup, ControlGroup, ButtonGroup, Button, EditableText, Icon } from '@blueprintjs/core';
+import { NonIdealState, InputGroup, ControlGroup, ButtonGroup, Button, EditableText } from '@blueprintjs/core';
 import { ItemList } from 'renderer/widgets/item-list';
 import {
   DataArray, DataIndex,

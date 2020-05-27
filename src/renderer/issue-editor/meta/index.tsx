@@ -10,7 +10,6 @@ import { defaultISSN, availableLanguages, defaultLanguage } from '../../../app';
 import { default as MetaAuthorsEditor } from './authors';
 import * as styles from './styles.scss';
 import { remote } from 'electron';
-import { lang } from 'moment';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
 
