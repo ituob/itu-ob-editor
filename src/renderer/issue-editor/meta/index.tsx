@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
-  FormGroup, InputGroup, Checkbox, Button,
+  FormGroup, InputGroup, Checkbox, Button, HTMLSelect,
 } from '@blueprintjs/core';
 import { DatePicker } from '@blueprintjs/datetime';
 import { callIPC } from 'coulomb/ipc/renderer';
@@ -10,6 +10,8 @@ import { defaultISSN, availableLanguages, defaultLanguage } from '../../../app';
 import { default as MetaAuthorsEditor } from './authors';
 import * as styles from './styles.scss';
 import { remote } from 'electron';
+import { lang } from 'moment';
+import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
 
 type MetaID = { issn: string, id: number };
@@ -51,6 +53,7 @@ const MetaIDEditor: React.FC<MetaEditorProps<MetaID>> = function ({ data, onChan
 
 
 const MetaLanguagesEditor: React.FC<MetaEditorProps<MetaLanguages>> = function ({ data, onChange }) {
+  const lang = useContext(LangConfigContext);
   function updateData(newDataPartial: Partial<MetaLanguages>) {
     const newData: MetaLanguages = { ...data, ...newDataPartial };
     onChange(newData);
@@ -78,6 +81,18 @@ const MetaLanguagesEditor: React.FC<MetaEditorProps<MetaLanguages>> = function (
           onChange={() =>
             updateData({ languages: { ...langs, [langID]: !isSelected }})} />
       })}
+    </FormGroup>
+
+    <FormGroup
+        label="Current language"
+        helperText="View and edit this OB issue in this language.">
+      <HTMLSelect
+        onChange={(evt: React.FormEvent<HTMLSelectElement>) => {
+          lang.select(evt.currentTarget.value);
+        }}
+        value={lang.selected}
+        options={Object.keys(data.languages).map(langID =>
+          ({ label: lang.available[langID], value: langID }))} />
     </FormGroup>
   </div>;
 };
