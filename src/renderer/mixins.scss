@@ -1,5 +1,26 @@
 @import "~@blueprintjs/core/lib/scss/variables";
 
+@mixin datasets() {
+  display: flex;
+  flex-flow: row nowrap;
+  flex: 1;
+  overflow: hidden;
+
+  .mainPane {
+    flex: 1;
+    display: flex;
+    flex-flow: column nowrap;
+    overflow: hidden;
+  }
+
+  .navigation {
+    width: 12rem;
+    box-shadow: $pt-elevation-shadow-1;
+    background: $pt-app-background-color;
+    z-index: 1;
+  }
+}
+
 :local .paneBody {
   overflow-y: auto;
   flex: 1;
