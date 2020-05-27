@@ -640,14 +640,15 @@ function ({ value, onFieldChange, fieldSpec }) {
             {onFieldChange !== undefined && lang.default !== lang.selected && !val[lang.selected]
               ? <Button small minimal
                   title="ITU magic translate"
-                  onClick={async () =>
-                    setVal({
-                      ...val,
-                      [lang.selected]: await translator.translate(
-                        translatable[lang.default],
-                        lang.default,
-                        lang.selected),
-                     })}
+                  onClick={async () => {
+                    const translated = await translator.translate(
+                      translatable[lang.default],
+                      lang.default,
+                      lang.selected);
+                    const newVal = { ...val, [lang.selected]: translated };
+                    setVal(newVal);
+                    onFieldChange(newVal);
+                  }}
                   icon="clean" />
               : undefined}
             <Button small minimal disabled>{lang.selected}</Button>
