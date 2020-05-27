@@ -285,7 +285,9 @@ function ({ schema, data, onChange }) {
   }
   function removeArrayItem() {
     if (onChange && isArray && selectedArrayIndex !== undefined) {
+      setReordering(true);
       onChange(update(data, { $splice: [[selectedArrayIndex, 1]] }));
+      setImmediate(() => setReordering(false));
     }
   }
 
