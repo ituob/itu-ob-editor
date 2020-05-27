@@ -268,7 +268,9 @@ function ({ schema, data, onChange }) {
 
   function addArrayItem(atIdx: number) {
     if (onChange && isArray) {
+      setReordering(true);
       onChange(update(data, { $splice: [[atIdx, 0, createItemStub()]] }));
+      setImmediate(() => setReordering(false));
     }
   }
   function addItemBefore() {
