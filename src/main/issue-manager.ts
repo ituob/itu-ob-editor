@@ -7,9 +7,7 @@ import { listen } from 'coulomb/ipc/main';
 import { OBIssue, ScheduledIssue, IssueMeta, PositionDatasets, patchDatasets } from 'models/issues';
 import { RunningAnnex, getRunningAnnexesForIssue, getAmendments } from 'models/running-annexes';
 import { defaultLanguage, defaultISSN } from '../app';
-import { Operation } from 'fast-json-patch';
 import { DatasetChanges } from 'models/messages/amendment';
-import { Data } from 'electron';
 
 
 const PUBLICATION_META_PATH = 'defaults/issue';
