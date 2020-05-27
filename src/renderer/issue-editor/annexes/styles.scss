@@ -46,6 +46,7 @@
 
   .datasetContentsTable {
     z-index: 0;
+    box-shadow: $pt-elevation-shadow-3;
   }
 
   .toolbar {
@@ -65,7 +66,7 @@
     }
 
     overflow: hidden;
-    transform: translateY(2px) translateX(1px);
+    transform: translateY(1px) translateX(1px);
     border-width: 0 1px 1px 0;
     border-style: solid;
     border-color: white;
