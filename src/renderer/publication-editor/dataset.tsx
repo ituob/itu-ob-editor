@@ -239,6 +239,8 @@ function ({ field, onChange, onDelete, nestingLevel, allowedTypes }) {
             type="text"
             value={field.id}
             placeholder="Unique ID for this field"
+            title={field.id}
+            disabled={!onChange}
             onChange={onChange
               ? (evt: React.FormEvent<HTMLInputElement>) =>
                 onChange({
@@ -250,8 +252,11 @@ function ({ field, onChange, onDelete, nestingLevel, allowedTypes }) {
           <InputGroup
             type="text"
             fill
+            title={field.label[lang.selected]}
             value={field.label[lang.selected]}
+            disabled={!onChange}
             placeholder={`Field label (${lang.available[lang.selected]}`}
+            rightElement={<Button disabled small minimal>{lang.available[lang.selected]}</Button>}
             onChange={onChange
               ? (evt: React.FormEvent<HTMLInputElement>) =>
                 onChange({
@@ -318,6 +323,7 @@ function ({ allowedTypes, selectedType, onChange, className }) {
     <HTMLSelect
       className={className}
       options={allowedTypes.map(typ => ({ label: typ, value: typ }))}
+      disabled={!onChange}
       value={selectedType}
       onChange={onChange
         ? (evt: React.FormEvent<HTMLSelectElement>) => {
