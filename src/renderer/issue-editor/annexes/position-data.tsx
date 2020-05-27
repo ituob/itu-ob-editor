@@ -435,8 +435,8 @@ function ({ itemCount, fields, type, items, selectedCell, onSelectCell, fieldKey
       ];
 
       setTableDimensions([
-        dimensions[0] - 1,
-        dimensions[1] - 50,
+        dimensions[0] - 20,
+        dimensions[1] - 70,
       ]);
 
       setImmediate(() => {

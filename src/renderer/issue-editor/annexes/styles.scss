@@ -35,6 +35,7 @@
   display: block;
   flex: 1;
   overflow: hidden;
+  padding: $pt-grid-size;
 }
 
 :local .datasetContents {
