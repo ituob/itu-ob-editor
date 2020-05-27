@@ -298,7 +298,7 @@ function ({ field, onChange, onDelete, nestingLevel, allowedTypes }) {
           </Button>
 
           <Button
-            disabled={!onChange}
+            disabled={!onDelete}
             onClick={onDelete}
             icon="delete"
             title="Delete this field." />
