@@ -114,7 +114,9 @@ interface AmendedPositionChangeReviewProps {
   datasetChanges: DatasetChanges
 }
 const AmendedPositionChangeReview: React.FC<AmendedPositionChangeReviewProps> = function ({ datasetChanges }) {
-  const changes = Object.entries(datasetChanges).map(([dsID, ds]) => {
+  const changes = Object.entries(datasetChanges).
+  filter(([dsID, ds]) => ds.contents.length > 0).
+  map(([dsID, ds]) => {
     const nonTestOps = ds.contents.filter(op => op.op !== 'test');
 
     return (
