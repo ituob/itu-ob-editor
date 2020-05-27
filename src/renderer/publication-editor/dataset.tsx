@@ -21,7 +21,7 @@ function ({ obj, onChange, schemaLocked }) {
   return (
     <div className={styles.datasetSpecEditor}>
       <div className={styles.datasetBasics}>
-        <FormGroup label="Dataset title:">
+        <FormGroup label="Dataset&nbsp;title:">
           <InputGroup
             value={dataset.title ? dataset.title[lang.selected] : ''}
             readOnly={!onChange}
@@ -49,7 +49,7 @@ function ({ obj, onChange, schemaLocked }) {
         </FormGroup>
 
         <FormGroup
-            label="Dataset schema:"
+            label="Dataset&nbsp;schema:"
             inline
             helperText={<>
               <p>
