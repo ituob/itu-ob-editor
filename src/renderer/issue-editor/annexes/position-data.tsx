@@ -100,11 +100,12 @@ function({ datasets, onChange }) {
   );
 };
 
+type ArrayDataset = DataArray & { item: DataObject };
 
-interface DatasetContentsEditorProps<Schema extends DataArray | DataIndex> {
-  schema: DataArray | DataIndex
-  data: Schema extends DataArray ? ArrayStructure : IndexStructure
-  onChange?: (data: Schema extends DataArray ? ArrayStructure : IndexStructure) => void
+interface DatasetContentsEditorProps<Schema extends ArrayDataset | DataIndex> {
+  schema: ArrayDataset | DataIndex
+  data: Schema extends ArrayDataset ? ArrayStructure : IndexStructure
+  onChange?: (data: Schema extends ArrayDataset ? ArrayStructure : IndexStructure) => void
 }
 export const DatasetContents: React.FC<DatasetContentsEditorProps<any>> =
 function ({ schema, data, onChange }) {

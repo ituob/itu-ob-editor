@@ -50,7 +50,7 @@ export type DataIndex = {
 /* Dataset meta. */
 export interface DatasetMeta {
   title?: Translatable<string>
-  schema: DataArray | DataIndex
+  schema: (DataArray & { item: DataObject }) | DataIndex
 }
 
 export interface Dataset {
@@ -71,7 +71,7 @@ interface ArrayDataset extends Dataset {
 }
 
 interface ArrayDatasetMeta extends DatasetMeta {
-  schema: DataArray
+  schema: (DataArray & { item: DataObject })
 }
 
 interface IndexDataset extends Dataset {
@@ -87,7 +87,7 @@ interface IndexDatasetMeta extends DatasetMeta {
 export function isArray(dataset: Dataset): dataset is ArrayDataset {
   return specifiesArray(dataset.meta.schema) && containsArray(dataset.contents);
 }
-export function specifiesArray(schema: DataArray | DataIndex): schema is DataArray {
+export function specifiesArray(schema: (DataArray & { item: DataObject }) | DataIndex): schema is (DataArray & { item: DataObject }) {
   return schema.type === 'array';
 }
 export function containsArray(data: ArrayStructure | IndexStructure): data is ArrayStructure {
