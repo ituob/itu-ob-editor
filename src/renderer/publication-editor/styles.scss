@@ -38,13 +38,38 @@ $sidebarWidth: 17em;
 // Datasets
 
 :local .datasetSpecEditor {
+  display: flex;
+  flex-flow: column nowrap;
+  overflow: hidden;
+  flex: 1;
+
   .datasetBasics {
     padding: $pt-grid-size * 2;
+    flex-shrink: 0;
   }
+}
+
+:local .datasetSchemaSpec {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 0;
 }
 
 :local .datasetFieldSortable {
   border-bottom: 1px $pt-divider-black solid;
+  margin-right: $pt-grid-size;
+
+  .datasetFieldSortable {
+    margin-right: 0;
+  }
+
+  &:first-child {
+    border-top: 1px $pt-divider-black solid;
+  }
+}
+
+:local .arrayItemSpec {
+  margin-bottom: $pt-grid-size;
 }
 
 :local .datasetField {
@@ -54,6 +79,9 @@ $sidebarWidth: 17em;
   :local .datasetFieldBasics:only-child {
     margin-bottom: 0;
   }
+}
+
+:local .deleteFieldButton {
 }
 
 :local .datasetType {

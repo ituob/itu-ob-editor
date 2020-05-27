@@ -81,6 +81,7 @@ function ({ obj, onChange, schemaLocked }) {
 
       <DndProvider backend={Backend}>
         <DataObjectSpec
+          className={styles.datasetSchemaSpec}
           obj={obj.schema.item}
           onChange={(onChange && !schemaLocked)
             ? ((newItem) => onChange({ ...obj, schema: { ...obj.schema, item: newItem }}))
@@ -101,9 +102,10 @@ interface DataObjectSpecProps {
   onChange?: (updatedObj: DataObject) => void
   allowedFieldTypes?: DataItem["type"][]
   nestingLevel: number
+  className?: string
 }
 const DataObjectSpec: React.FC<DataObjectSpecProps> =
-function ({ obj, onChange, nestingLevel, allowedFieldTypes }) {
+function ({ obj, onChange, nestingLevel, allowedFieldTypes, className }) {
   const lang = useContext(LangConfigContext);
 
   const NEW_SIMPLE_FIELD: DataItem & BasicField = {
@@ -151,7 +153,7 @@ function ({ obj, onChange, nestingLevel, allowedFieldTypes }) {
   }
 
   return (
-    <FormGroup>
+    <FormGroup className={className || ''}>
       {[ ...obj.fields.entries() ].map(([idx, field]) =>
         field !== undefined
         ? <Sortable
@@ -209,13 +211,41 @@ function ({ field, onChange, onDelete, nestingLevel, allowedTypes }) {
   let fieldEditor: JSX.Element | null;
   if (field.type === 'array') {
     fieldEditor = (
-      <DataObjectSpec
-        obj={field.item}
-        nestingLevel={nestingLevel}
-        onChange={onChange
-          ? ((newObj) => onChange({ ... field, item: newObj }))
-          : undefined}
-      />
+      <>
+        <ControlGroup className={styles.arrayItemSpec}>
+          <Button minimal disabled>of</Button>
+          <DataTypeSelector
+            // Let’s disallow arrays of arrays for now:
+            allowedTypes={typeOptions.filter(top => top !== 'array')}
+            selectedType={field.item.type}
+            onChange={onChange
+              ? ((typ) => {
+                  if (typ === 'object') {
+                    const newField: DataArray & BasicField = {
+                      ...field,
+                      item: {
+                        type: typ,
+                        fields: [defaultField],
+                      },
+                    };
+                    onChange(newField);
+                  } else {
+                    onChange({ ...field, item: { type: typ } } as DataArray & BasicField);
+                  }
+                })
+              : undefined} />
+        </ControlGroup>
+
+        {field.item.type === 'object'
+          ? <DataObjectSpec
+              obj={field.item}
+              nestingLevel={nestingLevel}
+              onChange={onChange
+                ? ((newObj) => onChange({ ... field, item: newObj }))
+                : undefined}
+            />
+          : null}
+      </>
     );
   } else if (field.type === 'object') {
     fieldEditor = (
