@@ -16,6 +16,8 @@ import { VariableSizeGrid } from 'react-window';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 import { Trans } from 'coulomb/localizer/renderer/widgets';
 import { debounce } from 'throttle-debounce';
+import { ITUTranslator } from 'renderer/machine-translation';
+import { Translatable } from 'coulomb/localizer/types';
 
 
 interface AnnexedPositionDataEditorProps {
@@ -629,11 +631,25 @@ function ({ value, onFieldChange, fieldSpec }) {
       onConfirm={onFieldChange ? (val => onFieldChange(val)) : undefined} />
 
   } else if (fieldSpec.type === 'translated-text') {
+    const translatable = val as Translatable<string>;
+
     return  <InputGroup
         type="text"
         rightElement={
           <ButtonGroup>
-            {lang.default !== lang.selected && !val[lang.selected] ? <Button small minimal onClick={() => void 0} icon="clean" /> : undefined}
+            {onFieldChange !== undefined && lang.default !== lang.selected && !val[lang.selected]
+              ? <Button small minimal
+                  title="ITU magic translate"
+                  onClick={async () =>
+                    setVal({
+                      ...val,
+                      [lang.selected]: await translator.translate(
+                        translatable[lang.default],
+                        lang.default,
+                        lang.selected),
+                     })}
+                  icon="clean" />
+              : undefined}
             <Button small minimal disabled>{lang.selected}</Button>
           </ButtonGroup>
         }
@@ -650,3 +666,6 @@ function ({ value, onFieldChange, fieldSpec }) {
     </span>;
   }
 };
+
+
+const translator = new ITUTranslator();
