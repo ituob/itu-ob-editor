@@ -137,10 +137,64 @@ function ({ schema, data, onChange }) {
 
   let list: any[];
   if (data.length) {
-    list = data as ArrayStructure;
+    list = filterArray(data as ArrayStructure, searchQuery || '');
   } else {
     const index = data as IndexStructure;
-    list = Object.entries(index).sort(([idx1, _1], [idx2, _2]) => idx1.localeCompare(idx2));
+    list = Object.entries(filterIndex(index, searchQuery || '')).sort(([idx1, _1], [idx2, _2]) => idx1.localeCompare(idx2));
+  }
+
+  function sanitizeQuery(q: string) {
+    return q.trim().toLowerCase();
+  }
+
+  function itemMatchesQuery(q: string, item: any) {
+    const fieldMatches: boolean[] = schema.item.fields.map(f => {
+      let valRaw = item[f.id];
+      let valStr: string;
+      if (f.type === 'text' || f.type === 'number') {
+        valStr = `${valRaw}`;
+      } else if (f.type === 'translated-text') {
+        valStr = `${valRaw[lang.selected]}`;
+      } else if (f.type === 'boolean') {
+        valStr = `${valRaw === true ? 'true' : 'false'}`;
+      } else {
+        valStr = JSON.stringify(valRaw);
+      }
+      const val = valStr.toLowerCase();
+      if (val === q || val.indexOf(q.trim()) >= 0) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+    return fieldMatches.indexOf(true) >= 0;
+  }
+
+  function filterArray(data: ArrayStructure, withQuery: string): ArrayStructure {
+    const q = sanitizeQuery(withQuery);
+
+    if (q === '') { return data; }
+
+    return data.filter((item: any) => itemMatchesQuery(q, item));
+  }
+
+  function filterIndex(data: IndexStructure, withQuery: string): IndexStructure {
+    const q = sanitizeQuery(withQuery);
+
+    if (q === '') { return data; }
+
+    const keys = Object.keys(data);
+
+    const matchingKeys = keys.filter(k => {
+      if (k.indexOf(q) >= 0) {
+        return true;
+      } else {
+        return itemMatchesQuery(q, data[k]);
+      }
+    });
+
+    const excludedKeys = keys.filter(k => matchingKeys.indexOf(k) < 0);
+    return update(data, { $unset: excludedKeys });
   }
 
   function getKey(forItemIndex: number): string | undefined {
@@ -156,15 +210,12 @@ function ({ schema, data, onChange }) {
       throw new Error("Can’t get string key for an array structure");
     }
   }
-
   const realSelectedIndex: number | undefined = ((selectedRowIdx !== undefined) && (selectedRowIdx > 0))
     ? selectedRowIdx - 1
     : undefined;
-
   const selectedArrayIndex = (isArray && realSelectedIndex !== undefined)
     ? realSelectedIndex
     : undefined;
-
   const selectedIndexKey = (isIndex && realSelectedIndex !== undefined)
     ? getKey(realSelectedIndex)
     : undefined;
@@ -315,7 +366,10 @@ function ({ schema, data, onChange }) {
         <ButtonGroup>
           {itemOperations}
         </ButtonGroup>
-        <ItemSearch query={searchQuery} onChange={setSearchQuery} findingsCount={undefined} />
+        <ItemSearch
+          query={searchQuery}
+          onChange={setSearchQuery}
+          findingsCount={undefined} />
       </ControlGroup>
 
       <ItemTable
@@ -426,7 +480,7 @@ function ({ itemCount, fields, type, items, selectedCell, onSelectCell, fieldKey
           rowCount={itemCount + 1}
           rowHeight={_ => 32}
           itemKey={fieldKey}
-          columnCount={fields.length}
+          columnCount={fields.length + 1}
           columnWidth={colIndex => columnStyles[colIndex].width}
           itemData={itemData}
           width={tableDimensions[0]}
@@ -451,7 +505,7 @@ const ItemSearch: React.FC<ItemSearchWidgetProps> = function ({ query, onChange,
       fill
       leftIcon="search"
       type="text"
-      value={query}
+      value={query || ''}
       placeholder="Type to search…"
       rightElement={findingsCount !== undefined ? <>{findingsCount} found</> : undefined}
       onChange={(evt: React.FormEvent<HTMLInputElement>) => onChange(evt.currentTarget.value as string)} />
