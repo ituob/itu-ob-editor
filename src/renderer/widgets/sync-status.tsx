@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron';
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { Button, IconName, Tooltip, FormGroup, InputGroup, Intent, Icon, Popover, Position } from '@blueprintjs/core';
 
 import { useIPCValue, callIPC } from 'coulomb/ipc/renderer';
@@ -31,10 +31,6 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
 
   const [passwordPromptIsOpen, openPasswordPrompt] = useState(false);
 
-  useEffect(() => {
-    openPasswordPrompt(remote.needsPassword);
-  }, [remote.needsPassword]);
-
   async function triggerStorageSync() {
     await callIPC('db-default-git-trigger-sync');
   }
@@ -64,12 +60,6 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
         app.openPredefinedWindow('batchCommit');
       }
     }
-
-  } else if (remote.needsPassword) {
-    statusIcon = "lock";
-    tooltipText = "Remote storage is pending authentication";
-    statusIntent = "primary";
-    action = null;
 
   } else if (!remote.isOnline) {
     statusIcon = "offline";
