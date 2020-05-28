@@ -662,7 +662,9 @@ function ({ value, onFieldChange, fieldSpec }) {
         className={styles.translatedTextInput}
         value={onFieldChange ? val[lang.selected] : value[lang.selected]}
         disabled={!onFieldChange}
-        onChange={onFieldChange ? (evt: React.FormEvent<HTMLInputElement>) => setVal({ ...val, [lang.selected]: evt.currentTarget.value }) : undefined}
+        onChange={onFieldChange
+          ? (evt: React.FormEvent<HTMLInputElement>) => setVal({ ...val, [lang.selected]: evt.currentTarget.value })
+          : undefined}
         onBlur={onFieldChange ? (() => onFieldChange(val)) : undefined} />;
 
   } else {

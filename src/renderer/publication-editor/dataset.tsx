@@ -190,7 +190,8 @@ interface DataFieldSpecProps {
 }
 const DataFieldSpec: React.FC<DataFieldSpecProps> =
 function ({ field, onChange, onDelete, nestingLevel, allowedTypes }) {
-  const typeOptions: DataItem["type"][] = allowedTypes || [ ...FIELD_TYPES, ...COMPLEX_FIELD_TYPES ];
+  const typeOptions: DataItem["type"][] =
+    allowedTypes || [ ...FIELD_TYPES, ...COMPLEX_FIELD_TYPES ];
 
   const lang = useContext(LangConfigContext);
 
@@ -304,10 +305,18 @@ function ({ field, onChange, onDelete, nestingLevel, allowedTypes }) {
             onChange={onChange
               ? ((typ) => {
                   if (typ === 'object') {
-                    const newField: DataObject & BasicField = { ...field, type: typ, fields: [defaultField] };
+                    const newField: DataObject & BasicField = {
+                      ...field,
+                      type: typ,
+                      fields: [defaultField],
+                    };
                     onChange(newField);
                   } else if (typ === 'array') {
-                    const newField: DataArray & BasicField = { ...field, type: typ, item: { type: 'object', fields: [defaultIDField] }};
+                    const newField: DataArray & BasicField = {
+                      ...field,
+                      type: typ,
+                      item: { type: 'object', fields: [defaultIDField] },
+                    };
                     onChange(newField)
                   } else if (typ === 'index') {
                     throw new Error("Index structures are not allowed beyond top-level dataset");
