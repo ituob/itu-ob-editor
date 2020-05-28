@@ -61,7 +61,10 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
       title="Applying amendments…" />;
 
   } else {
-    const datasetsWithAmendments = patchDatasets(latestAnnexedDatasets, pastPatches.value.patches);
+
+    const datasetsWithAmendments = patchDatasets(
+      latestAnnexedDatasets,
+      pastPatches.value.changes);
 
     return (
       <div className={styles.normalizedAmendment}>
