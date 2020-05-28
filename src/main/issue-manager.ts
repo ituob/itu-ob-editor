@@ -98,7 +98,9 @@ class IssueManager extends Manager<OBIssue, number, { onlyIDs?: number[], month?
       const latestDatasets = latestAnnex.annexedTo.annexes[forPubID]?.datasets;
 
       if (latestDatasets !== undefined) {
-        const datasets = patchDatasets(latestDatasets, await this.getDatasetChanges(forPubID, asOfIssueID));
+        const datasets = patchDatasets(
+          latestDatasets,
+          await this.getDatasetChanges(forPubID, asOfIssueID));
 
         if (Object.keys(datasets).length > 0) {
           return datasets;
