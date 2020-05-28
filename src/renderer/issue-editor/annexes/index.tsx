@@ -108,6 +108,7 @@ function ({ pubId, position, onChange, issueId }) {
                   <Button
                       large
                       intent="primary"
+                      title="Load previously annexed version and apply any subsequent amendments."
                       disabled={autoFillInProgress}
                       loading={autoFillInProgress}
                       onClick={autoFillDatasets}>
