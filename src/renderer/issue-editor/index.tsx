@@ -36,6 +36,7 @@ import * as styles from './styles.scss';
 import { WindowComponentProps } from 'coulomb/config/renderer';
 import { SimpleEditableCard } from 'coulomb/renderer/widgets';
 import { metaEditors } from './meta';
+import { useModifiedIDs } from 'renderer/hooks';
 
 
 const operationLock = new AsyncLock();
@@ -81,6 +82,8 @@ export const IssueEditor: React.FC<{ issue: OBIssue }> = (props) => {
   /* Issue change status */
 
   const [saved, setSaved] = useState(true);
+
+  const isUncommitted = useModifiedIDs().issues.indexOf(`${issue.id}`) >= 0;
 
 
   /* Prepare initial item selection status */
@@ -280,7 +283,7 @@ export const IssueEditor: React.FC<{ issue: OBIssue }> = (props) => {
         <ObjectStorageStatus
           objectType="OB"
           objectID={issue.id}
-          haveSaved={saved}
+          haveSaved={saved && !isUncommitted}
           onCommit={handleCommitAndQuit} />
 
         <div className={styles.paneBody}>
