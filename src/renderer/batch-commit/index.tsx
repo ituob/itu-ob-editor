@@ -113,7 +113,7 @@ const Window: React.FC<WindowComponentProps> = function () {
       selectedValid[ctype] = items.filter(i => modifiedIds[ctype].indexOf(i) >= 0);
     }
     updateSelectedItems(selectedValid);
-  }, [modifiedIds]);
+  }, [JSON.stringify(modifiedIds)]);
 
 
   const [commitMessage, updateCommitMessage] = useState('');
@@ -195,7 +195,6 @@ const Window: React.FC<WindowComponentProps> = function () {
     updateCommitMessage('');
     toggleCommitPrompt(false);
   }
-
 
   return (
     <div className={styles.batchCommitWindow}>
