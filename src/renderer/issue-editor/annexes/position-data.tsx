@@ -88,7 +88,7 @@ function({ datasets, onChange }) {
             title={dataset.meta.title ? `“${dataset.meta.title[lang.selected]}”` : idx}
             items={{
               'spec': "Settings",
-              'contents': <>Content&emsp;<Tag round>{Object.entries(dataset.contents).length} item(s)</Tag></>,
+              'contents': <>Content&emsp;<Tag round title="Dataset items">{Object.entries(dataset.contents).length}</Tag></>,
             }}
             onSelect={sectionIdx => {
               selectDatasetID(idx);
