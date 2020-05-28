@@ -38,7 +38,7 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
   <{ pubID: string, asOfIssueID: number, excluding: boolean }, { annex: RunningAnnex | undefined | null }>
   ('model-issues-get-latest-annex', { annex: undefined }, { pubID: msg.target.publication, asOfIssueID: issue.id, excluding: false });
 
-  const latestAnnexedDatasets = latestAnnex.value.annex?.annexedTo.annexes[msg.target.publication]?.datasets;
+  const latestAnnexedDatasets = latestAnnex.value.annex?.annexedTo.annexes[msg.target.publication]?.datasets || null;
 
   const contentsEditor = <FreeformContents
     defaultValue={(msg.contents || {})[lang.default] || {}}
