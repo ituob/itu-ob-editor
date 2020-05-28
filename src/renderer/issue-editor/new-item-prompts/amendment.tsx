@@ -7,7 +7,7 @@ import { AddCardTriggerButton } from 'coulomb/renderer/widgets';
 import * as editableCardListStyles from 'coulomb/renderer/widgets/editable-card-list/styles.scss';
 
 import { Publication } from 'models/publications';
-import { Message } from 'models/messages';
+import { Message, AmendmentMessage } from 'models/messages';
 
 import { app } from 'renderer/index';
 import { PublicationTitle } from 'renderer/widgets/publication-title';
@@ -59,7 +59,7 @@ export const NewAmendmentPrompt: React.FC<NewAmendmentPromptProps> = function (p
     <{ forPubID: string, asOfIssueID: number }, { datasets?: PositionDatasets }>
     ('model-issues-auto-fill-datasets', { forPubID: pub.id, asOfIssueID: props.issueId })).datasets;
 
-    var message: Message = {
+    var message: AmendmentMessage = {
       type: 'amendment',
       target: {
         publication: pub.id,
@@ -97,8 +97,8 @@ export const NewAmendmentPrompt: React.FC<NewAmendmentPromptProps> = function (p
       itemDisabled={(item) => {
         return props.disabledPublicationIDs.indexOf(item.id) >= 0;
       }}
-      onItemSelect={(pub: AmendablePublication) =>
-        props.onCreate(createAmendmentMessage(pub))}
+      onItemSelect={async (pub: AmendablePublication) =>
+        props.onCreate(await createAmendmentMessage(pub))}
     ><AddCardTriggerButton highlight={props.highlight} label="Amend service publication" /></NewAmendmentSelector>
   );
 };
