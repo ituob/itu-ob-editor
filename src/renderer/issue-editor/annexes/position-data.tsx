@@ -656,7 +656,7 @@ function ({ value, onFieldChange, fieldSpec }) {
         type="text"
         rightElement={
           <ButtonGroup>
-            {onFieldChange !== undefined && lang.default !== lang.selected && !val[lang.selected]
+            {onFieldChange !== undefined && lang.default !== lang.selected && (!val || !val[lang.selected])
               ? <Button small minimal
                   title="ITU magic translate"
                   onClick={async () => {
