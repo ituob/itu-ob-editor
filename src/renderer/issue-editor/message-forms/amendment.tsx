@@ -3,7 +3,7 @@ import * as jsonpatch from 'fast-json-patch';
 import { remote } from 'electron';
 
 import React, { useContext, useState } from 'react';
-import { Icon, Text, NonIdealState, Tabs, Tab, UL, H4, Tag, Spinner } from '@blueprintjs/core';
+import { Icon, Text, NonIdealState, Tabs, Tab, UL, Tag, Spinner } from '@blueprintjs/core';
 
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
