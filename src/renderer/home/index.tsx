@@ -52,8 +52,7 @@ const Window: React.FC<WindowComponentProps> = function () {
 
   useEffect(() => {
     const status = db?.status || {};
-    console.debug("Got status", status)
-    if (!status.isPushing && !status.isPulling && status.lastSynchronized === null && status.needsPassword === false) {
+    if (!status.hasLocalChanges && !status.isPushing && !status.isPulling && status.lastSynchronized === null && status.needsPassword === false) {
       callIPC('db-default-git-trigger-sync');
     }
   }, [JSON.stringify(db)]);
@@ -77,7 +76,7 @@ const Window: React.FC<WindowComponentProps> = function () {
       title="Synchronizing data"
       description={db.status.isPushing ? "Pushing changes" : "Pulling changes"}
     />
-  } else if (db.status.lastSynchronized === null) {
+  } else if (db.status.lastSynchronized === null && db.status.hasLocalChanges === false) {
     dbInitializationScreen = <NonIdealState
       icon="cloud-download"
       title="Synchronizing data"
