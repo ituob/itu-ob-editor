@@ -40,6 +40,7 @@ function({ datasets, onChange }) {
     if (editingData) {
       mainPane = <DatasetContents
         schema={selectedDataset.meta.schema}
+        datasetTitle={selectedDataset.meta.title}
         data={selectedDataset.contents}
         onChange={onChange
           ? (newContents) => {
@@ -109,12 +110,13 @@ function({ datasets, onChange }) {
 type ArrayDataset = DataArray & { item: DataObject };
 
 interface DatasetContentsEditorProps<Schema extends ArrayDataset | DataIndex> {
+  datasetTitle?: Translatable<string>
   schema: ArrayDataset | DataIndex
   data: Schema extends ArrayDataset ? ArrayStructure : IndexStructure
   onChange?: (data: Schema extends ArrayDataset ? ArrayStructure : IndexStructure) => void
 }
 export const DatasetContents: React.FC<DatasetContentsEditorProps<any>> =
-function ({ schema, data, onChange }) {
+function ({ datasetTitle, schema, data, onChange }) {
   const lang = useContext(LangConfigContext);
   const [selectedRowIdx, selectRowIdx] = useState<number | undefined>(undefined);
   const [selectedColIdx, selectColIdx] = useState<number | undefined>(undefined);
@@ -159,9 +161,9 @@ function ({ schema, data, onChange }) {
       let valRaw = item[f.id];
       let valStr: string;
       if (f.type === 'text' || f.type === 'number') {
-        valStr = `${valRaw}`;
+        valStr = `${valRaw || ''}`;
       } else if (f.type === 'translated-text') {
-        valStr = `${valRaw[lang.selected]}`;
+        valStr = `${(valRaw || {})[lang.selected] || ''}`;
       } else if (f.type === 'boolean') {
         valStr = `${valRaw === true ? 'true' : 'false'}`;
       } else {
@@ -386,6 +388,7 @@ function ({ schema, data, onChange }) {
       <ItemTable
         onSelectCell={(row, col) => { selectRowIdx(row); selectColIdx(col); }}
         selectedCell={[selectedRowIdx, selectedColIdx]}
+        datasetTitle={datasetTitle}
         lang={lang.selected}
         itemCount={list.length}
         type={schema.type}
@@ -424,11 +427,20 @@ interface ItemTableProps extends ItemData, Selection {
   fieldKey?: ({ columnIndex, data, rowIndex }: { columnIndex: number, data: ItemData, rowIndex: number }) => string
 }
 const ItemTable: React.FC<ItemTableProps> =
-function ({ itemCount, fields, type, items, selectedCell, onSelectCell, fieldKey, onFieldChange }) {
+function ({ datasetTitle, itemCount, fields, type, items, selectedCell, onSelectCell, fieldKey, onFieldChange }) {
   const gridEl = useRef<VariableSizeGrid>(null);
   const lang = useContext(LangConfigContext);
 
-  const itemData: CellData = { selectedCell, items, type, onSelectCell, fields, onFieldChange, lang: lang.selected };
+  const itemData: CellData = {
+    selectedCell,
+    items,
+    type,
+    onSelectCell,
+    fields,
+    onFieldChange,
+    datasetTitle,
+    lang: lang.selected,
+  };
 
   const [tableDimensions, setTableDimensions] = useState<[number, number]>([200, 200]); // width, height
   const tableWrapper = useRef<HTMLDivElement>(null);
@@ -479,7 +491,7 @@ function ({ itemCount, fields, type, items, selectedCell, onSelectCell, fieldKey
   }
 
   const columnStyles = [
-    { width: 50 },
+    { width: type === 'array' ? 50 : 150 },
     ...fields.map(() => ({ width: 200 })),
   ];
 
@@ -528,6 +540,7 @@ interface ItemData {
   type: 'index' | 'array'
   items: object[] | [string, object][]
   fields: DataObject["fields"]
+  datasetTitle?: Translatable<string>
   lang: string
   onFieldChange?: (itemIndex: number, fieldID: string, newValue: any) => void
 }
@@ -549,7 +562,9 @@ const CellView = ({ rowIndex, columnIndex, style, data }: { rowIndex: number, co
   let tooltip: string;
   let cellView: JSX.Element;
   if (rowIndex < 1 && columnIndex < 1) {
-    cellView = <>{data.type === 'array' ? "#" : "ID"}</>;
+    cellView = <>{data.type === 'array'
+      ? "#"
+      : ((data.datasetTitle || {})[data.lang] || "ID")}</>;
     tooltip = '';
 
   } else if (rowIndex < 1) {
@@ -628,14 +643,14 @@ function ({ value, onFieldChange, fieldSpec }) {
 
   if (fieldSpec.type === 'text' || fieldSpec.type === 'number') {
     return <EditableText
-      type="text"
-      value={onFieldChange ? val : value}
+      type={fieldSpec.type}
+      value={(onFieldChange ? val : value) || ''}
       disabled={!onFieldChange}
       onChange={onFieldChange ? setVal : undefined}
       onConfirm={onFieldChange ? (val => onFieldChange(val)) : undefined} />
 
   } else if (fieldSpec.type === 'translated-text') {
-    const translatable = val as Translatable<string>;
+    const translatable = val as Translatable<string> || { [lang.selected]: '' };
 
     return  <InputGroup
         type="text"
@@ -660,10 +675,13 @@ function ({ value, onFieldChange, fieldSpec }) {
         }
         small
         className={styles.translatedTextInput}
-        value={onFieldChange ? val[lang.selected] : value[lang.selected]}
+        value={translatable[lang.selected]}
         disabled={!onFieldChange}
         onChange={onFieldChange
-          ? (evt: React.FormEvent<HTMLInputElement>) => setVal({ ...val, [lang.selected]: evt.currentTarget.value })
+          ? (evt: React.FormEvent<HTMLInputElement>) => setVal({
+              ...val,
+              [lang.selected]: evt.currentTarget.value,
+            })
           : undefined}
         onBlur={onFieldChange ? (() => onFieldChange(val)) : undefined} />;
 
