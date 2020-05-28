@@ -81,7 +81,7 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
             <Tab
               id="changes"
               title="Review changes"
-              panel={<AmendedPositionChangeReview datasetChanges={changes} />}
+              panel={<AmendedPositionChangeReview datasets={datasetsWithAmendments} datasetChanges={changes} />}
               className={styles.changeMessageTab}
             />
             <Tab
@@ -125,30 +125,38 @@ function ({ amendment, issue }) {
 
 interface AmendedPositionChangeReviewProps {
   datasetChanges: DatasetChanges
+  datasets: PositionDatasets
 }
-const AmendedPositionChangeReview: React.FC<AmendedPositionChangeReviewProps> = function ({ datasetChanges }) {
+const AmendedPositionChangeReview: React.FC<AmendedPositionChangeReviewProps> = function ({ datasets, datasetChanges }) {
+  const lang = useContext(LangConfigContext);
+
   const changes = Object.entries(datasetChanges).
   filter(([dsID, ds]) => ds.contents.length > 0).
   map(([dsID, ds]) => {
     const nonTestOps = ds.contents.filter(op => op.op !== 'test');
+    const dsTitle = (datasets[dsID]?.meta?.title || {})[lang.selected] || dsID;
 
     return (
-      <>
-        <H4>{dsID}</H4>
-        <UL>
-          <li className={styles.change}>
-            {nonTestOps.map(op => <Operation op={op} />)}
-          </li>
-        </UL>
-      </>
+      nonTestOps.map(op => <Operation datasetTitle={dsTitle} op={op} />)
     );
   });
 
-  return <div className={styles.changeTab}><UL>{changes}</UL></div>;
+  return <div className={styles.changeTab}>
+    <UL>{changes}</UL>
+  </div>;
 };
 
-const Operation: React.FC<{ op: Operation }> = function ({ op }) {
-  return <p><span style={{textTransform: 'uppercase'}}>{op.op}</span>: {op.path}</p>;
+const Operation: React.FC<{ datasetTitle: string, op: Operation }> = function ({ datasetTitle, op }) {
+  return <p>
+    [<small>{datasetTitle}</small>]
+    <br />
+    {op.path} — <em style={{textTransform: 'uppercase'}}>{op.op}</em>
+    {" "}
+    {op.op === 'add' ? <>{JSON.stringify(op.value)}</> : null}
+    {op.op === 'replace' ? <>with {JSON.stringify(op.value)}</> : null}
+    {(op.op === 'copy' || op.op === 'move') ? <>from {op.from}</> : null}
+    {(op.op === 'copy' || op.op === 'move') ? <>from {op.from}</> : null}
+  </p>;
 }
 
 
