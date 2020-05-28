@@ -7,7 +7,7 @@ import { AddCardTriggerButton } from 'coulomb/renderer/widgets';
 import * as editableCardListStyles from 'coulomb/renderer/widgets/editable-card-list/styles.scss';
 
 import { Publication } from 'models/publications';
-import { Message, AmendmentMessage } from 'models/messages';
+import { AmendmentMessage } from 'models/messages';
 
 import { app } from 'renderer/index';
 import { PublicationTitle } from 'renderer/widgets/publication-title';
