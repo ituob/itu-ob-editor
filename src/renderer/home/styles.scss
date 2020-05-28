@@ -1,6 +1,10 @@
 @import "~@blueprintjs/core/lib/scss/variables";
 
 
+:local .dbInitializationOverlay {
+  background: $pt-app-background-color;
+}
+
 :local .homeWindow {
   $sidebarSide: 5rem;
 

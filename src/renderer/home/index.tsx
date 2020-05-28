@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
-import { NonIdealState, Button, Icon, Tooltip, Position } from '@blueprintjs/core';
+import React, { useState, useContext, useEffect } from 'react';
+import { NonIdealState, Button, Icon, Tooltip, Position, Spinner, Overlay } from '@blueprintjs/core';
 
 import { callIPC } from 'coulomb/ipc/renderer';
 import { WindowComponentProps } from 'coulomb/config/renderer';
 
 import { conf } from 'app';
 
-import { StorageStatus } from 'renderer/widgets/sync-status';
+import { StorageStatus, PasswordPrompt } from 'renderer/widgets/sync-status';
 import { default as IssueScheduler } from '../issue-scheduler';
 import { Browser as PublicationBrowser } from '../publication-browser';
 import * as styles from './styles.scss';
+import { SingleDBStatusContext } from 'renderer/single-db-status-context';
 
 
 interface ContentTypeOptions {
@@ -44,8 +45,52 @@ const contentTypes: ContentTypeOptionSet = [
 
 
 const Window: React.FC<WindowComponentProps> = function () {
+
+  const db = useContext(SingleDBStatusContext);
   
   const [selectedCType, selectCType] = useState('issues' as keyof typeof conf["data"]);
+
+  useEffect(() => {
+    const status = db?.status || {};
+    console.debug("Got status", status)
+    if (!status.isPushing && !status.isPulling && status.lastSynchronized === null && status.needsPassword === false) {
+      callIPC('db-default-git-trigger-sync');
+    }
+  }, [JSON.stringify(db)]);
+
+  let dbInitializationScreen: JSX.Element | null;
+
+  if (db?.status === undefined) {
+    dbInitializationScreen = <NonIdealState
+      icon={<Spinner />}
+      title="Initializing database"
+    />
+  } else if (db.status.needsPassword) {
+    dbInitializationScreen = <NonIdealState
+      icon="key"
+      title="Password required"
+      description={<PasswordPrompt onConfirm={() => void 0} />}
+    />
+  } else if (db.status.isPushing || db.status.isPulling) {
+    dbInitializationScreen = <NonIdealState
+      icon={<Spinner />}
+      title="Synchronizing data"
+      description={db.status.isPushing ? "Pushing changes" : "Pulling changes"}
+    />
+  } else if (db.status.lastSynchronized === null) {
+    dbInitializationScreen = <NonIdealState
+      icon="cloud-download"
+      title="Synchronizing data"
+    />
+  } else {
+    dbInitializationScreen = null;
+  }
+
+  if (dbInitializationScreen !== null) {
+    return <Overlay isOpen backdropClassName={styles.dbInitializationOverlay}>
+      {dbInitializationScreen}
+    </Overlay>
+  }
 
   const cTypeOptions = contentTypes.find(cType => cType.id === selectedCType);
 

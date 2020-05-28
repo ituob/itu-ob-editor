@@ -30,6 +30,9 @@ export const conf: RendererConfig<typeof appConf> = {
       selected: defaultLanguage,
       default: defaultLanguage,
     }),
+  }, {
+    cls: () => import('./single-db-status-context'),
+    getProps: () => ({ dbName: 'default' }),
   }],
 };
 

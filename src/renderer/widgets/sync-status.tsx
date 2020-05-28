@@ -1,13 +1,13 @@
 import { ipcRenderer } from 'electron';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Button, IconName, Tooltip, FormGroup, InputGroup, Intent, Icon, Popover, Position } from '@blueprintjs/core';
 
-import { BackendStatus } from 'coulomb/db/isogit-yaml/base';
 import { useIPCValue, callIPC } from 'coulomb/ipc/renderer';
 import { conf, app } from '..';
 
 import * as styles from './sync-status.scss';
+import { SingleDBStatusContext } from 'renderer/single-db-status-context';
 
 
 type AnyIDType = string | number;
@@ -20,16 +20,7 @@ interface StorageStatusProps {
   tooltipPosition?: Position,
 }
 export const StorageStatus: React.FC<StorageStatusProps> = function ({ className, iconClassName, tooltipPosition }) {
-  const [remote, updateRemote] = useState<BackendStatus>({
-    isMisconfigured: false,
-    hasLocalChanges: false,
-    needsPassword: false,
-    isPushing: false,
-    isPulling: false,
-    statusRelativeToLocal: undefined,
-    isOnline: false,
-    lastSynchronized: null,
-  });
+  const remote = useContext(SingleDBStatusContext)?.status;
 
   const modifiedIds: { [K in AnyDataType]: string[] } =
   Object.keys(conf.app.data).map((key) => {
@@ -37,13 +28,6 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
       [key]: useIPCValue<{}, string[]>(`model-${key}-read-uncommitted-ids`, []).value,
     };
   }).reduce((prevValue, currValue) => ({ ...prevValue, ...currValue }));
-
-  useEffect(() => {
-    ipcRenderer.on('db-default-status', handleStorageStatusUpdate);
-    return function cleanup() {
-      ipcRenderer.removeListener('db-default-status', handleStorageStatusUpdate);
-    };
-  }, []);
 
   const [passwordPromptIsOpen, openPasswordPrompt] = useState(false);
 
@@ -53,10 +37,6 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
 
   async function triggerStorageSync() {
     await callIPC('db-default-git-trigger-sync');
-  }
-
-  function handleStorageStatusUpdate(evt: any, remoteStatus: Partial<BackendStatus>) {
-    updateRemote(remote => ({ ...remote, ...remoteStatus }));
   }
 
   let statusIcon: IconName;
@@ -149,7 +129,7 @@ export const StorageStatus: React.FC<StorageStatusProps> = function ({ className
 };
 
 
-const PasswordPrompt: React.FC<{ onConfirm: () => void }> = function ({ onConfirm }) {
+export const PasswordPrompt: React.FC<{ onConfirm: () => void }> = function ({ onConfirm }) {
   const [value, setValue] = useState('');
 
   async function handlePasswordConfirm() {
