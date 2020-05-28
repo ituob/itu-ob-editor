@@ -2,9 +2,9 @@ import update from 'immutability-helper';
 import React, { useContext } from 'react';
 import { DndProvider } from 'react-dnd';
 import Backend from 'react-dnd-html5-backend';
-import { FormGroup, InputGroup, Button, ControlGroup, HTMLSelect } from '@blueprintjs/core';
+import { FormGroup, InputGroup, Button, ControlGroup, HTMLSelect, Callout } from '@blueprintjs/core';
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
-import { DataItem, DatasetMeta, DataObject, DataArray, BasicField, DataType } from 'models/dataset';
+import { DataItem, DatasetMeta, DataObject, DataArray, BasicField, DataType, DATA_TYPE_LABELS } from 'models/dataset';
 import { EditorViewProps } from './types';
 
 import styles from './styles.scss';
@@ -53,16 +53,17 @@ function ({ obj, onChange, schemaLocked }) {
             inline
             helperText={<>
               <p>
-                {obj.schema.type === 'array' ? "Items are in an ordered list." : null}
-                {obj.schema.type === 'index' ? "Each item is assigned a key." : null}
+                {obj.schema.type === 'array' ? "Array is suitable for lists of items, the order of which may change. " : null}
+                {obj.schema.type === 'index' ? "Index stores each item under a unique non-numerical key." : null}
                 {" "}
+                <code>index</code> is recommended.
                 Specify item fields below.
               </p>
-              <p>
+              <Callout intent="primary">
                 Note: to preserve data integrity,
                 {" "}
-                altering schema is not possible if dataset has any content.
-              </p>
+                altering schema is only possible while dataset has no content.
+              </Callout>
             </>}>
           <DataTypeSelector
             allowedTypes={['index', 'array']}
@@ -361,7 +362,9 @@ function ({ allowedTypes, selectedType, onChange, className }) {
   return (
     <HTMLSelect
       className={className}
-      options={allowedTypes.map(typ => ({ label: typ, value: typ }))}
+      options={allowedTypes.map(typ =>
+        ({ title: 'asd', label: DATA_TYPE_LABELS[typ] || typ, value: typ })
+      )}
       disabled={!onChange}
       value={selectedType}
       onChange={onChange

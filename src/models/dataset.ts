@@ -7,6 +7,10 @@ export type BasicField = {
   required?: true
 }
 
+
+/* Value types */
+// TODO: Rename *Field to *Value
+
 type TextField = {
   type: 'text'
 }
@@ -23,31 +27,49 @@ type BooleanField = {
   type: 'boolean'
 }
 
-
 export type DataArray = {
+  type: 'array'
   item: SimpleValue | DataObject
-} & { type: 'array' }
-
+}
 
 export type DataObject = {
+  type: 'object'
   fields: (BasicField & DataItem)[]
-} & { type: 'object' }
+}
 
 
-export type DataType = ('index' | DataItem["type"])
-
+// This one is only used for overall dataset structure,
+// not individual values
+export type DataIndex = {
+  type: 'index'
+  item: DataObject
+}
 
 export type SimpleValue = TextField | TranslatedTextField | NumberField | BooleanField
 export type ComplexValue =  DataArray | DataObject
 export type DataItem = SimpleValue | ComplexValue
 
 
-export type DataIndex = {
-  item: DataObject
-} & { type: 'index' }
+
+/* Possible data types */
+
+export type DataType = ('index' | DataItem["type"])
+
+export const DATA_TYPE_LABELS: {
+  [typ in DataType]: string
+} = {
+  'index': "index",
+  'object': "object",
+  'array': "array (beta)",
+  'text': "text",
+  'translated-text': "localized text",
+  'number': "number",
+  'boolean': "on/off marker",
+};
 
 
 /* Dataset meta. */
+
 export interface DatasetMeta {
   title?: Translatable<string>
   schema: (DataArray & { item: DataObject }) | DataIndex
@@ -83,6 +105,9 @@ interface IndexDatasetMeta extends DatasetMeta {
   schema: DataIndex
 }
 
+
+
+// Duck-typing datasets
 
 export function isArray(dataset: Dataset): dataset is ArrayDataset {
   return specifiesArray(dataset.meta.schema) && containsArray(dataset.contents);
