@@ -231,9 +231,9 @@ class IssueManager extends Manager<OBIssue, number, { onlyIDs?: number[], month?
       return await this.getSchedule({ month });
     });
 
-    listen<{ pubID: string, asOfIssueID: number, excluding: boolean }, { annex: RunningAnnex | undefined }>
+    listen<{ pubID: string, asOfIssueID: number, excluding: boolean }, { annex: RunningAnnex | null }>
     (`${prefix}-get-latest-annex`, async ({ pubID, asOfIssueID, excluding }) => {
-      return { annex: this.getLatestAnnex(pubID, asOfIssueID, excluding) };
+      return { annex: this.getLatestAnnex(pubID, asOfIssueID, excluding) || null };
     });
 
     listen<{ forPubID: string, asOfIssueID: number }, { changes: DatasetChanges }>

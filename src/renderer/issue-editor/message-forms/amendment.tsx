@@ -3,7 +3,7 @@ import * as jsonpatch from 'fast-json-patch';
 import { remote } from 'electron';
 
 import React, { useContext, useState } from 'react';
-import { Icon, Text, NonIdealState, Tabs, Tab, UL, H4 } from '@blueprintjs/core';
+import { Icon, Text, NonIdealState, Tabs, Tab, UL, H4, Tag, Spinner } from '@blueprintjs/core';
 
 import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
@@ -31,11 +31,11 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
   const [changes, setChanges] = useState<DatasetChanges>(msg.datasetChanges || {});
 
   const pastPatches = useIPCValue
-  <{ pubID: string, asOfIssueID: number }, { patches: { [datasetID: string]: { contents: Operation[] } } }>
-  ('model-issues-get-all-patches', { patches: {} }, { pubID: msg.target.publication, asOfIssueID: issue.id });
+  <{ forPubID: string, asOfIssueID: number }, { changes: DatasetChanges | undefined }>
+  ('model-issues-get-dataset-changes', { changes: undefined }, { forPubID: msg.target.publication, asOfIssueID: issue.id });
 
   const latestAnnex = useIPCValue
-  <{ pubID: string, asOfIssueID: number, excluding: boolean }, { annex: RunningAnnex | undefined }>
+  <{ pubID: string, asOfIssueID: number, excluding: boolean }, { annex: RunningAnnex | undefined | null }>
   ('model-issues-get-latest-annex', { annex: undefined }, { pubID: msg.target.publication, asOfIssueID: issue.id, excluding: false });
 
   const latestAnnexedDatasets = latestAnnex.value.annex?.annexedTo.annexes[msg.target.publication]?.datasets;
@@ -47,8 +47,18 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
     }}
   />;
 
-  if (latestAnnexedDatasets === undefined) {
+  if (latestAnnexedDatasets === null) {
     return contentsEditor;
+
+  } else if (latestAnnexedDatasets === undefined) {
+    return <NonIdealState
+      icon={<Spinner />}
+      title="Loading previously annexed version…" />;
+
+  } else if (pastPatches.value.changes === undefined) {
+    return <NonIdealState
+      icon={<Spinner />}
+      title="Applying amendments…" />;
 
   } else {
     const datasetsWithAmendments = patchDatasets(latestAnnexedDatasets, pastPatches.value.patches);
@@ -189,7 +199,7 @@ function({ datasets, datasetChanges, onChange }) {
           <ItemList
             key={idx}
             title={dataset.meta.title ? `“${dataset.meta.title[lang.selected]}”` : idx}
-            items={{ 'contents': "Content" }}
+            items={{ 'contents': <>Content&emsp;<Tag round title="Dataset items">{Object.entries(dataset.contents).length}</Tag></> }}
             onSelect={() => {
               selectDatasetID(idx);
             }}
