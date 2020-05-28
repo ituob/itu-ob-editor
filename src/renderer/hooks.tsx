@@ -9,9 +9,9 @@ type AnyDataType = keyof typeof conf["app"]["data"];
 export function useModifiedIDs() {
   const modifiedIDs: { [K in AnyDataType]: string[] } =
     Object.keys(conf.app.data).map((key) => {
-        return {
-        [key]: useIPCValue<{}, string[]>(`model-${key}-read-uncommitted-ids`, []).value,
-        };
+      return {
+        [key]: useIPCValue<{}, string[]>(`model-${key}-read-uncommitted-ids`, []).value.map(i => `${i}`),
+      };
     }).reduce((prevValue, currValue) => ({ ...prevValue, ...currValue }));
 
   return modifiedIDs;
