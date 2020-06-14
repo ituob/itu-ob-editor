@@ -8,6 +8,7 @@ import { Editor as BaseEditor, MenuBar } from '@aeaton/react-prosemirror';
 import { options, menu } from '@aeaton/react-prosemirror-config-default';
 
 import * as styles from './styles.scss';
+import { NonIdealState } from '@blueprintjs/core';
 
 
 type NodePath = { type: { name: string } }[];
@@ -52,7 +53,14 @@ interface FreeformContentsProps {
 export const FreeformContents: React.FC<FreeformContentsProps> = function ({ onChange, defaultValue, className }) {
   let initialDoc: any;
   if (Object.keys(defaultValue).length > 0) {
-    initialDoc = options.schema.nodeFromJSON(Object.assign({}, defaultValue));
+    try {
+      initialDoc = options.schema.nodeFromJSON(Object.assign({}, defaultValue));
+    } catch (e) {
+      return <NonIdealState
+        icon="heart-broken"
+        title="Error"
+        description="Somehow we ended with malformed data in this field :(" />
+    }
   } else {
     initialDoc = options.schema.topNodeType.createAndFill();
   }
