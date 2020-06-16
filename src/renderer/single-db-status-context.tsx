@@ -17,9 +17,6 @@ const DBStatusContextProvider: React.FC<SingleDBStatusContextProps> = function (
   const [backendStatus, updateBackendStatus] = useState(undefined as undefined | object);
   const description = useIPCValue(`${ipcPrefix}-describe`, null as null | BackendDescription<any>);
 
-  console.debug("STATUS", backendStatus);
-  console.debug("DESCRIPTION", description.value);
-
   // Listen to status updates
   function handleNewStatus(evt: any, newStatus: any) {
     log.debug("Received new status for DB", props.dbName, newStatus);
