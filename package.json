@@ -1,22 +1,44 @@
 {
   "name": "itu-ob-editor",
+  "productName": "ITU Operational Bulletin Editor",
   "version": "1.0.0-dev3",
-  "description": "ITU OB data editor",
-  "repository": "git@github.com:ituob/itu-ob-editor.git",
+  "description": "ITU Operational Bulletin Editor",
   "bugs": "https://github.com/ituob/itu-ob-editor/issues",
-  "author": "Ribose Inc. <open.source@ribose.com>",
+  "author": {
+    "name": "Ribose Inc.",
+    "email": "open.source@ribose.com",
+    "url": "https://www.ituob.org"
+  },
+  "repository": "github:ituob/itu-ob-editor",
+  "homepage": "https://www.ituob.org",
   "license": "MIT",
   "scripts": {
+    "postinstall": "electron-builder install-app-deps",
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",
+    "clean": "rm -rf ./bundle ./dist",
     "dist": "cross-env DEBUG=electron-builder electron-builder",
     "dist:win": "electron-builder -w",
     "dist:mac": "electron-builder -m",
     "pack": "electron-builder --dir",
     "release": "electron-builder --publish always",
     "cdist": "yarn compile && electron-builder -mlw",
-    "cdist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
+    "cdist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null",
+    "lint:css": "stylelint --ignore-path ./.gitignore --max-warnings 0 \"**/*.{css,sass,scss}\"",
+    "lint:css:fix": "yarn lint:css --fix",
+    "lint:ts": "eslint --ext .ts,.tsx --ignore-path ./.gitignore --max-warnings 0 \"**/*.{ts,tsx}\"",
+    "lint:ts:fix": "yarn lint:ts --fix",
+    "format": "prettier --ignore-path ./.gitignore --list-different \"**/*.{css,html,js,json,jsx,less,md,scss,ts,tsx,vue,yaml,yml}\"",
+    "format:fix": "yarn format --write"
   },
+  "resolutions": {
+    "js-yaml": "3.13.1",
+    "acorn": "6.4.1",
+    "kind-of": "6.0.3"
+  },
+  "browserslist": [
+    "electron 8.0"
+  ],
   "electronWebpack": {
     "staticSourceDirectory": "src/static",
     "main": {
@@ -29,14 +51,29 @@
   "build": {
     "productName": "ITU OB Editor",
     "appId": "org.ituob.editor",
+    "afterPack": "./scripts/after-pack.js",
+    "afterSign": "electron-builder-notarize",
     "mac": {
+      "target": [
+        "dmg",
+        "mas",
+        "zip"
+      ],
       "category": "public.app-category.productivity",
+      "darkModeSupport": true,
       "icon": "build/icon.icns",
-      "target": "dmg",
       "gatekeeperAssess": false,
       "hardenedRuntime": true,
-      "entitlements": "assets/mac/entitlements.mac.inherit.plist",
-      "entitlementsInherit": "assets/mac/entitlements.mac.inherit.plist"
+      "entitlements": "./build/entitlements.mac.plist",
+      "entitlementsInherit": "./build/entitlements.mac.plist"
+    },
+    "mas": {
+      "entitlements": "./build/entitlements.mas.plist",
+      "entitlementsInherit": "./build/entitlements.mas.inherit.plist",
+      "hardenedRuntime": false
+    },
+    "linux": {
+      "category": "Utility"
     },
     "dmg": {
       "contents": [
@@ -87,6 +124,9 @@
       }
     ]
   },
+  "stylelint": {
+    "extends": "stylelint-config-standard"
+  },
   "dependencies": {
     "@aeaton/react-prosemirror": "https://github.com/riboseinc/react-prosemirror#aeaton-react-prosemirror-v0.22.10-gitpkg",
     "@aeaton/react-prosemirror-config-default": "https://github.com/riboseinc/react-prosemirror#aeaton-react-prosemirror-config-default-v0.12.11-gitpkg",
@@ -132,13 +172,16 @@
     "cross-env": "^7.0.0",
     "electron": "^8.0.1",
     "electron-builder": "^22.4.1",
-    "electron-notarize": "^0.3.0",
+    "electron-builder-notarize": "^1.1.2",
     "electron-react-devtools": "^0.5.3",
     "electron-webpack": "^2.7.4",
     "electron-webpack-ts": "^4.0.0",
     "node-sass": "^4.12.0",
     "npm-run-all": "^4.1.5",
+    "prettifier": "^0.4.0",
     "sass-loader": "^8.0.2",
+    "stylelint": "^13.6.1",
+    "stylelint-config-standard": "^20.0.0",
     "typescript": "^3.7.2",
     "typescript-plugin-css-modules": "^2.2.0",
     "webpack": "~4.41.5"
