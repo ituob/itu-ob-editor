@@ -1,7 +1,7 @@
 {
   "name": "itu-ob-editor",
   "productName": "ITU Operational Bulletin Editor",
-  "version": "1.0.0-dev3",
+  "version": "1.0.0-dev4",
   "description": "ITU Operational Bulletin Editor",
   "bugs": "https://github.com/ituob/itu-ob-editor/issues",
   "author": {
