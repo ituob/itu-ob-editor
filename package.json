@@ -31,11 +31,6 @@
     "format": "prettier --ignore-path ./.gitignore --list-different \"**/*.{css,html,js,json,jsx,less,md,scss,ts,tsx,vue,yaml,yml}\"",
     "format:fix": "yarn format --write"
   },
-  "resolutions": {
-    "js-yaml": "3.13.1",
-    "acorn": "6.4.1",
-    "kind-of": "6.0.3"
-  },
   "browserslist": [
     "electron 8.0"
   ],
