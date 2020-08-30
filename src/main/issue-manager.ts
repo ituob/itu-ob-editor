@@ -61,11 +61,13 @@ class IssueManager extends Manager<OBIssue, number, { onlyIDs?: number[], month?
   async getDatasetChanges(forPubID: string, asOfIssueID: number): Promise<DatasetChanges> {
     const latestAnnex = this.getLatestAnnex(forPubID, asOfIssueID);
     if (!latestAnnex) {
+      log.warn("Issue manager: Couldn’t fetch latest annex", forPubID, asOfIssueID)
       return {};
     }
 
     const latestAnnexedDatasets = latestAnnex?.annexedTo.annexes[forPubID]?.datasets;
     if (latestAnnexedDatasets === undefined) {
+      log.warn("Issue manager: Couldn’t fetch dataset amendment changes", forPubID, asOfIssueID)
       return {};
     }
 
