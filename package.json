@@ -158,6 +158,7 @@
     "*/**/prosemirror-model": "https://github.com/strogonoff/prosemirror-model.git#prosemirror-model-v1.7.5-gitpkg",
     "js-yaml": "3.14.0",
     "acorn": "6.4.1",
+    "minimist": "1.2.5",
     "kind-of": "6.0.3"
   },
   "devDependencies": {
