@@ -187,7 +187,7 @@ interface DataFieldSpecProps {
   allowedTypes?: DataItem["type"][]
   onChange?: (updatedField: DataItem & BasicField) => void
   onDelete?: () => void
-  nestingLevel: number 
+  nestingLevel: number
 }
 const DataFieldSpec: React.FC<DataFieldSpecProps> =
 function ({ field, onChange, onDelete, nestingLevel, allowedTypes }) {
@@ -352,7 +352,7 @@ function ({ field, onChange, onDelete, nestingLevel, allowedTypes }) {
 
 
 interface DataTypeSelectorProps {
-  allowedTypes: DataType[] 
+  allowedTypes: DataType[]
   selectedType?: DataType
   onChange?: (type: DataType) => void
   className?: string

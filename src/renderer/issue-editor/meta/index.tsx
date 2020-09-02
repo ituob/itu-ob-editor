@@ -21,7 +21,7 @@ type MetaSchedule = ScheduledIssue;
 
 export interface MetaEditorProps<Data extends Partial<OBIssue>> {
   data: Data
-  onChange: (data: Data) => void 
+  onChange: (data: Data) => void
 }
 
 

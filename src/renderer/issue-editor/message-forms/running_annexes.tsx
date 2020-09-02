@@ -95,7 +95,7 @@ const ExtraPublications: React.FC<{ pubIds: string[], updateIds: (newIds: string
         </>
       ))}
 
-      {extraItemDialogState === true 
+      {extraItemDialogState === true
         ? <AddExtraAnnexedListDialog
             key="addNewDialog"
             isOpen={true}

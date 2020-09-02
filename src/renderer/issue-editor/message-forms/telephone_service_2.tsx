@@ -182,7 +182,7 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
         ))
         : ''}
 
-      {newCountryDialogState === true 
+      {newCountryDialogState === true
         ? <EditCountryDialog
             key="addCountry"
             title="Add country"

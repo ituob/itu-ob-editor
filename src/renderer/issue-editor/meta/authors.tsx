@@ -102,7 +102,7 @@ const MetaAuthorsEditor: React.FC<MetaEditorProps<MetaAuthors>> = function ({ da
 interface AuthorItemProps {
   author: OBAuthorOrg
   _authorIndex: number
-  onChange: (author: OBAuthorOrg) => void 
+  onChange: (author: OBAuthorOrg) => void
 }
 const AuthorItem: React.FC<AuthorItemProps> =
 function ({ author, onChange, _authorIndex }) {
@@ -191,7 +191,7 @@ function ({ author, onChange, _authorIndex }) {
 interface AuthorContactItemProps {
   contact: Contact
   onChange: (contact: Contact) => void
-  onDelete?: () => void 
+  onDelete?: () => void
 }
 const AuthorContactItem: React.FC<AuthorContactItemProps> =
 function ({ contact, onChange, onDelete }) {

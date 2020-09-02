@@ -100,7 +100,7 @@ const IssueScheduleCard: React.FC<IssueScheduleCardProps> = function ({ issue, o
         icon="folder-shared"
         date={issue.publication_date}
         text={<>Published (<IssueWebLinks issueId={issue.id} pubDate={issue.publication_date} />) on</>} />
-            
+
     </>;
   } else if (isCurrent) {
     status = <>

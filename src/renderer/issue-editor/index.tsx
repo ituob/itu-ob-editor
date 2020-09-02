@@ -218,7 +218,7 @@ export const IssueEditor: React.FC<{ issue: OBIssue }> = (props) => {
 
   function handleItemSelection(inSection: OBSection, atIndex: string) {
     selectItem(atIndex);
-    selectSection(inSection); 
+    selectSection(inSection);
   }
 
   function handleNewMessage(msg: Message, inSection: OBMessageSection) {

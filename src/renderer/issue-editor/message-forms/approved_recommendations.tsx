@@ -93,7 +93,7 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
         })}
       </>
 
-      {newRecDialogStatus === true 
+      {newRecDialogStatus === true
         ? <AddApprovedRecDialog
             key="addRec"
             isOpen={true}

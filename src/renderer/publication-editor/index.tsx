@@ -97,7 +97,7 @@ const Window: React.FC<WindowComponentProps> = function ({ query }) {
 
 interface PublicationEditorProps {
   publication: Publication
-  create: boolean 
+  create: boolean
 }
 const PublicationEditor: React.FC<PublicationEditorProps> = function (props) {
   const lang = useContext(LangConfigContext);

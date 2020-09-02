@@ -45,10 +45,10 @@ const modifiedFileListing: { [K in AnyDataType ]: React.FC<ModifiedFileOverviewP
 
 // const modifiedFileListing: { [K in keyof Storage]: React.FC<ModifiedFileOverviewProps<Storage[K] & any>> } = {
 //   // IMPORTANT: key is implied to be corresponding FS backend directory relative to Git working directory.
-// 
+//
 //   issues: ({ items, selectedItems, onSelect }) => <>
 //     <PaneHeader align="left">{items.length} modified OB {items.length !== 1 ? "editions" : "edition"}</PaneHeader>
-// 
+//
 //     <div className={styles.itemList}>
 //       {items.map(item => <ItemCard
 //         title={item.id}
@@ -57,10 +57,10 @@ const modifiedFileListing: { [K in AnyDataType ]: React.FC<ModifiedFileOverviewP
 //         isSelected={selectedItems.indexOf(item.id) >= 0} />)}
 //     </div>
 //   </>,
-// 
+//
 //   publications: ({ items, selectedItems, onSelect }) => <>
 //     <PaneHeader align="left">{items.length} modified service {items.length !== 1 ? "publications" : "publication"}</PaneHeader>
-// 
+//
 //     <div className={styles.itemList}>
 //       {items.map(item => <ItemCard
 //         title={item.id}
@@ -69,7 +69,7 @@ const modifiedFileListing: { [K in AnyDataType ]: React.FC<ModifiedFileOverviewP
 //         isSelected={selectedItems.indexOf(item.id) >= 0} />)}
 //     </div>
 //   </>,
-// 
+//
 //   recommendations: (recs) => <>
 //   </>,
 // };

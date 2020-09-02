@@ -60,7 +60,7 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
         ))}
       </>
 
-      {newItemDialogState === true 
+      {newItemDialogState === true
         ? <AddSRItemDialog
             key="addItem"
             title="Add Service Restrictions item"
