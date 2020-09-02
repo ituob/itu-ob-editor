@@ -51,7 +51,10 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
 
   function _onChange(newContents: TSCountryCommunicationSet[]) {
     updateCountryCommSets(newContents);
-    onChange({ contents: newContents });
+
+    if (onChange) {
+      onChange({ contents: newContents });
+    }
   }
 
   function updateCommunication(countryIdx: number, commIdx: number, updatedComm: TSCommunication) {
@@ -88,11 +91,17 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
       {countryCommSets.length > 0
         ? countryCommSets.map((countryCommSet: TSCountryCommunicationSet, countryIdx: number) => (
           <>
-            <SimpleEditableCard extended={true} key={countryIdx} onDelete={() => {
-              var newContents = [...countryCommSets];
-              newContents.splice(countryIdx, 1);
-              _onChange(newContents);
-            }}>
+            <SimpleEditableCard
+                extended={true}
+                key={countryIdx}
+                onDelete={onChange
+                  ? () => {
+                      var newContents = [...countryCommSets];
+                      newContents.splice(countryIdx, 1);
+                      _onChange(newContents);
+                    }
+                  : undefined}>
+
               <H4>
                 {countryCommSet.country_name[lang.default]}
                 &emsp;

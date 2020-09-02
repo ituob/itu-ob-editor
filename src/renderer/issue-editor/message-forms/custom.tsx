@@ -19,11 +19,13 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
   var doc: any = (msg.contents || {})[lang.default] || {};
 
   function _onChange() {
-    onChange({
-      ...msg,
-      contents: { ...msg.contents, [lang.default]: doc },
-      title: { ...msg.title, [lang.default]: title },
-    });
+    if (onChange) {
+      onChange({
+        ...msg,
+        contents: { ...msg.contents, [lang.default]: doc },
+        title: { ...msg.title, [lang.default]: title },
+      });
+    }
   }
 
   return (
@@ -35,10 +37,12 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
             large={true}
             placeholder="Title"
             defaultValue={title}
-            onChange={(event: React.FormEvent<HTMLElement>) => {
-              title = (event.target as HTMLInputElement).value;
-              _onChange();
-            }}
+            onChange={onChange
+              ? (event: React.FormEvent<HTMLElement>) => {
+                  title = (event.target as HTMLInputElement).value;
+                  _onChange();
+                }
+              : undefined}
           />
         </FormGroup>
       </Callout>

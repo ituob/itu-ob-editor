@@ -21,7 +21,9 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
 
   function _onChange(updatedMsg: { [K in keyof ApprovedRecommendationsMessage]?: ApprovedRecommendationsMessage[K] }) {
     updateMsg({ ...msg, ...updatedMsg });
-    onChange({ ...msg, ...updatedMsg });
+    if (onChange) {
+      onChange({ ...msg, ...updatedMsg });
+    }
   }
 
   const hasApprovalDoc = (msg.by || '') !== '';

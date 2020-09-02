@@ -42,7 +42,9 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
   const contentsEditor = <FreeformContents
     defaultValue={(msg.contents || {})[lang.default] || {}}
     onChange={(updatedDoc) => {
-      onChange({ ...msg, contents: { ...msg.contents, [lang.default]: updatedDoc } });
+      if (onChange) {
+        onChange({ ...msg, contents: { ...msg.contents, [lang.default]: updatedDoc } });
+      }
     }}
   />;
 
@@ -71,10 +73,14 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
         <AmendedPositionDataEditor
           datasets={datasetsWithAmendments}
           datasetChanges={changes}
-          onChange={(newChanges) => {
-            setChanges(newChanges);
-            onChange({ ...msg, datasetChanges: newChanges });
-          }} />
+          onChange={onChange
+            ? (newChanges) => {
+                setChanges(newChanges);
+                if (onChange) {
+                  onChange({ ...msg, datasetChanges: newChanges });
+                }
+              }
+            : undefined} />
 
           <Tabs defaultSelectedTabId="changes" className={styles.changeMessageTabs}>
             <Tab

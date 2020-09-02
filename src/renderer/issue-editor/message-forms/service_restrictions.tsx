@@ -19,7 +19,9 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
   const [newItemDialogState, toggleNewItemDialogState] = useState(false);
 
   function _onChange(newItems: SRItem[]) {
-    onChange(Object.assign({}, (message as ServiceRestrictionsMessage), { items: newItems }));
+    if (onChange) {
+      onChange(Object.assign({}, (message as ServiceRestrictionsMessage), { items: newItems }));
+    }
   }
 
   return (
@@ -37,12 +39,14 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
           <>
             <SimpleEditableCard
                 key="item"
-                onDelete={() => {
-                  const newItems = [...items]
-                  newItems.splice(idx, 1);
-                  updateItems(newItems);
-                  _onChange(newItems);
-                }}>
+                onDelete={onChange
+                  ? () => {
+                      const newItems = [...items]
+                      newItems.splice(idx, 1);
+                      updateItems(newItems);
+                      _onChange(newItems);
+                    }
+                  : undefined}>
               <strong>{item.country[lang.default]}</strong>
               &emsp;
               OB No. {item.ob},

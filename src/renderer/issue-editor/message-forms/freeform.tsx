@@ -14,7 +14,9 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
     <FreeformContents
       defaultValue={(msg.contents || {})[lang.default] || {}}
       onChange={(updatedDoc) => {
-        onChange({ ...msg, contents: { ...msg.contents, [lang.default]: updatedDoc } });
+        if (onChange) {
+          onChange({ ...msg, contents: { ...msg.contents, [lang.default]: updatedDoc } });
+        }
       }}
     />
   );

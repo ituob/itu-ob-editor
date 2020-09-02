@@ -19,7 +19,7 @@ export const MessageForm: React.FC<MessageFormProps> = function (props) {
     (props.message as RunningAnnexesMessage).extra_links);
 
   useEffect(() => {
-    props.onChange({ extra_links: extraPubIds });
+    props.onChange ? props.onChange({ extra_links: extraPubIds }) : void 0;
   }, [JSON.stringify(extraPubIds)]);
 
   const runningAnnexes = useRunningAnnexes(props.issue.id);

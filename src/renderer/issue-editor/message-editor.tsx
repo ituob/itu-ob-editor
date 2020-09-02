@@ -46,7 +46,7 @@ interface MessageEditorProps {
   message: Message,
   issue: OBIssue,
   meta?: JSX.Element,
-  onChange: (updatedMessage: Message) => void,
+  onChange?: (updatedMessage: Message) => void,
 }
 export const MessageEditor: React.FC<MessageEditorProps> = function (props) {
   if (props.message) {
@@ -70,7 +70,9 @@ export const MessageEditor: React.FC<MessageEditorProps> = function (props) {
         <EditorCls
           message={props.message}
           issue={props.issue}
-          onChange={(updatedMessage: any) => props.onChange({ ...updatedMessage, type: props.message.type })}
+          onChange={(updatedMessage: any) => props.onChange
+            ? props.onChange({ ...updatedMessage, type: props.message.type })
+            : void 0}
         />
       </>
     );
@@ -97,7 +99,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = function (props) {
 export interface MessageFormProps {
   issue: OBIssue,
   message: Message,
-  onChange: (updatedMessage: any) => void,
+  onChange?: (updatedMessage: any) => void,
 }
 
 
