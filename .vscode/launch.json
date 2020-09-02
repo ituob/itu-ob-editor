@@ -6,7 +6,7 @@
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceFolder}",
-      "runtimeExecutable": "yarn",
+      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/electron-webpack",
       "runtimeArgs": ["dev"],
       "autoAttachChildProcesses": true,
       "internalConsoleOptions": "openOnFirstSessionStart",
