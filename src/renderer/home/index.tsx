@@ -4,6 +4,7 @@ import { NonIdealState, Button, Icon, Tooltip, Position } from '@blueprintjs/cor
 import { callIPC } from '@riboseinc/coulomb/ipc/renderer';
 import { WindowComponentProps } from '@riboseinc/coulomb/config/renderer';
 import { SingleDBStatusContext } from '@riboseinc/coulomb/db/renderer/single-db-status-context-provider';
+import { DBSyncScreen } from '@riboseinc/coulomb/db/isogit-yaml/renderer/status';
 
 import { conf } from 'app';
 
@@ -11,7 +12,6 @@ import { StorageStatus } from 'renderer/widgets/sync-status';
 import { default as IssueScheduler } from '../issue-scheduler';
 import { Browser as PublicationBrowser } from '../publication-browser';
 import * as styles from './styles.scss';
-import { DBSyncScreen } from '@riboseinc/coulomb/db/isogit-yaml/renderer/status';
 
 
 interface ContentTypeOptions {
