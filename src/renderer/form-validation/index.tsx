@@ -54,7 +54,7 @@ export async function validate<Object>(obj: Object, validators: ObjectValidators
       if (await validator.didFail(obj)) {
         errs[fieldName as keyof Object] = {
           ...errs[fieldName as keyof Object],
-          [validatorName]: false as false,
+          [validatorName]: false as const,
           // Without as-casting false is typed as wider boolean, but we literally only allow false.
         };
       }
