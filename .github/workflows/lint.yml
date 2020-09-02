@@ -1,8 +1,10 @@
 name: Lint
 
 on:
-  - push
-  - pull_request
+  push:
+    ignore-tags:
+      - v*
+  pull_request:
 
 jobs:
   lint:
