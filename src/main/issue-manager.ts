@@ -28,6 +28,7 @@ class IssueManager extends Manager<OBIssue, number, { onlyIDs?: number[], month?
     try {
       idx = await this.readAll({}, true);
     } catch (e) {
+      log.error("Issue manager: Failed to rebuild indexes");
       idx = null;
     }
     if (idx) {
