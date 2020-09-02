@@ -152,7 +152,7 @@
   },
   "resolutions": {
     "*/**/prosemirror-model": "https://github.com/strogonoff/prosemirror-model.git#prosemirror-model-v1.7.5-gitpkg",
-    "js-yaml": "3.13.1",
+    "js-yaml": "3.14.0",
     "acorn": "6.4.1",
     "kind-of": "6.0.3"
   },
