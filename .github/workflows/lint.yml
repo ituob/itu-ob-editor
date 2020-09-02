@@ -19,7 +19,8 @@ jobs:
           node-version: 14
 
       - name: Install dependencies
-        run: yarn install
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
+        run: yarn
 
       - name: Run linters
         run: |
