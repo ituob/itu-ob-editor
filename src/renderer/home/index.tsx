@@ -47,7 +47,7 @@ const contentTypes: ContentTypeOptionSet = [
 const Window: React.FC<WindowComponentProps> = function () {
 
   const db = useContext(SingleDBStatusContext);
-  
+
   const [selectedCType, selectCType] = useState('issues' as keyof typeof conf["data"]);
 
   useEffect(() => {
