@@ -109,7 +109,7 @@
     "nsis": {
       "runAfterFinish": true,
       "installerIcon": "build/icon.ico",
-      "artifactName": "electron-gha-${version}.${ext}"
+      "artifactName": "itu-ob-editor-${version}.${ext}"
     },
     "portable": {
       "artifactName": "itu-ob-editor.exe"
