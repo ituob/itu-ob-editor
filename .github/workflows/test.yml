@@ -1,7 +1,10 @@
 name: Test
 
 on:
-  - push
+  pull_request:
+  push:
+    ignore-tags:
+      - v*
 
 jobs:
   test:
