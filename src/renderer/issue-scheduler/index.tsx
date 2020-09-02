@@ -175,8 +175,14 @@ const Scheduler: React.FC<{}> = function () {
             value={date}
             onChange={(newDate, isUserChange) => {
               if (isUserChange) { startOrUpdateDraft(newDate || date); }
-              if (newDate !== null) { selectDate(newDate); }
-              if (!moment(newDate).isSame(date, 'month')) { selectMonth(newDate); }
+
+              if (newDate !== null) {
+                selectDate(newDate);
+
+                if (!moment(newDate).isSame(date, 'month')) {
+                  selectMonth(newDate);
+                }
+              }
             }}
           />
 
