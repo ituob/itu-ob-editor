@@ -2,6 +2,8 @@
 
 # ITU OB editor
 
+![Build/release](https://github.com/ituob/itu-ob-editor/workflows/Build/release/badge.svg)
+
 Standalone application for editing [ITU OB website](https://ituob.org) data.
 
 ## Get the app
