@@ -187,7 +187,7 @@
     "@blueprintjs/datetime": "^3.18.2",
     "@blueprintjs/icons": "^3.18.1",
     "@blueprintjs/select": "^3.13.3",
-    "@riboseinc/coulomb": "^0.9.6",
+    "@riboseinc/coulomb": "^0.9.7",
     "@types/react-window": "^1.8.2",
     "async-lock": "^1.2.2",
     "electron-log": "^4.2.2",
