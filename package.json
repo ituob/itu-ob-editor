@@ -26,7 +26,7 @@
     "cdist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null",
     "lint:css": "stylelint --ignore-path ./.gitignore --max-warnings 0 \"**/*.{css,sass,scss}\"",
     "lint:css:fix": "yarn lint:css --fix",
-    "lint:ts": "eslint --ext .ts,.tsx --ignore-path ./.gitignore --max-warnings 0 \"**/*.{ts,tsx}\"",
+    "lint:ts": "eslint --ext .ts,.tsx --ignore-path ./.gitignore --max-warnings 500 \"**/*.{ts,tsx}\"",
     "lint:ts:fix": "yarn lint:ts --fix",
     "format": "prettier --ignore-path ./.gitignore --list-different \"**/*.{css,html,js,json,jsx,less,md,scss,ts,tsx,vue,yaml,yml}\"",
     "format:fix": "yarn format --write"
@@ -126,6 +126,21 @@
       }
     ]
   },
+  "eslintConfig": {
+    "parser": "@typescript-eslint/parser",
+    "extends": [
+      "plugin:@typescript-eslint/recommended"
+    ],
+    "rules": {
+      "@typescript-eslint/no-empty-function": 0,
+      "@typescript-eslint/no-inferrable-types": 0,
+      "@typescript-eslint/no-extra-semi": 0,
+      "@typescript-eslint/ban-types": 1,
+      "@typescript-eslint/no-explicit-any": 1,
+      "no-var": 1,
+      "@typescript-eslint/no-empty-interface": 1
+    }
+  },
   "stylelint": {
     "extends": "stylelint-config-standard",
     "rules": {
@@ -196,6 +211,8 @@
     "@types/react-dom": "^16.9.4",
     "@types/react-transition-group": "^4.2.3",
     "@types/throttle-debounce": "^2.1.0",
+    "@typescript-eslint/eslint-plugin": "^4.0.1",
+    "@typescript-eslint/parser": "^4.0.1",
     "cross-env": "^7.0.0",
     "electron": "^9.1.1",
     "electron-builder": "^22.7.0",
@@ -203,6 +220,7 @@
     "electron-react-devtools": "^0.5.3",
     "electron-webpack": "^2.8.2",
     "electron-webpack-ts": "^4.0.1",
+    "eslint": "^7.8.1",
     "native-ext-loader": "^2.3.0",
     "node-sass": "^4.12.0",
     "npm-run-all": "^4.1.5",
