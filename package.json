@@ -222,6 +222,7 @@
     "@types/throttle-debounce": "^2.1.0",
     "@typescript-eslint/eslint-plugin": "^4.0.1",
     "@typescript-eslint/parser": "^4.0.1",
+    "commitizen": "^4.2.1",
     "cross-env": "^7.0.0",
     "electron": "^9.1.1",
     "electron-builder": "^22.7.0",
@@ -230,6 +231,7 @@
     "electron-webpack": "^2.8.2",
     "electron-webpack-ts": "^4.0.1",
     "eslint": "^7.8.1",
+    "husky": "^4.2.5",
     "native-ext-loader": "^2.3.0",
     "node-sass": "^4.12.0",
     "npm-run-all": "^4.1.5",
@@ -241,5 +243,16 @@
     "typescript": "^3.9.7",
     "typescript-plugin-css-modules": "^2.2.0",
     "webpack": "~4.44.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "husky": {
+    "hooks": {
+      "prepare-commit-msg": "exec < /dev/tty && git cz --hook || true",
+      "pre-push": "yarn lint:ts && yarn lint:css && yarn compile"
+    }
   }
 }
