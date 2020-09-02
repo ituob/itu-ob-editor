@@ -31,7 +31,7 @@ export class ITUTranslator extends Translator<string> {
         };
         socket.onerror = function (err) {
           reject(err);
-        }
+        };
 
         this.sockets[endpoint] = socket;
       });
