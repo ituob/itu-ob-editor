@@ -1,5 +1,5 @@
-import { RendererConfig } from 'coulomb/config/renderer';
-import { renderApp } from 'coulomb/app/renderer';
+import { RendererConfig } from '@riboseinc/coulomb/config/renderer';
+import { renderApp } from '@riboseinc/coulomb/app/renderer';
 import { conf as appConf, availableLanguages, defaultLanguage } from '../app';
 
 
@@ -11,7 +11,7 @@ export const conf: RendererConfig<typeof appConf> = {
     issueEditor: () => import('./issue-editor'),
     publicationEditor: () => import('./publication-editor'),
     batchCommit: () => import('./batch-commit'),
-    settings: () => import('coulomb/settings/renderer'),
+    settings: () => import('@riboseinc/coulomb/settings/renderer'),
   },
 
   objectEditorWindows: {
@@ -20,19 +20,19 @@ export const conf: RendererConfig<typeof appConf> = {
   },
 
   databaseStatusComponents: {
-    default: () => import('coulomb/db/isogit-yaml/renderer/status'),
+    default: () => import('@riboseinc/coulomb/db/isogit-yaml/renderer/status'),
   },
 
   contextProviders: [{
-    cls: () => import('coulomb/localizer/renderer/context-provider'),
-    getProps: () => ({
+    cls: () => import('@riboseinc/coulomb/localizer/renderer/context-provider'),
+    getProps: async () => ({
       available: availableLanguages,
       selected: defaultLanguage,
       default: defaultLanguage,
     }),
   }, {
-    cls: () => import('./single-db-status-context'),
-    getProps: () => ({ dbName: 'default' }),
+    cls: () => import('@riboseinc/coulomb/db/renderer/single-db-status-context-provider'),
+    getProps: async () => ({ dbName: 'default' }),
   }],
 };
 

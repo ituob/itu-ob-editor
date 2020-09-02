@@ -1,16 +1,17 @@
+import { remote } from 'electron';
 import React, { useState, useContext } from 'react';
 import {
   FormGroup, InputGroup, Checkbox, Button, HTMLSelect,
 } from '@blueprintjs/core';
 import { DatePicker } from '@blueprintjs/datetime';
-import { callIPC } from 'coulomb/ipc/renderer';
+import { callIPC } from '@riboseinc/coulomb/ipc/renderer';
+import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
+
 import { OBIssue, ScheduledIssue } from 'models/issues';
 import { defaultISSN, availableLanguages, defaultLanguage } from '../../../app';
 
 import { default as MetaAuthorsEditor } from './authors';
 import * as styles from './styles.scss';
-import { remote } from 'electron';
-import { LangConfigContext } from 'coulomb/localizer/renderer/context';
 
 
 type MetaID = { issn: string, id: number };

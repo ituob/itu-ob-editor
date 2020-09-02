@@ -4,8 +4,9 @@ import { remote } from 'electron';
 import React from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { NonIdealState, H5, Icon, IconName, Text, Button } from '@blueprintjs/core';
-import { Index, QuerySet } from 'coulomb/db/query';
-import { SimpleEditableCard } from 'coulomb/renderer/widgets/editable-card-list';
+import { Index, QuerySet } from '@riboseinc/coulomb/db/query';
+import { SimpleEditableCard } from '@riboseinc/coulomb/renderer/widgets/editable-card-list';
+
 import { DateStamp } from 'renderer/widgets/dates';
 import { ScheduledIssue } from 'models/issues';
 import { app } from 'renderer/index';

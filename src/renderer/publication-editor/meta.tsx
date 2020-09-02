@@ -1,7 +1,7 @@
 import { remote } from 'electron';
 import React, { useContext } from 'react';
 import { FormGroup, InputGroup, NonIdealState } from '@blueprintjs/core';
-import { LangConfigContext } from 'coulomb/localizer/renderer/context';
+import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
 import { GenericValidationErrorsNotice, ValidationErrorsNotice } from 'renderer/form-validation';
 import { Publication } from 'models/publications';
 import { EditorViewProps } from './types';

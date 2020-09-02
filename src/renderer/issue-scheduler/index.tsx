@@ -6,8 +6,9 @@ import React, { useEffect, useState } from 'react';
 import { Icon } from '@blueprintjs/core';
 import { DatePicker } from '@blueprintjs/datetime';
 
-import { PaneHeader } from 'coulomb/renderer/widgets';
-import { relayIPCEvent, useIPCValue, callIPC } from 'coulomb/ipc/renderer';
+import { PaneHeader } from '@riboseinc/coulomb/renderer/widgets';
+import { relayIPCEvent, useIPCValue, callIPC } from '@riboseinc/coulomb/ipc/renderer';
+import { sortIntegerAscending, QuerySet, Index } from '@riboseinc/coulomb/db/query';
 
 import { DateStamp } from 'renderer/widgets/dates';
 import { HelpButton } from 'renderer/widgets/help-button';
@@ -18,7 +19,6 @@ import { IssueDraft, ScheduleForm } from './schedule-form';
 import { UpcomingIssues } from './upcoming';
 
 import * as styles from './styles.scss';
-import { sortIntegerAscending, QuerySet, Index } from 'coulomb/db/query';
 
 
 const DEFAULT_MAX_DATE: Date = moment().add(1, 'years').toDate();

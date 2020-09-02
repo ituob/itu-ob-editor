@@ -1,5 +1,12 @@
 import update from 'immutability-helper';
 import React, { useState, useRef, useContext, useEffect } from 'react';
+import { VariableSizeGrid } from 'react-window';
+import { debounce } from 'throttle-debounce';
+
+import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
+import { Trans } from '@riboseinc/coulomb/localizer/renderer/widgets';
+import { Translatable } from '@riboseinc/coulomb/localizer/types';
+
 import { PositionDatasets } from 'models/issues';
 import * as styles from './styles.scss';
 import DatasetMeta from 'renderer/publication-editor/dataset';
@@ -12,12 +19,7 @@ import {
   specifiesIndex, specifiesArray,
   DataObject, DataItem, BasicField,
 } from 'models/dataset';
-import { VariableSizeGrid } from 'react-window';
-import { LangConfigContext } from 'coulomb/localizer/renderer/context';
-import { Trans } from 'coulomb/localizer/renderer/widgets';
-import { debounce } from 'throttle-debounce';
 import { ITUTranslator } from 'renderer/machine-translation';
-import { Translatable } from 'coulomb/localizer/types';
 
 
 interface AnnexedPositionDataEditorProps {

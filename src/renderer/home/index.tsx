@@ -1,16 +1,17 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { NonIdealState, Button, Icon, Tooltip, Position, Spinner, Overlay } from '@blueprintjs/core';
+import { NonIdealState, Button, Icon, Tooltip, Position } from '@blueprintjs/core';
 
-import { callIPC } from 'coulomb/ipc/renderer';
-import { WindowComponentProps } from 'coulomb/config/renderer';
+import { callIPC } from '@riboseinc/coulomb/ipc/renderer';
+import { WindowComponentProps } from '@riboseinc/coulomb/config/renderer';
+import { SingleDBStatusContext } from '@riboseinc/coulomb/db/renderer/single-db-status-context-provider';
 
 import { conf } from 'app';
 
-import { StorageStatus, PasswordPrompt } from 'renderer/widgets/sync-status';
+import { StorageStatus } from 'renderer/widgets/sync-status';
 import { default as IssueScheduler } from '../issue-scheduler';
 import { Browser as PublicationBrowser } from '../publication-browser';
 import * as styles from './styles.scss';
-import { SingleDBStatusContext } from 'renderer/single-db-status-context';
+import { DBSyncScreen } from '@riboseinc/coulomb/db/isogit-yaml/renderer/status';
 
 
 interface ContentTypeOptions {
@@ -46,50 +47,45 @@ const contentTypes: ContentTypeOptionSet = [
 
 const Window: React.FC<WindowComponentProps> = function () {
 
-  const db = useContext(SingleDBStatusContext);
-
   const [selectedCType, selectCType] = useState('issues' as keyof typeof conf["data"]);
 
+  // START DB SYNC SCREEN
+
+  const db = useContext(SingleDBStatusContext);
+
+  const [syncScreenRequested, requestSyncScreen] = useState(false);
+
   useEffect(() => {
-    const status = db?.status || {};
-    if (!status.hasLocalChanges && !status.isPushing && !status.isPulling && status.lastSynchronized === null && status.needsPassword === false) {
-      callIPC('db-default-git-trigger-sync');
+    const showInitializationScreen = (
+      db?.status === undefined ||
+      db.status.needsPassword ||
+      db.status.isPushing ||
+      db.status.isPulling ||
+      db.status.isOnline !== true ||
+      db.status.lastSynchronized === null);
+
+    if (showInitializationScreen) {
+      requestSyncScreen(true);
     }
+
   }, [JSON.stringify(db)]);
 
-  let dbInitializationScreen: JSX.Element | null;
+  const handleRequestSync = async () => {
+    requestSyncScreen(true);
+    await callIPC('db-default-git-request-push');
+    await callIPC('db-default-git-trigger-sync');
+  };
 
-  if (db?.status === undefined) {
-    dbInitializationScreen = <NonIdealState
-      icon={<Spinner />}
-      title="Initializing database"
-    />
-  } else if (db.status.needsPassword) {
-    dbInitializationScreen = <NonIdealState
-      icon="key"
-      title="Password required"
-      description={<PasswordPrompt onConfirm={() => void 0} />}
-    />
-  } else if (db.status.isPushing || db.status.isPulling) {
-    dbInitializationScreen = <NonIdealState
-      icon={<Spinner />}
-      title="Synchronizing data"
-      description={db.status.isPushing ? "Pushing changes" : "Pulling changes"}
-    />
-  } else if (db.status.lastSynchronized === null && db.status.hasLocalChanges === false) {
-    dbInitializationScreen = <NonIdealState
-      icon="cloud-download"
-      title="Synchronizing data"
-    />
-  } else {
-    dbInitializationScreen = null;
+  if (db === null) {
+    return <NonIdealState title="Preparing DB synchronization…" />;
+  } else if (syncScreenRequested) {
+    return <DBSyncScreen
+      onDismiss={() => requestSyncScreen(false)}
+      dbName="default"
+      db={db} />;
   }
 
-  if (dbInitializationScreen !== null) {
-    return <Overlay isOpen backdropClassName={styles.dbInitializationOverlay}>
-      {dbInitializationScreen}
-    </Overlay>
-  }
+  // END SYNC SCREEN
 
   const cTypeOptions = contentTypes.find(cType => cType.id === selectedCType);
 
@@ -128,7 +124,7 @@ const Window: React.FC<WindowComponentProps> = function () {
           </DataBarButton>
 
           <StorageStatus
-            tooltipPosition={Position.RIGHT}
+            onRequest={handleRequestSync}
             iconClassName={styles.storageStatusIcon} />
         </div>
       </div>

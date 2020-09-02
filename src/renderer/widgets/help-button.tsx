@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@blueprintjs/core';
-import { callIPC } from 'coulomb/ipc/renderer';
+import { callIPC } from '@riboseinc/coulomb/ipc/renderer';
 
 
 const ROOT_HELP_URL = 'https://www.ituob.org/docs/';

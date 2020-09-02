@@ -1,4 +1,4 @@
-import { Translatable } from 'coulomb/localizer/types';
+import { Translatable } from '@riboseinc/coulomb/localizer/types';
 import { Recommendation } from 'models/recommendations';
 import { DatasetMeta } from 'models/dataset';
 

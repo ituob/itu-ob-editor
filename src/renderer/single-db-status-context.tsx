@@ -1,8 +1,8 @@
+import { ipcRenderer } from 'electron';
 import * as log from 'electron-log';
 import React, { useState, useEffect } from 'react';
-import { useIPCValue } from 'coulomb/ipc/renderer';
-import { BackendDescription } from 'coulomb/db/base';
-import { ipcRenderer } from 'electron';
+import { useIPCValue } from '@riboseinc/coulomb/ipc/renderer';
+import { BackendDescription } from '@riboseinc/coulomb/db/base';
 
 
 export type SingleDBStatusContextProps = {

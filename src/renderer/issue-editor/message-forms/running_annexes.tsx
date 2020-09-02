@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, Tab, Button, Label, InputGroup } from '@blueprintjs/core';
 
-import { AddCardTrigger, SimpleEditableCard } from 'coulomb/renderer/widgets';
+import { AddCardTrigger, SimpleEditableCard } from '@riboseinc/coulomb/renderer/widgets';
 
 import { useRunningAnnexes } from 'renderer/hooks';
 import { PublicationTitle } from 'renderer/widgets/publication-title';

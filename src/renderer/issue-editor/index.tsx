@@ -5,8 +5,8 @@ import { remote, ipcRenderer } from 'electron';
 import React, { useMemo, useState, useEffect } from 'react';
 import { Spinner, NonIdealState, Button } from '@blueprintjs/core';
 
-import { callIPC } from 'coulomb/ipc/renderer';
-import { PaneHeader } from 'coulomb/renderer/widgets';
+import { callIPC } from '@riboseinc/coulomb/ipc/renderer';
+import { PaneHeader } from '@riboseinc/coulomb/renderer/widgets';
 
 import { WindowToaster } from 'renderer/toaster';
 import { PublicationTitle } from 'renderer/widgets/publication-title';
@@ -33,8 +33,8 @@ import { AmendmentMeta } from './message-forms/amendment';
 import { AnnexEditor } from './annexes';
 
 import * as styles from './styles.scss';
-import { WindowComponentProps } from 'coulomb/config/renderer';
-import { SimpleEditableCard } from 'coulomb/renderer/widgets';
+import { WindowComponentProps } from '@riboseinc/coulomb/config/renderer';
+import { SimpleEditableCard } from '@riboseinc/coulomb/renderer/widgets';
 import { metaEditors } from './meta';
 import { useModifiedIDs } from 'renderer/hooks';
 

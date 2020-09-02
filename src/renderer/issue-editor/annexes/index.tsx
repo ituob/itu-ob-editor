@@ -5,7 +5,10 @@ import React, { useState, useContext } from 'react';
 
 import { Button, FormGroup, Text, NonIdealState, Callout } from '@blueprintjs/core';
 import { DatePicker } from '@blueprintjs/datetime';
-import { PaneHeader } from 'coulomb/renderer/widgets';
+
+import { PaneHeader } from '@riboseinc/coulomb/renderer/widgets';
+import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
+import { callIPC } from '@riboseinc/coulomb/ipc/renderer';
 
 import { app } from 'renderer/index';
 import { useLatestAnnex } from 'renderer/hooks';
@@ -19,8 +22,6 @@ import { AnnexedPositionDataEditor } from './position-data';
 import * as sharedStyles from '../styles.scss';
 import * as styles from './styles.scss';
 import { Dataset } from 'models/dataset';
-import { LangConfigContext } from 'coulomb/localizer/renderer/context';
-import { callIPC } from 'coulomb/ipc/renderer';
 
 
 interface AnnexEditorProps {

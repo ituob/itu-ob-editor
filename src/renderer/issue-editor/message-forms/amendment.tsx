@@ -1,11 +1,12 @@
 import update from 'immutability-helper';
 import * as jsonpatch from 'fast-json-patch';
+import { Operation } from 'fast-json-patch';
 import { remote } from 'electron';
-
 import React, { useContext, useState } from 'react';
 import { Icon, Text, NonIdealState, Tabs, Tab, UL, Tag, Spinner } from '@blueprintjs/core';
 
-import { LangConfigContext } from 'coulomb/localizer/renderer/context';
+import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
+import { useIPCValue } from '@riboseinc/coulomb/ipc/renderer';
 
 import { OBIssue, PositionDatasets, patchDatasets } from 'models/issues';
 import { Message as AmendmentMessage, DatasetChanges } from 'models/messages/amendment';
@@ -17,8 +18,6 @@ import { FreeformContents } from '../freeform-contents';
 import { MessageFormProps } from '../message-editor';
 import { DatasetContents } from '../annexes/position-data';
 import { Publication } from 'models/publications';
-import { useIPCValue } from 'coulomb/ipc/renderer';
-import { Operation } from 'fast-json-patch';
 import { RunningAnnex } from 'models/running-annexes';
 import { ItemList } from 'renderer/widgets/item-list';
 import * as styles from './amendment.scss';

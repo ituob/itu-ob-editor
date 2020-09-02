@@ -2,7 +2,7 @@ import * as moment from 'moment';
 import React, { useState } from 'react';
 
 import { Button, Callout, Label, FormGroup, InputGroup } from '@blueprintjs/core';
-import { AddCardTrigger, SimpleEditableCard } from 'coulomb/renderer/widgets/editable-card-list';
+import { AddCardTrigger, SimpleEditableCard } from '@riboseinc/coulomb/renderer/widgets/editable-card-list';
 
 import { ITURecCode, ITURecVersion, ITURecommendation } from 'models/recommendations';
 import { Message as ApprovedRecommendationsMessage } from 'models/messages/approved_recommendations';

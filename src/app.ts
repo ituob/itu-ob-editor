@@ -1,4 +1,4 @@
-import { AppConfig } from 'coulomb/config/app';
+import { AppConfig } from '@riboseinc/coulomb/config/app';
 import { AvailableLanguages } from 'models/languages';
 
 

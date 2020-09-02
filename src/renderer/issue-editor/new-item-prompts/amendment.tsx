@@ -2,9 +2,10 @@ import React from 'react';
 import { Position, Menu } from '@blueprintjs/core';
 import { Select, ItemPredicate, ItemRenderer, ItemListRenderer, renderFilteredItems } from '@blueprintjs/select';
 
-import { Index, QuerySet } from 'coulomb/db/query';
-import { AddCardTriggerButton } from 'coulomb/renderer/widgets';
-import * as editableCardListStyles from 'coulomb/renderer/widgets/editable-card-list/styles.scss';
+import { Index, QuerySet } from '@riboseinc/coulomb/db/query';
+import { AddCardTriggerButton } from '@riboseinc/coulomb/renderer/widgets';
+import * as editableCardListStyles from '@riboseinc/coulomb/renderer/widgets/editable-card-list/styles.scss';
+import { callIPC } from '@riboseinc/coulomb/ipc/renderer';
 
 import { Publication } from 'models/publications';
 import { AmendmentMessage } from 'models/messages';
@@ -14,7 +15,6 @@ import { PublicationTitle } from 'renderer/widgets/publication-title';
 import { NewItemPromptProps } from 'renderer/widgets/item-list/new-item-menu';
 import * as styles from '../styles.scss';
 import { useRunningAnnexes } from 'renderer/hooks';
-import { callIPC } from 'coulomb/ipc/renderer';
 import { DatasetChanges } from 'models/messages/amendment';
 import { PositionDatasets } from 'models/issues';
 

@@ -1,4 +1,4 @@
-import { Index, QuerySet, sortIntegerAscending, sortIntegerDescending } from 'coulomb/db/query';
+import { Index, QuerySet, sortIntegerAscending, sortIntegerDescending } from '@riboseinc/coulomb/db/query';
 import { OBIssue } from 'models/issues';
 import { AmendmentMessage } from './messages';
 

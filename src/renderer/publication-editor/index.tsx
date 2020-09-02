@@ -5,11 +5,11 @@ import { remote, ipcRenderer } from 'electron';
 import React, { useContext, useState, useEffect } from 'react';
 import { NonIdealState, Spinner, IconName } from '@blueprintjs/core';
 
-import { LangConfigContext } from 'coulomb/localizer/renderer/context';
-import { Trans } from 'coulomb/localizer/renderer/widgets';
-import { WindowComponentProps } from 'coulomb/config/renderer';
-import { callIPC } from 'coulomb/ipc/renderer';
-import { SimpleEditableCard, AddCardTrigger } from 'coulomb/renderer/widgets';
+import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
+import { Trans } from '@riboseinc/coulomb/localizer/renderer/widgets';
+import { WindowComponentProps } from '@riboseinc/coulomb/config/renderer';
+import { callIPC } from '@riboseinc/coulomb/ipc/renderer';
+import { SimpleEditableCard, AddCardTrigger } from '@riboseinc/coulomb/renderer/widgets';
 
 import { Publication } from 'models/publications';
 import { app } from 'renderer/index';
@@ -27,7 +27,7 @@ import { default as EditDatasetMeta } from './dataset';
 import * as styles from './styles.scss';
 import { ItemList } from 'renderer/widgets/item-list';
 import { DatasetMeta, BasicField, DataItem } from 'models/dataset';
-import { PaneHeader } from 'coulomb/renderer/widgets';
+import { PaneHeader } from '@riboseinc/coulomb/renderer/widgets';
 
 
 const pubOperationQueue = new AsyncLock();

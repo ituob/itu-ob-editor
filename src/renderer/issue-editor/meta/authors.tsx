@@ -6,7 +6,7 @@ import {
   Button, FormGroup, InputGroup, TextArea,
   ControlGroup, ButtonGroup,
 } from '@blueprintjs/core';
-import { PaneHeader } from 'coulomb/renderer/widgets';
+import { PaneHeader } from '@riboseinc/coulomb/renderer/widgets';
 import { Sortable } from 'renderer/widgets/dnd-sortable'
 import { OBIssue, OBAuthorOrg, Contact } from 'models/issues';
 

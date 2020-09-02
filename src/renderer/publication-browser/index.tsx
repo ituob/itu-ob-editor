@@ -1,6 +1,6 @@
 import React from 'react';
 import { H5 } from '@blueprintjs/core';
-import { SimpleEditableCard } from 'coulomb/renderer/widgets/editable-card-list';
+import { SimpleEditableCard } from '@riboseinc/coulomb/renderer/widgets/editable-card-list';
 import { PublicationTitle } from 'renderer/widgets/publication-title';
 import * as styles from './styles.scss';
 import { app } from 'renderer/index';

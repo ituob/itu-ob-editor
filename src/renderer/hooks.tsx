@@ -1,4 +1,4 @@
-import { useIPCValue } from 'coulomb/ipc/renderer';
+import { useIPCValue } from '@riboseinc/coulomb/ipc/renderer';
 import { RunningAnnex } from 'models/running-annexes';
 import { conf } from '.';
 

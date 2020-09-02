@@ -3,7 +3,7 @@ import React, { useContext } from 'react';
 import { DndProvider } from 'react-dnd';
 import Backend from 'react-dnd-html5-backend';
 import { FormGroup, InputGroup, Button, ControlGroup, HTMLSelect, Callout } from '@blueprintjs/core';
-import { LangConfigContext } from 'coulomb/localizer/renderer/context';
+import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
 import { DataItem, DatasetMeta, DataObject, DataArray, BasicField, DataType, DATA_TYPE_LABELS } from 'models/dataset';
 import { EditorViewProps } from './types';
 

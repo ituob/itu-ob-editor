@@ -1,4 +1,4 @@
-import { Translatable } from "coulomb/localizer/types"
+import { Translatable } from '@riboseinc/coulomb/localizer/types'
 
 
 export type BasicField = {

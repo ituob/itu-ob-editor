@@ -2,8 +2,8 @@ import React from 'react';
 import { Button, ButtonGroup, IconName, Intent } from '@blueprintjs/core';
 
 import * as styles from './change-status.scss';
-import { PaneHeader } from 'coulomb/renderer/widgets';
-import { PaneHeaderProps } from 'coulomb/renderer/widgets/pane-header';
+import { PaneHeader } from '@riboseinc/coulomb/renderer/widgets';
+import { PaneHeaderProps } from '@riboseinc/coulomb/renderer/widgets/pane-header';
 
 
 interface ObjectStorageStatusProps {

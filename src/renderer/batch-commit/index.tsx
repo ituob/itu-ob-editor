@@ -2,14 +2,14 @@ import { ipcRenderer } from 'electron';
 import React, { useState, useEffect } from 'react';
 
 import { NonIdealState, Checkbox, Button, Callout, TextArea, Popover } from '@blueprintjs/core';
-import { PaneHeader } from 'coulomb/renderer/widgets/pane-header';
-import { WindowComponentProps } from 'coulomb/config/renderer';
+import { PaneHeader } from '@riboseinc/coulomb/renderer/widgets/pane-header';
+import { WindowComponentProps } from '@riboseinc/coulomb/config/renderer';
+import { callIPC, relayIPCEvent } from '@riboseinc/coulomb/ipc/renderer';
 //import { request, openWindow, notifyAllWindows } from 'sse/api/renderer';
 import { WindowToaster } from 'renderer/toaster';
 import { conf, app } from '..';
 
 import * as styles from './styles.scss';
-import { callIPC, relayIPCEvent } from 'coulomb/ipc/renderer';
 import { useModifiedIDs } from 'renderer/hooks';
 
 

@@ -1,9 +1,10 @@
 import * as moment from 'moment';
 import * as log from 'electron-log';
 
-import { default as Manager } from 'coulomb/db/isogit-yaml/main/manager';
-import { sortIntegerAscending, QuerySet, Index } from 'coulomb/db/query';
-import { listen } from 'coulomb/ipc/main';
+import { default as Manager } from '@riboseinc/coulomb/db/isogit-yaml/main/manager';
+import { sortIntegerAscending, QuerySet, Index } from '@riboseinc/coulomb/db/query';
+import { listen } from '@riboseinc/coulomb/ipc/main';
+
 import { OBIssue, ScheduledIssue, IssueMeta, PositionDatasets, patchDatasets } from 'models/issues';
 import { RunningAnnex, getRunningAnnexesForIssue, getAmendments } from 'models/running-annexes';
 import { defaultLanguage, defaultISSN } from '../app';

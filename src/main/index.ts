@@ -1,12 +1,13 @@
 import * as path from 'path';
 import { app as electronApp } from 'electron';
 
-import { MainConfig } from 'coulomb/config/main';
-import { initMain } from 'coulomb/app/main';
+import { MainConfig } from '@riboseinc/coulomb/config/main';
+import { initMain } from '@riboseinc/coulomb/app/main';
 
-import { ManagerOptions } from 'coulomb/db/isogit-yaml/main/manager';
-import { default as BackendCls } from 'coulomb/db/isogit-yaml/main/base';
-import { default as ModelManagerCls } from 'coulomb/db/isogit-yaml/main/manager';
+import { ManagerOptions } from '@riboseinc/coulomb/db/isogit-yaml/main/manager';
+import { default as BackendCls } from '@riboseinc/coulomb/db/isogit-yaml/main/base';
+import { default as ModelManagerCls } from '@riboseinc/coulomb/db/isogit-yaml/main/manager';
+import { default as FSWrapper } from '@riboseinc/coulomb/db/isogit-yaml/main/yaml/directory';
 
 import { default as IssueManagerCls } from './issue-manager';
 
@@ -15,7 +16,6 @@ import { conf as appConf } from '../app';
 import { OBIssue } from 'models/issues';
 import { Publication } from 'models/publications';
 import { ITURecommendation } from 'models/recommendations';
-import { default as FSWrapper } from 'coulomb/db/isogit-yaml/main/yaml/directory';
 
 
 const appDataPath = electronApp.getPath('userData');
@@ -35,8 +35,6 @@ export const conf: MainConfig<typeof appConf> = {
       backend: BackendCls,
       options: {
         workDir: path.join(appDataPath, 'ituob-data'),
-        upstreamRepoURL: 'https://github.com/ituob/itu-ob-data',
-        corsProxyURL: 'https://cors.isomorphic-git.org',
         fsWrapperClass: FSWrapper,
       },
     },
