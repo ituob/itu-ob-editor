@@ -5,7 +5,7 @@ import { PaneHeader, SimpleEditableCard } from '@riboseinc/coulomb/renderer/widg
 
 interface ItemListProps {
   title: string,
-  items: object | any[],
+  items: Record<string, unknown> | any[],
   selectedIdx: string | undefined,
 
   onDelete?: (idx: string) => void,
