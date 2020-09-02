@@ -160,7 +160,7 @@ function ({ datasetTitle, schema, data, onChange }) {
 
   function itemMatchesQuery(q: string, item: any) {
     const fieldMatches: boolean[] = schema.item.fields.map(f => {
-      let valRaw = item[f.id];
+      const valRaw = item[f.id];
       let valStr: string;
       if (f.type === 'text' || f.type === 'number') {
         valStr = `${valRaw || ''}`;
