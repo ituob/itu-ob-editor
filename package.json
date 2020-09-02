@@ -144,31 +144,40 @@
   "stylelint": {
     "extends": "stylelint-config-standard",
     "rules": {
-        "length-zero-no-unit": null,
-        "max-empty-lines": 2,
-        "rule-empty-line-before": null,
-        "no-missing-end-of-source-newline": null,
-        "number-leading-zero": null,
-        "declaration-empty-line-before": null,
-        "block-no-empty": null,
-        "color-hex-case": null,
-        "font-family-no-duplicate-names": null,
-        "selector-list-comma-newline-after": null,
-        "at-rule-empty-line-before": null,
-        "block-closing-brace-newline-after": null,
-        "no-descending-specificity": null,
-        "at-rule-no-unknown": [
-          true,
-          {
-            "ignoreAtRules": ["include", "extend", "mixin", "if", "else"]
-          }
-        ],
-        "selector-pseudo-class-no-unknown": [
-            true,
-            {
-                "ignorePseudoClasses": ["global", "local"]
-            }
-        ]
+      "length-zero-no-unit": null,
+      "max-empty-lines": 2,
+      "rule-empty-line-before": null,
+      "no-missing-end-of-source-newline": null,
+      "number-leading-zero": null,
+      "declaration-empty-line-before": null,
+      "block-no-empty": null,
+      "color-hex-case": null,
+      "font-family-no-duplicate-names": null,
+      "selector-list-comma-newline-after": null,
+      "at-rule-empty-line-before": null,
+      "block-closing-brace-newline-after": null,
+      "no-descending-specificity": null,
+      "at-rule-no-unknown": [
+        true,
+        {
+          "ignoreAtRules": [
+            "include",
+            "extend",
+            "mixin",
+            "if",
+            "else"
+          ]
+        }
+      ],
+      "selector-pseudo-class-no-unknown": [
+        true,
+        {
+          "ignorePseudoClasses": [
+            "global",
+            "local"
+          ]
+        }
+      ]
     }
   },
   "dependencies": {
