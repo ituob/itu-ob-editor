@@ -1,5 +1,4 @@
-@import "~@blueprintjs/core/lib/scss/variables";
-
+@use "~@blueprintjs/core/lib/scss/variables" as *;
 
 :local .dbInitializationOverlay {
   background: $pt-app-background-color;

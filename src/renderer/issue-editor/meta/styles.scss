@@ -1,43 +1,41 @@
-@import "~@blueprintjs/core/lib/scss/variables";
-
+@use "~@blueprintjs/core/lib/scss/variables" as bp;
 
 :local .metaIDPane,
 :local .metaDeleteIssuePane,
 :local .metaLanguagesPane,
 :local .metaSchedulePane {
-  padding: $pt-grid-size * 2;
+  padding: bp.$pt-grid-size * 2;
 }
 
 :local .metaSchedulePane {
   display: flex;
   flex-flow: row wrap;
   > * {
-    margin-right: $pt-grid-size;
+    margin-right: bp.$pt-grid-size;
   }
 }
 
 :local .metaScheduleCalendar {
-  background: $pt-app-background-color;
+  background: bp.$pt-app-background-color;
   display: inline-block;
 }
-
 
 // Authors
 
 :local .metaNewAuthor {
-  margin: $pt-grid-size;
+  margin: bp.$pt-grid-size;
 }
 
 :local .metaAuthorItem {
-  padding-right: $pt-grid-size * 2;
-  padding-bottom: $pt-grid-size;
+  padding-right: bp.$pt-grid-size * 2;
+  padding-bottom: bp.$pt-grid-size;
   display: flex;
   flex-flow: column nowrap;
-  border-bottom: 1px $pt-divider-black solid;
+  border-bottom: 1px bp.$pt-divider-black solid;
 
   .metaAuthorItemTitle {
-    margin-left: -$pt-grid-size * 2;
-    margin-bottom: $pt-grid-size;
+    margin-left: bp.$pt-grid-size * 2;
+    margin-bottom: bp.$pt-grid-size;
   }
 }
 
@@ -49,9 +47,9 @@
 
 :local .metaAuthorContactItem,
 :local .metaAuthorContacts .metaNewItem {
-  background: $pt-app-background-color;
-  padding: $pt-grid-size;
-  padding-right: $pt-grid-size * 4;
+  background: bp.$pt-app-background-color;
+  padding: bp.$pt-grid-size;
+  padding-right: bp.$pt-grid-size * 4;
   margin-bottom: 2px;
 }
 

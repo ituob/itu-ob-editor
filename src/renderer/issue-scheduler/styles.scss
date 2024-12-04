@@ -1,83 +1,62 @@
-@import "~@blueprintjs/core/lib/scss/variables";
-@import './mixins';
+@use "@blueprintjs/core/lib/scss/variables" as bp;
+@use "../mixins.scss" as mixins;
 
+$pubColorLight: #3dcc91;
+$pubColorDark: #0f9960;
+$cutColorLight: #ffb366;
+$cutColorDark: #d9822b;
 
-$pubColorLight: #3DCC91;
-$pubColorDark: #0F9960;
-$cutColorLight: #FFB366;
-$cutColorDark: #D9822B;
-
-
-:local .issueScheduler {
+@mixin scheduleFormDateRow($color) {
   display: flex;
   flex-flow: row nowrap;
-  align-items: stretch;
-  overflow: hidden;
+  align-items: center;
 
-  .calendarPane {
-    @include pane;
-
-    width: 280px;
-    z-index: 2;
-    background: $pt-app-background-color;
-    box-shadow: $pt-elevation-shadow-1;
-    flex: 0;
-
-    .paneBody {
-      display: flex;
-      flex-flow: column nowrap;
-    }
-
-    :global .bp3-datepicker {
-      background: none;
-      padding: 0 .5rem;
-
-      .DayPicker-Day, .DayPicker-Day--disabled {
-        cursor: default !important;
-      }
-    }
-
-    .hint {
-      align-self: stretch;
-      display: flex;
-      flex-flow: column nowrap;
-      align-items: stretch;
-      color: $pt-text-color-muted;
-      padding: 0 1rem 0 20px;
-
-      margin-top: 1rem;
-
-      &:last-child {
-        margin-bottom: 1rem;
-      }
-    }
+  > :last-child {
+    margin-left: 0.5rem;
   }
-
-  .selectedDayPane {
-    @include sidebar;
-
-    .paneBody {
-      display: flex;
-      flex-flow: column nowrap;
-      justify-content: space-between;
-      align-items: stretch;
-      padding: 0 20px 20px 20px;
-    }
-  }
-
-  .issueListPane {
+  > :first-child {
     flex: 1;
-    overflow: auto;
+    color: $color;
   }
 }
 
+@mixin dayWithDot($modifier, $ofColor) {
+  &:not(.DayPicker-Day--outside) {
+    position: relative;
+
+    &:#{$modifier} {
+      background: $ofColor;
+      content: "";
+
+      display: block;
+      height: 0.4rem;
+      width: 0.4rem;
+      overflow: hidden;
+
+      position: absolute;
+      right: 0.1rem;
+      top: 40%;
+
+      @if ($modifier == "after") {
+        transform: translateY(-51%);
+      } @else {
+        transform: translateY(51%);
+      }
+    }
+  }
+}
+
+:local .schedulePane {
+  @include mixins.pane;
+  flex: 1;
+}
 
 :local .scheduleForm {
   align-self: stretch;
   display: flex;
   flex-flow: column nowrap;
   align-items: stretch;
-  padding: .5rem 20px 1rem 20px;
+  padding: 0.5rem 20px 1rem 20px;
   flex: 1;
 
   .scheduleFormPublicationDate {
@@ -107,13 +86,11 @@ $cutColorDark: #D9822B;
   }
 }
 
-
 :local .editDateButton {
   &:focus {
     outline: none !important;
   }
 }
-
 
 .DayPicker-Day--isPublicationDate {
   @include dayWithDot(before, $pubColorDark);
@@ -128,7 +105,6 @@ $cutColorDark: #D9822B;
   background: $cutColorLight !important;
 }
 
-
 /* Upcoming issues list */
 
 :local .upcomingIssues {
@@ -137,11 +113,9 @@ $cutColorDark: #D9822B;
   justify-content: space-around;
 }
 
-
 :global .issueScheduleCardTransition {
   // NOTE: Must match ITEM_ENTRY_EXIT_TRANSITION_DURATION_MS in issue-scheduler/upcoming component
-  // TODO: Pass that value here, DRY
-  $duration: 500ms;
+  $duration: 300ms;
 
   &-enter {
     opacity: 0;
@@ -159,13 +133,10 @@ $cutColorDark: #D9822B;
   }
 }
 
-
 :local .issueCard {
   &:hover {
     z-index: 2;
   }
-}
-:local .issueCardCurrent {
 }
 
 :local .issueCardContents {
@@ -187,7 +158,7 @@ $cutColorDark: #D9822B;
     display: flex;
     justify-content: flex-end;
     flex-flow: column nowrap;
-    width: $pt-navbar-height * 2;
+    width: bp.$pt-navbar-height * 2;
   }
 
   .scheduleInfo {
@@ -198,7 +169,7 @@ $cutColorDark: #D9822B;
   }
 
   .publicationStatus > * {
-    margin-bottom: .25rem;
+    margin-bottom: 0.25rem;
     white-space: nowrap;
 
     > * {
@@ -209,7 +180,7 @@ $cutColorDark: #D9822B;
       margin-bottom: 0;
     }
     > :first-child {
-      margin-right: .5rem;
+      margin-right: 0.5rem;
     }
   }
 

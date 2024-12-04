@@ -1,16 +1,16 @@
-@import "~@blueprintjs/core/lib/scss/variables";
-@import "renderer/mixins.scss";
+@use "@blueprintjs/core/lib/scss/variables" as bp;
+@use "../mixins.scss" as mixins;
 
 $sidebarWidth: 17em;
 
 :local .pubEditorWindow {
-  @include twoPaneWindowLayout($sidebarWidth);
+  @include mixins.twoPaneWindowLayout($sidebarWidth);
 
   .windowBody {
     display: flex;
     flex-flow: column nowrap;
     justify-content: flex-start;
-    box-shadow: $pt-elevation-shadow-1;
+    box-shadow: bp.$pt-elevation-shadow-1;
     z-index: 2;
     flex: 1;
     overflow-y: auto;
@@ -20,7 +20,7 @@ $sidebarWidth: 17em;
 :local .navSidebar {
   overflow-y: hidden;
 
-  background: $pt-app-background-color;
+  background: bp.$pt-app-background-color;
   position: relative;
 
   display: flex;
@@ -29,11 +29,9 @@ $sidebarWidth: 17em;
   cursor: default;
 }
 
-
 :local .publicationMetaEditor {
-  padding: $pt-grid-size * 2;
+  padding: bp.$pt-grid-size * 2;
 }
-
 
 // Datasets
 
@@ -44,7 +42,7 @@ $sidebarWidth: 17em;
   flex: 1;
 
   .datasetBasics {
-    padding: $pt-grid-size * 2;
+    padding: bp.$pt-grid-size * 2;
     flex-shrink: 0;
   }
 }
@@ -56,24 +54,24 @@ $sidebarWidth: 17em;
 }
 
 :local .datasetFieldSortable {
-  border-bottom: 1px $pt-divider-black solid;
-  margin-right: $pt-grid-size;
+  border-bottom: 1px bp.$pt-divider-black solid;
+  margin-right: bp.$pt-grid-size;
 
   .datasetFieldSortable {
     margin-right: 0;
   }
 
   &:first-child {
-    border-top: 1px $pt-divider-black solid;
+    border-top: 1px bp.$pt-divider-black solid;
   }
 }
 
 :local .arrayItemSpec {
-  margin-bottom: $pt-grid-size;
+  margin-bottom: bp.$pt-grid-size;
 }
 
 :local .datasetField {
-  padding: $pt-grid-size 0;
+  padding: bp.$pt-grid-size 0;
   margin-bottom: 3px;
 
   :local .datasetFieldBasics:only-child {
@@ -82,9 +80,9 @@ $sidebarWidth: 17em;
 }
 
 :local .datasetType {
-  margin-bottom: $pt-grid-size;
+  margin-bottom: bp.$pt-grid-size;
 }
 
 :local .datasetNewField {
-  padding: $pt-grid-size;
+  padding: bp.$pt-grid-size;
 }

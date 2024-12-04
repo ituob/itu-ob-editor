@@ -1,10 +1,10 @@
-@import "~@blueprintjs/core/lib/scss/variables";
+@use "~@blueprintjs/core/lib/scss/variables" as bp;
 
 :local .batchCommitWindow {
   height: 100vh;
   display: flex;
   flex-flow: column nowrap;
-  background: $pt-app-background-color;
+  background: bp.$pt-app-background-color;
 
   .paneBody {
     overflow-y: auto;
@@ -17,7 +17,7 @@
 }
 
 :local .modifiedItem {
-  padding: .5rem 20px;
+  padding: 0.5rem 20px;
 }
 
 :local .itemList {
@@ -42,7 +42,8 @@
     white-space: nowrap;
   }
 
-  :global .bp3-popover-wrapper, :global .bp3-popover-target {
+  :global .bp3-popover-wrapper,
+  :global .bp3-popover-target {
     width: 100%;
   }
 

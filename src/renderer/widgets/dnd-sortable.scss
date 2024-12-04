@@ -1,9 +1,9 @@
-@import "~@blueprintjs/core/lib/scss/variables";
-
+@use "sass:math";
+@use "~@blueprintjs/core/lib/scss/variables" as bp;
 
 :local .sortable {
   position: relative;
-  padding-left: $pt-grid-size * 3;
+  padding-left: bp.$pt-grid-size * 3;
 }
 
 :local .sortableDragHandle {
@@ -11,11 +11,11 @@
   left: 0px;
   top: 0px;
   bottom: 0px;
-  width: $pt-grid-size * 2;
+  width: bp.$pt-grid-size * 2;
 
-  padding: $pt-grid-size / 2;
+  padding: math.div(bp.$pt-grid-size, 2);
 
-  background-color: $pt-app-background-color;
+  background-color: bp.$pt-app-background-color;
 
   display: flex;
   flex-flow: column nowrap;
@@ -27,7 +27,7 @@
     transform: scaleX(0.5);
     transform-origin: left center;
     path {
-      fill: $pt-text-color-disabled;
+      fill: bp.$pt-text-color-disabled;
     }
   }
 }
@@ -37,5 +37,5 @@
 }
 
 :local .sortableOver {
-  opacity: .5;
+  opacity: 0.5;
 }
