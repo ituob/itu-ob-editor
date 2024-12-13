@@ -20,6 +20,7 @@
     "clean": "rm -rf ./bundle ./dist",
     "dist": "cross-env DEBUG=electron-builder electron-builder",
     "dist:win": "electron-builder -w --config.win.target=portable",
+    "dist:linux": "electron-builder -l",
     "dist:mac": "electron-builder -m",
     "pack": "electron-builder --dir",
     "release": "electron-builder --publish always",
