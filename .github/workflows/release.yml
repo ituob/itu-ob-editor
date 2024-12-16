@@ -62,10 +62,34 @@ jobs:
           API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
           API_KEY_ISSUER_ID: ${{ secrets.APPLE_API_KEY_ISSUER_ID }}
 
-      - name: Upload artifacts
+      - name: Upload DMG
         uses: actions/upload-artifact@v3
         if: always()
         with:
-          name: dist
-          path: dist
+          name: DMG
+          path: dist/*.dmg
+          if-no-files-found: error
+
+      - name: Upload AppImage
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: AppImage
+          path: dist/*.AppImage
+          if-no-files-found: error
+
+      - name: Upload .deb
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: DEB
+          path: dist/*.deb
+          if-no-files-found: error
+  
+      - name: Upload .exe
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: EXE
+          path: dist/*.exe
           if-no-files-found: error
