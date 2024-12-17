@@ -1296,10 +1296,10 @@
   resolved "https://registry.yarnpkg.com/@react-dnd/shallowequal/-/shallowequal-2.0.0.tgz#a3031eb54129f2c66b2753f8404266ec7bf67f0a"
   integrity sha512-Pc/AFTdwZwEKJxFJvlxrSmGe/di+aAOBn60sremrpLo6VI/6cmiUYNNwlI5KNYttg7uypzA3ILPMPgxB2GYZEg==
 
-"@riboseinc/coulomb@0.9.11":
-  version "0.9.11"
-  resolved "https://registry.yarnpkg.com/@riboseinc/coulomb/-/coulomb-0.9.11.tgz#40d66e29e0b72287b07d5b8fd4951168e48be9bf"
-  integrity sha512-IyWS3hou3A8+h54GuslYTQjoXmixh+hRxuLAPLqzNGFmDbHb1Daqi0AaDiydHf5UdX2mGFbNamMIkguqjHCLLw==
+"@riboseinc/coulomb@dev":
+  version "0.9.12"
+  resolved "https://registry.yarnpkg.com/@riboseinc/coulomb/-/coulomb-0.9.12.tgz#d569a4027c2e40e748592daeeebf187da52182fb"
+  integrity sha512-dHGKbUDAb1ChMGGzjBKddvCseLsUXPqR6OJAtnCeh/AvyfOXQJADNvSSBr5e5uK8znY1gZ6KfPLLeJN6eAQE9w==
   dependencies:
     async-lock "^1.2.2"
     fs-extra "^9.0.1"
