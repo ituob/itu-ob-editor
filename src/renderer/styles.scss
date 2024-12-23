@@ -1,8 +1,10 @@
-@import "~normalize.css";
+@use "normalize.css";
 
-body, html {
+body,
+html {
   height: 100%;
 }
+
 :local .app {
   height: 100%;
 }
@@ -34,7 +36,8 @@ html.platform--win32::before {
 .bp3-menu-item {
   cursor: default;
 
-  &, .bp3-menu &.bp3-disabled {
+  &,
+  .bp3-menu &.bp3-disabled {
     cursor: default !important;
   }
 }

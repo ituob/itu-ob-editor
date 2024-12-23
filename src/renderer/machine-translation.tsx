@@ -1,16 +1,14 @@
 import AsyncLock from "async-lock";
 
-
 export abstract class Translator<T> {
   async init() {}
   async destroy() {}
-  abstract async translate(val: T, ...opts: any[]): Promise<T>
+  abstract translate(val: T, ...opts: any[]): Promise<T>;
 }
 
-
 export class ITUTranslator extends Translator<string> {
-  endpointPrefix: string = 'wss://nmt.itu.int/marian_translate_'
-  sockets: { [langPair: string]: WebSocket } = {}
+  endpointPrefix: string = "wss://nmt.itu.int/marian_translate_";
+  sockets: { [langPair: string]: WebSocket } = {};
   socketLocks: AsyncLock;
 
   constructor() {

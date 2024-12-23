@@ -1,8 +1,8 @@
-@import "renderer/mixins.scss";
+@use "renderer/mixins.scss" as *;
 
 :local .statusIcon {
   display: inline;
-  margin-right: .5rem;
+  margin-right: 0.5rem;
 }
 
 :local .paneHeader {

@@ -1,66 +1,95 @@
-import * as moment from 'moment';
-import React, { useState } from 'react';
+import moment from "moment";
+import React, { useState } from "react";
 
-import { Button, Callout, Label, FormGroup, InputGroup } from '@blueprintjs/core';
-import { AddCardTrigger, SimpleEditableCard } from '@riboseinc/coulomb/renderer/widgets/editable-card-list';
+import {
+  Button,
+  Callout,
+  Label,
+  FormGroup,
+  InputGroup,
+} from "@blueprintjs/core";
+import {
+  AddCardTrigger,
+  SimpleEditableCard,
+} from "@riboseinc/coulomb/renderer/widgets/editable-card-list";
 
-import { ITURecCode, ITURecVersion, ITURecommendation } from 'models/recommendations';
-import { Message as ApprovedRecommendationsMessage } from 'models/messages/approved_recommendations';
-import { app } from 'renderer/index';
+import {
+  ITURecCode,
+  ITURecVersion,
+  ITURecommendation,
+} from "models/recommendations";
+import { Message as ApprovedRecommendationsMessage } from "models/messages/approved_recommendations";
+import { app } from "renderer/index";
 
-import { MessageFormProps, MessageEditorDialog } from '../message-editor';
+import { MessageFormProps, MessageEditorDialog } from "../message-editor";
 
-import * as styles from '../styles.scss';
+import * as styles from "../styles.scss";
 
-
-export const MessageForm: React.FC<MessageFormProps> = function ({ message, onChange }) {
+export const MessageForm: React.FC<MessageFormProps> = function ({
+  message,
+  onChange,
+}) {
   const [msg, updateMsg] = useState(message as ApprovedRecommendationsMessage);
 
   const [newRecDialogStatus, toggleNewRecDialogStatus] = useState(false);
-  const recs = app.useMany<ITURecommendation>('recommendations').objects;
+  const recs = app.useMany<ITURecommendation>("recommendations").objects;
 
-  function _onChange(updatedMsg: { [K in keyof ApprovedRecommendationsMessage]?: ApprovedRecommendationsMessage[K] }) {
+  function _onChange(updatedMsg: {
+    [K in keyof ApprovedRecommendationsMessage]?: ApprovedRecommendationsMessage[K];
+  }) {
     updateMsg({ ...msg, ...updatedMsg });
     if (onChange) {
       onChange({ ...msg, ...updatedMsg });
     }
   }
 
-  const hasApprovalDoc = (msg.by || '') !== '';
-  const hasProceduresDoc = (msg.procedures || '') !== '';
+  const hasApprovalDoc = (msg.by || "") !== "";
+  const hasProceduresDoc = (msg.procedures || "") !== "";
 
   return (
     <>
       <Callout className={styles.approvedRecsMeta}>
         <FormGroup
-            key="by"
-            intent={!onChange || hasApprovalDoc ? undefined : "warning"}
-            helperText={!onChange || hasApprovalDoc ? undefined : "Please specify the approving document reference."}
-            label="Approved by:"
-            labelInfo={onChange ? "(required)" : undefined}>
+          key="by"
+          intent={!onChange || hasApprovalDoc ? undefined : "warning"}
+          helperText={
+            !onChange || hasApprovalDoc
+              ? undefined
+              : "Please specify the approving document reference."
+          }
+          label="Approved by:"
+          labelInfo={onChange ? "(required)" : undefined}
+        >
           <InputGroup
             type="text"
             disabled={!onChange}
             placeholder={onChange ? "e.g., AAP-184" : undefined}
-            value={msg.by || ''}
+            value={msg.by || ""}
             onChange={(event: React.FormEvent<HTMLElement>) => {
               _onChange({ by: (event.target as HTMLInputElement).value });
             }}
           />
         </FormGroup>
         <FormGroup
-            key="procedures"
-            intent={!onChange || hasProceduresDoc ? undefined : "warning"}
-            helperText={!onChange || hasProceduresDoc ? undefined : "Please specify the procedures document reference."}
-            label="In accordance with procedures outlined in:"
-            labelInfo={onChange ? "(required)" : undefined}>
+          key="procedures"
+          intent={!onChange || hasProceduresDoc ? undefined : "warning"}
+          helperText={
+            !onChange || hasProceduresDoc
+              ? undefined
+              : "Please specify the procedures document reference."
+          }
+          label="In accordance with procedures outlined in:"
+          labelInfo={onChange ? "(required)" : undefined}
+        >
           <InputGroup
             type="text"
             disabled={!onChange}
             placeholder={onChange ? "e.g., Resolution 42" : undefined}
-            value={msg.procedures || ''}
+            value={msg.procedures || ""}
             onChange={(event: React.FormEvent<HTMLElement>) => {
-              _onChange({ procedures: (event.target as HTMLInputElement).value });
+              _onChange({
+                procedures: (event.target as HTMLInputElement).value,
+              });
             }}
           />
         </FormGroup>
@@ -78,7 +107,7 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
       <>
         {Object.entries(msg.items).map(([code, version]: [string, string]) => {
           const rec = recs[code];
-          const title = rec ? rec.title.en : '';
+          const title = rec ? rec.title.en : "";
           return (
             <SimpleEditableCard
               key={code}
@@ -86,8 +115,9 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
                 var newRecs = { ...msg.items };
                 delete newRecs[code];
                 _onChange({ items: newRecs });
-              }}>
-              <strong>{code}</strong> ({moment(version).format('YYYY-MM')})
+              }}
+            >
+              <strong>{code}</strong> ({moment(version).format("YYYY-MM")})
               &ensp;
               <em>{title}</em>
             </SimpleEditableCard>
@@ -95,32 +125,37 @@ export const MessageForm: React.FC<MessageFormProps> = function ({ message, onCh
         })}
       </>
 
-      {newRecDialogStatus === true
-        ? <AddApprovedRecDialog
-            key="addRec"
-            isOpen={true}
-            onClose={() => toggleNewRecDialogStatus(false)}
-            onSave={(code, version) => {
-              var newRecs = { ...msg.items };
-              newRecs[code] = version;
-              _onChange({ items: newRecs });
-              toggleNewRecDialogStatus(false);
-            }}
-          />
-        : ''}
+      {newRecDialogStatus === true ? (
+        <AddApprovedRecDialog
+          key="addRec"
+          isOpen={true}
+          onClose={() => toggleNewRecDialogStatus(false)}
+          onSave={(code, version) => {
+            var newRecs = { ...msg.items };
+            newRecs[code] = version;
+            _onChange({ items: newRecs });
+            toggleNewRecDialogStatus(false);
+          }}
+        />
+      ) : (
+        ""
+      )}
     </>
   );
 };
 
-
 interface AddApprovedRecDialogProps {
-  isOpen: boolean,
-  onSave: (code: ITURecCode, version: ITURecVersion) => void,
-  onClose: () => void,
+  isOpen: boolean;
+  onSave: (code: ITURecCode, version: ITURecVersion) => void;
+  onClose: () => void;
 }
-const AddApprovedRecDialog: React.FC<AddApprovedRecDialogProps> = function ({ isOpen, onSave, onClose }) {
-  const [code, setCode] = useState('');
-  const [version, setVersion] = useState('');
+const AddApprovedRecDialog: React.FC<AddApprovedRecDialogProps> = function ({
+  isOpen,
+  onSave,
+  onClose,
+}) {
+  const [code, setCode] = useState("");
+  const [version, setVersion] = useState("");
 
   function _onSave() {
     onSave(code, version);
@@ -129,15 +164,19 @@ const AddApprovedRecDialog: React.FC<AddApprovedRecDialogProps> = function ({ is
 
   return (
     <MessageEditorDialog
-        title="Add approved recommendation"
-        isOpen={isOpen}
-        onClose={onClose}
-        saveButton={
-          <Button
-            intent="primary"
-            disabled={code === '' || version == ''}
-            onClick={_onSave}>Add recommendation</Button>
-        }>
+      title="Add approved recommendation"
+      isOpen={isOpen}
+      onClose={onClose}
+      saveButton={
+        <Button
+          intent="primary"
+          disabled={code === "" || version == ""}
+          onClick={_onSave}
+        >
+          Add recommendation
+        </Button>
+      }
+    >
       <Label key="code">
         Code
         <InputGroup

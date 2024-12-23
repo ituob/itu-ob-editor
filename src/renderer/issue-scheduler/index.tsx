@@ -1,47 +1,66 @@
-import * as moment from 'moment';
+import moment from "moment";
 
-import { ipcRenderer } from 'electron';
+import { ipcRenderer } from "electron";
 
-import React, { useEffect, useState } from 'react';
-import { Icon } from '@blueprintjs/core';
-import { DatePicker } from '@blueprintjs/datetime';
+import React, { useEffect, useState } from "react";
+import { Icon } from "@blueprintjs/core";
+import { DatePicker } from "@blueprintjs/datetime";
 
-import { PaneHeader } from '@riboseinc/coulomb/renderer/widgets';
-import { relayIPCEvent, useIPCValue, callIPC } from '@riboseinc/coulomb/ipc/renderer';
-import { sortIntegerAscending, QuerySet, Index } from '@riboseinc/coulomb/db/query';
+import { PaneHeader } from "@riboseinc/coulomb/renderer/widgets";
+import {
+  relayIPCEvent,
+  useIPCValue,
+  callIPC,
+} from "@riboseinc/coulomb/ipc/renderer";
+import {
+  sortIntegerAscending,
+  QuerySet,
+  Index,
+} from "@riboseinc/coulomb/db/query";
 
-import { DateStamp } from 'renderer/widgets/dates';
-import { HelpButton } from 'renderer/widgets/help-button';
-import { WindowToaster } from 'renderer/toaster';
-import { ScheduledIssue } from 'models/issues';
+import { DateStamp } from "renderer/widgets/dates";
+import { HelpButton } from "renderer/widgets/help-button";
+import { WindowToaster } from "renderer/toaster";
+import { ScheduledIssue } from "models/issues";
 
-import { IssueDraft, ScheduleForm } from './schedule-form';
-import { UpcomingIssues } from './upcoming';
+import { IssueDraft, ScheduleForm } from "./schedule-form";
+import { UpcomingIssues } from "./upcoming";
 
-import * as styles from './styles.scss';
+import * as styles from "./styles.scss";
 
-
-const DEFAULT_MAX_DATE: Date = moment().add(1, 'years').toDate();
-
+const DEFAULT_MAX_DATE: Date = moment().add(1, "years").toDate();
 
 const Scheduler: React.FC<{}> = function () {
   //const [schedule, updateSchedule] = useState([] as ScheduledIssue[]);
 
-  const currentIssue = useIPCValue<{}, { id: number | null }>('model-issues-get-current-issue-id', { id: null });
+  const currentIssue = useIPCValue<{}, { id: number | null }>(
+    "model-issues-get-current-issue-id",
+    { id: null }
+  );
   //const [currentIssue, setCurrentIssue] = useState({ id: null } as { id: number | null });
 
   const [date, selectDate] = useState(new Date());
   const [month, selectMonth] = useState(new Date());
 
-  const issueIndex = useIPCValue<{ month: Date }, Index<ScheduledIssue>>('model-issues-get-schedule', {}, { month });
-  const schedule = new QuerySet(issueIndex.value).orderBy(sortIntegerAscending).all();
+  const issueIndex = useIPCValue<{ month: Date }, Index<ScheduledIssue>>(
+    "model-issues-get-schedule",
+    {},
+    { month }
+  );
+  const schedule = new QuerySet(issueIndex.value)
+    .orderBy(sortIntegerAscending)
+    .all();
 
   //const schedule = useIPCValue<{ month: Date }, { issues: ScheduledIssue[] }>('model-issues-get-schedule', { issues: [] }, { month });
   //console.debug(month, issueIndex.objects, schedule.value);
 
   const [hoveredDate, hoverDate] = useState(null as Date | null);
-  const [newIssueDraft, updateNewIssueDraft] = useState(null as IssueDraft | null);
-  const [daySchedule, updateDaySchedule] = useState(null as ScheduledIssue | null);
+  const [newIssueDraft, updateNewIssueDraft] = useState(
+    null as IssueDraft | null
+  );
+  const [daySchedule, updateDaySchedule] = useState(
+    null as ScheduledIssue | null
+  );
   const [minDate, setMinDate] = useState(undefined as Date | undefined);
   const [maxDate, setMaxDate] = useState(DEFAULT_MAX_DATE);
   const [userIsEditing, setUserIsEditing] = useState(true);
@@ -68,9 +87,9 @@ const Scheduler: React.FC<{}> = function () {
 
   useEffect(() => {
     refreshIssues();
-    ipcRenderer.on('model-issues-objects-changed', refreshIssues);
+    ipcRenderer.on("model-issues-objects-changed", refreshIssues);
     return function cleanup() {
-      ipcRenderer.removeListener('model-issues-objects-changed', refreshIssues);
+      ipcRenderer.removeListener("model-issues-objects-changed", refreshIssues);
     };
   }, []);
 
@@ -95,7 +114,6 @@ const Scheduler: React.FC<{}> = function () {
     }
   }, [hoveredDate]);
 
-
   /* Storage API utilities */
 
   // TODO: useMany()
@@ -113,18 +131,25 @@ const Scheduler: React.FC<{}> = function () {
   // }
 
   async function saveNewSchedule() {
-    if (newIssueDraft && newIssueDraft.publication_date && newIssueDraft.cutoff_date) {
+    if (
+      newIssueDraft &&
+      newIssueDraft.publication_date &&
+      newIssueDraft.cutoff_date
+    ) {
       setSchedulingInProgress(true);
 
       const draft = newIssueDraft as ScheduledIssue;
       try {
-        await callIPC<{ obj: ScheduledIssue }, { success: true }>('model-issues-schedule-one', { obj: draft });
-      } catch (e) {
+        await callIPC<{ obj: ScheduledIssue }, { success: true }>(
+          "model-issues-schedule-one",
+          { obj: draft }
+        );
+      } catch (e: any) {
         for (const msg of e.errorMessageList) {
           WindowToaster.show({
             message: msg,
-            intent: 'warning',
-            icon: 'warning-sign',
+            intent: "warning",
+            icon: "warning-sign",
           });
         }
         setSchedulingInProgress(false);
@@ -133,8 +158,8 @@ const Scheduler: React.FC<{}> = function () {
       setSchedulingInProgress(false);
       updateNewIssueDraft(null);
 
-      await ipcRenderer.send('db-default-git-trigger-sync');
-      await relayIPCEvent({ eventName: 'model-issues-objects-changed' });
+      await ipcRenderer.send("db-default-git-trigger-sync");
+      await relayIPCEvent({ eventName: "model-issues-objects-changed" });
       await issueIndex.refresh();
     }
   }
@@ -145,25 +170,39 @@ const Scheduler: React.FC<{}> = function () {
         <UpcomingIssues
           issues={issueIndex.value}
           userIsEditing={userIsEditing}
-          currentIssueId={currentIssue.value.id || undefined} />
+          currentIssueId={currentIssue.value.id || undefined}
+        />
       </div>
 
       <div className={styles.calendarPane}>
-        <PaneHeader align="left" major={true} actions={<HelpButton path="schedule/" />}>
+        <PaneHeader
+          align="left"
+          major={true}
+          actions={<HelpButton path="schedule/" />}
+        >
           {newIssueDraft ? "New edition" : "Schedule"}
         </PaneHeader>
 
         <div className={styles.paneBody}>
           <DatePicker
             modifiers={{
-              isPublicationDate: (date) => getIssueWithPublication(date, schedule) !== null,
-              isCutoffDate: (date) => getIssueWithCutoff(date, schedule) !== null,
-              isNewPublicationDate: (date) => (
-                (newIssueDraft || {} as IssueDraft).publication_date
-                ? moment((newIssueDraft as IssueDraft).publication_date).isSame(date, 'day') : false),
-              isNewCutoffDate: (date) => (
-                (newIssueDraft || {} as IssueDraft).cutoff_date
-                ? moment((newIssueDraft as IssueDraft).cutoff_date).isSame(date, 'day') : false),
+              isPublicationDate: (date) =>
+                getIssueWithPublication(date, schedule) !== null,
+              isCutoffDate: (date) =>
+                getIssueWithCutoff(date, schedule) !== null,
+              isNewPublicationDate: (date) =>
+                (newIssueDraft || ({} as IssueDraft)).publication_date
+                  ? moment(
+                      (newIssueDraft as IssueDraft).publication_date
+                    ).isSame(date, "day")
+                  : false,
+              isNewCutoffDate: (date) =>
+                (newIssueDraft || ({} as IssueDraft)).cutoff_date
+                  ? moment((newIssueDraft as IssueDraft).cutoff_date).isSame(
+                      date,
+                      "day"
+                    )
+                  : false,
             }}
             dayPickerProps={{
               onDayMouseEnter: (date) => hoverDate(date),
@@ -174,75 +213,101 @@ const Scheduler: React.FC<{}> = function () {
             maxDate={maxDate}
             value={date}
             onChange={(newDate, isUserChange) => {
-              if (isUserChange) { startOrUpdateDraft(newDate || date); }
+              if (isUserChange) {
+                startOrUpdateDraft(newDate || date);
+              }
 
               if (newDate !== null) {
                 selectDate(newDate);
 
-                if (!moment(newDate).isSame(date, 'month')) {
+                if (!moment(newDate).isSame(date, "month")) {
                   selectMonth(newDate);
                 }
               }
             }}
           />
 
-          {!newIssueDraft && hoveredDate
-            ? <div className={styles.hint}>
+          {!newIssueDraft && hoveredDate ? (
+            <div className={styles.hint}>
+              <p>
+                <Icon icon="edit" />
+                &nbsp;
+                {newIssueDraft ? (
+                  <>Click to&nbsp;schedule the</>
+                ) : (
+                  <>Click to&nbsp;schedule a&nbsp;new&nbsp;edition with</>
+                )}
+                &nbsp;
+                <strong className={styles.cutDateLabel}>
+                  cutoff&nbsp;date
+                </strong>{" "}
+                on&nbsp;
+                <DateStamp date={hoveredDate as Date} />.
+              </p>
+
+              {daySchedule ? (
                 <p>
-                  <Icon icon="edit" />
-                  &nbsp;
-                  {newIssueDraft
-                    ? <>Click to&nbsp;schedule the</>
-                    : <>Click to&nbsp;schedule a&nbsp;new&nbsp;edition with</>}&nbsp;<strong className={styles.cutDateLabel}>cutoff&nbsp;date</strong> on&nbsp;<DateStamp date={hoveredDate as Date} />.
+                  <Icon icon="info-sign" />
+                  &nbsp; Something is&nbsp;already scheduled
+                  on&nbsp;this&nbsp;day.
                 </p>
+              ) : null}
+            </div>
+          ) : null}
 
-                {daySchedule
-                  ? <p>
-                      <Icon icon="info-sign" />
-                      &nbsp;
-                      Something is&nbsp;already scheduled on&nbsp;this&nbsp;day.
-                    </p>
-                  : null}
-              </div>
-            : null}
+          {!newIssueDraft && !hoveredDate && !newIssueDraft ? (
+            <div className={styles.hint}>
+              <p>
+                <Icon icon="info-sign" />
+                &nbsp; Select a&nbsp;month to&nbsp;view&nbsp;OB&nbsp;schedule
+                for&nbsp;that&nbsp;time&nbsp;period.
+              </p>
+            </div>
+          ) : null}
 
-            {!newIssueDraft && !hoveredDate && !newIssueDraft
-              ? <div className={styles.hint}>
-                  <p>
-                    <Icon icon="info-sign" />
-                    &nbsp;
-                    Select a&nbsp;month to&nbsp;view&nbsp;OB&nbsp;schedule for&nbsp;that&nbsp;time&nbsp;period.
-                  </p>
-                </div>
-              : null}
-
-            {newIssueDraft
-              ? <ScheduleForm
-                  busy={schedulingInProgress}
-                  draft={newIssueDraft as IssueDraft}
-                  onChange={updateNewIssueDraft}
-                  onSave={saveNewSchedule}
-                  onCancel={() => { updateNewIssueDraft(null) }}
-                />
-              : null}
+          {newIssueDraft ? (
+            <ScheduleForm
+              busy={schedulingInProgress}
+              draft={newIssueDraft as IssueDraft}
+              onChange={updateNewIssueDraft}
+              onSave={saveNewSchedule}
+              onCancel={() => {
+                updateNewIssueDraft(null);
+              }}
+            />
+          ) : null}
         </div>
       </div>
     </div>
   );
 };
 
-
-function getDaySchedule(forDate: Date, issues: ScheduledIssue[]): ScheduledIssue | null {
-  return getIssueWithPublication(forDate, issues) || getIssueWithCutoff(forDate, issues);
+function getDaySchedule(
+  forDate: Date,
+  issues: ScheduledIssue[]
+): ScheduledIssue | null {
+  return (
+    getIssueWithPublication(forDate, issues) ||
+    getIssueWithCutoff(forDate, issues)
+  );
 }
 
-function getIssueWithPublication(onDate: Date, issues: ScheduledIssue[]): ScheduledIssue | null {
-  return issues.find(i => moment(i.publication_date).isSame(onDate, 'day')) || null;
+function getIssueWithPublication(
+  onDate: Date,
+  issues: ScheduledIssue[]
+): ScheduledIssue | null {
+  return (
+    issues.find((i) => moment(i.publication_date).isSame(onDate, "day")) || null
+  );
 }
 
-function getIssueWithCutoff(onDate: Date, issues: ScheduledIssue[]): ScheduledIssue | null {
-  return issues.find(i => moment(i.cutoff_date).isSame(onDate, 'day')) || null;
+function getIssueWithCutoff(
+  onDate: Date,
+  issues: ScheduledIssue[]
+): ScheduledIssue | null {
+  return (
+    issues.find((i) => moment(i.cutoff_date).isSame(onDate, "day")) || null
+  );
 }
-
 
 export default Scheduler;

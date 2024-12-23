@@ -1,19 +1,17 @@
+import React, { useContext } from "react";
 
-import React, { useContext } from 'react';
+import { LangConfigContext } from "@riboseinc/coulomb/localizer/renderer/context";
+import { NonIdealState, Classes, Dialog } from "@blueprintjs/core";
+import { PaneHeader } from "@riboseinc/coulomb/renderer/widgets";
 
-import { LangConfigContext } from '@riboseinc/coulomb/localizer/renderer/context';
-import { NonIdealState, Classes, Dialog } from '@blueprintjs/core';
-import { PaneHeader } from '@riboseinc/coulomb/renderer/widgets';
+import { PublicationTitle } from "renderer/widgets/publication-title";
+import { HelpButton } from "renderer/widgets/help-button";
 
-import { PublicationTitle } from 'renderer/widgets/publication-title';
-import { HelpButton } from 'renderer/widgets/help-button';
-
-import { OBIssue } from 'models/issues';
+import { OBIssue } from "models/issues";
 
 import {
   Message,
   AmendmentMessage,
-
   isApprovedRecommendations,
   isServiceRestrictions,
   isRunningAnnexes,
@@ -23,7 +21,7 @@ import {
   isCustom,
   isFreeform,
   getMessageTypeTitle,
-} from 'models/messages';
+} from "models/messages";
 
 import {
   ApprovedRecommendationsForm,
@@ -34,59 +32,56 @@ import {
   CBProceduresForm,
   CustomMessageForm,
   FreeformForm,
-} from './message-forms';
+} from "./message-forms";
 
-import * as styles from './styles.scss';
-
+import * as styles from "./styles.scss";
 
 /* Message editor. More or less wraps message form, for which it gets the appropriate
    React class based on given message type. */
 
 interface MessageEditorProps {
-  message: Message,
-  issue: OBIssue,
-  meta?: JSX.Element,
-  onChange?: (updatedMessage: Message) => void,
+  message: Message;
+  issue: OBIssue;
+  meta?: JSX.Element;
+  onChange?: (updatedMessage: Message) => void;
 }
 export const MessageEditor: React.FC<MessageEditorProps> = function (props) {
   if (props.message) {
     const EditorCls = getMessageEditor(props.message);
-    const helpPath = isAmendment(props.message) ? "amend-publication/" : `messages/${props.message.type}/`;
+    const helpPath = isAmendment(props.message)
+      ? "amend-publication/"
+      : `messages/${props.message.type}/`;
 
     return (
       <>
         <header className={styles.messageEditorPaneHeader}>
           <PaneHeader
-              major={true}
-              align="left"
-              actions={<HelpButton path={helpPath} />}>
+            major={true}
+            align="left"
+            actions={<HelpButton path={helpPath} />}
+          >
             <MessageTitle message={props.message} />
           </PaneHeader>
-          {props.meta
-            ? <div className={styles.editorMeta}>{props.meta}</div>
-            : null}
+          {props.meta ? (
+            <div className={styles.editorMeta}>{props.meta}</div>
+          ) : null}
         </header>
 
         <EditorCls
           message={props.message}
           issue={props.issue}
-          onChange={(updatedMessage: any) => props.onChange
-            ? props.onChange({ ...updatedMessage, type: props.message.type })
-            : void 0}
+          onChange={(updatedMessage: any) =>
+            props.onChange
+              ? props.onChange({ ...updatedMessage, type: props.message.type })
+              : void 0
+          }
         />
       </>
     );
-
   } else {
-    return (
-      <NonIdealState
-        icon="error"
-        title="Error loading message"
-      />
-    );
+    return <NonIdealState icon="error" title="Error loading message" />;
   }
 };
-
 
 /* Message form spec.
 
@@ -97,11 +92,10 @@ export const MessageEditor: React.FC<MessageEditorProps> = function (props) {
    other messages within current OB edition, or data from past editions. */
 
 export interface MessageFormProps {
-  issue: OBIssue,
-  message: Message,
-  onChange?: (updatedMessage: any) => void,
+  issue: OBIssue;
+  message: Message;
+  onChange?: (updatedMessage: any) => void;
 }
-
 
 /* Message editor dialog.
 
@@ -109,17 +103,18 @@ export interface MessageFormProps {
    TODO: Move from this to inline editing or native Electron dialog windows. #28 */
 
 interface MessageEditorDialogProps {
-  isOpen: boolean,
-  onClose: () => void,
-  key?: string,
-  title?: string,
-  width?: string,
-  saveButton?: JSX.Element,
-  className?: string,
+  isOpen: boolean;
+  onClose: () => void;
+  key?: string;
+  title?: string;
+  width?: string;
+  saveButton?: JSX.Element;
+  className?: string;
 }
-export const MessageEditorDialog: React.FC<MessageEditorDialogProps> = function (props) {
-  return (
-    <Dialog
+export const MessageEditorDialog: React.FC<MessageEditorDialogProps> =
+  function (props) {
+    return (
+      <Dialog
         key={props.key || "dialog"}
         title={props.title || undefined}
         isOpen={props.isOpen}
@@ -127,19 +122,14 @@ export const MessageEditorDialog: React.FC<MessageEditorDialogProps> = function 
         onClose={props.onClose}
         style={props.width ? { width: props.width } : {}}
       >
-      <div className={Classes.DIALOG_BODY}>
-        {props.children}
-      </div>
+        <div className={Classes.DIALOG_BODY}>{props.children}</div>
 
-      {props.saveButton
-        ? <div className={Classes.DIALOG_FOOTER}>
-            {props.saveButton}
-          </div>
-        : null}
-    </Dialog>
-  );
-};
-
+        {props.saveButton ? (
+          <div className={Classes.DIALOG_FOOTER}>{props.saveButton}</div>
+        ) : null}
+      </Dialog>
+    );
+  };
 
 /* Utility functions */
 
@@ -149,27 +139,30 @@ export const MessageTitle: React.FC<{ message: Message }> = ({ message }) => {
 
   if (!isCustomOrAmendment) {
     return <>{getMessageTypeTitle(message.type)}</>;
-
   } else if (isCustom(message)) {
-    const title = (message.title || {})[lang.default] || '';
+    const title = (message.title || {})[lang.default] || "";
     if (title) {
-      return <><small title="Custom message">Cust.</small>&ensp;{title}</>;
+      return (
+        <>
+          <small title="Custom message">Cust.</small>&ensp;{title}
+        </>
+      );
     } else {
       return <>Custom message</>;
     }
-
   } else if (isAmendment(message)) {
     const pubId = ((message as AmendmentMessage).target || {}).publication;
-    return <>
-      <small title="Amendment to publication">Amd.&nbsp;to</small>
-      &ensp;
-      <PublicationTitle id={pubId} />
-    </>;
-
+    return (
+      <>
+        <small title="Amendment to publication">Amd.&nbsp;to</small>
+        &ensp;
+        <PublicationTitle id={pubId} />
+      </>
+    );
   } else {
-    return <em>unknown message {message.type}</em>;
+    return <em>unknown message {(message as Message).type}</em>;
   }
-}
+};
 
 function getMessageEditor(msg: Message): React.FC<MessageEditorProps> {
   if (isApprovedRecommendations(msg)) {
@@ -192,10 +185,9 @@ function getMessageEditor(msg: Message): React.FC<MessageEditorProps> {
     return () => (
       <NonIdealState
         icon="heart-broken"
-        title={`“${msg.type}” messages aren’t supported yet`}
+        title={`"${(msg as Message).type}" messages aren't supported yet`}
         description="Sorry about that."
       />
     );
-    //throw new Error("Unknown message type");
   }
 }

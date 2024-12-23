@@ -1,12 +1,15 @@
 {
   "extends": "./node_modules/electron-webpack/tsconfig-base.json",
   "compilerOptions": {
-    "baseUrl": "./src",
-    "lib": [
-      "es2019",
-      "DOM"
-    ],
+    "baseUrl": "src",
+    "paths": {
+      "models/*": ["models/*"]
+    },
+    "lib": ["es2019", "DOM"],
     "plugins": [{ "name": "typescript-plugin-css-modules" }],
-    "jsx": "react"
+    "jsx": "react",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   }
 }

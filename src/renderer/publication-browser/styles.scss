@@ -1,4 +1,4 @@
-@import "~@blueprintjs/core/lib/scss/variables";
+@use "~@blueprintjs/core/lib/scss/variables" as bp;
 
 :local .objectList {
   overflow-y: auto;
@@ -30,7 +30,7 @@
       flex-shrink: 0;
       margin-left: 1rem;
       font-weight: normal;
-      font-size: $pt-font-size-small;
+      font-size: bp.$pt-font-size-small;
     }
   }
 }

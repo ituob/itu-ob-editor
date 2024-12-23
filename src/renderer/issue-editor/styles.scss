@@ -1,16 +1,16 @@
-@import "~@blueprintjs/core/lib/scss/variables";
-@import "renderer/mixins.scss";
+@use "@blueprintjs/core/lib/scss/variables" as bp;
+@use "../mixins.scss" as mixins;
 
 $sidebarWidth: 17em;
 
 :local .twoPaneEditor {
-  @include twoPaneWindowLayout($sidebarWidth);
+  @include mixins.twoPaneWindowLayout($sidebarWidth);
 }
 
 :local .messageListPane {
   overflow-y: hidden;
 
-  background: $pt-app-background-color;
+  background: bp.$pt-app-background-color;
   position: relative;
 
   display: flex;
@@ -20,7 +20,7 @@ $sidebarWidth: 17em;
 }
 
 :local .selectedMessagePane {
-  box-shadow: $pt-elevation-shadow-1;
+  box-shadow: bp.$pt-elevation-shadow-1;
   position: relative;
   z-index: 2;
   overflow-y: auto;
@@ -48,79 +48,8 @@ $sidebarWidth: 17em;
 :local .messageEditorTabs {
   :global .bp3-tab-list {
     margin: 0 1rem;
-    transform: translateY(.5rem);
-
-    .bp3-tab-indicator {
-      background-color: $pt-text-color;
-    }
-    .bp3-tab {
-      &:focus {
-        outline: none;
-      }
-      &[aria-selected=false] {
-        color: $pt-link-color;
-      }
-      &[aria-selected=true] {
-        color: $pt-text-color;
-      }
-    }
+    transform: translateY(0.5rem);
   }
-}
-
-
-/* Freeform text editor */
-
-:local .freeformEditor {
-  display: flex;
-  flex-flow: column nowrap;
-  overflow-y: hidden;
-
-  font-size: 90%;
-
-  :global .ProseMirror {
-    flex: 1;
-    overflow-y: auto;
-
-    table {
-      margin-bottom: 10px;
-      td {
-        padding: .5rem;
-      }
-    }
-
-    p:last-of-type {
-      margin-bottom: 0;
-    }
-
-    ul li {
-      margin-bottom: 10px;
-    }
-
-    p.empty-node {
-      &::before {
-        content: "¶" !important;
-        font-style: normal;
-        opacity: 0.5;
-      }
-      &:hover::before {
-        content: "¶ — empty block" !important;
-        opacity: 1;
-      }
-    }
-  }
-}
-
-:local .freeformEditorToolbar {
-  background: $pt-app-background-color;
-
-  button, button[disabled] {
-    cursor: default;
-  }
-}
-
-:local .amendmentsList,
-:local .generalMessageList {
-  margin-top: 1rem;
 }
 
 :local .editorMeta {
@@ -131,23 +60,21 @@ $sidebarWidth: 17em;
   display: flex;
   flex-flow: column nowrap;
 
-  font-size: $pt-font-size-small;
-  color: $pt-text-color-muted;
+  font-size: bp.$pt-font-size-small;
+  color: bp.$pt-text-color-muted;
 
   > * {
     display: block;
   }
 }
 
-
 /* Message type specific editors */
-
 
 .editor-pane-message-approved_recommendations,
 .editor-pane-message-amendment,
 .editor-pane-annex {
   :local .messageEditorPaneHeader {
-    box-shadow: $pt-elevation-shadow-1;
+    box-shadow: bp.$pt-elevation-shadow-1;
     z-index: 2;
   }
 }
@@ -156,8 +83,8 @@ $sidebarWidth: 17em;
 .editor-pane-message-amendment {
   :local .editorMeta {
     > :last-child {
-      margin-top: .5rem;
-      font-size: $pt-font-size-large;
+      margin-top: 0.5rem;
+      font-size: bp.$pt-font-size-large;
     }
   }
 }
@@ -217,11 +144,10 @@ $sidebarWidth: 17em;
   :local .freeformEditor {
     flex: 1;
     overflow-y: auto;
-    padding: .5rem;
-    margin: .5rem;
+    padding: 0.5rem;
+    margin: 0.5rem;
   }
 }
-
 
 /* Telephone service */
 

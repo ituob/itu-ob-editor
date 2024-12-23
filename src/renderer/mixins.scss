@@ -1,4 +1,15 @@
-@import "~@blueprintjs/core/lib/scss/variables";
+@use "@blueprintjs/core/lib/scss/variables" as bp;
+
+@mixin pane {
+  display: flex;
+  flex-flow: column nowrap;
+  flex-shrink: 0;
+
+  .paneBody {
+    flex: 1;
+    overflow-y: auto;
+  }
+}
 
 @mixin datasets() {
   display: flex;
@@ -15,17 +26,10 @@
 
   .navigation {
     width: 12rem;
-    box-shadow: $pt-elevation-shadow-1;
-    background: $pt-app-background-color;
+    box-shadow: bp.$pt-elevation-shadow-1;
+    background: bp.$pt-app-background-color;
     z-index: 1;
   }
-}
-
-:local .paneBody {
-  overflow-y: auto;
-  flex: 1;
-  position: relative;
-  padding-bottom: 3rem;
 }
 
 @mixin twoPaneWindowLayout($leftPaneWidth) {
@@ -46,7 +50,7 @@
   flex-grow: 0;
   flex-shrink: 0;
   z-index: 5;
-  font-size: $pt-font-size-small;
+  font-size: bp.$pt-font-size-small;
 
   :global .bp3-text-overflow-ellipsis {
     display: flex;
@@ -54,8 +58,8 @@
   }
 
   :global .object-id {
-    color: $pt-intent-primary;
-    margin-left: .1rem;
-    font-size: $pt-font-size-large;
+    color: bp.$pt-intent-primary;
+    margin-left: 0.1rem;
+    font-size: bp.$pt-font-size-large;
   }
 }

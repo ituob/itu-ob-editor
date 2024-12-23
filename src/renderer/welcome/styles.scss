@@ -1,4 +1,4 @@
-@import "~@blueprintjs/core/lib/scss/variables";
+@use "~@blueprintjs/core/lib/scss/variables" as bp;
 
 :local .base {
   height: 100%;
