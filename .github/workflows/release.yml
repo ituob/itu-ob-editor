@@ -1,6 +1,7 @@
 name: Build/release
 
 on:
+  pull_request:
   push:
     tags:
       - v*
@@ -13,8 +14,7 @@ jobs:
     # Platforms to build on/for
     strategy:
       matrix:
-        # ubuntu-latest,
-        os: [macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
       - name: Check out Git repository
@@ -23,7 +23,7 @@ jobs:
       - name: Install Node.js, NPM and Yarn
         uses: actions/setup-node@v1
         with:
-          node-version: 12
+          node-version: 18.19.0
 
       # - name: Install Snapcraft
       #   uses: samuelmeuli/action-snapcraft@v1
@@ -61,3 +61,35 @@ jobs:
           # macOS notarization API key
           API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
           API_KEY_ISSUER_ID: ${{ secrets.APPLE_API_KEY_ISSUER_ID }}
+
+      - name: Upload DMG
+        uses: actions/upload-artifact@v3
+        if: startsWith(matrix.os, 'macos')
+        with:
+          name: DMG
+          path: dist/*.dmg
+          if-no-files-found: error
+
+      - name: Upload AppImage
+        uses: actions/upload-artifact@v3
+        if: startsWith(matrix.os, 'ubuntu')
+        with:
+          name: AppImage
+          path: dist/*.AppImage
+          if-no-files-found: error
+
+      - name: Upload .deb
+        uses: actions/upload-artifact@v3
+        if: startsWith(matrix.os, 'ubuntu')
+        with:
+          name: DEB
+          path: dist/*.deb
+          if-no-files-found: error
+  
+      - name: Upload .exe
+        uses: actions/upload-artifact@v3
+        if: startsWith(matrix.os, 'windows')
+        with:
+          name: EXE
+          path: dist/*.exe
+          if-no-files-found: error

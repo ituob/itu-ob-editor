@@ -177,7 +177,7 @@
     "@blueprintjs/icons": "^3.18.1",
     "@blueprintjs/select": "^3.13.3",
     "@electron/remote": "^2.1.2",
-    "@riboseinc/coulomb": "0.9.11",
+    "@riboseinc/coulomb": "dev",
     "@types/react-window": "^1.8.2",
     "async-lock": "^1.2.2",
     "electron-log": "^4.2.2",
