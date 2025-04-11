@@ -160,7 +160,7 @@ jobs:
 
       - name: Upload error logs
         uses: actions/upload-artifact@v4
-        if: env.has_notarization_error == 1
+        if: always() && env.has_notarization_error == 1
         with:
           name: error-logs-${{ matrix.os }}
           path: |
