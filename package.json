@@ -53,6 +53,7 @@
     "productName": "ITU OB Editor",
     "appId": "org.ituob.editor",
     "afterPack": "./scripts/after-pack.js",
+    "afterSign": "electron-builder-notarize",
     "asarUnpack": [
       "**/*.node",
       "node_modules/source-map/**/*",
