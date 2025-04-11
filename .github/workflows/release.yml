@@ -34,6 +34,9 @@ jobs:
       #     # Log in to Snap Store
       #     snapcraft_token: ${{ secrets.snapcraft_token }}
 
+
+      - run: yarn compile
+
       - name: Prepare for app notarization (macOS)
         if: startsWith(matrix.os, 'macos')
         # Import Apple API key for app notarization on macOS
@@ -41,27 +44,81 @@ jobs:
           mkdir -p ~/private_keys/
           echo '${{ secrets.APPLE_API_KEY }}' > ~/private_keys/AuthKey_${{ secrets.APPLE_API_KEY_ID }}.p8
 
-      - name: Build/release Electron app
-        uses: samuelmeuli/action-electron-builder@v1
-        with:
-          # Run `yarn compile` before `yarn electron-builder --mac`
-          build_script_name: "compile"
 
-          # GitHub token, automatically provided to the action
-          # (No need to define this secret in the repo settings)
-          github_token: ${{ secrets.github_token }}
+      - name: Run yarn dist for a maximum of 5 times
+        run: |
 
-          # macOS code signing certificate
-          mac_certs: ${{ secrets.mac_certs }}
-          mac_certs_password: ${{ secrets.mac_certs_password }}
+          notarization_log="notarization-error.log"
 
-          # If the commit is tagged with a version (e.g. "v1.0.0"),
-          # release the app after building
-          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+          if [[ ${{ inputs.os }} = macos-* ]]
+          then
+            export CSC_KEY_PASSWORD='${{ secrets.MAC_CERTS_PASSWORD }}'
+            export CSC_LINK='${{ secrets.MAC_CERTS }}'
+          # Windows codesigning disabled until cloud HSM has been set up.
+          # elif [[ ${{ inputs.os }} = windows-* ]]
+          # then
+          #   export CSC_KEY_PASSWORD='${{ secrets.WINDOWS_CERTS_PASSWORD }}'
+          #   export CSC_LINK='${{ secrets.WINDOWS_CERTS }}'
+          fi
+
+          # Unset empty variables for electron-builder (mainly for Windows but may also help with other OSs)
+          for var in CSC_LINK CSC_KEY_PASSWORD
+          do
+            if [[ -z "${!var:-}" ]]
+            then
+              >&2 echo "info: unsetting empty \$${var} variable."
+              unset "${var}"
+            else
+              >&2 echo "info: keeping non-empty \$${var} variable."
+            fi
+          done
+
+          attempt=1
+          until yarn dist
+          do
+            >&2 echo "warning: ⚠️ Attempt #${attempt} failed."
+            if ((attempt >= 5))
+            then
+              >&2 echo "error: ❌ Attempted 5 times and all have failed.  Aborting."
+              if [[ -r "${notarization_log}" ]]
+              then
+                >&2 printf "📝 \e[1;93mPrinting out notarization error log:\e[m\n"
+                >&2 echo
+                >&2 printf "\e[1m<NotarizationLog>\e[;33m\n"
+                >&2 echo
+                >&2 cat "${notarization_log}"
+                >&2 echo
+                >&2 printf "\e[;1m</NotarizationLog>\e[m\n"
+                >&2 echo
+                echo 'has_notarization_error=1' >> $GITHUB_ENV
+              fi
+              exit 1
+            fi
+            ((attempt++))
+          done
+          >&2 echo "info: ✅ Completed after attempt #${attempt}."
+        shell: bash
         env:
-          # macOS notarization API key
+          # Always helpful for debugging non-interactive sessions
+          DEBUG: electron-builder
+
+          # macOS notarization
+          # APPLE_ID: ${{ secrets.APPLE_ID }}
+          # APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
           API_KEY_ISSUER_ID: ${{ secrets.APPLE_API_KEY_ISSUER_ID }}
+
+          # Windows codesigning
+          WINDOWS_CERTS_PASSWORD: ${{ secrets.WINDOWS_CERTS_PASSWORD }}
+          WINDOWS_CERTS: ${{ secrets.WINDOWS_CERTS }}
+
+          # macOS notarization
+          MAC_CERTS_PASSWORD: ${{ secrets.MAC_CERTS_PASSWORD }}
+          MAC_CERTS: ${{ secrets.MAC_CERTS }}
+
+          # electron-builder publishing
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload DMG
         uses: actions/upload-artifact@v4
@@ -94,3 +151,11 @@ jobs:
           name: EXE
           path: dist/*.exe
           if-no-files-found: error
+
+      - name: Upload error logs
+        uses: actions/upload-artifact@v4
+        if: env.has_notarization_error == 1
+        with:
+          name: error-logs-${{ matrix.os }}
+          path: |
+            notarization-error.log
