@@ -23,7 +23,6 @@
     "clean": "rm -rf ./bundle ./dist",
     "dist": "cross-env DEBUG=electron-builder electron-builder",
     "dist:win": "electron-builder -w --config.win.target=portable",
-    "dist:linux": "electron-builder -l",
     "dist:mac": "electron-builder -m",
     "dist:linux": "electron-builder -l",
     "pack": "electron-builder --dir",
@@ -53,6 +52,7 @@
     "productName": "ITU OB Editor",
     "appId": "org.ituob.editor",
     "afterPack": "./scripts/after-pack.js",
+    "afterSign": "electron-builder-notarize",
     "asarUnpack": [
       "**/*.node",
       "node_modules/source-map/**/*",
@@ -74,8 +74,7 @@
       "icon": "build/icon.icns",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
-      "entitlements": "./build/entitlements.mac.plist",
-      "entitlementsInherit": "./build/entitlements.mac.plist"
+      "entitlements": "./node_modules/electron-builder-notarize/entitlements.mac.inherit.plist"
     },
     "linux": {
       "target": [
@@ -197,6 +196,7 @@
     "throttle-debounce": "^2.1.0"
   },
   "resolutions": {
+    "*/**/keytar": "7.9.0",
     "*/**/prosemirror-model": "https://github.com/strogonoff/prosemirror-model.git#prosemirror-model-v1.7.5-gitpkg",
     "js-yaml": "3.14.0",
     "acorn": "6.4.1",
@@ -204,7 +204,6 @@
     "kind-of": "6.0.3",
     "node-abi": "^3.47.0",
     "keytar": "7.9.0",
-    "*/**/keytar": "7.9.0",
     "@types/react": "^16.14.0"
   },
   "devDependencies": {
@@ -221,7 +220,7 @@
     "cross-env": "^7.0.0",
     "electron": "^22.3.27",
     "electron-builder": "23.6.0",
-    "electron-builder-notarize": "^1.1.2",
+    "electron-builder-notarize": "^1.5.2",
     "electron-react-devtools": "^0.5.3",
     "electron-rebuild": "^3.2.9",
     "electron-webpack": "^2.8.2",
@@ -247,5 +246,6 @@
   },
   "husky": {
     "hooks": {}
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha256.c17d3797fb9a9115bf375e31bfd30058cac6bc9c3b8807a3d8cb2094794b51ca"
 }
