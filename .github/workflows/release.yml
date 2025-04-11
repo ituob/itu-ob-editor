@@ -112,8 +112,9 @@ jobs:
           # APPLE_ID: ${{ secrets.APPLE_ID }}
           # APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
           # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
-          API_KEY_ISSUER_ID: ${{ secrets.APPLE_API_KEY_ISSUER_ID }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_KEY_ISSUER: ${{ secrets.APPLE_API_KEY_ISSUER_ID }}
 
           # Windows codesigning
           WINDOWS_CERTS_PASSWORD: ${{ secrets.WINDOWS_CERTS_PASSWORD }}
