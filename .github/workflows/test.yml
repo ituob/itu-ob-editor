@@ -18,12 +18,13 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
-          node-version: 12
+          node-version: 14
+          architecture: x64
 
       - name: Install dependencies
         if: steps.yarn-cache.outputs.cache-hit != 'true'
