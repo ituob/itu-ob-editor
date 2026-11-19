@@ -3,9 +3,9 @@
 # ITU OB editor
 
 > [!IMPORTANT]
-> **This app is retired.** OB data is now edited in the web editor at
-> [ituob.org/admin](https://www.ituob.org/admin), which covers every form this app had.
-> This repository is kept for reference only and will be archived.
+> **This app is being retired.** OB data editing is moving to a web editor under
+> `/admin` on [ituob.org](https://www.ituob.org). That editor is access-gated and not
+> yet live. Once it is, this repository will be archived and kept for reference only.
 
 ![Build/release](https://github.com/ituob/itu-ob-editor/workflows/Build/release/badge.svg)
 
