@@ -2,6 +2,11 @@
 
 # ITU OB editor
 
+> [!IMPORTANT]
+> **This app is being retired.** OB data editing is moving to a web editor under
+> `/admin` on [ituob.org](https://www.ituob.org). That editor is access-gated and not
+> yet live. Once it is, this repository will be archived and kept for reference only.
+
 ![Build/release](https://github.com/ituob/itu-ob-editor/workflows/Build/release/badge.svg)
 
 Standalone application for editing [ITU OB website](https://ituob.org) data.
