@@ -22,7 +22,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.yarn-cache.outputs.cache-hit != 'true'
-        run: yarn
+        run: yarn --ignore-scripts
 
       - name: Run linters
         run: |
